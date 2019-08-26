@@ -28,11 +28,16 @@ typedef struct _winInfo {
 
     char* caption;
 
+    uint16_t lockedFps;
+
+    double lastFrame;
+
 } winInfo_t;
 
 #define GLX_DEFAULT_MAJOR_VERSION 3
 #define GLX_DEFAULT_MINOR_VERSION 0
 #define GLX_DEFAULT_FLAGS         GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB
+#define DEFAULT_LOCKED_FPS        60
 
 winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
                     char* winCaption, bool verbose, FILE* vf);

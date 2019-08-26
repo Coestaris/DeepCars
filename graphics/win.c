@@ -52,10 +52,18 @@ void w_setGLXContextVersion(int major, int minor, int flags)
 winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
         char* winCaption, bool verbose, FILE* vf)
 {
-    if(verbose)
-        fprintf(vf, "[*] Trying to open X display\n");
-
     winInfo_t* info = malloc(sizeof(winInfo_t));
+
+    info->w = winW;
+    info->h = winH;
+    info->caption = winCaption;
+    info->lockedFps = DEFAULT_LOCKED_FPS;
+    info->lastFrame = 0;
+
+    if(verbose)
+    {
+        fprintf(vf, "[*] Trying to open X display\n");
+    }
     info->display = XOpenDisplay(NULL);
     if (!info->display)
     {
@@ -156,9 +164,13 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
     info->colorMap = cmap;
 
     if(verbose)
-        fprintf(vf,"[*] Creating window\n");
+    {
+        fprintf(vf, "[*] Creating window\n");
+        fprintf(vf, "[*] WinW: %i, winH: %i, winX: %i, winY: %i, caption: \"%s\"\n",
+                winW, winH, winX, winY, winCaption);
+    }
     info->win = XCreateWindow(info->display, RootWindow(info->display, vi->screen),
-                               0, 0, 100, 100, 0, vi->depth, InputOutput, vi->visual,
+                               winX, winY, winW, winH, 0, vi->depth, InputOutput, vi->visual,
                                CWBorderPixel | CWColormap | CWEventMask, &swa);
     if (!info->win)
     {
