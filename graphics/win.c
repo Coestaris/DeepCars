@@ -149,7 +149,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
         fprintf(vf,"[*] Getting XVisual from FrameBuffer Config\n");
     XVisualInfo* vi = glXGetVisualFromFBConfig(info->display, bestFbc);
     if(verbose)
-        fprintf(vf, "[*] Chosen visual ID = 0x%x\n", vi->visualid);
+        fprintf(vf, "[*] Chosen visual ID = 0x%lx\n", vi->visualid);
 
     if(verbose)
         fprintf(vf,"[*] Creating colormap\n");

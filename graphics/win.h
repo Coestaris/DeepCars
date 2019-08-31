@@ -5,6 +5,8 @@
 #ifndef ZOMBOID3D_WIN_H
 #define ZOMBOID3D_WIN_H
 
+#define GL_GLEXT_PROTOTYPES
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
