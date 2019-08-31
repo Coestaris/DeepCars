@@ -43,3 +43,13 @@ shader_t* s_getShader(int id)
         if (nodes[i]->id == id) return nodes[i]->shader;
     return NULL;
 }
+
+void s_free(void)
+{
+    for (size_t i = 0; i < nodeCount; i++)
+    {
+        sh_free(nodes[i]->shader);
+        nodes[i] = NULL;
+    }
+    nodeCount = 0;
+}

@@ -9,10 +9,6 @@
 
 #include "shader.h"
 
-#define SHADER_IMAGE 0
-#define SHADER_BACKGROUND 1
-#define SHADER_TEXT 2
-
 #define SHM_MAX_SHADERS 256
 
 typedef struct _shmNode
@@ -22,9 +18,10 @@ typedef struct _shmNode
 } shmNode_t;
 
 uint8_t s_hasShader(int id);
-void s_pushBuiltInShaders();
+void s_pushBuiltInShaders(void);
 void s_push(shader_t* shader, int id);
-void s_init();
+void s_init(void);
+void s_free(void);
 shader_t* s_getShader(int id);
 
 #endif //ZOMBOID3D_SHADERMGR_H

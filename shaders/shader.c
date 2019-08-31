@@ -19,6 +19,7 @@ shader_t* sh_create(char* vertexPath, char* fragmentPath)
 
 void sh_free(shader_t* sh)
 {
+    glDeleteProgram(sh->progID);
     free(sh);
 }
 
@@ -150,4 +151,37 @@ void sh_setInt(shader_t* sh, const char* name, int value)
 void sh_setFloat(shader_t* sh, const char* name, float value)
 {
     glUniform1f(glGetUniformLocation(sh->progID, name), value);
+}
+
+void sh_info(shader_t* sh)
+{
+    GLint i;
+    GLint count;
+
+    GLint size; // size of the variable
+    GLenum type; // type of the variable (float, vec3 or mat4, etc)
+
+    const GLsizei bufSize = 16; // maximum name length
+    GLchar name[bufSize]; // variable name in GLSL
+    GLsizei length; // name length
+
+    glGetProgramiv(sh->progID, GL_ACTIVE_ATTRIBUTES, &count);
+    printf("Active Attributes: %d\n", count);
+
+    for (i = 0; i < count; i++)
+    {
+        glGetActiveAttrib(sh->progID, (GLuint)i, bufSize, &length, &size, &type, name);
+
+        printf("Attribute #%d Type: %u Name: %s\n", i, type, name);
+    }
+
+    glGetProgramiv(sh->progID, GL_ACTIVE_UNIFORMS, &count);
+    printf("Active Uniforms: %d\n", count);
+
+    for (i = 0; i < count; i++)
+    {
+        glGetActiveUniform(sh->progID, (GLuint)i, bufSize, &length, &size, &type, name);
+
+        printf("Uniform #%d Type: %u Name: %s\n", i, type, name);
+    }
 }
