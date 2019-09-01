@@ -2,6 +2,7 @@
 // Created by maxim on 3/6/19.
 //
 
+#include <stdbool.h>
 #include "shader.h"
 
 shader_t* sh_create(char* vertexPath, char* fragmentPath)
@@ -151,6 +152,11 @@ void sh_setInt(shader_t* sh, const char* name, int value)
 void sh_setFloat(shader_t* sh, const char* name, float value)
 {
     glUniform1f(glGetUniformLocation(sh->progID, name), value);
+}
+
+void sh_setMat4(shader_t* sh, const char* name, mat4 value)
+{
+    glUniformMatrix4fv(glGetUniformLocation(sh->progID, name),1, true, value);
 }
 
 void sh_info(shader_t* sh)

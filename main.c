@@ -2,6 +2,7 @@
 #include "shaders/shaderMgr.h"
 #include "updater.h"
 #include "textures/texture.h"
+#include "gmath.h"
 
 void w_printInfo()
 {
@@ -34,11 +35,11 @@ void proceedEvent(XEvent event)
 unsigned int VBO, VAO, EBO;
 
 float vertices[] = {
-        // positions          // colors           // texture coords
-        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+        // positions              // colors           // texture coords
+         500.0f,  0.0f  ,   0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+         500.0f,  600.0f,   0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+           0.0f,  600.0f,   0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+           0.0f,  0.0f  ,   0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
 };
 
 unsigned int indices[] = {  // note that we start from 0!
@@ -48,6 +49,8 @@ unsigned int indices[] = {  // note that we start from 0!
 
 shader_t* triangleSh;
 texture_t* tex;
+mat4 projection;
+mat4 transform;
 
 float mixLevel = 0;
 
@@ -62,8 +65,8 @@ void drawingRoutine()
     t_bind(tex);
 
     sh_setFloat(triangleSh, "mixLevel", mixLevel += 0.01f);
-    if(mixLevel >= 1)
-        mixLevel = 0;
+    sh_setMat4(triangleSh, "projection", projection);
+    sh_setMat4(triangleSh, "transform", transform);
 
     glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
     //glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -104,7 +107,7 @@ void initTriangle()
 
     glBindVertexArray(0);
 
-    s_push(sh_create("../shaders/shaders/triangle.vsh",
+    s_push(sh_create(  "../shaders/shaders/triangle.vsh",
                      "../shaders/shaders/triangle.fsh"), 1);
     triangleSh = s_getShader(1);
 
@@ -113,6 +116,26 @@ void initTriangle()
 
     sh_info(triangleSh);
     sh_setInt(triangleSh, "ourTexture", 0);
+
+
+    float r = win->w / 2;
+    float t = win->h / 2;
+    float n = -1;
+    float f = 1;
+
+    projection = cmat4();
+    fillMat4(projection,
+             1 / r,   0,     0,            0,
+             0,       1 / t, 0,            0,
+             0,       0,     -2 / (f - n), - (f + n) / (f - n),
+             0 ,      0 ,    0,            1);
+
+    transform = cmat4();
+    identityMat(transform);
+    translateMat(transform, -r, -t ,0);
+
+    printMat4(projection);
+    printMat4(transform);
 
 }
 

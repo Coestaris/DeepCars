@@ -9,5 +9,6 @@ uniform float mixLevel;
 
 void main()
 {
-    FragColor = vec4(mix(texture(ourTexture, TexCoord).xyz, ourColor, mixLevel), 0);
+    FragColor = vec4(mix(texture(ourTexture, TexCoord).xyz, ourColor,
+        sin(mixLevel)), 0);
 }
