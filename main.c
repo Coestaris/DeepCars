@@ -3,6 +3,7 @@
 #include "updater.h"
 #include "textures/texture.h"
 #include "gmath.h"
+#include "map/map.h"
 
 void w_printInfo()
 {
@@ -35,11 +36,11 @@ void proceedEvent(XEvent event)
 unsigned int VBO, VAO, EBO;
 
 float vertices[] = {
-        // positions              // colors           // texture coords
-         500.0f,  0.0f  ,   0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-         500.0f,  600.0f,   0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-           0.0f,  600.0f,   0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-           0.0f,  0.0f  ,   0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+        // positions               // texture coords
+        500.0f,  0.0f  ,   0.0f,  1.0f, 1.0f,   // top right
+        500.0f,  600.0f,   0.0f,  1.0f, 0.0f,   // bottom right
+        0.0f,  600.0f,   0.0f,    0.0f, 0.0f,   // bottom left
+        0.0f,  0.0f  ,   0.0f,    0.0f, 1.0f    // top left
 };
 
 unsigned int indices[] = {  // note that we start from 0!
@@ -51,6 +52,7 @@ shader_t* triangleSh;
 texture_t* tex;
 mat4 projection;
 mat4 transform;
+map_t* map;
 
 float mixLevel = 0;
 
@@ -64,9 +66,8 @@ void drawingRoutine()
     sh_use(triangleSh);
     t_bind(tex);
 
-    sh_setFloat(triangleSh, "mixLevel", mixLevel += 0.01f);
     sh_setMat4(triangleSh, "projection", projection);
-    sh_setMat4(triangleSh, "transform", transform);
+    sh_setInt(triangleSh, "img", 0);
 
     glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
     //glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -94,21 +95,18 @@ void initTriangle()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
     // texture coord attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindVertexArray(0);
 
-    s_push(sh_create(  "../shaders/shaders/triangle.vsh",
-                     "../shaders/shaders/triangle.fsh"), 1);
+    s_push(sh_create(  "../shaders/shaders/render.vsh",
+                     "../shaders/shaders/render.fsh"), 1);
     triangleSh = s_getShader(1);
 
     tex = t_create("image.png", vec2f(0, 0));
@@ -117,6 +115,11 @@ void initTriangle()
     sh_info(triangleSh);
     sh_setInt(triangleSh, "ourTexture", 0);
 
+    map = m_load("level1");
+    if(!map)
+    {
+        abort();
+    }
 
     float r = win->w / 2;
     float t = win->h / 2;
@@ -124,11 +127,7 @@ void initTriangle()
     float f = 1;
 
     projection = cmat4();
-    fillMat4(projection,
-             1 / r,   0,     0,            0,
-             0,       1 / t, 0,            0,
-             0,       0,     -2 / (f - n), - (f + n) / (f - n),
-             0 ,      0 ,    0,            1);
+    orthoMath(projection, n, f, r, t);
 
     transform = cmat4();
     identityMat(transform);
@@ -136,6 +135,8 @@ void initTriangle()
 
     printMat4(projection);
     printMat4(transform);
+
+    mat4_mulm(projection, transform);
 
 }
 

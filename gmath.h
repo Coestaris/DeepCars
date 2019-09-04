@@ -33,6 +33,7 @@ void identityMat(mat4 m);
 void rotateMat4Z(mat4 m, float angle);
 void translateMat(mat4 m, float x, float y, float z);
 void scaleMat(mat4 m, float x, float y, float z);
+void orthoMath(mat4 m, float n, float f, float r, float t);
 
 vec4 vec4_cpy(vec4 v);
 void vec4_addf(vec4 v, float value);

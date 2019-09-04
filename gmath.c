@@ -170,6 +170,15 @@ void translateMat(mat4 m, float x, float y, float z)
     m[11] += z;
 }
 
+void orthoMath(mat4 m, float n, float f, float r, float t)
+{
+    fillMat4(m,
+             1 / r,   0,     0,            0,
+             0,       1 / t, 0,            0,
+             0,       0,     -2 / (f - n), - (f + n) / (f - n),
+             0 ,      0 ,    0,            1);
+}
+
 void scaleMat(mat4 m, float x, float y, float z)
 {
     m[0] *= x;
