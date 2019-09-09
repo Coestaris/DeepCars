@@ -31,11 +31,12 @@ void freeMat4(mat4 mat)
     free(mat);
 }
 
-void identityMat(mat4 m)
+inline void identityMat(mat4 m)
 {
-    memset(m, 0, sizeof(float) * 4 * 4);
-    for (int i = 0; i < 4; i++)
-        m[i * 4 + i] = 1;
+    m[0]  = 1;  m[1]  = 0;  m[2]  = 0;  m[3]  = 0;
+    m[4]  = 0;  m[5]  = 1;  m[6]  = 0;  m[7]  = 0;
+    m[8]  = 0;  m[9]  = 0;  m[10] = 1;  m[11] = 0;
+    m[12] = 0;  m[13] = 0;  m[14] = 0;  m[15] = 1;
 }
 
 void printVec4(vec4 vec)
@@ -78,7 +79,15 @@ void printMat4(mat4 mat)
     printf("]\n");
 }
 
-vec4 vec4_cpy(vec4 v)
+void vec4_cpy(vec4 dest, vec4 src)
+{
+    dest[0] = src[0];
+    dest[1] = src[1];
+    dest[2] = src[2];
+    dest[3] = src[3];
+}
+
+vec4 vec4_ccpy(vec4 v)
 {
     vec4 b = cvec4(v[0], v[1], v[2], v[3]);
     return b;
@@ -86,33 +95,64 @@ vec4 vec4_cpy(vec4 v)
 
 void vec4_addf(vec4 v, float value)
 {
-    for (int i = 0; i < 4; i++)
-        v[i] += value;
+    v[0] += value;
+    v[1] += value;
+    v[2] += value;
+    v[3] += value;
 }
 
-void vec4_addv(vec4 v, const vec4 value)
+void vec4_addv(vec4 v, vec4 value)
 {
-    for (int i = 0; i < 4; i++)
-        v[i] += value[i];
+    v[0] += value[0];
+    v[1] += value[1];
+    v[2] += value[2];
+    v[3] += value[3];
+}
+
+void vec4_subf(vec4 v, float value)
+{
+    v[0] -= value;
+    v[1] -= value;
+    v[2] -= value;
+    v[3] -= value;
+}
+
+void vec4_subv(vec4 v, vec4 value)
+{
+    v[0] -= value[0];
+    v[1] -= value[1];
+    v[2] -= value[2];
+    v[3] -= value[3];
 }
 
 void vec4_mulf(vec4 v, float value)
 {
-    for (int i = 0; i < 4; i++)
-        v[i] *= value;
+    v[0] *= value;
+    v[1] *= value;
+    v[2] *= value;
+    v[3] *= value;
 }
 
 float vec4_scalar_mulv(vec4 a, vec4 b)
 {
     float v = 0;
-    for (int i = 0; i < 4; i++)
-        v += a[i] * b[i];
+    v += a[0] * b[0];
+    v += a[1] * b[1];
+    v += a[2] * b[2];
+    v += a[3] * b[3];
     return v;
 }
 
-void vec4_mulv(vec4 a, vec4 b)
+void vec4_cross(vec4 a, vec4 b)
 {
-    assert(0);
+    float x, y, z;
+    x = a[1] * b[2] - a[2] * b[1];
+    y = a[2] * b[0] - a[0] * b[2];
+    z = a[0] * b[1] - a[1] * b[0];
+    a[0] = x;
+    a[1] = y;
+    a[2] = z;
+    a[3] = 0;
 }
 
 float vec4_len(vec4 v)
@@ -156,10 +196,12 @@ void mat4_mulv(mat4 m, float v)
 
 void mat4_mulm(mat4 m, mat4 v)
 {
-    float cpy[16];
-
-    memcpy(cpy, m, sizeof(float) * 4 * 4);
-    memset(m, 0, sizeof(float) * 4 * 4);
+    float cpy[16] = {
+        m[0],  m[1],  m[2],  m[3],
+        m[4],  m[5],  m[6],  m[7],
+        m[8],  m[9],  m[10], m[11],
+        m[12], m[13], m[14], m[15],
+    };
 
     for (int n = 0; n < 16; n++)
         for (int i = 0; i < 4; i++)
@@ -180,6 +222,47 @@ void orthoMat(mat4 m, float n, float f, float r, float t)
              0,       1 / t, 0,            0,
              0,       0,     -2 / (f - n), - (f + n) / (f - n),
              0 ,      0 ,    0,            1);
+}
+
+vec4 direction;
+vec4 cameraRight;
+vec4 cameraUp;
+mat4 component1;
+mat4 component2;
+
+void lookAtMat(
+        mat4 m,
+        vec4 position,
+        vec4 target,
+        vec4 up)
+{
+    vec4_cpy(direction, position);
+    vec4_cpy(cameraRight, up);
+
+    vec4_subv(direction, target);
+    vec4_norm(direction);
+
+    vec4_cross(cameraRight, direction);
+    vec4_norm(cameraRight);
+
+    vec4_cpy(cameraUp, direction);
+    vec4_cross(cameraUp, cameraRight);
+
+    fillMat4(component1,
+            cameraRight[0], cameraRight[1], cameraRight[2], 0,
+            cameraUp   [0], cameraUp   [1], cameraUp   [2], 0,
+            direction  [0], direction  [1], direction  [2], 0,
+                         0,              0,              0, 1);
+
+    fillMat4(component2,
+            1, 0, 0, -position[0],
+            0, 1, 0, -position[1],
+            0, 0, 1, -position[1],
+            0, 0, 0, 1);
+
+    identityMat(m);
+    mat4_mulm(m, component1);
+    mat4_mulm(m, component2);
 }
 
 void perspectiveFovMat(

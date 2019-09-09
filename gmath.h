@@ -39,12 +39,17 @@ void orthoMat(mat4 m, float n, float f, float r, float t);
 void perspectiveMat(mat4 m, float n, float f, float r, float t);
 void perspectiveFovMat(mat4 m, float angleOfView, float imageAspectRatio, float n, float f);
 
-vec4 vec4_cpy(vec4 v);
+void vec4_cpy(vec4 dest, vec4 src);
+vec4 vec4_ccpy(vec4 v);
+
+
 void vec4_addf(vec4 v, float value);
 void vec4_addv(vec4 v, vec4 value);
+void vec4_subf(vec4 v, float value);
+void vec4_subv(vec4 v, vec4 value);
 void vec4_mulf(vec4 v, float value);
 float vec4_scalar_mulv(vec4 a, vec4 b);
-void vec4_mulv(vec4 a, vec4 b);
+void vec4_cross(vec4 a, vec4 b);
 float vec4_len(vec4 v);
 void vec4_norm(vec4 v);
 void vec4_mulm(vec4 v, mat4 m);

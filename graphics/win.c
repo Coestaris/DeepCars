@@ -286,6 +286,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
 
     glXMakeCurrent(info->display, info->win, ctx);
 
+    glEnable(GL_DEPTH_TEST);
     return info;
 }
 
