@@ -49,18 +49,21 @@ void fillMat4(mat4 m,
               float c1, float c2, float c3, float c4,
               float d1, float d2, float d3, float d4)
 {
-    m[0] = a1;
-    m[1] = a2;
-    m[2] = a3;
-    m[3] = a4;
-    m[4] = b1;
-    m[5] = b2;
-    m[6] = b3;
-    m[7] = b4;
-    m[8] = c1;
-    m[9] = c2;
+    m[0]  = a1;
+    m[1]  = a2;
+    m[2]  = a3;
+    m[3]  = a4;
+
+    m[4]  = b1;
+    m[5]  = b2;
+    m[6]  = b3;
+    m[7]  = b4;
+
+    m[8]  = c1;
+    m[9]  = c2;
     m[10] = c3;
     m[11] = c4;
+
     m[12] = d1;
     m[13] = d2;
     m[14] = d3;
@@ -170,7 +173,7 @@ void translateMat(mat4 m, float x, float y, float z)
     m[11] += z;
 }
 
-void orthoMath(mat4 m, float n, float f, float r, float t)
+void orthoMat(mat4 m, float n, float f, float r, float t)
 {
     fillMat4(m,
              1 / r,   0,     0,            0,
@@ -179,11 +182,86 @@ void orthoMath(mat4 m, float n, float f, float r, float t)
              0 ,      0 ,    0,            1);
 }
 
+void perspectiveFovMat(
+        mat4 m,
+        float angleOfView, float imageAspectRatio,
+        float n, float f)
+{
+    float scale = tanf(angleOfView * 0.5f * (float)M_PI / 180.0f) * n;
+
+    float r = imageAspectRatio * scale;
+    float l = -r;
+    float t = scale;
+    float b = -t;
+
+    perspectiveMat(m, n, f, r, t);
+}
+
+void perspectiveMat(mat4 m, float n, float f, float r, float t)
+{
+    fillMat4(m,
+             n / r,   0,     0,                   0,
+             0,       n / t, 0,                   0,
+             0,       0,     - (f + n) / (f - n),  - 2 * f * n  / (f - n),
+             0 ,      0 ,    -1,                   0);
+}
+
+
 void scaleMat(mat4 m, float x, float y, float z)
 {
     m[0] *= x;
     m[5] *= y;
     m[10] *= z;
+}
+
+void rotateMat4X(mat4 m, float angle)
+{
+    float c = cosf(angle);
+    float s = sinf(angle);
+    m[0]  = 1;
+    m[1]  = 0;
+    m[2]  = 0;
+    m[3]  = 0;
+
+    m[4]  = 0;
+    m[5]  = c;
+    m[6]  = s;
+    m[7]  = 0;
+
+    m[8]  = 0;
+    m[9]  = -s;
+    m[10] = c;
+    m[11] = 0;
+
+    m[12] = 0;
+    m[13] = 0;
+    m[14] = 0;
+    m[15] = 1;
+}
+
+void rotateMat4Y(mat4 m, float angle)
+{
+    float c = cosf(angle);
+    float s = sinf(angle);
+    m[0]  = c;
+    m[1]  = 0;
+    m[2]  = -s;
+    m[3]  = 0;
+
+    m[4]  = 0;
+    m[5]  = 1;
+    m[6]  = 0;
+    m[7]  = 0;
+
+    m[8]  = s;
+    m[9]  = 0;
+    m[10] = c;
+    m[11] = 0;
+
+    m[12] = 0;
+    m[13] = 0;
+    m[14] = 0;
+    m[15] = 1;
 }
 
 void rotateMat4Z(mat4 m, float angle)
@@ -192,8 +270,21 @@ void rotateMat4Z(mat4 m, float angle)
     float s = sinf(angle);
     m[0] = c;
     m[1] = -s;
+    m[2] = 0;
+    m[3] = 0;
+
     m[4] = s;
     m[5] = c;
+    m[6] = 0;
+    m[7] = 0;
+
+    m[8] = 0;
+    m[9] = 0;
     m[10] = 1;
+    m[11] = 0;
+
+    m[12] = 0;
+    m[13] = 0;
+    m[14] = 0;
     m[15] = 1;
 }

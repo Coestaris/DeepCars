@@ -30,10 +30,14 @@ void fillMat4(mat4 m,
               float d1, float d2, float d3, float d4);
 
 void identityMat(mat4 m);
+void rotateMat4Y(mat4 m, float angle);
+void rotateMat4X(mat4 m, float angle);
 void rotateMat4Z(mat4 m, float angle);
 void translateMat(mat4 m, float x, float y, float z);
 void scaleMat(mat4 m, float x, float y, float z);
-void orthoMath(mat4 m, float n, float f, float r, float t);
+void orthoMat(mat4 m, float n, float f, float r, float t);
+void perspectiveMat(mat4 m, float n, float f, float r, float t);
+void perspectiveFovMat(mat4 m, float angleOfView, float imageAspectRatio, float n, float f);
 
 vec4 vec4_cpy(vec4 v);
 void vec4_addf(vec4 v, float value);

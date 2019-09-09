@@ -3,7 +3,6 @@
 #include "updater.h"
 #include "textures/texture.h"
 #include "gmath.h"
-#include "map/map.h"
 
 void w_printInfo()
 {
@@ -36,11 +35,11 @@ void proceedEvent(XEvent event)
 unsigned int VBO, VAO, EBO;
 
 float vertices[] = {
-        // positions               // texture coords
-        500.0f,  0.0f  ,   0.0f,  1.0f, 1.0f,   // top right
-        500.0f,  600.0f,   0.0f,  1.0f, 0.0f,   // bottom right
-        0.0f,  600.0f,   0.0f,    0.0f, 0.0f,   // bottom left
-        0.0f,  0.0f  ,   0.0f,    0.0f, 1.0f    // top left
+        // positions          // texture coords
+        0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // top right
+        0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
+        -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left
 };
 
 unsigned int indices[] = {  // note that we start from 0!
@@ -50,11 +49,12 @@ unsigned int indices[] = {  // note that we start from 0!
 
 shader_t* triangleSh;
 texture_t* tex;
-mat4 projection;
-mat4 transform;
-map_t* map;
 
-float mixLevel = 0;
+mat4 projection;
+mat4 view;
+mat4 model;
+
+float angle = 0;
 
 void drawingRoutine()
 {
@@ -66,7 +66,14 @@ void drawingRoutine()
     sh_use(triangleSh);
     t_bind(tex);
 
+    identityMat(model);
+    rotateMat4X(model, angle += 0.01);
+
+
     sh_setMat4(triangleSh, "projection", projection);
+    sh_setMat4(triangleSh, "view", view);
+    sh_setMat4(triangleSh, "model", model);
+
     sh_setInt(triangleSh, "img", 0);
 
     glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
@@ -115,29 +122,23 @@ void initTriangle()
     sh_info(triangleSh);
     sh_setInt(triangleSh, "ourTexture", 0);
 
-    map = m_load("level1");
-    if(!map)
-    {
-        abort();
-    }
-
-    float r = win->w / 2;
-    float t = win->h / 2;
-    float n = -1;
-    float f = 1;
+    float angleOfView = 90;
+    float near = 0.1;
+    float far = 100;
+    float imageAspectRatio = win->w / (float)win->h;
 
     projection = cmat4();
-    orthoMath(projection, n, f, r, t);
+    perspectiveFovMat(projection, angleOfView, imageAspectRatio, near, far);
 
-    transform = cmat4();
-    identityMat(transform);
-    translateMat(transform, -r, -t ,0);
+    view = cmat4();
+    identityMat(view);
+    translateMat(view, 0, 0 ,-2);
+
+    model = cmat4();
 
     printMat4(projection);
-    printMat4(transform);
-
-    mat4_mulm(projection, transform);
-
+    printMat4(view);
+    printMat4(model);
 }
 
 void freeTriangle(void)
