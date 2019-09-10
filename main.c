@@ -14,18 +14,26 @@ void w_printInfo()
 
 winInfo_t* win;
 
+vec4 cameraPosition;
+vec4 cameraTarget;
+vec4 cameraUpDirection;
+
+int keysState[256];
+
 void proceedEvent(XEvent event)
 {
     switch(event.type)
     {
         case KeyPress:
+            keysState[event.xkey.keycode] = 1;
             break;
         case KeyRelease:
+            keysState[event.xkey.keycode] = 0;
             break;
         case ButtonPress:
             break;
         case ButtonRelease:
-            u_close();
+            //u_close();
             break;
         case Expose:
             break;
@@ -109,13 +117,30 @@ float positions[10][3] = {
         { -1.3f,  1.0f, -1.5 },
 };
 
-vec4 cameraPosition;
-vec4 cameraTarget;
-vec4 cameraUpDirection;
-
-
 void drawingRoutine()
 {
+    //left
+    if(keysState[38])
+        cameraPosition[0] -= 0.01f;
+    //right
+    if(keysState[40])
+        cameraPosition[0] += 0.01f;
+    //forward
+    if(keysState[25])
+        cameraPosition[2] -= 0.01f;
+    //back
+    if(keysState[39])
+        cameraPosition[2] += 0.01f;
+    //up
+    if(keysState[65])
+        cameraPosition[1] += 0.01f;
+    //down
+    if(keysState[50])
+        cameraPosition[1] -= 0.01f;
+
+    vec4_cpy(cameraTarget, cameraPosition);
+    cameraTarget[2] -= 10;
+
     // ------
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -125,13 +150,6 @@ void drawingRoutine()
     t_bind(tex);
 
     identityMat(view);
-
-    fillVec4(cameraPosition,
-            10 * cosf(angle),
-           5,
-            10 * sinf(angle) - 5, 0);
-
-    angle += 0.01;
 
     lookAtMat(view,
             cameraPosition,
@@ -241,7 +259,7 @@ void freeTriangle(void)
 
 int main(int argc, char* argv[])
 {
-    win = w_create(500, 600, 0, 0, "hello world", false, stdout);
+    win = w_create(800, 600, 0, 0, "hello world", false, stdout);
     w_printInfo();
 
     s_init();
