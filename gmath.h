@@ -28,23 +28,34 @@ void fillMat4(mat4 m,
               float b1, float b2, float b3, float b4,
               float c1, float c2, float c3, float c4,
               float d1, float d2, float d3, float d4);
+void fillVec4(vec4 a, double x, double y, double z, double l);
 
 void identityMat(mat4 m);
 void rotateMat4Y(mat4 m, float angle);
 void rotateMat4X(mat4 m, float angle);
 void rotateMat4Z(mat4 m, float angle);
+
 void translateMat(mat4 m, float x, float y, float z);
 void scaleMat(mat4 m, float x, float y, float z);
 void orthoMat(mat4 m, float n, float f, float r, float t);
 void perspectiveMat(mat4 m, float n, float f, float r, float t);
 void perspectiveFovMat(mat4 m, float angleOfView, float imageAspectRatio, float n, float f);
 
-vec4 vec4_cpy(vec4 v);
+void lookAtInit(void);
+void lookAtMat(mat4 m, vec4 position, vec4 target, vec4 up);
+
+void vec4_cpy(vec4 dest, vec4 src);
+vec4 vec4_ccpy(vec4 v);
+
 void vec4_addf(vec4 v, float value);
 void vec4_addv(vec4 v, vec4 value);
+void vec4_subf(vec4 v, float value);
+void vec4_subv(vec4 v, vec4 value);
+
 void vec4_mulf(vec4 v, float value);
 float vec4_scalar_mulv(vec4 a, vec4 b);
-void vec4_mulv(vec4 a, vec4 b);
+void vec4_cross(vec4 a, vec4 b);
+
 float vec4_len(vec4 v);
 void vec4_norm(vec4 v);
 void vec4_mulm(vec4 v, mat4 m);
