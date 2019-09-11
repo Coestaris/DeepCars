@@ -250,17 +250,30 @@ inline void lookAtInit()
     component2 = cmat4();
 }
 
-inline void lookAtMat(
+inline void lookAtTargetMat(
         mat4 m,
         vec4 position,
         vec4 target,
         vec4 up)
 {
     vec4_cpy(direction, position);
-    vec4_cpy(cameraRight, up);
 
     vec4_subv(direction, target);
     vec4_norm(direction);
+
+    lookAtMat(m,
+            position,
+            direction,
+            up);
+}
+
+inline void lookAtMat(
+        mat4 m,
+        vec4 position,
+        vec4 direction,
+        vec4 up)
+{
+    vec4_cpy(cameraRight, up);
 
     vec4_cross(cameraRight, direction);
     vec4_norm(cameraRight);

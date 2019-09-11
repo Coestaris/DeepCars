@@ -42,7 +42,8 @@ void perspectiveMat(mat4 m, float n, float f, float r, float t);
 void perspectiveFovMat(mat4 m, float angleOfView, float imageAspectRatio, float n, float f);
 
 void lookAtInit(void);
-void lookAtMat(mat4 m, vec4 position, vec4 target, vec4 up);
+void lookAtTargetMat(mat4 m, vec4 position, vec4 target, vec4 up);
+void lookAtMat(mat4 m, vec4 position, vec4 direction, vec4 up);
 
 void vec4_cpy(vec4 dest, vec4 src);
 vec4 vec4_ccpy(vec4 v);

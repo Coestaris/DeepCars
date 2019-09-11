@@ -15,10 +15,23 @@ void w_printInfo()
 winInfo_t* win;
 
 vec4 cameraPosition;
-vec4 cameraTarget;
+vec4 cameraDirection;
 vec4 cameraUpDirection;
 
 int keysState[256];
+int mouseState[10];
+
+int mousePressX[10];
+int mousePressY[10];
+
+float cameraPitch = 0;
+float cameraYaw = M_PI / 2;
+
+float dx;
+float dy;
+
+float lastdx = 0;
+float lastdy = 0;
 
 void proceedEvent(XEvent event)
 {
@@ -31,9 +44,28 @@ void proceedEvent(XEvent event)
             keysState[event.xkey.keycode] = 0;
             break;
         case ButtonPress:
+            mouseState[event.xbutton.button] = 1;
+            mousePressX[event.xbutton.button] = event.xbutton.x;
+            mousePressY[event.xbutton.button] = event.xbutton.y;
             break;
         case ButtonRelease:
-            //u_close();
+            mouseState[event.xbutton.button] = 0;
+            lastdx = dx;
+            lastdy = dy;
+            break;
+        case MotionNotify:
+            /*printf("x: %i, y: %i",
+                    event.xmotion.x,
+                    event.xmotion.y);*/
+
+            if(mouseState[1])
+            {
+                dx = ((float)event.xmotion.x - (float)mousePressX[1]) / 100.0f + lastdx;
+                dy = ((float)event.xmotion.y - (float)mousePressY[1]) / 100.0f + lastdy;
+            }
+            //XWarpPointer(win->display, None, win->win, 0, 0, 0, 0, win->w / 2, win->h / 2);
+            //XFlush(win->display);
+
             break;
         case Expose:
             break;
@@ -117,29 +149,50 @@ float positions[10][3] = {
         { -1.3f,  1.0f, -1.5 },
 };
 
+vec4 dirCpy;
+vec4 dirCross;
+
 void drawingRoutine()
 {
+    cameraPitch = dy;
+    cameraYaw = dx + M_PI / 2;
+
+    cameraDirection[0] = cosf(cameraPitch) * cosf(cameraYaw);
+    cameraDirection[1] = sinf(cameraPitch);
+    cameraDirection[2] = cosf(cameraPitch) * sinf(cameraYaw);
+
+    vec4_cpy(dirCpy, cameraDirection);
+    vec4_cpy(dirCross, cameraDirection);
+    vec4_mulf(dirCpy, .2);
+
+    vec4_cross(dirCross, cameraUpDirection);
+    vec4_norm(dirCross);
+    vec4_mulf(dirCross, .2);
+
     //left
     if(keysState[38])
-        cameraPosition[0] -= 0.01f;
+        vec4_addv(cameraPosition, dirCross);
+
     //right
     if(keysState[40])
-        cameraPosition[0] += 0.01f;
+        vec4_subv(cameraPosition, dirCross);
+
     //forward
     if(keysState[25])
-        cameraPosition[2] -= 0.01f;
+        vec4_subv(cameraPosition, dirCpy);
+
     //back
     if(keysState[39])
-        cameraPosition[2] += 0.01f;
+        vec4_addv(cameraPosition, dirCpy);
+
     //up
     if(keysState[65])
-        cameraPosition[1] += 0.01f;
+        cameraPosition[1] += 0.2f;
     //down
     if(keysState[50])
-        cameraPosition[1] -= 0.01f;
+        cameraPosition[1] -= 0.2f;
 
-    vec4_cpy(cameraTarget, cameraPosition);
-    cameraTarget[2] -= 10;
+
 
     // ------
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -152,9 +205,9 @@ void drawingRoutine()
     identityMat(view);
 
     lookAtMat(view,
-            cameraPosition,
-            cameraTarget,
-            cameraUpDirection);
+              cameraPosition,
+              cameraDirection,
+              cameraUpDirection);
 
     sh_setMat4(triangleSh, "projection", projection);
     sh_setMat4(triangleSh, "view", view);
@@ -247,8 +300,11 @@ void initTriangle()
     lookAtInit();
 
     cameraPosition = cvec4(0, 0, 0, 0);
-    cameraTarget = cvec4(0, 0, -5, 0);
+    cameraDirection = cvec4(0, 0, -5, 0);
     cameraUpDirection = cvec4(0, 1, 0, 0);
+
+    dirCpy = cvec4(0, 0, -5, 0);
+    dirCross = cvec4(0, 1, 0, 0);
 }
 
 void freeTriangle(void)
@@ -259,7 +315,7 @@ void freeTriangle(void)
 
 int main(int argc, char* argv[])
 {
-    win = w_create(800, 600, 0, 0, "hello world", false, stdout);
+    win = w_create(1200, 800, 0, 0, "hello world", false, stdout);
     w_printInfo();
 
     s_init();
