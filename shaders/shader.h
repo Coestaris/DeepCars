@@ -14,7 +14,7 @@
 #include <string.h>
 #include <malloc.h>
 
-#include "../gmath.h"
+#include "../graphics/gmath.h"
 
 typedef struct _shader
 {
@@ -25,10 +25,14 @@ typedef struct _shader
 } shader_t;
 
 shader_t* sh_create(char* vertexPath, char* fragmentPath);
-void sh_free(shader_t* shader);
-void sh_setInt(shader_t* shader, const char* name, int value);
-void sh_setFloat(shader_t* shader, const char* name, float value);
-void sh_setMat4(shader_t* shader, const char* name, mat4 value);
+void sh_free(shader_t* sh);
+void sh_setInt(shader_t* sh, const char* name, int value);
+void sh_setFloat(shader_t* sh, const char* name, float value);
+void sh_setMat4(shader_t* sh, const char* name, mat4 value);
+void sh_setVec3v(shader_t* sh, const char* name, float a, float b, float c);
+void sh_setVec3(shader_t* sh, const char* name,  vec4 v);
+void sh_setVec4v(shader_t* sh, const char* name, float a, float b, float c, float d);
+void sh_setVec4(shader_t* sh, const char* name, vec4 v);
 int sh_load(shader_t* sh);
 void sh_use(shader_t* sh);
 void sh_info(shader_t* sh);

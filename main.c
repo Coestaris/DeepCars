@@ -2,7 +2,9 @@
 #include "shaders/shaderMgr.h"
 #include "updater.h"
 #include "textures/texture.h"
-#include "gmath.h"
+#include "graphics/gmath.h"
+#include "graphics/camera.h"
+#include "graphics/model.h"
 
 void w_printInfo()
 {
@@ -13,10 +15,6 @@ void w_printInfo()
 }
 
 winInfo_t* win;
-
-vec4 cameraPosition;
-vec4 cameraDirection;
-vec4 cameraUpDirection;
 
 int keysState[256];
 int mouseState[10];
@@ -42,6 +40,8 @@ void proceedEvent(XEvent event)
             break;
         case KeyRelease:
             keysState[event.xkey.keycode] = 0;
+            if(event.xkey.keycode == 9)
+                u_close();
             break;
         case ButtonPress:
             mouseState[event.xbutton.button] = 1;
@@ -54,193 +54,162 @@ void proceedEvent(XEvent event)
             lastdy = dy;
             break;
         case MotionNotify:
-            /*printf("x: %i, y: %i",
-                    event.xmotion.x,
-                    event.xmotion.y);*/
-
             if(mouseState[1])
             {
                 dx = ((float)event.xmotion.x - (float)mousePressX[1]) / 100.0f + lastdx;
                 dy = ((float)event.xmotion.y - (float)mousePressY[1]) / 100.0f + lastdy;
             }
-            //XWarpPointer(win->display, None, win->win, 0, 0, 0, 0, win->w / 2, win->h / 2);
-            //XFlush(win->display);
-
             break;
         case Expose:
             break;
     }
 }
 
-unsigned int VBO, VAO;
+unsigned int VBO, cubeVAO, lampVAO;
 
 float vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
 
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,   1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+    0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 };
 
-unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,  // first Triangle
-        1, 2, 3   // second Triangle
-};
-
-shader_t* triangleSh;
+shader_t* lampShader;
+shader_t* shader;
 texture_t* tex;
 
 mat4 projection;
 mat4 view;
 mat4 model;
 
-float angle = 0;
+vec4 cameraDirCpy;
+vec4 cameraCrossCpy;
+camera_t* camera;
 
-mat4 xRotate;
-mat4 yRotate;
-mat4 zRotate;
+sphere_t* sphere;
 
-float positions[10][3] = {
-        {  0.0f,  0.0f,  0.0f },
-        {  2.0f,  5.0f, -15.0f },
-        { -1.5f, -2.2f, -2.5f },
-        { -3.8f, -2.0f, -12.3f },
-        {  2.4f, -0.4f, -3.5f },
-        { -1.7f,  3.0f, -7.5f },
-        {  1.3f, -2.0f, -2.5f },
-        {  1.5f,  2.0f, -2.5f },
-        {  1.5f,  0.2f, -1.5f },
-        { -1.3f,  1.0f, -1.5 },
-};
-
-vec4 dirCpy;
-vec4 dirCross;
+vec4 lampPosition;
+float angle;
 
 void drawingRoutine()
 {
     cameraPitch = dy;
     cameraYaw = dx + M_PI / 2;
+    identityMat(view);
 
-    cameraDirection[0] = cosf(cameraPitch) * cosf(cameraYaw);
-    cameraDirection[1] = sinf(cameraPitch);
-    cameraDirection[2] = cosf(cameraPitch) * sinf(cameraYaw);
+    c_rotate(camera, cameraPitch, cameraYaw);
+    c_toMat(view, camera);
 
-    vec4_cpy(dirCpy, cameraDirection);
-    vec4_cpy(dirCross, cameraDirection);
-    vec4_mulf(dirCpy, .2);
+    vec4_cpy(cameraDirCpy, camera->direction);
+    vec4_mulf(cameraDirCpy, .2);
 
-    vec4_cross(dirCross, cameraUpDirection);
-    vec4_norm(dirCross);
-    vec4_mulf(dirCross, .2);
+    vec4_cpy(cameraCrossCpy, camera->_cameraRight);
+    vec4_mulf(cameraCrossCpy, .2);
 
     //left
     if(keysState[38])
-        vec4_addv(cameraPosition, dirCross);
+        vec4_subv(camera->position, cameraCrossCpy);
 
     //right
     if(keysState[40])
-        vec4_subv(cameraPosition, dirCross);
+        vec4_addv(camera->position, cameraCrossCpy);
 
     //forward
     if(keysState[25])
-        vec4_subv(cameraPosition, dirCpy);
+        vec4_subv(camera->position, cameraDirCpy);
 
     //back
     if(keysState[39])
-        vec4_addv(cameraPosition, dirCpy);
+        vec4_addv(camera->position, cameraDirCpy);
 
     //up
     if(keysState[65])
-        cameraPosition[1] += 0.2f;
+        camera->position[1] += 0.2f;
     //down
     if(keysState[50])
-        cameraPosition[1] -= 0.2f;
-
+        camera->position[1] -= 0.2f;
 
 
     // ------
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // draw our first triangle
-    sh_use(triangleSh);
-    t_bind(tex);
+    glBindVertexArray(cubeVAO);
 
-    identityMat(view);
+    sh_use(shader);
+    identityMat(model);
 
-    lookAtMat(view,
-              cameraPosition,
-              cameraDirection,
-              cameraUpDirection);
+   // rotateMat4Y(model, angle += 0.01);
+    lampPosition[0] = cos(angle) * 5;
+    lampPosition[2] = sin(angle+=0.06) * 5;
 
-    sh_setMat4(triangleSh, "projection", projection);
-    sh_setMat4(triangleSh, "view", view);
+    sh_setMat4(shader, "projection", projection);
+    sh_setMat4(shader, "view", view);
+    sh_setMat4(shader, "model", model);
 
-    glBindVertexArray(VAO);
+    sh_setVec3v(shader, "color", 1, 0.1, 1);
+    sh_setVec3v(shader, "lightColor", 1, 1, 1);
+    sh_setVec3v(shader, "lightPos", lampPosition[0], lampPosition[1], lampPosition[2]);
+    sh_setVec3v(shader, "viewPos", camera->position[0], camera->position[1], camera->position[2]);
 
-    sh_setInt(triangleSh, "img", 0);
 
-    identityMat(xRotate);
-    identityMat(yRotate);
-    identityMat(zRotate);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    for(size_t i = 0; i < 10; i++)
-    {
-        identityMat(model);
+    m_draw_sphere(sphere);
 
-        rotateMat4X(xRotate, 5 * i);
-        rotateMat4Y(yRotate, 3 * i);
-        rotateMat4Z(zRotate, 0);
+    glBindVertexArray(lampVAO);
 
-        mat4_mulm(model, xRotate);
-        mat4_mulm(model, yRotate);
-        mat4_mulm(model, zRotate);
+    sh_use(lampShader);
+    identityMat(model);
+    translateMat(model,
+            lampPosition[0],
+            lampPosition[1],
+            lampPosition[2]);
+    scaleMat(model, .3f, .3f, .3f);
 
-        translateMat(model,
-                     positions[i][0],
-                     positions[i][1],
-                     positions[i][2]);
+    sh_setMat4(lampShader, "projection", projection);
+    sh_setMat4(lampShader, "view", view);
+    sh_setMat4(lampShader, "model", model);
+    sh_setVec3v(lampShader, "lightColor", 1, 1, 1);
 
-        sh_setMat4(triangleSh, "model", model);
-
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
     w_swapBuffers(win);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -249,34 +218,40 @@ void drawingRoutine()
 
 void initTriangle()
 {
-    glGenVertexArrays(1, &VAO);
+    glGenVertexArrays(1, &cubeVAO);
+    glGenVertexArrays(1, &lampVAO);
     glGenBuffers(1, &VBO);
 
-    glBindVertexArray(VAO);
+    glBindVertexArray(cubeVAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // texture coord attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    glBindVertexArray(lampVAO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindVertexArray(0);
 
-    s_push(sh_create(  "../shaders/shaders/render.vsh",
-                       "../shaders/shaders/render.fsh"), 1);
-    triangleSh = s_getShader(1);
+    s_push(sh_create(  "../shaders/shaders/cube.vsh",
+                       "../shaders/shaders/cube.fsh"), 1);
+    s_push(sh_create(  "../shaders/shaders/lamp.vsh",
+                       "../shaders/shaders/lamp.fsh"), 2);
+    shader = s_getShader(1);
+    lampShader = s_getShader(2);
 
     tex = t_create("image.png", vec2f(0, 0));
     t_load(tex);
 
-    sh_info(triangleSh);
-    sh_setInt(triangleSh, "ourTexture", 0);
+    sh_info(shader);
+    sh_setInt(shader, "ourTexture", 0);
 
     float angleOfView = 60;
     float near = 0.1;
@@ -293,23 +268,21 @@ void initTriangle()
     printMat4(view);
     printMat4(model);
 
-    xRotate = cmat4();
-    yRotate = cmat4();
-    zRotate = cmat4();
+    camera = c_create(cvec4(0, 0, 0, 0), cvec4(0, 1, 0, 0));
+    camera->direction = cvec4(0, 0, 0, 0);
 
-    lookAtInit();
+    cameraDirCpy = cvec4(0, 0, 0, 0);
+    cameraCrossCpy = cvec4(0, 0, 0, 0);
 
-    cameraPosition = cvec4(0, 0, 0, 0);
-    cameraDirection = cvec4(0, 0, -5, 0);
-    cameraUpDirection = cvec4(0, 1, 0, 0);
+    lampPosition = cvec4(5, 3, 3, 0);
 
-    dirCpy = cvec4(0, 0, -5, 0);
-    dirCross = cvec4(0, 1, 0, 0);
+    sphere = m_sphere(10, 10, 4);
 }
 
 void freeTriangle(void)
 {
-    glDeleteVertexArrays(1, &VAO);
+    glDeleteVertexArrays(1, &cubeVAO);
+    glDeleteVertexArrays(1, &lampVAO);
     glDeleteBuffers(1, &VBO);
 }
 

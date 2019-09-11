@@ -159,6 +159,26 @@ void sh_setMat4(shader_t* sh, const char* name, mat4 value)
     glUniformMatrix4fv(glGetUniformLocation(sh->progID, name),1, true, value);
 }
 
+void sh_setVec3v(shader_t* sh, const char* name, float a, float b, float c)
+{
+    glUniform3f(glGetUniformLocation(sh->progID, name), a, b, c);
+}
+
+void sh_setVec3(shader_t* sh, const char* name,  vec4 v)
+{
+    glUniform3fv(glGetUniformLocation(sh->progID, name), 3, v);
+}
+
+void sh_setVec4v(shader_t* sh, const char* name, float a, float b, float c, float d)
+{
+    glUniform4f(glGetUniformLocation(sh->progID, name), a, b, c, d);
+}
+
+void sh_setVec4(shader_t* sh, const char* name, vec4 v)
+{
+    glUniform3fv(glGetUniformLocation(sh->progID, name), 4, v);
+}
+
 void sh_info(shader_t* sh)
 {
     GLint i;
