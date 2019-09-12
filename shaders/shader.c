@@ -179,6 +179,13 @@ void sh_setVec4(shader_t* sh, const char* name, vec4 v)
     glUniform3fv(glGetUniformLocation(sh->progID, name), 4, v);
 }
 
+void sh_setMaterial(shader_t* sh, material_t* material)
+{
+    sh_setInt(sh, "material.diffuse", material->diffuse->texID);
+    sh_setInt(sh, "material.specular", material->specular->texID);
+    sh_setFloat(sh, "material.shininess", material->shininess);
+}
+
 void sh_info(shader_t* sh)
 {
     GLint i;
@@ -187,7 +194,7 @@ void sh_info(shader_t* sh)
     GLint size; // size of the variable
     GLenum type; // type of the variable (float, vec3 or mat4, etc)
 
-    const GLsizei bufSize = 16; // maximum name length
+    const GLsizei bufSize = 32; // maximum name length
     GLchar name[bufSize]; // variable name in GLSL
     GLsizei length; // name length
 

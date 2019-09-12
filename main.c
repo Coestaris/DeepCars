@@ -68,52 +68,55 @@ void proceedEvent(XEvent event)
 unsigned int VBO, cubeVAO, lampVAO;
 
 float vertices[] = {
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        // positions          // normals           // texture coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
 
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-    0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
 
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-    0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-    0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-    0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
 
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
 };
 
 shader_t* lampShader;
 shader_t* shader;
-texture_t* tex;
+
+texture_t* diffuse;
+texture_t* specular;
 
 mat4 projection;
 mat4 view;
@@ -124,15 +127,22 @@ vec4 cameraCrossCpy;
 camera_t* camera;
 
 sphere_t* sphere;
+material_t* material;
 
 vec4 lampPosition;
 float angle;
 
 void drawingRoutine()
 {
+    identityMat(view);
+
     cameraPitch = dy;
     cameraYaw = dx + M_PI / 2;
-    identityMat(view);
+
+    if(cameraPitch >= M_PI / 2)
+        cameraPitch = M_PI / 2 - 0.001f;
+    if(cameraPitch <= - 3 * M_PI / 7)
+        cameraPitch = - 3 * M_PI / 7 + 0.001;
 
     c_rotate(camera, cameraPitch, cameraYaw);
     c_toMat(view, camera);
@@ -166,7 +176,6 @@ void drawingRoutine()
     if(keysState[50])
         camera->position[1] -= 0.2f;
 
-
     // ------
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -182,20 +191,39 @@ void drawingRoutine()
 
     sh_setMat4(shader, "projection", projection);
     sh_setMat4(shader, "view", view);
-    sh_setMat4(shader, "model", model);
 
-    sh_setVec3v(shader, "color", 1, 0.1, 1);
-    sh_setVec3v(shader, "lightColor", 1, 1, 1);
-    sh_setVec3v(shader, "lightPos", lampPosition[0], lampPosition[1], lampPosition[2]);
     sh_setVec3v(shader, "viewPos", camera->position[0], camera->position[1], camera->position[2]);
+    sh_setMaterial(shader, material);
 
+    sh_setVec3v(shader, "light.ambient",  0.1f, 0.1f, 0.1f);
+    sh_setVec3v(shader, "light.diffuse",  0.5f, 0.5f, 0.5f);
+    sh_setVec3v(shader, "light.specular", 1.0f, 1.0f, 1.0f);
+    sh_setVec3v(shader, "light.position",  lampPosition[0], lampPosition[1], lampPosition[2]);
 
+    identityMat(model);
+    translateMat(model, -1, 0, -1);
+    sh_setMat4(shader, "model", model);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    m_draw_sphere(sphere);
+    identityMat(model);
+    translateMat(model, -1, 0, 1);
+    sh_setMat4(shader, "model", model);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
+    identityMat(model);
+    translateMat(model, 1, 0, -1);
+    sh_setMat4(shader, "model", model);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
+    identityMat(model);
+    translateMat(model, 1, 0, 1);
+    sh_setMat4(shader, "model", model);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
 
     glBindVertexArray(lampVAO);
-
     sh_use(lampShader);
     identityMat(model);
     translateMat(model,
@@ -222,18 +250,19 @@ void initTriangle()
     glGenVertexArrays(1, &lampVAO);
     glGenBuffers(1, &VBO);
 
-    glBindVertexArray(cubeVAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glBindVertexArray(cubeVAO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glBindVertexArray(lampVAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -247,11 +276,12 @@ void initTriangle()
     shader = s_getShader(1);
     lampShader = s_getShader(2);
 
-    tex = t_create("image.png", vec2f(0, 0));
-    t_load(tex);
+    diffuse = t_create("image.png", vec2f(0, 0));
+    t_load(diffuse);
+    specular = t_create("specular.png", vec2f(0, 0));
+    t_load(specular);
 
     sh_info(shader);
-    sh_setInt(shader, "ourTexture", 0);
 
     float angleOfView = 60;
     float near = 0.1;
@@ -276,7 +306,8 @@ void initTriangle()
 
     lampPosition = cvec4(5, 3, 3, 0);
 
-    sphere = m_sphere(10, 10, 4);
+    //sphere = m_sphere(10, 10, 4);
+    material = mt_create(diffuse, specular, 128.0f);
 }
 
 void freeTriangle(void)
