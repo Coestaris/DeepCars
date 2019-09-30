@@ -8,24 +8,16 @@
 #define GL_GLEXT_PROTOTYPES
 
 #include <malloc.h>
+#include <stdio.h>
 #include <math.h>
 #include "GL/gl.h"
 
-typedef struct _sphere {
-    float* data;
+typedef struct _model {
 
-    float radius;
-    int stackCount;
-    int sectorCount;
 
-    GLuint VAO;
-    GLuint VBO;
+} model_t;
 
-    size_t count;
-
-} sphere_t;
-
-sphere_t* m_sphere(int stackCount, int sectorCount, float radius);
-void m_draw_sphere(sphere_t* sphere);
+model_t* m_load(const char* filename);
+void m_free(model_t* model);
 
 #endif //ZOMBOID3D_MODEL_H
