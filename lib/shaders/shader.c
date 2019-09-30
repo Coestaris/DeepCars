@@ -181,8 +181,9 @@ void sh_setVec4(shader_t* sh, const char* name, vec4 v)
 
 void sh_setMaterial(shader_t* sh, material_t* material)
 {
-    sh_setInt(sh, "material.diffuse", material->diffuse->texID);
-    sh_setInt(sh, "material.specular", material->specular->texID);
+    sh_setInt(sh, "material.diffuse", 0);
+    sh_setInt(sh, "material.specular", 1);
+    sh_setInt(sh, "material.emit", 2);
     sh_setFloat(sh, "material.shininess", material->shininess);
 }
 

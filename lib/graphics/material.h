@@ -6,7 +6,7 @@
 #define ZOMBOID3D_MATERIAL_H
 
 #include "gmath.h"
-#include "../textures/texture.h"
+#include "../resources/texture.h"
 
 typedef struct _material {
     texture_t* diffuse;

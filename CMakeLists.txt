@@ -6,7 +6,7 @@ set(CMAKE_C_STANDARD 99)
 FILE(GLOB oilSources oil/*.c)
 FILE(GLOB oilHeaders oil/*.h)
 
-add_executable(Zomboid3D main.c graphics/graphics.c graphics/graphics.h graphics/win.h graphics/win.c updater.c updater.h shaders/shader.c shaders/shader.h shaders/shaderMgr.c shaders/shaderMgr.h textures/texture.c textures/texture.h structs.c structs.h graphics/gmath.c graphics/gmath.h graphics/camera.c graphics/camera.h graphics/model.c graphics/model.h graphics/material.c graphics/material.h)
+add_executable(Zomboid3D main.c lib/graphics/graphics.c lib/graphics/graphics.h lib/graphics/win.h lib/graphics/win.c lib/updater.c lib/updater.h lib/shaders/shader.c lib/shaders/shader.h lib/shaders/shaderMgr.c lib/shaders/shaderMgr.h lib/resources/texture.c lib/resources/texture.h lib/structs.c lib/structs.h lib/graphics/gmath.c lib/graphics/gmath.h lib/graphics/camera.c lib/graphics/camera.h lib/resources/model.c lib/resources/model.h lib/graphics/material.c lib/graphics/material.h)
 
 target_sources(Zomboid3D PUBLIC ${oilSources})
 target_sources(Zomboid3D PUBLIC ${oilHeaders})

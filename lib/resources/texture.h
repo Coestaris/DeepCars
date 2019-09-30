@@ -14,7 +14,7 @@
 
 #include <GL/gl.h>
 
-#include "../oil/oil.h"
+#include "../../oil/oil.h"
 #include "../structs.h"
 
 typedef struct _texture

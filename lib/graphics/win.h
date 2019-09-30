@@ -46,5 +46,6 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
 void w_setGLXContextVersion(int major, int minor, int flags);
 void w_destroy(winInfo_t* w);
 void w_swapBuffers(winInfo_t* w);
+void w_printInfo();
 
 #endif //ZOMBOID3D_WIN_H

@@ -7,7 +7,7 @@
 sphere_t* m_sphere(int stackCount, int sectorCount, float radius)
 {
     sphere_t* sphere = malloc(sizeof(sphere_t));
-    sphere->count = stackCount * sectorCount;
+    sphere->count = stackCount * sectorCount + 2;
     sphere->data = malloc(sizeof(float) * sphere->count * 6);
     size_t dataIndex = 0;
 
@@ -42,9 +42,9 @@ sphere_t* m_sphere(int stackCount, int sectorCount, float radius)
             nx = x * lengthInv;
             ny = y * lengthInv;
             nz = z * lengthInv;
-            sphere->data[dataIndex] = nx;
-            sphere->data[dataIndex] = ny;
-            sphere->data[dataIndex] = nz;
+            sphere->data[dataIndex++] = nx;
+            sphere->data[dataIndex++] = ny;
+            sphere->data[dataIndex++] = nz;
 
             // vertex tex coord (s, t) range between [0, 1]
             //s = (float)j / sectorCount;
@@ -77,7 +77,9 @@ void m_draw_sphere(sphere_t* sphere)
 {
     glBindBuffer(GL_ARRAY_BUFFER, sphere->VBO);
     glBindVertexArray(sphere->VAO);
+
     glDrawElements(GL_TRIANGLES, sphere->count, GL_UNSIGNED_INT, (void*)0);
+
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

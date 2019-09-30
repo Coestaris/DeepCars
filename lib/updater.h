@@ -20,6 +20,16 @@
 typedef void (*drawFunc_t)();
 typedef void (*eventHandler_t)(XEvent event);
 
+typedef enum _keyState {
+    pressed,
+    released
+} keyState_t;
+
+typedef enum _mouseState {
+    pressedasd
+} mouseState_t;
+
+
 void u_close();
 void u_startLoop(
         winInfo_t* info,

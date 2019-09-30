@@ -303,4 +303,13 @@ void w_destroy(winInfo_t* w)
 void w_swapBuffers(winInfo_t* w)
 {
     glXSwapBuffers(w->display, w->win);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void w_printInfo()
+{
+    printf("[GL Spec]: Vendor: %s\n", (char*) glGetString(GL_VENDOR));
+    printf("[GL Spec]: Using OpenGL Version: %s\n", (char*) glGetString(GL_VERSION));
+    printf("[GL Spec]: Using OpenGL Rendered: %s\n", (char*) glGetString(GL_RENDERER));
+    printf("[GL Spec]: GLSH Version: %s\n", (char*) glGetString(GL_SHADING_LANGUAGE_VERSION));
 }

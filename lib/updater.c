@@ -3,6 +3,7 @@
 //
 
 #include "updater.h"
+#include "graphics/graphics.h"
 
 bool closed = false;
 int counter = 0;
@@ -52,6 +53,22 @@ void measureTime(void)
     }
 }
 
+int keysState[256];
+int mouseState[10];
+int mousePressX[10];
+int mousePressY[10];
+winInfo_t* defaultWin;
+
+void defaultDrawFunc()
+{
+    gr_fill(COLOR_GRAY);
+    w_swapBuffers(defaultWin);
+}
+
+void defaultEventHandler()
+{
+
+}
 
 void u_startLoop(winInfo_t* win, drawFunc_t drawFunc, eventHandler_t eventHandler)
 {
@@ -62,7 +79,16 @@ void u_startLoop(winInfo_t* win, drawFunc_t drawFunc, eventHandler_t eventHandle
                  PointerMotionMask | ButtonMotionMask | ExposureMask | VisibilityChangeMask |
                  ResizeRedirectMask);
 
-    globalDrawFunc = drawFunc;
+    if(drawFunc == NULL)
+    {
+        globalDrawFunc = defaultDrawFunc;
+        defaultWin = win;
+    }
+    else
+        globalDrawFunc = drawFunc;
+
+    if(eventHandler == NULL)
+        eventHandler = defaultEventHandler;
 
     while (1)
     {
@@ -78,3 +104,4 @@ void u_startLoop(winInfo_t* win, drawFunc_t drawFunc, eventHandler_t eventHandle
         eventHandler(event);
     }
 }
+
