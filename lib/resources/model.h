@@ -7,10 +7,16 @@
 
 #define GL_GLEXT_PROTOTYPES
 
+#include <stdbool.h>
+#include <string.h>
 #include <malloc.h>
 #include <stdio.h>
 #include <math.h>
 #include "GL/gl.h"
+
+typedef struct {
+
+};
 
 typedef struct _model {
 
