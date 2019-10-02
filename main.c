@@ -7,6 +7,8 @@
 int main(int argc, char* argv[])
 {
     model_t* m = m_load("cube.obj");
+    m_info(m);
+
     /*winInfo_t* win = w_create(1200, 800, 0, 0, "hello world", false, stdout);
     w_printInfo();
     s_init();
