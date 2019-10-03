@@ -21,7 +21,7 @@
 
 struct _model;
 
-#define pushModelProp(model, prop, type, item) {                                                 \
+#define pushModelProp(model, prop, type, item) {                                                \
         if(model->modelLen->prop ## Count > model->modelLen->prop ##MaxCount - 1)               \
         {                                                                                       \
             size_t newLen = (int)((float)model->modelLen->prop ##MaxCount * INCREASE_LEN);      \
@@ -31,6 +31,10 @@ struct _model;
         model->prop[model->modelLen->prop ##Count++] = item;                                    \
     }
 
+#define START_LEN_COUNT 10
+#define INCREASE_LEN 1.5
+#define MAX_FACE_LEN 5
+
 typedef struct _modelFace {
     struct _model* parent;
 
@@ -38,14 +42,13 @@ typedef struct _modelFace {
     uint16_t smID;
     uint32_t groupFlags;
 
-    size_t* vertID;
-    size_t* texID;
-    size_t* normalID;
+    int32_t vertID[MAX_FACE_LEN];
+    int32_t texID[MAX_FACE_LEN];
+    int32_t normalID[MAX_FACE_LEN];
+
+    size_t count;
 
 } modelFace_t;
-
-#define START_LEN_COUNT 10
-#define INCREASE_LEN 1.5
 
 typedef struct _modelLen {
     size_t verticesCount;

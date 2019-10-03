@@ -19,6 +19,8 @@ objDescriptor_t allowedDescriptors[] =
 };
 
 #define MAX_WORD_LEN 256
+modelFace_t* face;
+
 char word[MAX_WORD_LEN];
 const size_t descriptorsCount = sizeof(allowedDescriptors) / sizeof(allowedDescriptors[0]);
 vec4 buffVec;
@@ -46,6 +48,25 @@ bool readNextWord(const char* string, size_t* startIndex, size_t endIndex)
     memset(word, 0, len + 1);
     memcpy(word, string + start, len);
     return true;
+}
+
+void parseFace(int32_t* i1, int32_t* i2, int32_t* i3)
+{
+    int32_t* ptr = i1;
+    size_t power = 0;
+    for(int64_t i = strlen(word) - 1; i >= 0; i--)
+    {
+        if(word[i] == '/')
+        {
+            if(ptr == i1) ptr = i2;
+            else ptr = i3;
+            power = 0;
+        }
+        else
+        {
+            *ptr += (word[i] - '0') * pow(10, power++);
+        }
+    }
 }
 
 double parseDouble(size_t lineIndex)
@@ -86,7 +107,7 @@ void proceedLine(model_t* model, const char* string, size_t startIndex, size_t e
                 exit(EXIT_FAILURE);
             }
 
-            printf("Descriptor: %s\n", descriptor->string);
+            //printf("Descriptor: %s\n", descriptor->string);
         }
         else
         {
@@ -108,6 +129,17 @@ void proceedLine(model_t* model, const char* string, size_t startIndex, size_t e
                 }
                 buffVec[wordCount - 1] = (float)parseDouble(lineIndex);
             }
+            if(descriptor->type == od_face)
+            {
+                int32_t i1 = 0, i2 = 0, i3 = 0;
+                parseFace(&i1, &i2, &i3);
+
+                assert(wordCount < MAX_FACE_LEN);
+
+                face->vertID[wordCount - 1] = i1;
+                face->texID[wordCount - 1] = i2;
+                face->normalID[wordCount - 1] = i3;
+            }
         }
         wordCount++;
     }
@@ -122,9 +154,19 @@ void proceedLine(model_t* model, const char* string, size_t startIndex, size_t e
         m_pushNormal(model, vec4_ccpy(buffVec));
         fillVec4(buffVec, 0, 0, 0, 0);
     }
+
+    if(descriptor->type == od_face) {
+        modelFace_t* newFace = malloc(sizeof(modelFace_t));
+        newFace->parent = model;
+        newFace->count = wordCount - 1;
+        memcpy(newFace->normalID, face->normalID, sizeof(face->normalID));
+        memcpy(newFace->vertID, face->vertID, sizeof(face->vertID));
+        memcpy(newFace->texID, face->texID, sizeof(face->texID));
+        m_pushFace(model, newFace);
+    }
 }
 
-void getIndexes(model_t* model, const char* str)
+void parseLines(model_t* model, const char* str)
 {
     size_t startIndex = 0;
     size_t endIndex = 0;
@@ -204,6 +246,12 @@ model_t* m_load(const char* filename)
     if(!buffVec)
         buffVec = cvec4(0,0,0,0);
 
+    if(!face)
+    {
+        face = malloc(sizeof(modelFace_t));
+
+    }
+
     FILE* f = fopen(filename, "r");
     if(!f)
     {
@@ -223,7 +271,7 @@ model_t* m_load(const char* filename)
     model_t* model = m_create();
     model->filename = filename;
 
-    getIndexes(model, data);
+    parseLines(model, data);
 
     free(data);
     fclose(f);
@@ -293,4 +341,17 @@ void m_info(model_t* model)
                i, model->normals[i][0],
                   model->normals[i][1],
                   model->normals[i][2]);
+
+    printf("\nFaces (%li): \n", model->modelLen->facesCount);
+    for(size_t i = 0; i < model->modelLen->facesCount; i++)
+    {
+        printf("%li. ", i);
+        for(size_t j = 0; j < model->faces[j]->count; j++) {
+            printf("%i/%i/%i ",
+                    model->faces[i]->vertID[j],
+                    model->faces[i]->texID[j],
+                    model->faces[i]->normalID[j]);
+        }
+        putchar('\n');
+    }
 }
