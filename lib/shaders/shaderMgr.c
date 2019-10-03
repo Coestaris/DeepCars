@@ -4,6 +4,7 @@
 
 #include "shaderMgr.h"
 
+
 shmNode_t* nodes[SHM_MAX_SHADERS];
 size_t nodeCount;
 
@@ -25,6 +26,17 @@ void s_push(shader_t* shader, int id)
 
 void s_pushBuiltInShaders()
 {
+    shader_t* simpleColored = sh_create("../lib/shaders/shaders/simpleColored.fsh",
+                                        "../lib/shaders/shaders/simpleColored.fsh");
+    sh_info(simpleColored);
+
+    simpleColored->uniformLocations = malloc(sizeof(GLint) * 4);
+    simpleColored->uniformLocations[SH_SIMPLECOLORED_COLOR] = glGetUniformLocation(simpleColored->progID, "objectColor");
+    simpleColored->uniformLocations[SH_SIMPLECOLORED_MODEL] = glGetUniformLocation(simpleColored->progID, "model");
+    simpleColored->uniformLocations[SH_SIMPLECOLORED_VIEW] = glGetUniformLocation(simpleColored->progID, "view");
+    simpleColored->uniformLocations[SH_SIMPLECOLORED_PROJ] = glGetUniformLocation(simpleColored->progID, "projection");
+
+    s_push(simpleColored, SH_SIMPLECOLORED);
 }
 
 void s_init()
@@ -35,6 +47,7 @@ void s_init()
         nodes[i]->shader = NULL;
         nodes[i]->id = -1;
     }
+    s_pushBuiltInShaders();
 }
 
 shader_t* s_getShader(int id)

@@ -16,6 +16,8 @@
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <stdbool.h>
+#include "gmath.h"
+#include "camera.h"
 
 typedef struct _winInfo {
 
@@ -33,6 +35,8 @@ typedef struct _winInfo {
     uint16_t lockedFps;
 
     double lastFrame;
+
+    mat4 projection;
 
 } winInfo_t;
 

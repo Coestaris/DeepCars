@@ -5,13 +5,20 @@
 #ifndef ZOMBOID3D_GRAPHICS_H
 #define ZOMBOID3D_GRAPHICS_H
 
+#define GL_GLEXT_PROTOTYPES
+
 #include <GL/gl.h>
+
 #include "gmath.h"
+#include "../resources/model.h"
 
 void gr_fill(vec4 color);
 
-void gr_init(void);
+void gr_init(mat4 proj, mat4 view);
 void gr_free(void);
+
+void gr_draw_model(model_t* model);
+void gr_draw_model_simpleColor(model_t* model, vec4 color);
 
 extern vec4 COLOR_WHITE;
 extern vec4 COLOR_SILVER;

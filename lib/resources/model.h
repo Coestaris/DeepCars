@@ -85,6 +85,13 @@ typedef struct _model {
 
     modelLen_t* modelLen;
 
+    GLuint VBO;
+    GLuint VAO;
+    size_t bufferLen;
+
+    mat4 model;
+    float* buffer;
+
 } model_t;
 
 typedef enum {
@@ -110,6 +117,7 @@ model_t* m_create();
 model_t* m_load(const char* filename);
 void m_free(model_t* model);
 void m_info(model_t* model);
+void m_build(model_t* model);
 
 void m_pushVertex(model_t* model, vec4 vec);
 void m_pushNormal(model_t* model, vec4 vec);

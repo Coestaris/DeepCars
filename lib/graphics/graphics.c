@@ -3,6 +3,8 @@
 //
 
 #include "graphics.h"
+#include "../shaders/shader.h"
+#include "../shaders/shaderMgr.h"
 
 vec4 COLOR_WHITE;
 vec4 COLOR_SILVER;
@@ -26,7 +28,11 @@ void gr_fill(vec4 color)
     glClearColor(color[0], color[1], color[2], color[3]);
 }
 
-void gr_init(void)
+shader_t* shader_simpleColored;
+mat4 proj;
+mat4 view;
+
+void gr_init(mat4 _proj, mat4 _view)
 {
     COLOR_WHITE   = cvec4(1, 1, 1, 0);
     COLOR_SILVER  = cvec4(.75, .75, .75, 0);
@@ -44,6 +50,11 @@ void gr_init(void)
     COLOR_NAVY    = cvec4(0, 0, .5, 0);
     COLOR_FUCHSIA = cvec4(1, 0, 1, 0);
     COLOR_PURPLE  = cvec4(.5, 0, .5, 0);
+
+    shader_simpleColored = s_getShader(SH_SIMPLECOLORED);
+
+    proj = _proj;
+    view = _view;
 }
 
 void gr_free(void)
@@ -64,4 +75,41 @@ void gr_free(void)
     freeVec4(COLOR_NAVY);
     freeVec4(COLOR_FUCHSIA);
     freeVec4(COLOR_PURPLE);
+}
+
+void gr_draw_model(model_t* model)
+{
+    glBindBuffer(GL_ARRAY_BUFFER, model->VBO);
+    glBindVertexArray(model->VAO);
+
+    glDrawArrays(GL_TRIANGLES, 0, model->modelLen->facesCount * 3);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void gr_draw_model_simpleColor(model_t* model, vec4 color)
+{
+    sh_use(shader_simpleColored);
+    sh_setVec3v(shader_simpleColored,
+            shader_simpleColored->uniformLocations[SH_SIMPLECOLORED_COLOR],
+            color[0], color[1], color[2]);
+
+    sh_setMat4(shader_simpleColored,
+                shader_simpleColored->uniformLocations[SH_SIMPLECOLORED_PROJ],
+                proj);
+
+    sh_setMat4(shader_simpleColored,
+               shader_simpleColored->uniformLocations[SH_SIMPLECOLORED_VIEW],
+               view);
+
+    sh_setMat4(shader_simpleColored,
+               shader_simpleColored->uniformLocations[SH_SIMPLECOLORED_MODEL],
+               model->model);
+
+    printMat4(proj);
+    printMat4(model->model);
+    printMat4(view);
+
+    gr_draw_model(model);
 }

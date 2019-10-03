@@ -64,6 +64,7 @@ void parseFace(int32_t* i1, int32_t* i2, int32_t* i3)
         }
         else
         {
+            if(power == 0) *ptr = 0;
             *ptr += (word[i] - '0') * pow(10, power++);
         }
     }
@@ -131,14 +132,14 @@ void proceedLine(model_t* model, const char* string, size_t startIndex, size_t e
             }
             if(descriptor->type == od_face)
             {
-                int32_t i1 = 0, i2 = 0, i3 = 0;
-                parseFace(&i1, &i2, &i3);
-
                 assert(wordCount < MAX_FACE_LEN);
 
-                face->vertID[wordCount - 1] = i1;
+                int32_t i1 = -1, i2 = -1, i3 = -1;
+                parseFace(&i1, &i2, &i3);
+
+                face->vertID[wordCount - 1] = i3;
                 face->texID[wordCount - 1] = i2;
-                face->normalID[wordCount - 1] = i3;
+                face->normalID[wordCount - 1] = i1;
             }
         }
         wordCount++;
@@ -237,6 +238,9 @@ model_t* m_create()
 
     model->objectName = NULL;
     model->filename = NULL;
+
+    model->model = cmat4();
+    identityMat(model->model);
 
     return model;
 }
@@ -354,4 +358,102 @@ void m_info(model_t* model)
         }
         putchar('\n');
     }
+}
+
+void m_build(model_t* model)
+{
+    bool useTexCoords = model->modelLen->texCoordsCount != 0 && model->faces[0]->texID[0] != -1;
+    bool useNormals = model->modelLen->normalsCount != 0 && model->faces[0]->normalID[0] != -1;
+    size_t vertPerFace =  model->faces[0]->count;
+
+    size_t size =
+                            model->modelLen->facesCount * vertPerFace * 3 +         //vertices
+           (useTexCoords ? (model->modelLen->facesCount * vertPerFace * 2) : 0) +  //texcoord
+           (useNormals ?   (model->modelLen->facesCount * vertPerFace * 3) : 0);   //normals
+
+    float* buffer = malloc(sizeof(float) * size);
+    size_t bufferIndex = 0;
+
+    for(size_t i = 0; i < model->modelLen->facesCount; i++)
+        for(size_t j = 0; j < vertPerFace; j++)
+        {
+            assert(model->faces[i]->vertID[j] <= model->modelLen->verticesCount);
+            buffer[bufferIndex++] = model->vertices[model->faces[i]->vertID[j] - 1][0];
+            buffer[bufferIndex++] = model->vertices[model->faces[i]->vertID[j] - 1][1];
+            buffer[bufferIndex++] = model->vertices[model->faces[i]->vertID[j] - 1][2];
+
+            if(useTexCoords)
+            {
+                assert(model->faces[i]->texID[j] <= model->modelLen->texCoordsCount);
+                buffer[bufferIndex++] = model->texCoords[model->faces[i]->texID[j] - 1][0];
+                buffer[bufferIndex++] = model->texCoords[model->faces[i]->texID[j] - 1][1];
+            }
+
+            if(useNormals)
+            {
+                assert(model->faces[i]->normalID[j] <= model->modelLen->normalsCount);
+                buffer[bufferIndex++] = model->normals[model->faces[i]->normalID[j] - 1][0];
+                buffer[bufferIndex++] = model->normals[model->faces[i]->normalID[j] - 1][1];
+                buffer[bufferIndex++] = model->normals[model->faces[i]->normalID[j] - 1][2];
+            }
+        }
+
+    assert(bufferIndex != size - 1);
+
+    glGenBuffers(1, &model->VBO);
+    glGenVertexArrays(1, &model->VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, model->VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * size, buffer, GL_STATIC_DRAW);
+
+    glBindVertexArray(model->VAO);
+    if(useNormals && useTexCoords)
+    {
+        glVertexAttribPointer(0, vertPerFace, GL_FLOAT, GL_FALSE, (vertPerFace + 5) * sizeof(float),
+                (void*)0);
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, (vertPerFace + 5) * sizeof(float),
+                (void*)(vertPerFace * sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, (vertPerFace + 5) * sizeof(float),
+                (void*)((vertPerFace + 2) * sizeof(float)));
+        glEnableVertexAttribArray(2);
+    }
+    else if(!useNormals && useTexCoords)
+    {
+        glVertexAttribPointer(0, vertPerFace, GL_FLOAT, GL_FALSE, (vertPerFace + 2) * sizeof(float),
+                              (void*)0);
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, (vertPerFace + 2) * sizeof(float),
+                              (void*)(vertPerFace * sizeof(float)));
+        glEnableVertexAttribArray(1);
+    }
+    else if(useNormals && !useTexCoords)
+    {
+        glVertexAttribPointer(0, vertPerFace, GL_FLOAT, GL_FALSE, (vertPerFace + 3) * sizeof(float),
+                              (void*)0);
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (vertPerFace + 3) * sizeof(float),
+                              (void*)(vertPerFace * sizeof(float)));
+        glEnableVertexAttribArray(1);
+    }
+    else //no normals and coords
+    {
+        glVertexAttribPointer(0, vertPerFace, GL_FLOAT, GL_FALSE, (vertPerFace + 2) * sizeof(float),
+                              (void*)0);
+        glEnableVertexAttribArray(0);
+    }
+    glBindVertexArray(model->VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    for(size_t i = 0; i < size; i++)
+        printf("%.2f%c", buffer[i], i && !((i + 1) % 6) ? '\n' : ' ');
+
+    free(buffer);
 }
