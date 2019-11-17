@@ -229,22 +229,22 @@ void sh_info(shader_t* sh)
     GLsizei length; // name length
 
     glGetProgramiv(sh->progID, GL_ACTIVE_ATTRIBUTES, &count);
-    printf("Active Attributes: %d\n", count);
+    printf("[shader.c]: Active Attributes: %d\n", count);
 
     for (i = 0; i < count; i++)
     {
         glGetActiveAttrib(sh->progID, (GLuint)i, bufSize, &length, &size, &type, name);
 
-        printf("Attribute #%d Type: %u Name: %s\n", i, type, name);
+        printf("[shader.c]: Attribute #%d Type: %u Name: %s\n", i, type, name);
     }
 
     glGetProgramiv(sh->progID, GL_ACTIVE_UNIFORMS, &count);
-    printf("Active Uniforms: %d\n", count);
+    printf("[shader.c]: Active Uniforms: %d\n", count);
 
     for (i = 0; i < count; i++)
     {
         glGetActiveUniform(sh->progID, (GLuint)i, bufSize, &length, &size, &type, name);
 
-        printf("Uniform #%d Type: %u Name: %s\n", i, type, name);
+        printf("[shader.c]: Uniform #%d Type: %u Name: %s\n", i, type, name);
     }
 }

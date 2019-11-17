@@ -62,12 +62,12 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
 
     if(verbose)
     {
-        fprintf(vf, "[*] Trying to open X display\n");
+        fprintf(vf, "[win.c]: Trying to open X display\n");
     }
     info->display = XOpenDisplay(NULL);
     if (!info->display)
     {
-        fprintf(vf, "[-] Failed to open X display\n");
+        fprintf(vf, "[win.c][ERROR]: Failed to open X display\n");
         exit(1);
     }
 
@@ -89,33 +89,33 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
     };
 
     if(verbose)
-        fprintf(vf, "[*] Checking GLX version\n");
+        fprintf(vf, "[win.c]: Checking GLX version\n");
 
     int glx_major, glx_minor;
 
     if (!glXQueryVersion(info->display, &glx_major, &glx_minor) ||
         ((glx_major == 1) && (glx_minor < 3)) || (glx_major < 1))
     {
-        fprintf(vf,"[-] Invalid GLX version. Required GLX 1.3 or higher\n");
+        fprintf(vf,"[win.c][ERROR]: Invalid GLX version. Required GLX 1.3 or higher\n");
         exit(1);
     }
 
     if(verbose)
-        fprintf(vf, "[*] Getting matching framebuffer configs\n");
+        fprintf(vf, "[win.c]: Getting matching framebuffer configs\n");
 
     int fbcount;
     GLXFBConfig* fbc = glXChooseFBConfig(info->display, DefaultScreen(info->display), visual_attribs, &fbcount);
     if (!fbc)
     {
-        fprintf(vf, "[-] Failed to retrieve a framebuffer config\n");
+        fprintf(vf, "[win.c][ERROR]: Failed to retrieve a framebuffer config\n");
         exit(1);
     }
     if(verbose)
-        fprintf(vf,"[*] Found %d matching FB configs.\n", fbcount);
+        fprintf(vf,"[win.c]: Found %d matching FB configs.\n", fbcount);
 
     // Pick the FB config/visual with the most samples per pixel
     if(verbose)
-        fprintf(vf,"[*] Getting XVisualInfos\n");
+        fprintf(vf,"[win.c]: Getting XVisualInfos\n");
     int best_fbc = -1, worst_fbc = -1, best_num_samp = -1, worst_num_samp = 999;
 
     for (size_t i = 0; i < fbcount; i++)
@@ -128,7 +128,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
             glXGetFBConfigAttrib(info->display, fbc[i], GLX_SAMPLES, &samples);
 
             if(verbose)
-                fprintf(vf,"[*] [%2lu/%2i] Fbconfig: visual ID 0x%2lx: SAMPLE_BUFFERS = %d, SAMPLES = %d\n",
+                fprintf(vf,"[win.c]: [%2lu/%2i] Fbconfig: visual ID 0x%2lx: SAMPLE_BUFFERS = %d, SAMPLES = %d\n",
                    i + 1, fbcount, vi->visualid, samp_buf, samples);
 
             if (best_fbc < 0 || (samp_buf && samples > best_num_samp))
@@ -146,13 +146,13 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
 
     // Get a visual
     if(verbose)
-        fprintf(vf,"[*] Getting XVisual from FrameBuffer Config\n");
+        fprintf(vf,"[win.c]: Getting XVisual from FrameBuffer Config\n");
     XVisualInfo* vi = glXGetVisualFromFBConfig(info->display, bestFbc);
     if(verbose)
-        fprintf(vf, "[*] Chosen visual ID = 0x%lx\n", vi->visualid);
+        fprintf(vf, "[win.c]: Chosen visual ID = 0x%lx\n", vi->visualid);
 
     if(verbose)
-        fprintf(vf,"[*] Creating colormap\n");
+        fprintf(vf,"[win.c]: Creating colormap\n");
     XSetWindowAttributes swa;
     Colormap cmap;
     swa.colormap = cmap = XCreateColormap(info->display, RootWindow(info->display, vi->screen),
@@ -165,8 +165,8 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
 
     if(verbose)
     {
-        fprintf(vf, "[*] Creating window\n");
-        fprintf(vf, "[*] WinW: %i, winH: %i, winX: %i, winY: %i, caption: \"%s\"\n",
+        fprintf(vf, "[win.c]: Creating window\n");
+        fprintf(vf, "[win.c]: WinW: %i, winH: %i, winX: %i, winY: %i, caption: \"%s\"\n",
                 winW, winH, winX, winY, winCaption);
     }
     info->win = XCreateWindow(info->display, RootWindow(info->display, vi->screen),
@@ -174,7 +174,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
                                CWBorderPixel | CWColormap | CWEventMask, &swa);
     if (!info->win)
     {
-        fprintf(vf, "[-] Failed to create window.\n");
+        fprintf(vf, "[win.c][ERROR]: Failed to create window.\n");
         exit(1);
     }
 
@@ -184,7 +184,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
     XStoreName(info->display, info->win, winCaption);
 
     if(verbose)
-        fprintf(vf,"[*] Mapping window\n");
+        fprintf(vf,"[win.c]: Mapping window\n");
     XMapWindow(info->display, info->win);
 
     // Get the default screen's GLX extension list
@@ -208,13 +208,13 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
     int (* oldHandler)(Display*, XErrorEvent*) = XSetErrorHandler(&ctxErrorHandler);
 
     if(verbose)
-        fprintf(vf,"[*] Creating GL Context\n");
+        fprintf(vf,"[win.c]: Creating GL Context\n");
 
     // Check for the GLX_ARB_create_context extension string and the function.
     // If either is not present, use GLX 1.3 context creation method.
     if (!w_isExtensionSupported(glxExts, "GLX_ARB_create_context") || !glXCreateContextAttribsARB)
     {
-        fprintf(vf, "glXCreateContextAttribsARB() not found... using old-style GLX context\n");
+        fprintf(vf, "[win.c]: glXCreateContextAttribsARB() not found... using old-style GLX context\n");
         ctx = glXCreateNewContext(info->display, bestFbc, GLX_RGBA_TYPE, 0, True);
     }
     // If it does, try to get a GL 3.0 context!
@@ -229,7 +229,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
         };
 
         if(verbose)
-            fprintf(vf,"[*] Creating context\n");
+            fprintf(vf,"[win.c]: Creating context\n");
         ctx = glXCreateContextAttribsARB(info->display, bestFbc, 0, True, context_attribs);
 
         // Sync to ensure any errors generated are processed.
@@ -237,7 +237,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
         if (!ctxErrorOccurred && ctx)
         {
             if (verbose)
-                fprintf(vf, "[*] Created GL 3.0 context\n");
+                fprintf(vf, "[win.c]: Created GL 3.0 context\n");
         }
         else
         {
@@ -252,7 +252,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
 
             ctxErrorOccurred = false;
 
-            fprintf(vf, "[*] Failed to create GL 3.0 context... using old-style GLX context\n");
+            fprintf(vf, "[win.c]: Failed to create GL 3.0 context... using old-style GLX context\n");
             ctx = glXCreateContextAttribsARB(info->display, bestFbc, 0, True, context_attribs);
         }
     }
@@ -265,7 +265,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
 
     if (ctxErrorOccurred || !ctx)
     {
-        fprintf(vf ,"[-] Failed to create an OpenGL context\n");
+        fprintf(vf ,"[win.c][ERROR]: Failed to create an OpenGL context\n");
         exit(1);
     }
 
@@ -273,16 +273,16 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
     if (!glXIsDirect(info->display, ctx))
     {
         if(verbose)
-            fprintf(vf, "[*] Indirect GLX rendering context obtained\n");
+            fprintf(vf, "[win.c]: Indirect GLX rendering context obtained\n");
     }
     else
     {
         if(verbose)
-            fprintf(vf, "[*] Direct GLX rendering context obtained\n");
+            fprintf(vf, "[win.c]: Direct GLX rendering context obtained\n");
     }
 
     if(verbose)
-        fprintf(vf,"[*] Making context current\n");
+        fprintf(vf,"[win.c]: Making context current\n");
 
     glXMakeCurrent(info->display, info->win, ctx);
 
@@ -308,8 +308,8 @@ void w_swapBuffers(winInfo_t* w)
 
 void w_printInfo()
 {
-    printf("[GL Spec]: Vendor: %s\n", (char*) glGetString(GL_VENDOR));
-    printf("[GL Spec]: Using OpenGL Version: %s\n", (char*) glGetString(GL_VERSION));
-    printf("[GL Spec]: Using OpenGL Rendered: %s\n", (char*) glGetString(GL_RENDERER));
-    printf("[GL Spec]: GLSH Version: %s\n", (char*) glGetString(GL_SHADING_LANGUAGE_VERSION));
+    printf("[win.c][GL Spec]: Vendor: %s\n", (char*) glGetString(GL_VENDOR));
+    printf("[win.c][GL Spec]: Using OpenGL Version: %s\n", (char*) glGetString(GL_VERSION));
+    printf("[win.c][GL Spec]: Using OpenGL Rendered: %s\n", (char*) glGetString(GL_RENDERER));
+    printf("[win.c][GL Spec]: GLSH Version: %s\n", (char*) glGetString(GL_SHADING_LANGUAGE_VERSION));
 }

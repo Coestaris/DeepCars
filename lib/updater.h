@@ -12,13 +12,11 @@
 #include <X11/Xlib.h>
 
 #include "graphics/win.h"
+#include "drawableObject.h"
 
 #define FPSToLock 60.0
 #define FPSDelay 1000.0 / FPSToLock
 #define FPSAvCounter 1000.0
-
-typedef void (*drawFunc_t)();
-typedef void (*eventHandler_t)(XEvent event);
 
 typedef enum _keyState {
     pressed,
@@ -29,12 +27,10 @@ typedef enum _mouseState {
     pressedasd
 } mouseState_t;
 
-
 void u_close();
-void u_startLoop(
-        winInfo_t* info,
-        drawFunc_t drawFunc,
-        eventHandler_t eventHandler);
+void u_startLoop(winInfo_t* info);
 
+void u_pushObject(drawableObject_t*object);
+uint64_t u_getFrames();
 
 #endif //DEEPCARS_UPDATER_H
