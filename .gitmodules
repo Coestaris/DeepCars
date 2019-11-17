@@ -1,6 +1,3 @@
 [submodule "oil"]
 	path = oil
 	url = https://github.com/Coestaris/oil
-[submodule "nevermind"]
-	path = nevermind
-	url = https://github.com/Coestaris/Zomboid3D.Nevermind
