@@ -107,9 +107,9 @@ void gr_draw_model_simpleColor(model_t* model, vec4 color)
                shader_simpleColored->uniformLocations[SH_SIMPLECOLORED_MODEL],
                model->model);
 
-    printMat4(proj);
-    printMat4(model->model);
-    printMat4(view);
+    //printMat4(proj);
+    //printMat4(model->model);
+    //printMat4(view);
 
     gr_draw_model(model);
 }

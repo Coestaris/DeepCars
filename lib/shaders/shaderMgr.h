@@ -2,8 +2,8 @@
 // Created by maxim on 8/31/19.
 //
 
-#ifndef ZOMBOID3D_SHADERMGR_H
-#define ZOMBOID3D_SHADERMGR_H
+#ifndef sym_SHADERMGR_H
+#define sym_SHADERMGR_H
 
 #include <assert.h>
 
@@ -30,4 +30,4 @@ void s_init(void);
 void s_free(void);
 shader_t* s_getShader(int id);
 
-#endif //ZOMBOID3D_SHADERMGR_H
+#endif //sym_SHADERMGR_H

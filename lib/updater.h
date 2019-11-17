@@ -2,8 +2,8 @@
 // Created by maxim on 8/28/19.
 //
 
-#ifndef ZOMBOID3D_UPDATER_H
-#define ZOMBOID3D_UPDATER_H
+#ifndef sym_UPDATER_H
+#define sym_UPDATER_H
 
 #include <stddef.h>
 #include <sys/time.h>
@@ -37,4 +37,4 @@ void u_startLoop(
         eventHandler_t eventHandler);
 
 
-#endif //ZOMBOID3D_UPDATER_H
+#endif //sym_UPDATER_H

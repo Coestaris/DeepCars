@@ -2,8 +2,8 @@
 // Created by maxim on 8/31/19.
 //
 
-#ifndef ZOMBOID3D_TEXTURE_H
-#define ZOMBOID3D_TEXTURE_H
+#ifndef sym_TEXTURE_H
+#define sym_TEXTURE_H
 
 #include <malloc.h>
 #include <stdio.h>
@@ -39,4 +39,4 @@ void t_load(texture_t* tex);
 
 void t_bind(texture_t* tex);
 
-#endif //ZOMBOID3D_TEXTURE_H
+#endif //sym_TEXTURE_H

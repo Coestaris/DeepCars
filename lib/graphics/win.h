@@ -2,8 +2,8 @@
 // Created by maxim on 8/26/19.
 //
 
-#ifndef ZOMBOID3D_WIN_H
-#define ZOMBOID3D_WIN_H
+#ifndef sym_WIN_H
+#define sym_WIN_H
 
 #define GL_GLEXT_PROTOTYPES
 
@@ -52,4 +52,4 @@ void w_destroy(winInfo_t* w);
 void w_swapBuffers(winInfo_t* w);
 void w_printInfo();
 
-#endif //ZOMBOID3D_WIN_H
+#endif //sym_WIN_H

@@ -2,8 +2,8 @@
 // Created by maxim on 9/11/19.
 //
 
-#ifndef ZOMBOID3D_MODEL_H
-#define ZOMBOID3D_MODEL_H
+#ifndef sym_MODEL_H
+#define sym_MODEL_H
 
 #define GL_GLEXT_PROTOTYPES
 
@@ -127,4 +127,4 @@ void m_pushGroupName(model_t* model, char* groupName);
 void m_pushMtlLib(model_t* model, char* mtlLib);
 void m_pushUsedMaterial(model_t* model, material_t* usedMaterial);
 
-#endif //ZOMBOID3D_MODEL_H
+#endif //sym_MODEL_H

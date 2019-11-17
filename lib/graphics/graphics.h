@@ -2,8 +2,8 @@
 // Created by maxim on 8/26/19.
 //
 
-#ifndef ZOMBOID3D_GRAPHICS_H
-#define ZOMBOID3D_GRAPHICS_H
+#ifndef sym_GRAPHICS_H
+#define sym_GRAPHICS_H
 
 #define GL_GLEXT_PROTOTYPES
 
@@ -37,4 +37,4 @@ extern vec4 COLOR_NAVY;
 extern vec4 COLOR_FUCHSIA;
 extern vec4 COLOR_PURPLE;
 
-#endif //ZOMBOID3D_GRAPHICS_H
+#endif //sym_GRAPHICS_H

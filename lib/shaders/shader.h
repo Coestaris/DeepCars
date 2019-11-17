@@ -2,8 +2,8 @@
 // Created by maxim on 8/31/19.
 //
 
-#ifndef ZOMBOID3D_SHADER_H
-#define ZOMBOID3D_SHADER_H
+#ifndef sym_SHADER_H
+#define sym_SHADER_H
 
 #define GL_GLEXT_PROTOTYPES
 
@@ -50,4 +50,4 @@ int sh_load(shader_t* sh);
 void sh_use(shader_t* sh);
 void sh_info(shader_t* sh);
 
-#endif //ZOMBOID3D_SHADER_H
+#endif //sym_SHADER_H
