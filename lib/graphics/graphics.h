@@ -2,8 +2,8 @@
 // Created by maxim on 8/26/19.
 //
 
-#ifndef sym_GRAPHICS_H
-#define sym_GRAPHICS_H
+#ifndef DEEPCARS_GRAPHICS_H
+#define DEEPCARS_GRAPHICS_H
 
 #define GL_GLEXT_PROTOTYPES
 
@@ -37,4 +37,4 @@ extern vec4 COLOR_NAVY;
 extern vec4 COLOR_FUCHSIA;
 extern vec4 COLOR_PURPLE;
 
-#endif //sym_GRAPHICS_H
+#endif //DEEPCARS_GRAPHICS_H

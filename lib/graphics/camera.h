@@ -2,8 +2,8 @@
 // Created by maxim on 9/11/19.
 //
 
-#ifndef sym_CAMERA_H
-#define sym_CAMERA_H
+#ifndef DEEPCARS_CAMERA_H
+#define DEEPCARS_CAMERA_H
 
 #include <stdbool.h>
 #include "gmath.h"
@@ -28,4 +28,4 @@ void c_free(camera_t* camera);
 void c_toMat(mat4 m, camera_t* camera);
 void c_rotate(camera_t* camera, float pitch, float yaw);
 
-#endif //sym_CAMERA_H
+#endif //DEEPCARS_CAMERA_H

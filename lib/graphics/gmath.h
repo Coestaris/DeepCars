@@ -2,8 +2,8 @@
 // Created by maxim on 9/1/19.
 //
 
-#ifndef sym_GMATH_H
-#define sym_GMATH_H
+#ifndef DEEPCARS_GMATH_H
+#define DEEPCARS_GMATH_H
 
 #include <malloc.h>
 #include <string.h>
@@ -62,4 +62,4 @@ void mat4_addm(mat4 m, mat4 v);
 void mat4_mulv(mat4 m, float v);
 void mat4_mulm(mat4 m, mat4 v);
 
-#endif //sym_GMATH_H
+#endif //DEEPCARS_GMATH_H

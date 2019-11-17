@@ -2,8 +2,8 @@
 // Created by maxim on 8/31/19.
 //
 
-#ifndef sym_TEXTURE_H
-#define sym_TEXTURE_H
+#ifndef DEEPCARS_TEXTURE_H
+#define DEEPCARS_TEXTURE_H
 
 #include <malloc.h>
 #include <stdio.h>
@@ -39,4 +39,4 @@ void t_load(texture_t* tex);
 
 void t_bind(texture_t* tex);
 
-#endif //sym_TEXTURE_H
+#endif //DEEPCARS_TEXTURE_H

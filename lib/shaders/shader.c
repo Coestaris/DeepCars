@@ -7,6 +7,8 @@
 
 shader_t* sh_create(char* vertexPath, char* fragmentPath)
 {
+
+
     shader_t* sh = malloc(sizeof(shader_t));
     sh->fragmentPath = fragmentPath;
     sh->vertexPath = vertexPath;

@@ -26,7 +26,7 @@ void s_push(shader_t* shader, int id)
 
 void s_pushBuiltInShaders()
 {
-    shader_t* simpleColored = sh_create("../lib/shaders/shaders/simpleColored.fsh",
+    shader_t* simpleColored = sh_create("../lib/shaders/shaders/simpleColored.vsh",
                                         "../lib/shaders/shaders/simpleColored.fsh");
     sh_info(simpleColored);
 
