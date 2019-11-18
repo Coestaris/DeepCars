@@ -19,21 +19,9 @@
 #include "../graphics/gmath.h"
 #include "../graphics/material.h"
 
-struct _model;
-
-#define pushModelProp(model, prop, type, item) {                                                \
-        if(model->modelLen->prop ## Count > model->modelLen->prop ##MaxCount - 1)               \
-        {                                                                                       \
-            size_t newLen = (int)((float)model->modelLen->prop ##MaxCount * INCREASE_LEN);      \
-            model->prop = realloc(model-> prop, sizeof(type) * newLen);                         \
-            model->modelLen->prop ##MaxCount = newLen;                                          \
-        }                                                                                       \
-        model->prop[model->modelLen->prop ##Count++] = item;                                    \
-    }
-
-#define START_LEN_COUNT 10
-#define INCREASE_LEN 1.5
 #define MAX_FACE_LEN 5
+
+struct _model;
 
 typedef struct _modelFace {
     struct _model* parent;
@@ -87,44 +75,13 @@ typedef struct _model {
 
     GLuint VBO;
     GLuint VAO;
-    size_t bufferLen;
-
-    mat4 model;
-    float* buffer;
 
 } model_t;
-
-typedef enum {
-    od_vertex,
-    od_vertexNormal,
-    od_vertexTex,
-    od_face,
-    od_group,
-    od_object,
-    od_mtllib,
-    od_usemtl,
-    od_comment
-
-} objDescriptorType_t;
-
-typedef struct {
-    const char* string;
-    objDescriptorType_t type;
-
-} objDescriptor_t;
 
 model_t* m_create();
 model_t* m_load(const char* filename);
 void m_free(model_t* model);
 void m_info(model_t* model);
 void m_build(model_t* model);
-
-void m_pushVertex(model_t* model, vec4 vec);
-void m_pushNormal(model_t* model, vec4 vec);
-void m_pushTexCoord(model_t* model, vec4 vec);
-void m_pushFace(model_t* model, modelFace_t* face);
-void m_pushGroupName(model_t* model, char* groupName);
-void m_pushMtlLib(model_t* model, char* mtlLib);
-void m_pushUsedMaterial(model_t* model, material_t* usedMaterial);
 
 #endif //DEEPCARS_MODEL_H

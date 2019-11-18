@@ -8,8 +8,9 @@
 #include "scene.h"
 #include "updater.h"
 
-void scm_init();
+void scm_init(void);
 void scm_pushScene(scene_t* scene);
 void scm_loadScene(uint32_t id, bool free);
+void scm_free(void);
 
 #endif //DEEPCARS_SCENEMANAGER_H

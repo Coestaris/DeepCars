@@ -5,7 +5,6 @@
 #include "win.h"
 
 typedef GLXContext (* glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
-static bool ctxErrorOccurred = false;
 
 static bool w_isExtensionSupported(const char* extList, const char* extension)
 {
@@ -34,8 +33,11 @@ static bool w_isExtensionSupported(const char* extList, const char* extension)
 
 static int ctxErrorHandler(Display* dpy, XErrorEvent* ev)
 {
-    ctxErrorOccurred = true;
-    return 0;
+    printf("[win.c][ERROR]: == CONTEXT ERROR ==");
+    printf("[win.c][ERROR]: Type: %i, Error code: %i", ev->type, ev->error_code);
+    printf("[win.c][ERROR]: Minor code: %i, Request code: %i,",  ev->minor_code, ev->request_code);
+    printf("[win.c][ERROR]: Resource ID: %lu, Serial number: %lu",   ev->resourceid, ev->serial);
+    exit(1);
 }
 
 int glx_major_version = GLX_DEFAULT_MAJOR_VERSION;
@@ -50,7 +52,7 @@ void w_setGLXContextVersion(int major, int minor, int flags)
 }
 
 winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
-        char* winCaption, bool verbose, FILE* vf)
+        const char* winCaption, bool verbose, FILE* vf)
 {
     winInfo_t* info = malloc(sizeof(winInfo_t));
 
@@ -204,7 +206,6 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
     // Note this error handler is global.  All display connections in all threads
     // of a process use the same error handler, so be sure to guard against other
     // threads issuing X commands while this code is running.
-    ctxErrorOccurred = false;
     int (* oldHandler)(Display*, XErrorEvent*) = XSetErrorHandler(&ctxErrorHandler);
 
     if(verbose)
@@ -234,7 +235,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
 
         // Sync to ensure any errors generated are processed.
         XSync(info->display, False);
-        if (!ctxErrorOccurred && ctx)
+        if (ctx)
         {
             if (verbose)
                 fprintf(vf, "[win.c]: Created GL 3.0 context\n");
@@ -250,8 +251,6 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
             // GLX_CONTEXT_MINOR_VERSION_ARB = 0
             context_attribs[3] = 0;
 
-            ctxErrorOccurred = false;
-
             fprintf(vf, "[win.c]: Failed to create GL 3.0 context... using old-style GLX context\n");
             ctx = glXCreateContextAttribsARB(info->display, bestFbc, 0, True, context_attribs);
         }
@@ -263,7 +262,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
     // Restore the original error handler
     XSetErrorHandler(oldHandler);
 
-    if (ctxErrorOccurred || !ctx)
+    if (!ctx)
     {
         fprintf(vf ,"[win.c][ERROR]: Failed to create an OpenGL context\n");
         exit(1);
@@ -284,6 +283,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
     if(verbose)
         fprintf(vf,"[win.c]: Making context current\n");
 
+    info->context = ctx;
     glXMakeCurrent(info->display, info->win, ctx);
 
     glEnable(GL_DEPTH_TEST);
@@ -298,6 +298,8 @@ void w_destroy(winInfo_t* w)
     XDestroyWindow(w->display, w->win);
     XFreeColormap(w->display, w->colorMap);
     XCloseDisplay(w->display);
+
+    free(w);
 }
 
 void w_swapBuffers(winInfo_t* w)

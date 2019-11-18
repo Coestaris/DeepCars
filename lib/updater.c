@@ -4,6 +4,7 @@
 
 #include "updater.h"
 #include "graphics/graphics.h"
+#include "shaders/shader.h"
 
 #define OBJECT_COUNT_START 50
 #define OBJECT_COUNT_INCREASE 1.5
@@ -42,6 +43,16 @@ void u_close(void)
 void drawFunc()
 {
     gr_fill(COLOR_GRAY);
+
+    for(size_t i = 0; i < objects->count; i++)
+    {
+        drawableObject_t* object = (drawableObject_t*)objects->collection[i];
+        if(object->model)
+        {
+            gr_draw_model_simpleColor(object->model, COLOR_AQUA, object->modelMat);
+        }
+    }
+
     w_swapBuffers(defaultWin);
 }
 
@@ -105,20 +116,15 @@ void u_clearObjects(bool free)
 {
     if(free)
     {
-        listFreeElements(objects);
-        listFreeElements(mouseListeners);
-        listFreeElements(keyListeners);
-        listFreeElements(updateListeners);
-        listFreeElements(mouseMoveListeners);
+        for(size_t i = 0; i < objects->count; i++)
+            o_free((drawableObject_t*) objects->collection[i]);
     }
-    else
-    {
-        objects->count = 0;
-        mouseListeners->count = 0;
-        keyListeners->count = 0;
-        updateListeners->count = 0;
-        mouseMoveListeners->count = 0;
-    }
+
+    objects->count = 0;
+    mouseListeners->count = 0;
+    keyListeners->count = 0;
+    updateListeners->count = 0;
+    mouseMoveListeners->count = 0;
 }
 
 void u_pushObject(drawableObject_t* object)
@@ -162,7 +168,7 @@ void measureTime(void)
         counter = 0;
         elapsed = 0;
 
-        printf("[updater.c]: FPS: %lf\n", fps);
+        printf("[updater.c]: FPS: %lf. Objects: %li\n", fps, objects->count);
     }
 }
 
@@ -200,5 +206,14 @@ void u_startLoop(winInfo_t* win)
         XNextEvent(win->display, &event);
         eventHandler(event);
     }
+
 }
 
+void u_free()
+{
+    listFree(objects);
+    listFree(keyListeners);
+    listFree(mouseListeners);
+    listFree(mouseMoveListeners);
+    listFree(updateListeners);
+}

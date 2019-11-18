@@ -9,6 +9,8 @@ camera_t* c_create(vec4 position, vec4 up)
     camera_t* camera = malloc(sizeof(camera_t));
     camera->position = position;
     camera->up = up;
+    camera->direction = NULL;
+    camera->target = NULL;
 
     camera->useTarget = false;
 
@@ -22,9 +24,12 @@ camera_t* c_create(vec4 position, vec4 up)
 
 void c_free(camera_t* camera)
 {
-    freeVec4(camera->position);
-    freeVec4(camera->target);
-    freeVec4(camera->direction);
+    if(camera->position)
+        freeVec4(camera->position);
+    if(camera->target)
+        freeVec4(camera->target);
+    if(camera->direction)
+        freeVec4(camera->direction);
     freeVec4(camera->up);
 
     freeVec4(camera->_cameraRight);

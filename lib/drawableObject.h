@@ -30,5 +30,6 @@ typedef struct _drawableObject {
 
 drawableObject_t* o_clone(drawableObject_t* object);
 drawableObject_t* o_create();
+void o_free(drawableObject_t* object);
 
 #endif //DEEPCARS_DRAWABLEOBJECT_H

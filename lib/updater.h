@@ -18,19 +18,11 @@
 #define FPSDelay 1000.0 / FPSToLock
 #define FPSAvCounter 1000.0
 
-typedef enum _keyState {
-    pressed,
-    released
-} keyState_t;
-
-typedef enum _mouseState {
-    pressedasd
-} mouseState_t;
-
 void u_init(void);
 void u_close(void);
 void u_startLoop(winInfo_t* info);
 void u_clearObjects(bool free);
+void u_free();
 void u_pushObject(drawableObject_t*object);
 uint64_t u_getFrames(void);
 

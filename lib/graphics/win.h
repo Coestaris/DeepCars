@@ -30,12 +30,10 @@ typedef struct _winInfo {
     uint16_t w;
     uint16_t h;
 
-    char* caption;
+    const char* caption;
 
     uint16_t lockedFps;
-
     double lastFrame;
-
     mat4 projection;
 
 } winInfo_t;
@@ -46,7 +44,7 @@ typedef struct _winInfo {
 #define DEFAULT_LOCKED_FPS        60
 
 winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
-                    char* winCaption, bool verbose, FILE* vf);
+                    const char* winCaption, bool verbose, FILE* vf);
 void w_setGLXContextVersion(int major, int minor, int flags);
 void w_destroy(winInfo_t* w);
 void w_swapBuffers(winInfo_t* w);

@@ -10,6 +10,7 @@
 #include "structs.h"
 #include "graphics/camera.h"
 #include "graphics/light.h"
+#include "drawableObject.h"
 
 typedef struct _scene {
     uint32_t id;

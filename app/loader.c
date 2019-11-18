@@ -11,17 +11,36 @@
 
 #include "objects/obj_cube.h"
 #include "winDefaults.h"
+#include "objects/obj_camera_control.h"
 
 winInfo_t* win;
+list_t* models;
 mat4 view;
-mat4 model;
+
+model_t* getModel(uint32_t id)
+{
+    return models->collection[id];
+}
+
+model_t* loadAndBuildModel(const char* filename)
+{
+    model_t* model = m_load(filename);
+    m_build(model);
+    return model;
+}
 
 void app_loadResources(void)
 {
+    //models
+    models = createList(10);
+    listPush(models, loadAndBuildModel("cube.obj"));
+
+    //scenes
     scene_t* menu = sc_create(SCENEID_MENU);
     listPush(menu->startupObjects, create_cube(vec3f(0, 0, 0), 5, NULL));
     listPush(menu->startupObjects, create_cube(vec3f(-5, 0, 0), 6, NULL));
     listPush(menu->startupObjects, create_cube(vec3f(0, 5, 0), 7, NULL));
+    listPush(menu->startupObjects, create_cameraControl());
 
     scm_pushScene(menu);
 }
@@ -44,8 +63,6 @@ void app_initGraphics(void)
     perspectiveFovMat(win->projection, angleOfView, imageAspectRatio, near, far);
 
     view = cmat4();
-    model = cmat4();
-
     if(VERBOSE)
         w_printInfo();
 
@@ -61,8 +78,19 @@ void app_run(void)
     u_startLoop(win);
 }
 
-void finalize()
+void app_fin()
 {
     s_free();
+
+    u_clearObjects(true);
+    u_free();
+
+    for(size_t i = 0; i < models->count; i++)
+        m_free((model_t*)models->collection[i]);
+    listFree(models);
+
+    scm_free();
+    gr_free();
+
     w_destroy(win);
 }

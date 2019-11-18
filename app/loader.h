@@ -9,4 +9,6 @@ void app_initGraphics(void);
 void app_loadResources(void);
 void app_run(void);
 
+void app_fin(void);
+
 #endif //DEEPCARS_LOADER_H

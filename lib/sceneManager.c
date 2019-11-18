@@ -24,3 +24,10 @@ void scm_loadScene(uint32_t id, bool free)
     for(size_t i = 0; i < scene->startupObjects->count; i++)
         u_pushObject(o_clone((drawableObject_t*)scene->startupObjects->collection[i]));
 }
+
+void scm_free()
+{
+    for(size_t i = 0; i < scenes->count; i++)
+        sc_free((scene_t*)scenes->collection[i]);
+    listFree(scenes);
+}

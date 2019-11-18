@@ -5,6 +5,48 @@
 #include <errno.h>
 #include "model.h"
 
+
+#define pushModelProp(model, prop, type, item) {                                                \
+        if(model->modelLen->prop ## Count > model->modelLen->prop ##MaxCount - 1)               \
+        {                                                                                       \
+            size_t newLen = (int)((float)model->modelLen->prop ##MaxCount * INCREASE_LEN);      \
+            model->prop = realloc(model-> prop, sizeof(type) * newLen);                         \
+            model->modelLen->prop ##MaxCount = newLen;                                          \
+        }                                                                                       \
+        model->prop[model->modelLen->prop ##Count++] = item;                                    \
+    }
+
+#define START_LEN_COUNT 10
+#define INCREASE_LEN 1.5
+#define MAX_WORD_LEN 256
+
+typedef enum {
+    od_vertex,
+    od_vertexNormal,
+    od_vertexTex,
+    od_face,
+    od_group,
+    od_object,
+    od_mtllib,
+    od_usemtl,
+    od_comment
+
+} objDescriptorType_t;
+
+typedef struct {
+    const char* string;
+    objDescriptorType_t type;
+
+} objDescriptor_t;
+
+void m_pushVertex(model_t* model, vec4 vec);
+void m_pushNormal(model_t* model, vec4 vec);
+void m_pushTexCoord(model_t* model, vec4 vec);
+void m_pushFace(model_t* model, modelFace_t* face);
+void m_pushGroupName(model_t* model, char* groupName);
+void m_pushMtlLib(model_t* model, char* mtlLib);
+void m_pushUsedMaterial(model_t* model, material_t* usedMaterial);
+
 objDescriptor_t allowedDescriptors[] =
 {
     { "v",      od_vertex },
@@ -18,9 +60,7 @@ objDescriptor_t allowedDescriptors[] =
     { "#",      od_comment }
 };
 
-#define MAX_WORD_LEN 256
 modelFace_t* face;
-
 char word[MAX_WORD_LEN];
 const size_t descriptorsCount = sizeof(allowedDescriptors) / sizeof(allowedDescriptors[0]);
 vec4 buffVec;
@@ -79,7 +119,7 @@ double parseDouble(size_t lineIndex)
         return d;
     else
     {
-        printf("Unable to parse %s. Expected float point value at line %li", word, lineIndex);
+        printf("[model.c][ERROR]: Unable to parse %s. Expected float point value at line %li\n", word, lineIndex);
         exit(EXIT_FAILURE);
     }
 }
@@ -104,7 +144,7 @@ void proceedLine(model_t* model, const char* string, size_t startIndex, size_t e
 
             if (descriptor == NULL)
             {
-                printf("%s is unknown line descriptor at line %li", word, lineIndex);
+                printf("[model.c][ERROR]: %s is unknown line descriptor at line %li\n", word, lineIndex);
                 exit(EXIT_FAILURE);
             }
 
@@ -117,7 +157,7 @@ void proceedLine(model_t* model, const char* string, size_t startIndex, size_t e
             if(descriptor->type == od_vertex)
             {
                 if(wordCount > 4) {
-                    printf("Too many arguments for vertex descriptor at line %li", lineIndex);
+                    printf("[model.c][ERROR]: Too many arguments for vertex descriptor at line %li\n", lineIndex);
                     exit(EXIT_FAILURE);
                 }
                 buffVec[wordCount - 1] = (float)parseDouble(lineIndex);
@@ -125,7 +165,7 @@ void proceedLine(model_t* model, const char* string, size_t startIndex, size_t e
             if(descriptor->type == od_vertexNormal)
             {
                 if(wordCount > 3) {
-                    printf("Too many arguments for normal descriptor at line %li", lineIndex);
+                    printf("[model.c][ERROR]: Too many arguments for normal descriptor at line %li\n", lineIndex);
                     exit(EXIT_FAILURE);
                 }
                 buffVec[wordCount - 1] = (float)parseDouble(lineIndex);
@@ -239,9 +279,6 @@ model_t* m_create()
     model->objectName = NULL;
     model->filename = NULL;
 
-    model->model = cmat4();
-    identityMat(model->model);
-
     return model;
 }
 
@@ -259,7 +296,7 @@ model_t* m_load(const char* filename)
     FILE* f = fopen(filename, "r");
     if(!f)
     {
-        printf("Unable to open file \"%s\"", filename);
+        printf("[model.c][ERROR]: Unable to open file \"%s\"", filename);
         return NULL;
     }
 
@@ -279,12 +316,54 @@ model_t* m_load(const char* filename)
 
     free(data);
     fclose(f);
+
+    printf("[model.c]: Loaded model %s. Vertices: %li, Faces: %li\n",
+            filename, model->modelLen->verticesCount, model->modelLen->facesCount);
+
     return model;
 }
 
 void m_free(model_t* model)
 {
+    for(size_t i = 0; i < model->modelLen->verticesCount; i++)
+        freeVec4(model->vertices[i]);
+    free(model->vertices);
 
+    for(size_t i = 0; i < model->modelLen->normalsCount; i++)
+        freeVec4(model->normals[i]);
+    free(model->normals);
+
+    for(size_t i = 0; i < model->modelLen->texCoordsCount; i++)
+        freeVec4(model->texCoords[i]);
+    free(model->texCoords);
+
+    for(size_t i = 0; i < model->modelLen->facesCount; i++)
+        free(model->faces[i]);
+    free(model->faces);
+
+    for(size_t i = 0; i < model->modelLen->groupNamesCount; i++)
+        free(model->groupNames[i]);
+    free(model->groupNames);
+
+    for(size_t i = 0; i < model->modelLen->mtlLibsCount; i++)
+        free(model->mtlLibs[i]);
+    free(model->mtlLibs);
+
+    for(size_t i = 0; i < model->modelLen->usedMaterialsCount; i++)
+        free(model->usedMaterials[i]);
+    free(model->usedMaterials);
+
+    free(model->objectName);
+    free(model->modelLen);
+
+    if(model->VBO != 0)
+        glDeleteBuffers(1, &(model->VBO));
+
+    if(model->VAO != 0)
+        glDeleteBuffers(1, &(model->VAO));
+
+    printf("[model.c]: Freed model %s", model->filename);
+    free(model);
 }
 
 inline void m_pushVertex(model_t* model, vec4 vec)
@@ -331,7 +410,7 @@ inline void m_pushUsedMaterial(model_t* model, material_t* usedMaterial)
 
 void m_info(model_t* model)
 {
-    printf("Vertices (%li): \n", model->modelLen->verticesCount);
+    printf("[model.c]: Vertices (%li): \n", model->modelLen->verticesCount);
     for(size_t i = 0; i < model->modelLen->verticesCount; i++)
         printf("%li: %f %f %f [%f]\n",
                 i, model->vertices[i][0],
@@ -339,14 +418,14 @@ void m_info(model_t* model)
                    model->vertices[i][2],
                    model->vertices[i][3]);
 
-    printf("\nNormals (%li): \n", model->modelLen->normalsCount);
+    printf("\n[model.c]: Normals (%li): \n", model->modelLen->normalsCount);
     for(size_t i = 0; i < model->modelLen->normalsCount; i++)
         printf("%li: %f %f %f\n",
                i, model->normals[i][0],
                   model->normals[i][1],
                   model->normals[i][2]);
 
-    printf("\nFaces (%li): \n", model->modelLen->facesCount);
+    printf("\n[model.c]: Faces (%li): \n", model->modelLen->facesCount);
     for(size_t i = 0; i < model->modelLen->facesCount; i++)
     {
         printf("%li. ", i);
@@ -452,8 +531,8 @@ void m_build(model_t* model)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    for(size_t i = 0; i < size; i++)
-        printf("%.2f%c", buffer[i], i && !((i + 1) % 6) ? '\n' : ' ');
+    /*for(size_t i = 0; i < size; i++)
+        printf("%.2f%c", buffer[i], i && !((i + 1) % 6) ? '\n' : ' ');*/
 
     free(buffer);
 }

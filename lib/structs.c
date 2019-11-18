@@ -18,6 +18,12 @@ inline vec3f_t vec3f(double x, double y, double z)
 
 void listPush(list_t* list, void* object)
 {
+    if(list->count > list->maxSize - 1)
+    {
+        size_t newLen = (int)((float)list->maxSize * 1.5f);
+        list->collection = realloc(list->collection, sizeof(void*) * newLen);
+        list->maxSize = newLen;
+    }
     list->collection[list->count++] = object;
 }
 
@@ -30,7 +36,8 @@ void listFreeElements(list_t* list)
 
 void listFree(list_t* list)
 {
-    listFreeElements(list);
+    //listFreeElements(list);
+    free(list->collection);
     free(list);
 }
 

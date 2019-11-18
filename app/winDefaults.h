@@ -12,4 +12,13 @@
 
 #define SCENEID_MENU 0
 
+#define MODELID_CUBE 0
+
+extern winInfo_t* win;
+extern list_t* models;
+extern mat4 view;
+
+model_t* getModel(uint32_t id);
+model_t* getMaterial(uint32_t id);
+
 #endif //DEEPCARS_WINDEFAULTS_H

@@ -75,6 +75,9 @@ void gr_free(void)
     freeVec4(COLOR_NAVY);
     freeVec4(COLOR_FUCHSIA);
     freeVec4(COLOR_PURPLE);
+
+    free(proj);
+    free(view);
 }
 
 void gr_draw_model(model_t* model)
@@ -88,7 +91,7 @@ void gr_draw_model(model_t* model)
     glBindVertexArray(0);
 }
 
-void gr_draw_model_simpleColor(model_t* model, vec4 color)
+void gr_draw_model_simpleColor(model_t* model, vec4 color, mat4 modelMat)
 {
     sh_use(shader_simpleColored);
     sh_setVec3v(shader_simpleColored,
@@ -105,7 +108,7 @@ void gr_draw_model_simpleColor(model_t* model, vec4 color)
 
     sh_setMat4(shader_simpleColored,
                shader_simpleColored->uniformLocations[SH_SIMPLECOLORED_MODEL],
-               model->model);
+               modelMat);
 
     //printMat4(proj);
     //printMat4(model->model);

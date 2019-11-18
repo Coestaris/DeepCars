@@ -22,7 +22,10 @@ shader_t* sh_create(char* vertexPath, char* fragmentPath)
 
 void sh_free(shader_t* sh)
 {
+    printf("[shader.c]: Freed shader. vertex path: %s, fragment path: %s\n", sh->vertexPath, sh->fragmentPath);
     glDeleteProgram(sh->progID);
+    if(sh->uniformLocations)
+        free(sh->uniformLocations);
     free(sh);
 }
 

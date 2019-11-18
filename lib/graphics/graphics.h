@@ -18,7 +18,7 @@ void gr_init(mat4 proj, mat4 view);
 void gr_free(void);
 
 void gr_draw_model(model_t* model);
-void gr_draw_model_simpleColor(model_t* model, vec4 color);
+void gr_draw_model_simpleColor(model_t* model, vec4 color, mat4 modelMat);
 
 extern vec4 COLOR_WHITE;
 extern vec4 COLOR_SILVER;

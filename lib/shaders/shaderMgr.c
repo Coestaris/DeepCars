@@ -4,7 +4,6 @@
 
 #include "shaderMgr.h"
 
-
 shmNode_t* nodes[SHM_MAX_SHADERS];
 size_t nodeCount;
 
@@ -62,7 +61,7 @@ void s_free(void)
     for (size_t i = 0; i < nodeCount; i++)
     {
         sh_free(nodes[i]->shader);
-        nodes[i] = NULL;
+        free(nodes[i]);
     }
     nodeCount = 0;
 }
