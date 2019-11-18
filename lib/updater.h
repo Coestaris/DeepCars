@@ -27,10 +27,11 @@ typedef enum _mouseState {
     pressedasd
 } mouseState_t;
 
-void u_close();
+void u_init(void);
+void u_close(void);
 void u_startLoop(winInfo_t* info);
-
+void u_clearObjects(bool free);
 void u_pushObject(drawableObject_t*object);
-uint64_t u_getFrames();
+uint64_t u_getFrames(void);
 
 #endif //DEEPCARS_UPDATER_H

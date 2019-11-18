@@ -20,29 +20,11 @@ uint32_t mouseX;
 uint32_t mouseY;
 winInfo_t* defaultWin;
 
-struct list {
-    size_t count;
-    size_t maxSize;
-
-    drawableObject_t** collection;
-};
-
-struct list* objects;
-struct list* keyListeners;
-struct list* mouseListeners;
-struct list* mouseMoveListeners;
-struct list* updateListeners;
-
-void listPush(struct list* list, drawableObject_t* drawableObject)
-{
-    list->collection[list->count++] = drawableObject;
-}
-
-void listRemove(struct list* list, drawableObject_t* drawableObject)
-{
-    //todo
-}
-
+list_t* objects;
+list_t* keyListeners;
+list_t* mouseListeners;
+list_t* mouseMoveListeners;
+list_t* updateListeners;
 
 double getMillis(void)
 {
@@ -71,7 +53,7 @@ void eventHandler(XEvent event)
         {
             keysState[event.xkey.keycode] = 1;
             for(size_t i = 0; i < keyListeners->count; i++)
-                keyListeners->collection[i]->keyEventFunc(
+                ((drawableObject_t*)keyListeners->collection[i])->keyEventFunc(
                         keyListeners->collection[i],
                         event.xkey.keycode,
                         event.xkey.state);
@@ -80,7 +62,7 @@ void eventHandler(XEvent event)
         case KeyRelease:
             keysState[event.xkey.keycode] = 0;
             for(size_t i = 0; i < keyListeners->count; i++)
-                keyListeners->collection[i]->keyEventFunc(
+                ((drawableObject_t*)keyListeners->collection[i])->keyEventFunc(
                         keyListeners->collection[i],
                         event.xkey.keycode,
                         event.xkey.state);
@@ -88,7 +70,7 @@ void eventHandler(XEvent event)
         case ButtonPress:
             mouseState[event.xbutton.button] = 1;
             for(size_t i = 0; i < mouseListeners->count; i++)
-                mouseListeners->collection[i]->mouseEventFunc(
+                ((drawableObject_t*)mouseListeners->collection[i])->mouseEventFunc(
                         mouseListeners->collection[i],
                         event.xbutton.x,
                         event.xbutton.y,
@@ -98,7 +80,7 @@ void eventHandler(XEvent event)
         case ButtonRelease:
             mouseState[event.xbutton.button] = 0;
             for(size_t i = 0; i < mouseListeners->count; i++)
-                mouseListeners->collection[i]->mouseEventFunc(
+                ((drawableObject_t*)mouseListeners->collection[i])->mouseEventFunc(
                         mouseListeners->collection[i],
                         event.xbutton.x,
                         event.xbutton.y,
@@ -109,13 +91,33 @@ void eventHandler(XEvent event)
             mouseX = event.xbutton.x;
             mouseY = event.xbutton.y;
             for(size_t i = 0; i < mouseMoveListeners->count; i++)
-                mouseMoveListeners->collection[i]->mouseMoveEventFunc(
+                ((drawableObject_t*)mouseMoveListeners->collection[i])->mouseMoveEventFunc(
                         mouseMoveListeners->collection[i],
                         event.xbutton.x,
                         event.xbutton.y);
             break;
         case Expose:
             break;
+    }
+}
+
+void u_clearObjects(bool free)
+{
+    if(free)
+    {
+        listFreeElements(objects);
+        listFreeElements(mouseListeners);
+        listFreeElements(keyListeners);
+        listFreeElements(updateListeners);
+        listFreeElements(mouseMoveListeners);
+    }
+    else
+    {
+        objects->count = 0;
+        mouseListeners->count = 0;
+        keyListeners->count = 0;
+        updateListeners->count = 0;
+        mouseMoveListeners->count = 0;
     }
 }
 
@@ -126,8 +128,8 @@ void u_pushObject(drawableObject_t* object)
         listPush(mouseListeners, object);
     if(object->keyEventFunc)
         listPush(keyListeners, object);
-    if(object->keyEventFunc)
-        listPush(keyListeners, object);
+    if(object->updateFunc)
+        listPush(updateListeners, object);
     if(object->mouseMoveEventFunc)
         listPush(mouseMoveListeners, object);
 }
@@ -164,29 +166,24 @@ void measureTime(void)
     }
 }
 
+void u_init(void)
+{
+    objects = createList(OBJECT_COUNT_START);
+    keyListeners = createList(OBJECT_COUNT_START);
+    mouseListeners = createList(OBJECT_COUNT_START);
+    mouseMoveListeners = createList(OBJECT_COUNT_START);
+    updateListeners = createList(OBJECT_COUNT_START);
+}
+
 void u_startLoop(winInfo_t* win)
 {
-    objects = malloc(sizeof(struct list));
-    objects->count = 0;
-    objects->maxSize = OBJECT_COUNT_START;
-    keyListeners = malloc(sizeof(struct list));
-    keyListeners->count = 0;
-    keyListeners->maxSize = OBJECT_COUNT_START;
-    mouseListeners = malloc(sizeof(struct list));
-    mouseListeners->count = 0;
-    mouseListeners->maxSize = OBJECT_COUNT_START;
-    mouseMoveListeners = malloc(sizeof(struct list));
-    mouseMoveListeners->count = 0;
-    mouseMoveListeners->maxSize = OBJECT_COUNT_START;
-    updateListeners = malloc(sizeof(struct list));
-    updateListeners->count = 0;
-    updateListeners->maxSize = OBJECT_COUNT_START;
     XEvent event;
-
     XSelectInput(win->display, win->win,
                  KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
                  PointerMotionMask | ButtonMotionMask | ExposureMask | VisibilityChangeMask |
                  ResizeRedirectMask);
+
+    defaultWin = win;
     while (1)
     {
         if(closed) break;
@@ -194,7 +191,7 @@ void u_startLoop(winInfo_t* win)
         if(XPending(win->display) == 0)
         {
             for(size_t i = 0; i < updateListeners->count; i++)
-                updateListeners->collection[i]->updateFunc(updateListeners->collection[i]);
+                ((drawableObject_t*)updateListeners->collection[i])->updateFunc(updateListeners->collection[i]);
 
             measureTime();
             continue;

@@ -7,7 +7,9 @@
 #include "../lib/graphics/graphics.h"
 #include "../lib/updater.h"
 #include "../lib/shaders/shaderMgr.h"
+#include "../lib/sceneManager.h"
 
+#include "objects/obj_cube.h"
 #include "winDefaults.h"
 
 winInfo_t* win;
@@ -16,7 +18,12 @@ mat4 model;
 
 void app_loadResources(void)
 {
+    scene_t* menu = sc_create(SCENEID_MENU);
+    listPush(menu->startupObjects, create_cube(vec3f(0, 0, 0), 5, NULL));
+    listPush(menu->startupObjects, create_cube(vec3f(-5, 0, 0), 6, NULL));
+    listPush(menu->startupObjects, create_cube(vec3f(0, 5, 0), 7, NULL));
 
+    scm_pushScene(menu);
 }
 
 void app_initGraphics(void)
@@ -42,13 +49,16 @@ void app_initGraphics(void)
     if(VERBOSE)
         w_printInfo();
 
+    u_init();
+    scm_init();
     s_init();
     gr_init(win->projection, view);
 }
 
 void app_run(void)
 {
-    u_startLoop(win, NULL, NULL);
+    scm_loadScene(SCENEID_MENU, true);
+    u_startLoop(win);
 }
 
 void finalize()

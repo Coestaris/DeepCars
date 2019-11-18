@@ -20,10 +20,15 @@ typedef struct _drawableObject {
     mat4 modelMat;
 
     updateFunc_t updateFunc;
+    updateFunc_t initFunc;
+
     keyEventFunc_t keyEventFunc;
     mouseEventFunc_t mouseEventFunc;
     mouseMoveEventFunc_t mouseMoveEventFunc;
 
 } drawableObject_t;
+
+drawableObject_t* o_clone(drawableObject_t* object);
+drawableObject_t* o_create();
 
 #endif //DEEPCARS_DRAWABLEOBJECT_H

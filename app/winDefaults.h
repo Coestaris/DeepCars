@@ -10,4 +10,6 @@
 #define WIN_TITLE  "DeepCars"
 #define VERBOSE    true
 
+#define SCENEID_MENU 0
+
 #endif //DEEPCARS_WINDEFAULTS_H
