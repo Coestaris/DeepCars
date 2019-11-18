@@ -11,5 +11,6 @@
 #include "structs.h"
 #include "drawableObject.h"
 #include "updater.h"
+#include "sceneManager.h"
 
 #endif //DEEPCARS_OBJECTINCLUDE_H

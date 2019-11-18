@@ -9,7 +9,7 @@ camera_t* c_create(vec4 position, vec4 up)
     camera_t* camera = malloc(sizeof(camera_t));
     camera->position = position;
     camera->up = up;
-    camera->direction = NULL;
+    camera->direction = cvec4(0, 0, 0, 0);
     camera->target = NULL;
 
     camera->useTarget = false;

@@ -12,5 +12,6 @@ void scm_init(void);
 void scm_pushScene(scene_t* scene);
 void scm_loadScene(uint32_t id, bool free);
 void scm_free(void);
+scene_t* scm_getCurrent(void);
 
 #endif //DEEPCARS_SCENEMANAGER_H

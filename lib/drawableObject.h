@@ -16,15 +16,20 @@ typedef void (*mouseMoveEventFunc_t)(struct _drawableObject* this, uint32_t x, u
 
 typedef struct _drawableObject {
     model_t* model;
+
     vec3f_t position;
-    mat4 modelMat;
+    vec3f_t rotation;
+    vec3f_t scale;
 
     updateFunc_t updateFunc;
     updateFunc_t initFunc;
+    updateFunc_t destroyFunc;
 
     keyEventFunc_t keyEventFunc;
     mouseEventFunc_t mouseEventFunc;
     mouseMoveEventFunc_t mouseMoveEventFunc;
+
+    vec4 color;
 
 } drawableObject_t;
 

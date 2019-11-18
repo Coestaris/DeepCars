@@ -5,6 +5,12 @@
 #include "sceneManager.h"
 
 list_t* scenes;
+int currentSceneID = -1;
+
+scene_t* scm_getCurrent(void)
+{
+    return (scene_t*)scenes->collection[currentSceneID];
+}
 
 void scm_init()
 {
@@ -18,6 +24,12 @@ void scm_pushScene(scene_t* scene)
 
 void scm_loadScene(uint32_t id, bool free)
 {
+    if(currentSceneID != -1)
+    {
+        //todo
+    }
+
+    currentSceneID = id;
     u_clearObjects(free);
     scene_t* scene = (scene_t*)scenes->collection[id];
 

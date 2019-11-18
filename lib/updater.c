@@ -48,12 +48,26 @@ void drawFunc()
     {
         drawableObject_t* object = (drawableObject_t*)objects->collection[i];
         if(object->model)
-        {
-            gr_draw_model_simpleColor(object->model, COLOR_AQUA, object->modelMat);
-        }
+            gr_draw_model_simpleColor(object->model, object->color,
+                    object->position, object->scale, object->rotation);
     }
 
     w_swapBuffers(defaultWin);
+}
+
+vec2f_t u_getMousePos()
+{
+    return vec2f(mouseX, mouseY);
+}
+
+int u_getKeyState(int key)
+{
+    return keysState[key];
+}
+
+int u_getMouseState(int mouse)
+{
+    return mouseState[mouse];
 }
 
 void eventHandler(XEvent event)
@@ -67,45 +81,53 @@ void eventHandler(XEvent event)
                 ((drawableObject_t*)keyListeners->collection[i])->keyEventFunc(
                         keyListeners->collection[i],
                         event.xkey.keycode,
-                        event.xkey.state);
+                        KEY_PRESSED);
         }
             break;
         case KeyRelease:
+        {
             keysState[event.xkey.keycode] = 0;
-            for(size_t i = 0; i < keyListeners->count; i++)
-                ((drawableObject_t*)keyListeners->collection[i])->keyEventFunc(
+            for (size_t i = 0; i < keyListeners->count; i++)
+                ((drawableObject_t*) keyListeners->collection[i])->keyEventFunc(
                         keyListeners->collection[i],
                         event.xkey.keycode,
-                        event.xkey.state);
+                        KEY_RELEASE);
+        }
             break;
         case ButtonPress:
+        {
             mouseState[event.xbutton.button] = 1;
-            for(size_t i = 0; i < mouseListeners->count; i++)
-                ((drawableObject_t*)mouseListeners->collection[i])->mouseEventFunc(
+            for (size_t i = 0; i < mouseListeners->count; i++)
+                ((drawableObject_t*) mouseListeners->collection[i])->mouseEventFunc(
                         mouseListeners->collection[i],
                         event.xbutton.x,
                         event.xbutton.y,
-                        event.xbutton.state,
+                        MOUSE_PRESSED,
                         event.xbutton.button);
+        }
             break;
         case ButtonRelease:
+        {
             mouseState[event.xbutton.button] = 0;
-            for(size_t i = 0; i < mouseListeners->count; i++)
-                ((drawableObject_t*)mouseListeners->collection[i])->mouseEventFunc(
+            for (size_t i = 0; i < mouseListeners->count; i++)
+                ((drawableObject_t*) mouseListeners->collection[i])->mouseEventFunc(
                         mouseListeners->collection[i],
                         event.xbutton.x,
                         event.xbutton.y,
-                        event.xbutton.state,
+                        MOUSE_RELEASE,
                         event.xbutton.button);
+        }
             break;
         case MotionNotify:
+        {
             mouseX = event.xbutton.x;
             mouseY = event.xbutton.y;
-            for(size_t i = 0; i < mouseMoveListeners->count; i++)
-                ((drawableObject_t*)mouseMoveListeners->collection[i])->mouseMoveEventFunc(
+            for (size_t i = 0; i < mouseMoveListeners->count; i++)
+                ((drawableObject_t*) mouseMoveListeners->collection[i])->mouseMoveEventFunc(
                         mouseMoveListeners->collection[i],
                         event.xbutton.x,
                         event.xbutton.y);
+        }
             break;
         case Expose:
             break;

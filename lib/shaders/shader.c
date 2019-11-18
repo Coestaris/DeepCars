@@ -7,14 +7,15 @@
 
 shader_t* sh_create(char* vertexPath, char* fragmentPath)
 {
-
-
     shader_t* sh = malloc(sizeof(shader_t));
     sh->fragmentPath = fragmentPath;
     sh->vertexPath = vertexPath;
     sh->progID = 0;
 
-    if (!sh_load(sh)) return NULL;
+    if (!sh_load(sh))
+    {
+        exit(1);
+    }
 
     printf("[shader.c]: Loaded shader. vertex path: %s, fragment path: %s\n", vertexPath, fragmentPath);
     return sh;
@@ -146,7 +147,8 @@ int sh_load(shader_t* sh)
 
 inline void sh_use(shader_t* sh)
 {
-    glUseProgram(sh->progID);
+    if(!sh) glUseProgram(0);
+    else glUseProgram(sh->progID);
 }
 
 void sh_setInt(shader_t* sh, GLint location, int value)

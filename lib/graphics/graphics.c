@@ -29,8 +29,9 @@ void gr_fill(vec4 color)
 }
 
 shader_t* shader_simpleColored;
-mat4 proj;
-mat4 view;
+mat4 projMat;
+mat4 viewMat;
+mat4 modelMat;
 
 void gr_init(mat4 _proj, mat4 _view)
 {
@@ -53,8 +54,9 @@ void gr_init(mat4 _proj, mat4 _view)
 
     shader_simpleColored = s_getShader(SH_SIMPLECOLORED);
 
-    proj = _proj;
-    view = _view;
+    projMat = _proj;
+    viewMat = _view;
+    modelMat = cmat4();
 }
 
 void gr_free(void)
@@ -76,8 +78,9 @@ void gr_free(void)
     freeVec4(COLOR_FUCHSIA);
     freeVec4(COLOR_PURPLE);
 
-    free(proj);
-    free(view);
+    freeMat4(projMat);
+    freeMat4(viewMat);
+    freeMat4(modelMat);
 }
 
 void gr_draw_model(model_t* model)
@@ -91,7 +94,9 @@ void gr_draw_model(model_t* model)
     glBindVertexArray(0);
 }
 
-void gr_draw_model_simpleColor(model_t* model, vec4 color, mat4 modelMat)
+void gr_draw_model_simpleColor(
+        model_t* model, vec4 color,
+        vec3f_t pos, vec3f_t scale, vec3f_t rot)
 {
     sh_use(shader_simpleColored);
     sh_setVec3v(shader_simpleColored,
@@ -99,20 +104,21 @@ void gr_draw_model_simpleColor(model_t* model, vec4 color, mat4 modelMat)
             color[0], color[1], color[2]);
 
     sh_setMat4(shader_simpleColored,
-                shader_simpleColored->uniformLocations[SH_SIMPLECOLORED_PROJ],
-                proj);
+               shader_simpleColored->uniformLocations[SH_SIMPLECOLORED_PROJ],
+               projMat);
 
     sh_setMat4(shader_simpleColored,
                shader_simpleColored->uniformLocations[SH_SIMPLECOLORED_VIEW],
-               view);
+               viewMat);
+
+    identityMat(modelMat);
+    translateMat(modelMat, (float)pos.x, (float)pos.y, (float)pos.y);
+    scaleMat(modelMat, (float)scale.x, (float)scale.y, (float)scale.y);
 
     sh_setMat4(shader_simpleColored,
                shader_simpleColored->uniformLocations[SH_SIMPLECOLORED_MODEL],
                modelMat);
 
-    //printMat4(proj);
-    //printMat4(model->model);
-    //printMat4(view);
-
     gr_draw_model(model);
+    sh_use(NULL);
 }

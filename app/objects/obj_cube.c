@@ -4,12 +4,13 @@
 
 #include "obj_cube.h"
 
-drawableObject_t* create_cube(vec3f_t pos, float size, material_t* mat)
+drawableObject_t* create_cube(vec3f_t pos, float size, vec4 color)
 {
     drawableObject_t* this = o_create();
     this->position = pos;
-    this->model = getModel(MODELID_CUBE);
-    scaleMat(this->modelMat, size, size, size);
+    this->scale = vec3f(size, size, size);
 
+    this->model = getModel(MODELID_CUBE);
+    this->color = color;
     return this;
 }

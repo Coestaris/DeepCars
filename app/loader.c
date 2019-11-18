@@ -37,9 +37,9 @@ void app_loadResources(void)
 
     //scenes
     scene_t* menu = sc_create(SCENEID_MENU);
-    listPush(menu->startupObjects, create_cube(vec3f(0, 0, 0), 5, NULL));
-    listPush(menu->startupObjects, create_cube(vec3f(-5, 0, 0), 6, NULL));
-    listPush(menu->startupObjects, create_cube(vec3f(0, 5, 0), 7, NULL));
+    listPush(menu->startupObjects, create_cube(vec3f(5, 5, 0), 2, COLOR_GREEN));
+    listPush(menu->startupObjects, create_cube(vec3f(-5, 5, 0), 3, COLOR_BLUE));
+    listPush(menu->startupObjects, create_cube(vec3f(5, -5, 0), 1, COLOR_RED));
     listPush(menu->startupObjects, create_cameraControl());
 
     scm_pushScene(menu);
@@ -57,7 +57,7 @@ void app_initGraphics(void)
 
     const float angleOfView = 60.0f;
     const float near = 0.1f;
-    const float far = 100.0f;
+    const float far = 200.0f;
     const float imageAspectRatio = (float)win->w / (float)win->h;
     win->projection = cmat4();
     perspectiveFovMat(win->projection, angleOfView, imageAspectRatio, near, far);
