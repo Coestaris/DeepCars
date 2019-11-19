@@ -8,11 +8,12 @@
 #include "gmath.h"
 #include "../resources/texture.h"
 
-typedef struct _material {
-    texture_t* diffuse;
-    texture_t* specular;
+typedef struct _material
+{
+   texture_t* diffuse;
+   texture_t* specular;
 
-    float shininess;
+   float shininess;
 
 } material_t;
 

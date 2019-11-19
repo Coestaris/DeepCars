@@ -7,35 +7,63 @@
 
 #include <malloc.h>
 #include <stddef.h>
+#include <math.h>
 
+// 2 dimensional floating point vector
 typedef struct _vec2f
 {
-    double x;
-    double y;
+   double_t x;
+   double_t y;
+
 } vec2f_t;
 
+// 3 dimensional floating point vector
 typedef struct _vec3f
 {
-    double x;
-    double y;
-    double z;
+   double_t x;
+   double_t y;
+   double_t z;
+
 } vec3f_t;
 
-typedef struct _list {
-    size_t count;
-    size_t maxSize;
+// Generic list to store pointers
+typedef struct _list
+{
+   // Current count of elements in collection
+   size_t count;
+   // Actual size of allocated pointer
+   size_t max_size;
+   // Pointer to a data storing memory
+   void** collection;
 
-    void** collection;
 } list_t;
 
-void listPush(list_t* list, void* object);
-void listRemove(list_t* list, void* drawableObject);
-void listFreeElements(list_t* list);
-void listFree(list_t* list);
-list_t* createList(int maxCount);
+//
+// List methods
+//
+// Push new element to a list
+void list_push(list_t* list, void* object);
 
-vec2f_t vec2f(double x, double y);
-vec3f_t vec3f(double x, double y, double z);
+// Remove element from list by it's pointer
+void list_remove(list_t* list, void* object);
+
+// Free all lists elements
+void list_free_elements(list_t* list);
+
+// Free list but keep all its elements
+void list_free(list_t* list);
+
+// list_t constructor
+list_t* list_create(int maxCount);
+
+//
+// Vector methods
+//
+// vec2f_t constructor
+vec2f_t vec2f(double_t x, double_t y);
+
+// vec3f_t constructor
+vec3f_t vec3f(double_t x, double_t y, double_t z);
 
 
 #endif //DEEPCARS_STRUCTS_H

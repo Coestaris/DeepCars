@@ -2,10 +2,10 @@
 
 int main(int argc, char* argv[])
 {
-    app_initGraphics();
-    app_loadResources();
+   app_initGraphics();
+   app_loadResources();
 
-    app_run();
+   app_run();
 
-    app_fin();
+   app_fin();
 }

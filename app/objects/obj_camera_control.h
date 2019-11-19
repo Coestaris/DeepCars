@@ -8,6 +8,6 @@
 #include "../../lib/objectInclude.h"
 #include "../winDefaults.h"
 
-drawableObject_t* create_cameraControl();
+object_t* create_cameraControl();
 
 #endif //DEEPCARS_OBJ_CAMERA_CONTROL_H

@@ -6,15 +6,15 @@
 
 material_t* mt_create(texture_t* diffuse, texture_t* specular, float shininess)
 {
-    material_t* material = malloc(sizeof(material_t));
-    material->diffuse = diffuse;
-    material->specular = specular;
-    material->shininess = shininess;
+   material_t* material = malloc(sizeof(material_t));
+   material->diffuse = diffuse;
+   material->specular = specular;
+   material->shininess = shininess;
 
-    return material;
+   return material;
 }
 
 void mt_free(material_t* material)
 {
-    free(material);
+   free(material);
 }

@@ -8,18 +8,19 @@
 #include <stdbool.h>
 #include "gmath.h"
 
-typedef struct _camera {
-    vec4 position;
-    vec4 target;
-    vec4 direction;
-    vec4 up;
+typedef struct _camera
+{
+   vec4 position;
+   vec4 target;
+   vec4 direction;
+   vec4 up;
 
-    vec4 _cameraRight;
-    vec4 _cameraUp;
-    mat4 _component1;
-    mat4 _component2;
+   vec4 _cameraRight;
+   vec4 _cameraUp;
+   mat4 _component1;
+   mat4 _component2;
 
-    bool useTarget;
+   bool useTarget;
 
 } camera_t;
 

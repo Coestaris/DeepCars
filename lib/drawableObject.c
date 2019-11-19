@@ -2,35 +2,47 @@
 // Created by maxim on 11/17/19.
 //
 
+#ifdef __GNUC__
+#pragma implementation "drawableObject.h"
+#endif
 #include "drawableObject.h"
 
-void o_free(drawableObject_t* object)
+//
+// o_free
+//
+void o_free(object_t* object)
 {
-    if(object->destroyFunc)
-        object->destroyFunc(object);
+   if (object->destroy_func)
+      object->destroy_func(object);
 
-    free(object);
+   free(object);
 }
 
-drawableObject_t* o_clone(drawableObject_t* object)
+//
+// o_clone
+//
+object_t* o_clone(object_t* object)
 {
-    drawableObject_t* newObject = malloc(sizeof(drawableObject_t));
-    memcpy(newObject, object, sizeof(drawableObject_t));
-    return newObject;
+   object_t* newObject = malloc(sizeof(object_t));
+   memcpy(newObject, object, sizeof(object_t));
+   return newObject;
 }
 
-drawableObject_t* o_create()
+//
+// o_create
+//
+object_t* o_create()
 {
-    drawableObject_t* object = malloc(sizeof(drawableObject_t));
-    object->model = NULL;
-    object->position = vec3f(0, 0, 0);
-    object->rotation = vec3f(0, 0, 0);
-    object->scale = vec3f(1, 1, 1);
-    object->destroyFunc = NULL;
-    object->updateFunc = NULL;
-    object->initFunc = NULL;
-    object->keyEventFunc = NULL;
-    object->mouseEventFunc = NULL;
-    object->mouseMoveEventFunc = NULL;
-    return object;
+   object_t* object = malloc(sizeof(object_t));
+   object->model = NULL;
+   object->position = vec3f(0, 0, 0);
+   object->rotation = vec3f(0, 0, 0);
+   object->scale = vec3f(1, 1, 1);
+   object->destroy_func = NULL;
+   object->update_func = NULL;
+   object->init_func = NULL;
+   object->key_event_func = NULL;
+   object->mouse_event_func = NULL;
+   object->mousemove_event_func = NULL;
+   return object;
 }

@@ -14,7 +14,7 @@
 typedef float* mat4;
 typedef float* vec4;
 
-vec4 cvec4(double x, double y, double z, double l);
+vec4 cvec4(double_t x, double_t y, double_t z, double_t l);
 void freeVec4(vec4 vec);
 mat4 cmat4();
 void freeMat4(mat4 mat);
@@ -28,7 +28,7 @@ void fillMat4(mat4 m,
               float b1, float b2, float b3, float b4,
               float c1, float c2, float c3, float c4,
               float d1, float d2, float d3, float d4);
-void fillVec4(vec4 a, double x, double y, double z, double l);
+void fillVec4(vec4 a, double_t x, double_t y, double_t z, double_t l);
 
 void identityMat(mat4 m);
 void rotateMat4Y(mat4 m, float angle);

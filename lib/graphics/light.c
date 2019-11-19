@@ -4,5 +4,8 @@
 
 #include "light.h"
 
-light_t* l_create() {}
-void l_free(light_t* light) {}
+light_t* l_create()
+{}
+
+void l_free(light_t* light)
+{}

@@ -2,254 +2,276 @@
 // Created by maxim on 3/6/19.
 //
 
-#include <stdbool.h>
+#ifdef __GNUC__
+#pragma implementation "shader.h"
+#endif
 #include "shader.h"
 
-shader_t* sh_create(char* vertexPath, char* fragmentPath)
+// Builds shader form string
+void sh_load_shader_src(const char* sz_shader_src, GLuint shader)
 {
-    shader_t* sh = malloc(sizeof(shader_t));
-    sh->fragmentPath = fragmentPath;
-    sh->vertexPath = vertexPath;
-    sh->progID = 0;
+   GLchar* string_part[1];
+   string_part[0] = (GLchar*) sz_shader_src;
 
-    if (!sh_load(sh))
-    {
-        exit(1);
-    }
-
-    printf("[shader.c]: Loaded shader. vertex path: %s, fragment path: %s\n", vertexPath, fragmentPath);
-    return sh;
+   glShaderSource(shader, 1, (const GLchar**) string_part, NULL);
 }
 
-void sh_free(shader_t* sh)
+// Builds shader from file
+int sh_load_shader_file(const char* filename, GLuint shader)
 {
-    printf("[shader.c]: Freed shader. vertex path: %s, fragment path: %s\n", sh->vertexPath, sh->fragmentPath);
-    glDeleteProgram(sh->progID);
-    if(sh->uniformLocations)
-        free(sh->uniformLocations);
-    free(sh);
+   FILE* f = fopen(filename, "r");
+   if (!f) return 0;
+
+   fseek(f, 0, SEEK_END);
+
+   size_t size = (size_t) ftell(f);
+   fseek(f, 0, SEEK_SET);
+
+   char* rawInput = malloc(size + 1);
+   memset(rawInput, 0, size + 1);
+   fread(rawInput, size, size, f);
+
+   fclose(f);
+
+   sh_load_shader_src((const char*) rawInput, shader);
+
+   free(rawInput);
+   return 1;
 }
 
-void loadShaderSrc(const char* szShaderSrc, GLuint shader)
-{
-    GLchar* fsStringPtr[1];
-    fsStringPtr[0] = (GLchar*) szShaderSrc;
-
-    glShaderSource(shader, 1, (const GLchar**) fsStringPtr, NULL);
-}
-
-int loadShaderFile(const char* szFile, GLuint shader)
-{
-    FILE* f = fopen(szFile, "r");
-    if (!f) return 0;
-
-    fseek(f, 0, SEEK_END);
-
-    size_t size = (size_t) ftell(f);
-    fseek(f, 0, SEEK_SET);
-
-    char* rawInput = malloc(size + 1);
-    memset(rawInput, 0, size + 1);
-    fread(rawInput, size, size, f);
-
-    fclose(f);
-
-    loadShaderSrc((const char*) rawInput, shader);
-
-    free(rawInput);
-
-    return 1;
-}
-
+// Builds shader and loads it to a GPU memory
 int sh_load(shader_t* sh)
 {
-    GLuint vertexShader;
-    GLuint fragmentShader;
+   GLuint vertex_shader;
+   GLuint fragment_shader;
 
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+   vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+   fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 
-    if (vertexShader == 0 || fragmentShader == 0)
-    {
-        printf("[shader.c]: Unable to create shaders\n");
-        return 0;
-    }
+   if (vertex_shader == 0 || fragment_shader == 0)
+   {
+      printf("[shader.c]: Unable to create shaders\n");
+      return 0;
+   }
 
-    if (!loadShaderFile(sh->fragmentPath, fragmentShader))
-    {
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-        printf("[shader.c][ERROR]: The fragment shader at %s could not be found.\n", sh->fragmentPath);
-        return 0;
-    }
+   if (!sh_load_shader_file(sh->fragment_path, fragment_shader))
+   {
+      glDeleteShader(vertex_shader);
+      glDeleteShader(fragment_shader);
+      printf("[shader.c][ERROR]: The fragment shader at %s could not be found.\n",
+              sh->fragment_path);
+      return 0;
+   }
 
-    if (!loadShaderFile(sh->vertexPath, vertexShader))
-    {
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-        printf("[shader.c][ERROR]: The vertex shader at %s could not be found.\n", sh->vertexPath);
-        return 0;
-    }
+   if (!sh_load_shader_file(sh->vertex_path, vertex_shader))
+   {
+      glDeleteShader(vertex_shader);
+      glDeleteShader(fragment_shader);
+      printf("[shader.c][ERROR]: The vertex shader at %s could not be found.\n",
+              sh->vertex_path);
+      return 0;
+   }
 
-    glCompileShader(vertexShader);
-    glCompileShader(fragmentShader);
+   glCompileShader(vertex_shader);
+   glCompileShader(fragment_shader);
 
-    GLint testVal;
+   GLint test_val;
 
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &testVal);
-    if (testVal == GL_FALSE)
-    {
-        char infoLog[1024];
-        glGetShaderInfoLog(vertexShader, 1024, NULL, infoLog);
-        printf("[shader.c][ERROR]: The vertex shader at %s failed to compile with the following error:\n%s\n",
-               sh->vertexPath, infoLog);
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-        return 0;
-    }
+   glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &test_val);
+   if (test_val == GL_FALSE)
+   {
+      char infoLog[1024];
+      glGetShaderInfoLog(vertex_shader, 1024, NULL, infoLog);
+      printf("[shader.c][ERROR]: The vertex shader at %s failed to compile with the following error:\n%s\n",
+             sh->vertex_path, infoLog);
+      glDeleteShader(vertex_shader);
+      glDeleteShader(fragment_shader);
+      return 0;
+   }
 
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &testVal);
-    if (testVal == GL_FALSE)
-    {
-        char infoLog[1024];
-        glGetShaderInfoLog(fragmentShader, 1024, NULL, infoLog);
-        printf("[shader.c][ERROR]: The fragment shader at %s failed to compile with the following error:\n%s\n",
-               sh->fragmentPath, infoLog);
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-        return 0;
-    }
+   glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &test_val);
+   if (test_val == GL_FALSE)
+   {
+      char infoLog[1024];
+      glGetShaderInfoLog(fragment_shader, 1024, NULL, infoLog);
+      printf("[shader.c][ERROR]: The fragment shader at %s failed to compile with the following error:\n%s\n",
+             sh->fragment_path, infoLog);
+      glDeleteShader(vertex_shader);
+      glDeleteShader(fragment_shader);
+      return 0;
+   }
 
-    sh->progID = glCreateProgram();
+   sh->prog_id = glCreateProgram();
 
-    glAttachShader(sh->progID, vertexShader);
-    glAttachShader(sh->progID, fragmentShader);
+   glAttachShader(sh->prog_id, vertex_shader);
+   glAttachShader(sh->prog_id, fragment_shader);
 
-    glLinkProgram(sh->progID);
+   glLinkProgram(sh->prog_id);
 
-    glGetProgramiv(sh->progID, GL_LINK_STATUS, &testVal);
-    if (testVal == GL_FALSE)
-    {
-        char infoLog[1024];
-        glGetProgramInfoLog(sh->progID, 1024, NULL, infoLog);
-        printf("[shader.c][ERROR]: The programs %s and %s failed to link with the following errors:\n%s\n",
-               sh->vertexPath, sh->fragmentPath, infoLog);
-        glDeleteProgram(sh->progID);
-        return 0;
+   glGetProgramiv(sh->prog_id, GL_LINK_STATUS, &test_val);
+   if (test_val == GL_FALSE)
+   {
+      char infoLog[1024];
+      glGetProgramInfoLog(sh->prog_id, 1024, NULL, infoLog);
+      printf("[shader.c][ERROR]: The programs %s and %s failed to link with the following errors:\n%s\n",
+             sh->vertex_path, sh->fragment_path, infoLog);
+      glDeleteProgram(sh->prog_id);
+      return 0;
 
-    }
+   }
 
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    return 1;
+   glDeleteShader(vertex_shader);
+   glDeleteShader(fragment_shader);
+   return 1;
 }
 
+//
+// sh_create
+//
+shader_t* sh_create(char* vertexPath, char* fragmentPath)
+{
+   shader_t* sh = malloc(sizeof(shader_t));
+   sh->fragment_path = fragmentPath;
+   sh->vertex_path = vertexPath;
+   sh->prog_id = 0;
+
+   if (!sh_load(sh))
+   {
+      exit(1);
+   }
+
+   printf("[shader.c]: Loaded shader. vertex path: %s, fragment path: %s\n",
+           vertexPath, fragmentPath);
+   return sh;
+}
+
+//
+// sh_free
+//
+void sh_free(shader_t* sh)
+{
+   printf("[shader.c]: Freed shader. vertex path: %s, fragment path: %s\n",
+           sh->vertex_path, sh->fragment_path);
+
+   glDeleteProgram(sh->prog_id);
+
+   if (sh->uniform_locations)
+      free(sh->uniform_locations);
+
+   free(sh);
+}
+
+//
+// sh_use
+//
 inline void sh_use(shader_t* sh)
 {
-    if(!sh) glUseProgram(0);
-    else glUseProgram(sh->progID);
+   if (!sh) glUseProgram(0);
+   else glUseProgram(sh->prog_id);
 }
 
-void sh_setInt(shader_t* sh, GLint location, int value)
+void sh_set_int(shader_t* sh, GLint location, int value)
 {
-    glUniform1i(location, value);
+   glUniform1i(location, value);
 }
 
-void sh_setFloat(shader_t* sh, GLint location, float value)
+void sh_set_float(shader_t* sh, GLint location, float value)
 {
-    glUniform1f(location, value);
+   glUniform1f(location, value);
 }
 
-void sh_setMat4(shader_t* sh, GLint location, mat4 value)
+void sh_set_mat4(shader_t* sh, GLint location, mat4 value)
 {
-    glUniformMatrix4fv(location,1, true, value);
+   glUniformMatrix4fv(location, 1, true, value);
 }
 
-void sh_setVec3v(shader_t* sh, GLint location, float a, float b, float c)
+void sh_set_vec3v(shader_t* sh, GLint location, float a, float b, float c)
 {
-    glUniform3f(location, a, b, c);
+   glUniform3f(location, a, b, c);
 }
 
-void sh_setVec3(shader_t* sh, GLint location,  vec4 v)
+void sh_set_vec3(shader_t* sh, GLint location, vec4 v)
 {
-    glUniform3fv(location, 3, v);
+   glUniform3fv(location, 3, v);
 }
 
-void sh_setVec4v(shader_t* sh, GLint location, float a, float b, float c, float d)
+void sh_set_vec4v(shader_t* sh, GLint locatione, float a, float b, float c, float d)
 {
-    glUniform4f(location, a, b, c, d);
+   glUniform4f(locatione, a, b, c, d);
 }
 
-void sh_setVec4(shader_t* sh, GLint location, vec4 v)
+void sh_set_vec4(shader_t* sh, GLint location, vec4 v)
 {
-    glUniform3fv(location, 4, v);
+   glUniform3fv(location, 4, v);
 }
 
-void sh_nsetInt(shader_t* sh, const char* name, int value)
+void sh_nset_int(shader_t* sh, const char* name, int value)
 {
-    sh_setInt(sh, glGetUniformLocation(sh->progID, name), value);
+   sh_set_int(sh, glGetUniformLocation(sh->prog_id, name), value);
 }
 
-void sh_nsetFloat(shader_t* sh, const char* name, float value)
+void sh_nset_float(shader_t* sh, const char* name, float value)
 {
-    sh_setFloat(sh, glGetUniformLocation(sh->progID, name), value);
+   sh_set_float(sh, glGetUniformLocation(sh->prog_id, name), value);
 }
 
-void sh_nsetMat4(shader_t* sh, const char* name, mat4 value)
+void sh_nset_mat4(shader_t* sh, const char* name, mat4 value)
 {
-    sh_setMat4(sh, glGetUniformLocation(sh->progID, name), value);
+   sh_set_mat4(sh, glGetUniformLocation(sh->prog_id, name), value);
 }
 
-void sh_nsetVec3v(shader_t* sh, const char* name, float a, float b, float c)
+void sh_nset_vec3v(shader_t* sh, const char* name, float a, float b, float c)
 {
-    sh_setVec3v(sh, glGetUniformLocation(sh->progID, name), a, b, c);
+   sh_set_vec3v(sh, glGetUniformLocation(sh->prog_id, name), a, b, c);
 }
 
-void sh_nsetVec3(shader_t* sh, const char* name,  vec4 v)
+void sh_nset_vec3(shader_t* sh, const char* name, vec4 v)
 {
-    sh_setVec3(sh, glGetUniformLocation(sh->progID, name), v);
+   sh_set_vec3(sh, glGetUniformLocation(sh->prog_id, name), v);
 }
 
-void sh_nsetVec4v(shader_t* sh, const char* name, float a, float b, float c, float d)
+void sh_nset_vec4v(shader_t* sh, const char* name, float a, float b, float c, float d)
 {
-    sh_setVec4v(sh, glGetUniformLocation(sh->progID, name), a, b, c, d);
+   sh_set_vec4v(sh, glGetUniformLocation(sh->prog_id, name), a, b, c, d);
 }
 
-void sh_nsetVec4(shader_t* sh, const char* name, vec4 v)
+void sh_nset_vec4(shader_t* sh, const char* name, vec4 v)
 {
-    sh_setVec4(sh, glGetUniformLocation(sh->progID, name), v);
+   sh_set_vec4(sh, glGetUniformLocation(sh->prog_id, name), v);
 }
 
+//
+// sh_info
+//
 void sh_info(shader_t* sh)
 {
-    GLint i;
-    GLint count;
+   GLint i;
+   GLint count;
 
-    GLint size; // size of the variable
-    GLenum type; // type of the variable (float, vec3 or mat4, etc)
+   GLint size; // size of the variable
+   GLenum type; // type of the variable (float, vec3 or mat4, etc)
 
-    const GLsizei bufSize = 32; // maximum name length
-    GLchar name[bufSize]; // variable name in GLSL
-    GLsizei length; // name length
+   const GLsizei bufSize = 32; // maximum name length
+   GLchar name[bufSize]; // variable name in GLSL
+   GLsizei length; // name length
 
-    glGetProgramiv(sh->progID, GL_ACTIVE_ATTRIBUTES, &count);
-    printf("[shader.c]: Active Attributes: %d\n", count);
+   glGetProgramiv(sh->prog_id, GL_ACTIVE_ATTRIBUTES, &count);
+   printf("[shader.c]: Active Attributes: %d\n", count);
 
-    for (i = 0; i < count; i++)
-    {
-        glGetActiveAttrib(sh->progID, (GLuint)i, bufSize, &length, &size, &type, name);
+   for (i = 0; i < count; i++)
+   {
+      glGetActiveAttrib(sh->prog_id, (GLuint) i, bufSize, &length, &size, &type, name);
 
-        printf("[shader.c]: Attribute #%d Type: %u Name: %s\n", i, type, name);
-    }
+      printf("[shader.c]: Attribute #%d Type: %u Name: %s\n", i, type, name);
+   }
 
-    glGetProgramiv(sh->progID, GL_ACTIVE_UNIFORMS, &count);
-    printf("[shader.c]: Active Uniforms: %d\n", count);
+   glGetProgramiv(sh->prog_id, GL_ACTIVE_UNIFORMS, &count);
+   printf("[shader.c]: Active Uniforms: %d\n", count);
 
-    for (i = 0; i < count; i++)
-    {
-        glGetActiveUniform(sh->progID, (GLuint)i, bufSize, &length, &size, &type, name);
+   for (i = 0; i < count; i++)
+   {
+      glGetActiveUniform(sh->prog_id, (GLuint) i, bufSize, &length, &size, &type, name);
 
-        printf("[shader.c]: Uniform #%d Type: %u Name: %s\n", i, type, name);
-    }
+      printf("[shader.c]: Uniform #%d Type: %u Name: %s\n", i, type, name);
+   }
 }

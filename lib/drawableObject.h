@@ -7,34 +7,49 @@
 
 #include "resources/model.h"
 
-struct _drawableObject;
+struct _object;
 
-typedef void (*updateFunc_t)(struct _drawableObject* this);
-typedef void (*keyEventFunc_t)(struct _drawableObject* this, uint32_t key, uint32_t state);
-typedef void (*mouseEventFunc_t)(struct _drawableObject* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse);
-typedef void (*mouseMoveEventFunc_t)(struct _drawableObject* this, uint32_t x, uint32_t y);
+//
+// Object callback types
+//
+typedef void (* update_func_t)(struct _object* this);
+typedef void (* key_event_func_t)(struct _object* this, uint32_t key, uint32_t state);
+typedef void (* mouse_event_func_t)(struct _object* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse);
+typedef void (* mousemove_event_func_t)(struct _object* this, uint32_t x, uint32_t y);
 
-typedef struct _drawableObject {
-    model_t* model;
+// Struct that describes drawable object
+typedef struct _object
+{
+   // Model to be rendered
+   model_t* model;
 
-    vec3f_t position;
-    vec3f_t rotation;
-    vec3f_t scale;
+   // Transformation of object
+   vec3f_t position;
+   vec3f_t rotation;
+   vec3f_t scale;
 
-    updateFunc_t updateFunc;
-    updateFunc_t initFunc;
-    updateFunc_t destroyFunc;
+   // Base object callbacks
+   update_func_t update_func;
+   update_func_t init_func;
+   update_func_t destroy_func;
 
-    keyEventFunc_t keyEventFunc;
-    mouseEventFunc_t mouseEventFunc;
-    mouseMoveEventFunc_t mouseMoveEventFunc;
+   // Object event callbacks. If set to 0 updater will ignore it
+   key_event_func_t key_event_func;
+   mouse_event_func_t mouse_event_func;
+   mousemove_event_func_t mousemove_event_func;
 
-    vec4 color;
+   //todo: delete
+   vec4 color;
 
-} drawableObject_t;
+} object_t;
 
-drawableObject_t* o_clone(drawableObject_t* object);
-drawableObject_t* o_create();
-void o_free(drawableObject_t* object);
+// Clone object and allocates another one
+object_t* o_clone(object_t* object);
+
+// object_t constructor
+object_t* o_create();
+
+// Frees object and all its used resources
+void o_free(object_t* object);
 
 #endif //DEEPCARS_DRAWABLEOBJECT_H

@@ -8,10 +8,19 @@
 #include "scene.h"
 #include "updater.h"
 
+// Init all private variables of scene manager
 void scm_init(void);
-void scm_pushScene(scene_t* scene);
-void scm_loadScene(uint32_t id, bool free);
+
+// Push new scene to a manager's list
+void scm_push_scene(scene_t* scene);
+
+// Load scene and initialize all its startup objects
+void scm_load_scene(uint32_t id, bool free);
+
+// Free all used by scene manager resources
 void scm_free(void);
-scene_t* scm_getCurrent(void);
+
+// Get loaded scene
+scene_t* scm_get_current(void);
 
 #endif //DEEPCARS_SCENEMANAGER_H

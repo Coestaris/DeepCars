@@ -2,240 +2,304 @@
 // Created by maxim on 8/28/19.
 //
 
+#ifdef __GNUC__
+#pragma implementation "updater.h"
+#endif
 #include "updater.h"
+
 #include "graphics/graphics.h"
 #include "shaders/shader.h"
 
+// Initial count of objects
 #define OBJECT_COUNT_START 50
-#define OBJECT_COUNT_INCREASE 1.5
 
-bool closed = false;
-uint64_t counter = 0;
-double elapsed = 0;
-double fps = 0;
-uint64_t frames;
+//
+// FPS Lock variables
+//
+// Set true to finish loop
+bool        closed = false;
+// Frame counter for FPS measurements
+uint64_t    counter = 0;
+// Elapsed time between current time and last FPS measurement
+double_t    elapsed = 0;
+// Average FPS count
+double_t    fps = 0;
+// Current frame counter
+uint64_t    frames;
 
-uint32_t keysState[256];
-uint32_t mouseState[10];
-uint32_t mouseX;
-uint32_t mouseY;
-winInfo_t* defaultWin;
+//
+// Event processing variables
+//
+uint32_t    keys_state[256];
+uint32_t    mouse_state[10];
+uint32_t    mouseX;
+uint32_t    mouseY;
 
-list_t* objects;
-list_t* keyListeners;
-list_t* mouseListeners;
-list_t* mouseMoveListeners;
-list_t* updateListeners;
+// Current X window allocated in win.h
+winInfo_t*  default_win;
 
-double getMillis(void)
+// Global list of all drawable objects
+list_t*     objects;
+// Preprocessed lists of listening objects
+list_t*     key_listeners;
+list_t*     mouse_listeners;
+list_t*     mousemove_listeners;
+list_t*     update_listeners;
+
+
+// Get current millisecond of global time
+double_t u_get_millis(void)
 {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
+   struct timeval tv;
+   gettimeofday(&tv, NULL);
 
-    return (tv.tv_sec) * 1000.0 + (tv.tv_usec) / 1000.0;
+   return (tv.tv_sec) * 1000.0 + (tv.tv_usec) / 1000.0;
 }
 
+//
+// u_close()
+//
 void u_close(void)
 {
-    closed = true;
+   closed = true;
 }
 
-void drawFunc()
+// Main draw function.
+// Looping through all objects and draws it
+void u_draw_func(void)
 {
-    gr_fill(COLOR_GRAY);
+   gr_fill(COLOR_GRAY);
 
-    for(size_t i = 0; i < objects->count; i++)
-    {
-        drawableObject_t* object = (drawableObject_t*)objects->collection[i];
-        if(object->model)
-            gr_draw_model_simpleColor(object->model, object->color,
-                    object->position, object->scale, object->rotation);
-    }
+   for (size_t i = 0; i < objects->count; i++)
+   {
+      object_t* object = (object_t*) objects->collection[i];
+      if (object->model)
+         gr_draw_model_simpleColor(object->model, object->color,
+                                   object->position, object->scale, object->rotation);
+   }
 
-    w_swapBuffers(defaultWin);
+   w_swapBuffers(default_win);
 }
 
-vec2f_t u_getMousePos()
+//
+// u_get_mouse_pos()
+//
+vec2f_t u_get_mouse_pos()
 {
-    return vec2f(mouseX, mouseY);
+   return vec2f(mouseX, mouseY);
 }
 
-int u_getKeyState(int key)
+//
+// u_get_key_state()
+//
+int u_get_key_state(int key)
 {
-    return keysState[key];
+   return keys_state[key];
 }
 
-int u_getMouseState(int mouse)
+//
+// u_get_mouse_state()
+//
+int u_get_mouse_state(int mouse)
 {
-    return mouseState[mouse];
+   return mouse_state[mouse];
 }
 
-void eventHandler(XEvent event)
+// Main event handler function.
+// Sets all necessary states and run all callbacks in listeners
+void u_event_handler(XEvent event)
 {
-    switch(event.type)
-    {
-        case KeyPress:
-        {
-            keysState[event.xkey.keycode] = 1;
-            for(size_t i = 0; i < keyListeners->count; i++)
-                ((drawableObject_t*)keyListeners->collection[i])->keyEventFunc(
-                        keyListeners->collection[i],
-                        event.xkey.keycode,
-                        KEY_PRESSED);
-        }
-            break;
-        case KeyRelease:
-        {
-            keysState[event.xkey.keycode] = 0;
-            for (size_t i = 0; i < keyListeners->count; i++)
-                ((drawableObject_t*) keyListeners->collection[i])->keyEventFunc(
-                        keyListeners->collection[i],
-                        event.xkey.keycode,
-                        KEY_RELEASE);
-        }
-            break;
-        case ButtonPress:
-        {
-            mouseState[event.xbutton.button] = 1;
-            for (size_t i = 0; i < mouseListeners->count; i++)
-                ((drawableObject_t*) mouseListeners->collection[i])->mouseEventFunc(
-                        mouseListeners->collection[i],
-                        event.xbutton.x,
-                        event.xbutton.y,
-                        MOUSE_PRESSED,
-                        event.xbutton.button);
-        }
-            break;
-        case ButtonRelease:
-        {
-            mouseState[event.xbutton.button] = 0;
-            for (size_t i = 0; i < mouseListeners->count; i++)
-                ((drawableObject_t*) mouseListeners->collection[i])->mouseEventFunc(
-                        mouseListeners->collection[i],
-                        event.xbutton.x,
-                        event.xbutton.y,
-                        MOUSE_RELEASE,
-                        event.xbutton.button);
-        }
-            break;
-        case MotionNotify:
-        {
-            mouseX = event.xbutton.x;
-            mouseY = event.xbutton.y;
-            for (size_t i = 0; i < mouseMoveListeners->count; i++)
-                ((drawableObject_t*) mouseMoveListeners->collection[i])->mouseMoveEventFunc(
-                        mouseMoveListeners->collection[i],
-                        event.xbutton.x,
-                        event.xbutton.y);
-        }
-            break;
-        case Expose:
-            break;
-    }
+   switch (event.type)
+   {
+      case KeyPress:
+      {
+         keys_state[event.xkey.keycode] = 1;
+         for (size_t i = 0; i < key_listeners->count; i++)
+            ((object_t*) key_listeners->collection[i])->key_event_func(
+                    key_listeners->collection[i],
+                    event.xkey.keycode,
+                    KEY_PRESSED);
+      }
+         break;
+
+      case KeyRelease:
+      {
+         keys_state[event.xkey.keycode] = 0;
+         for (size_t i = 0; i < key_listeners->count; i++)
+            ((object_t*) key_listeners->collection[i])->key_event_func(
+                    key_listeners->collection[i],
+                    event.xkey.keycode,
+                    KEY_RELEASE);
+      }
+         break;
+      case ButtonPress:
+      {
+         mouse_state[event.xbutton.button] = 1;
+         for (size_t i = 0; i < mouse_listeners->count; i++)
+            ((object_t*) mouse_listeners->collection[i])->mouse_event_func(
+                    mouse_listeners->collection[i],
+                    event.xbutton.x,
+                    event.xbutton.y,
+                    MOUSE_PRESSED,
+                    event.xbutton.button);
+      }
+         break;
+      case ButtonRelease:
+      {
+         mouse_state[event.xbutton.button] = 0;
+         for (size_t i = 0; i < mouse_listeners->count; i++)
+            ((object_t*) mouse_listeners->collection[i])->mouse_event_func(
+                    mouse_listeners->collection[i],
+                    event.xbutton.x,
+                    event.xbutton.y,
+                    MOUSE_RELEASE,
+                    event.xbutton.button);
+      }
+         break;
+      case MotionNotify:
+      {
+         mouseX = event.xbutton.x;
+         mouseY = event.xbutton.y;
+         for (size_t i = 0; i < mousemove_listeners->count; i++)
+            ((object_t*) mousemove_listeners->collection[i])->mousemove_event_func(
+                    mousemove_listeners->collection[i],
+                    event.xbutton.x,
+                    event.xbutton.y);
+      }
+         break;
+      case Expose:
+         break;
+   }
 }
 
-void u_clearObjects(bool free)
+//
+// u_clear_objects
+//
+void u_clear_objects(bool free)
 {
-    if(free)
-    {
-        for(size_t i = 0; i < objects->count; i++)
-            o_free((drawableObject_t*) objects->collection[i]);
-    }
+   if (free)
+   {
+      for (size_t i = 0; i < objects->count; i++)
+         o_free((object_t*) objects->collection[i]);
+   }
 
-    objects->count = 0;
-    mouseListeners->count = 0;
-    keyListeners->count = 0;
-    updateListeners->count = 0;
-    mouseMoveListeners->count = 0;
+   // Just reset all vector lengths
+   objects->count = 0;
+   mouse_listeners->count = 0;
+   key_listeners->count = 0;
+   update_listeners->count = 0;
+   mousemove_listeners->count = 0;
 }
 
-void u_pushObject(drawableObject_t* object)
+//
+// u_push_object
+//
+void u_push_object(object_t* object)
 {
-    listPush(objects, object);
-    if(object->mouseEventFunc)
-        listPush(mouseListeners, object);
-    if(object->keyEventFunc)
-        listPush(keyListeners, object);
-    if(object->updateFunc)
-        listPush(updateListeners, object);
-    if(object->mouseMoveEventFunc)
-        listPush(mouseMoveListeners, object);
+   list_push(objects, object);
+   if (object->mouse_event_func)
+      list_push(mouse_listeners, object);
+   if (object->key_event_func)
+      list_push(key_listeners, object);
+   if (object->update_func)
+      list_push(update_listeners, object);
+   if (object->mousemove_event_func)
+      list_push(mousemove_listeners, object);
 }
 
-uint64_t u_getFrames()
+//
+// u_get_frames
+//
+uint64_t u_get_frames()
 {
-    return frames;
+   return frames;
 }
 
-void measureTime(void)
+// Measures the time between frames and
+// waits for the required amount of time
+void u_measure_time(void)
 {
-    double tickStart = getMillis();
+   double_t tick_start = u_get_millis();
+   u_draw_func(); //draw routine
 
-    drawFunc();
+   double_t diff = u_get_millis() - tick_start;
+   counter++;
+   frames++;
 
-    double diff = getMillis() - tickStart;
-    counter++;
-    frames++;
+   // wait
+   if (diff < FPS_DELAY)
+   {
+      usleep((uint32_t) (FPS_DELAY - diff) * 1000);
+   }
 
-    if (diff < FPSDelay)
-    {
-        usleep((unsigned int) (FPSDelay - diff) * 1000);
-    }
+   elapsed += u_get_millis() - tick_start;
+   // calculate FPS
+   if (elapsed > FPS_AV_COUNTER)
+   {
+      fps = 1000.0 * counter / elapsed;
+      counter = 0;
+      elapsed = 0;
 
-    elapsed += getMillis() - tickStart;
-
-    if (elapsed > FPSAvCounter)
-    {
-        fps = 1000.0 * counter / elapsed;
-        counter = 0;
-        elapsed = 0;
-
-        printf("[updater.c]: FPS: %lf. Objects: %li\n", fps, objects->count);
-    }
+      printf("[updater.c]: FPS: %lf. Objects: %li\n", fps, objects->count);
+   }
 }
 
+//
+// u_init
+//
 void u_init(void)
 {
-    objects = createList(OBJECT_COUNT_START);
-    keyListeners = createList(OBJECT_COUNT_START);
-    mouseListeners = createList(OBJECT_COUNT_START);
-    mouseMoveListeners = createList(OBJECT_COUNT_START);
-    updateListeners = createList(OBJECT_COUNT_START);
+   objects = list_create(OBJECT_COUNT_START);
+   key_listeners = list_create(OBJECT_COUNT_START);
+   mouse_listeners = list_create(OBJECT_COUNT_START);
+   mousemove_listeners = list_create(OBJECT_COUNT_START);
+   update_listeners = list_create(OBJECT_COUNT_START);
 }
 
-void u_startLoop(winInfo_t* win)
+//
+// u_start_loop
+//
+void u_start_loop(winInfo_t* info)
 {
-    XEvent event;
-    XSelectInput(win->display, win->win,
-                 KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
-                 PointerMotionMask | ButtonMotionMask | ExposureMask | VisibilityChangeMask |
-                 ResizeRedirectMask);
+   XEvent event;
+   XSelectInput(info->display, info->win,
+       KeyPressMask      | KeyReleaseMask   | ButtonPressMask | ButtonReleaseMask    |
+       PointerMotionMask | ButtonMotionMask | ExposureMask    | VisibilityChangeMask |
+       ResizeRedirectMask);
 
-    defaultWin = win;
-    while (1)
-    {
-        if(closed) break;
+   default_win = info;
+   // main app loop
+   while (1)
+   {
+      // check close condition
+      if (closed) break;
+      // if there's no pending events
+      if (XPending(info->display) == 0)
+      {
+         //update all objects
+         for (size_t i = 0; i < update_listeners->count; i++)
+            ((object_t*) update_listeners->collection[i])->update_func(update_listeners->collection[i]);
 
-        if(XPending(win->display) == 0)
-        {
-            for(size_t i = 0; i < updateListeners->count; i++)
-                ((drawableObject_t*)updateListeners->collection[i])->updateFunc(updateListeners->collection[i]);
+         // call draw func and wait to save constant frame rate
+         u_measure_time();
+         continue;
+      }
 
-            measureTime();
-            continue;
-        }
-
-        XNextEvent(win->display, &event);
-        eventHandler(event);
-    }
+      // process event queue
+      XNextEvent(info->display, &event);
+      u_event_handler(event);
+   }
 
 }
 
+//
+// u_free
+//
 void u_free()
 {
-    listFree(objects);
-    listFree(keyListeners);
-    listFree(mouseListeners);
-    listFree(mouseMoveListeners);
-    listFree(updateListeners);
+   list_free(objects);
+   list_free(key_listeners);
+   list_free(mouse_listeners);
+   list_free(mousemove_listeners);
+   list_free(update_listeners);
 }

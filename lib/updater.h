@@ -24,20 +24,40 @@
 #define MOUSE_MIDDLE 2
 #define MOUSE_RIGHT 3
 
-#define FPSToLock 60.0
-#define FPSDelay 1000.0 / FPSToLock
-#define FPSAvCounter 1000.0
+// Average FPS count to be locked
+#define FPS_TO_LOCK 60.0
+#define FPS_DELAY 1000.0 / FPS_TO_LOCK
+// Period of measuring FPS
+#define FPS_AV_COUNTER 1000.0
 
-void u_init(void);
+// End application loop
 void u_close(void);
-void u_startLoop(winInfo_t* info);
-void u_clearObjects(bool free);
-void u_free();
-void u_pushObject(drawableObject_t*object);
-uint64_t u_getFrames(void);
 
-vec2f_t u_getMousePos();
-int u_getKeyState(int key);
-int u_getMouseState(int mouse);
+// Initialize all private variables
+void u_init(void);
+
+// Start application loop
+void u_start_loop(winInfo_t* info);
+
+// Clears all drawable objects
+void u_clear_objects(bool free);
+
+// Finalize all used resources
+void u_free();
+
+// Add specified object to global objects list
+void u_push_object(object_t* object);
+
+// Get current frame index
+uint64_t u_get_frames(void);
+
+// Get current mouse position
+vec2f_t u_get_mouse_pos();
+
+// Get state of specified keyboard key
+int u_get_key_state(int key);
+
+// Get state of mouse button
+int u_get_mouse_state(int mouse);
 
 #endif //DEEPCARS_UPDATER_H

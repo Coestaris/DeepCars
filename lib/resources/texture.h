@@ -19,15 +19,15 @@
 
 typedef struct _texture
 {
-    const char* fn;
-    GLuint texID;
+   const char* fn;
+   GLuint texID;
 
-    vec2f_t center;
+   vec2f_t center;
 
-    int width;
-    int height;
+   int width;
+   int height;
 
-    texData* data;
+   texData* data;
 
 } texture_t;
 

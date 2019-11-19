@@ -19,22 +19,23 @@
 #include "gmath.h"
 #include "camera.h"
 
-typedef struct _winInfo {
+typedef struct _winInfo
+{
 
-    Display* display;
+   Display* display;
 
-    Window win;
-    GLXContext context;
-    Colormap colorMap;
+   Window win;
+   GLXContext context;
+   Colormap colorMap;
 
-    uint16_t w;
-    uint16_t h;
+   uint16_t w;
+   uint16_t h;
 
-    const char* caption;
+   const char* caption;
 
-    uint16_t lockedFps;
-    double lastFrame;
-    mat4 projection;
+   uint16_t lockedFps;
+   double_t lastFrame;
+   mat4 projection;
 
 } winInfo_t;
 

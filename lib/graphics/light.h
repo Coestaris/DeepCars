@@ -5,7 +5,8 @@
 #ifndef DEEPCARS_LIGHT_H
 #define DEEPCARS_LIGHT_H
 
-typedef struct _light {
+typedef struct _light
+{
 
 } light_t;
 
