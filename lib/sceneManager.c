@@ -9,14 +9,14 @@
 
 // List of all pushed scenes
 list_t* scenes;
-int current_scene = -1;
+scene_t* current_scene = NULL;
 
 //
 // scm_get_current
 //
 scene_t* scm_get_current(void)
 {
-   return (scene_t*) scenes->collection[current_scene];
+   return current_scene;
 }
 
 //
@@ -40,14 +40,26 @@ void scm_push_scene(scene_t* scene)
 //
 void scm_load_scene(uint32_t id, bool free)
 {
-   if (current_scene != -1)
+   if (current_scene)
    {
       //todo
    }
 
-   current_scene = id;
+   scene_t* scene =  NULL;
+
+   // find scene with specified id in list
+   for(size_t i = 0; i < scenes->count; i++)
+      if(((scene_t*)scenes->collection[i])->id == id)
+         scene = (scene_t*) scenes->collection[id];
+
+   if(!scene)
+   {
+      printf("[sceneManager.c][ERROR]: Unable to find scene with id %i", id);
+      exit(1);
+   }
+
+   current_scene = scene;
    u_clear_objects(free);
-   scene_t* scene = (scene_t*) scenes->collection[id];
 
    for (size_t i = 0; i < scene->startup_objects->count; i++)
       u_push_object(o_clone((object_t*) scene->startup_objects->collection[i]));

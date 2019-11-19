@@ -33,10 +33,8 @@ typedef struct _texture
 
 texture_t* t_create(const char* fn, vec2f_t center);
 void t_free(texture_t* tex);
-
 void t_unload(texture_t* tex);
 void t_load(texture_t* tex);
-
 void t_bind(texture_t* tex);
 
 #endif //DEEPCARS_TEXTURE_H

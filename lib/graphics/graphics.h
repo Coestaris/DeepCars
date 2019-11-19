@@ -39,4 +39,8 @@ extern vec4 COLOR_NAVY;
 extern vec4 COLOR_FUCHSIA;
 extern vec4 COLOR_PURPLE;
 
+extern mat4 projMat;
+extern mat4 view_mat;
+extern mat4 modelMat;
+
 #endif //DEEPCARS_GRAPHICS_H

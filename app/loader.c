@@ -37,9 +37,9 @@ void app_loadResources(void)
 
    //scenes
    scene_t* menu = sc_create(SCENEID_MENU);
-   list_push(menu->startup_objects, create_cube(vec3f(5, 5, 0), .3f, COLOR_GREEN));
-   //list_push(menu->startup_objects, create_cube(vec3f(-5, 5, 0), 3, COLOR_BLUE));
-   //list_push(menu->startup_objects, create_cube(vec3f(5, -5, 0), 1, COLOR_RED));
+   list_push(menu->startup_objects, create_cube(vec3f(11, 11, 12), .05f, COLOR_GREEN));
+   list_push(menu->startup_objects, create_cube(vec3f(12, 13, 0), .05f, COLOR_BLUE));
+   list_push(menu->startup_objects, create_cube(vec3f(13, 0, 11), .05f, COLOR_RED));
    list_push(menu->startup_objects, create_cameraControl());
 
    scm_push_scene(menu);

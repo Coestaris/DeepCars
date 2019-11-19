@@ -9,6 +9,8 @@
 
 #include "graphics/graphics.h"
 #include "shaders/shader.h"
+#include "scene.h"
+#include "sceneManager.h"
 
 // Initial count of objects
 #define OBJECT_COUNT_START 50
@@ -46,7 +48,6 @@ list_t*     mouse_listeners;
 list_t*     mousemove_listeners;
 list_t*     update_listeners;
 
-
 // Get current millisecond of global time
 double_t u_get_millis(void)
 {
@@ -68,7 +69,11 @@ void u_close(void)
 // Looping through all objects and draws it
 void u_draw_func(void)
 {
-   gr_fill(COLOR_GRAY);
+   gr_fill(current_scene->back_color);
+
+   // update view matrix according to current camera
+   identityMat(view_mat);
+   c_toMat(view_mat, current_scene->camera);
 
    for (size_t i = 0; i < objects->count; i++)
    {

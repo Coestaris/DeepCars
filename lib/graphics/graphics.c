@@ -30,7 +30,7 @@ void gr_fill(vec4 color)
 
 shader_t* shader_simpleColored;
 mat4 projMat;
-mat4 viewMat;
+mat4 view_mat;
 mat4 modelMat;
 
 void gr_init(mat4 _proj, mat4 _view)
@@ -55,7 +55,7 @@ void gr_init(mat4 _proj, mat4 _view)
    shader_simpleColored = s_getShader(SH_SIMPLECOLORED);
 
    projMat = _proj;
-   viewMat = _view;
+   view_mat = _view;
    modelMat = cmat4();
 }
 
@@ -79,7 +79,7 @@ void gr_free(void)
    freeVec4(COLOR_PURPLE);
 
    freeMat4(projMat);
-   freeMat4(viewMat);
+   freeMat4(view_mat);
    freeMat4(modelMat);
 }
 
@@ -109,11 +109,11 @@ void gr_draw_model_simpleColor(
 
    sh_set_mat4(shader_simpleColored,
                shader_simpleColored->uniform_locations[SH_SIMPLECOLORED_VIEW],
-               viewMat);
+               view_mat);
 
    identityMat(modelMat);
-   translateMat(modelMat, (float) pos.x, (float) pos.y, (float) pos.y);
-   scaleMat(modelMat, (float) scale.x, (float) scale.y, (float) scale.y);
+   translateMat(modelMat, (float) pos.x, (float) pos.y, (float) pos.z);
+   scaleMat(modelMat, (float) scale.x, (float) scale.y, (float) scale.z);
 
    sh_set_mat4(shader_simpleColored,
                shader_simpleColored->uniform_locations[SH_SIMPLECOLORED_MODEL],

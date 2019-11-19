@@ -8,6 +8,9 @@
 #include "scene.h"
 #include "updater.h"
 
+// Global current scene set by scm_load_scene
+extern scene_t* current_scene;
+
 // Init all private variables of scene manager
 void scm_init(void);
 

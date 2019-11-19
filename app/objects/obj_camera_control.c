@@ -20,10 +20,7 @@ void camera_updateFunc(object_t* this)
    scene_t* scene = scm_get_current();
    cameraPitch = dy;
    cameraYaw = dx + (float) M_PI / 2.0;
-   identityMat(view);
-
    c_rotate(scene->camera, cameraPitch, cameraYaw);
-   c_toMat(view, scene->camera);
 
    vec4_cpy(cameraDirCpy, scene->camera->direction);
    vec4_mulf(cameraDirCpy, .2f);

@@ -9,6 +9,7 @@
 
 #include "structs.h"
 #include "graphics/camera.h"
+#include "graphics/graphics.h"
 #include "graphics/light.h"
 #include "drawableObject.h"
 
@@ -22,6 +23,9 @@ typedef struct _scene
    camera_t* camera;
    // Set of objects that loads to an updater when scene is will be loading
    list_t* startup_objects;
+
+   //todo: delete
+   vec4 back_color;
 
 } scene_t;
 
