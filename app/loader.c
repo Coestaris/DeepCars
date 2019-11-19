@@ -33,13 +33,13 @@ void app_loadResources(void)
 {
     //models
     models = createList(10);
-    listPush(models, loadAndBuildModel("cube.obj"));
+    listPush(models, loadAndBuildModel("teapot.obj"));
 
     //scenes
     scene_t* menu = sc_create(SCENEID_MENU);
-    listPush(menu->startupObjects, create_cube(vec3f(5, 5, 0), 2, COLOR_GREEN));
-    listPush(menu->startupObjects, create_cube(vec3f(-5, 5, 0), 3, COLOR_BLUE));
-    listPush(menu->startupObjects, create_cube(vec3f(5, -5, 0), 1, COLOR_RED));
+    listPush(menu->startupObjects, create_cube(vec3f(5, 5, 0), .3f, COLOR_GREEN));
+    //listPush(menu->startupObjects, create_cube(vec3f(-5, 5, 0), 3, COLOR_BLUE));
+    //listPush(menu->startupObjects, create_cube(vec3f(5, -5, 0), 1, COLOR_RED));
     listPush(menu->startupObjects, create_cameraControl());
 
     scm_pushScene(menu);

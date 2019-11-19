@@ -177,9 +177,16 @@ void proceedLine(model_t* model, const char* string, size_t startIndex, size_t e
                 int32_t i1 = -1, i2 = -1, i3 = -1;
                 parseFace(&i1, &i2, &i3);
 
-                face->vertID[wordCount - 1] = i3;
-                face->texID[wordCount - 1] = i2;
-                face->normalID[wordCount - 1] = i1;
+                if(i2 == -1 && i3 == -1)
+                {
+                    face->vertID[wordCount - 1] = i1;
+                }
+                else
+                {
+                    face->vertID[wordCount - 1] = i3;
+                    face->texID[wordCount - 1] = i2;
+                    face->normalID[wordCount - 1] = i1;
+                }
             }
         }
         wordCount++;
@@ -204,6 +211,9 @@ void proceedLine(model_t* model, const char* string, size_t startIndex, size_t e
         memcpy(newFace->vertID, face->vertID, sizeof(face->vertID));
         memcpy(newFace->texID, face->texID, sizeof(face->texID));
         m_pushFace(model, newFace);
+
+        memset(face->normalID, -1, sizeof(face->normalID));
+        memset(face->texID, -1, sizeof(face->texID));
     }
 }
 
@@ -290,9 +300,9 @@ model_t* m_load(const char* filename)
     if(!face)
     {
         face = malloc(sizeof(modelFace_t));
-
+        memset(face->normalID, -1, sizeof(face->normalID));
+        memset(face->texID, -1, sizeof(face->texID));
     }
-
     FILE* f = fopen(filename, "r");
     if(!f)
     {
@@ -443,7 +453,7 @@ void m_build(model_t* model)
 {
     bool useTexCoords = model->modelLen->texCoordsCount != 0 && model->faces[0]->texID[0] != -1;
     bool useNormals = model->modelLen->normalsCount != 0 && model->faces[0]->normalID[0] != -1;
-    size_t vertPerFace =  model->faces[0]->count;
+    size_t vertPerFace =  3; //always triangles...
 
     size_t size =
                             model->modelLen->facesCount * vertPerFace * 3 +         //vertices
@@ -457,23 +467,29 @@ void m_build(model_t* model)
         for(size_t j = 0; j < vertPerFace; j++)
         {
             assert(model->faces[i]->vertID[j] <= model->modelLen->verticesCount);
-            buffer[bufferIndex++] = model->vertices[model->faces[i]->vertID[j] - 1][0];
-            buffer[bufferIndex++] = model->vertices[model->faces[i]->vertID[j] - 1][1];
-            buffer[bufferIndex++] = model->vertices[model->faces[i]->vertID[j] - 1][2];
+            uint32_t vertID = model->faces[i]->vertID[j] - 1;
+
+            buffer[bufferIndex++] = model->vertices[vertID][0];
+            buffer[bufferIndex++] = model->vertices[vertID][1];
+            buffer[bufferIndex++] = model->vertices[vertID][2];
 
             if(useTexCoords)
             {
                 assert(model->faces[i]->texID[j] <= model->modelLen->texCoordsCount);
-                buffer[bufferIndex++] = model->texCoords[model->faces[i]->texID[j] - 1][0];
-                buffer[bufferIndex++] = model->texCoords[model->faces[i]->texID[j] - 1][1];
+                uint32_t texID = model->faces[i]->texID[j] - 1;
+
+                buffer[bufferIndex++] = model->texCoords[texID][0];
+                buffer[bufferIndex++] = model->texCoords[texID][1];
             }
 
             if(useNormals)
             {
                 assert(model->faces[i]->normalID[j] <= model->modelLen->normalsCount);
-                buffer[bufferIndex++] = model->normals[model->faces[i]->normalID[j] - 1][0];
-                buffer[bufferIndex++] = model->normals[model->faces[i]->normalID[j] - 1][1];
-                buffer[bufferIndex++] = model->normals[model->faces[i]->normalID[j] - 1][2];
+                uint32_t normalID = model->faces[i]->normalID[j] - 1;
+
+                buffer[bufferIndex++] = model->normals[normalID][0];
+                buffer[bufferIndex++] = model->normals[normalID][1];
+                buffer[bufferIndex++] = model->normals[normalID][2];
             }
         }
 
@@ -522,7 +538,7 @@ void m_build(model_t* model)
     }
     else //no normals and coords
     {
-        glVertexAttribPointer(0, vertPerFace, GL_FLOAT, GL_FALSE, (vertPerFace + 2) * sizeof(float),
+        glVertexAttribPointer(0, vertPerFace, GL_FLOAT, GL_FALSE, vertPerFace * sizeof(float),
                               (void*)0);
         glEnableVertexAttribArray(0);
     }
