@@ -11,7 +11,7 @@
 #include "graphics/camera.h"
 #include "graphics/graphics.h"
 #include "graphics/light.h"
-#include "drawableObject.h"
+#include "object.h"
 
 // Structure for ease movement between scenes (changing one set of objects, lights to a second)
 typedef struct _scene

@@ -12,7 +12,7 @@
 #include <X11/Xlib.h>
 
 #include "graphics/win.h"
-#include "drawableObject.h"
+#include "object.h"
 
 #define KEY_RELEASE 0
 #define KEY_PRESSED 1
@@ -37,7 +37,7 @@ void u_close(void);
 void u_init(void);
 
 // Start application loop
-void u_start_loop(winInfo_t* info);
+void u_start_loop(win_info_t* info);
 
 // Clears all drawable objects
 void u_clear_objects(bool free);

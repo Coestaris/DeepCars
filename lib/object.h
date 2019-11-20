@@ -2,8 +2,8 @@
 // Created by maxim on 11/17/19.
 //
 
-#ifndef DEEPCARS_DRAWABLEOBJECT_H
-#define DEEPCARS_DRAWABLEOBJECT_H
+#ifndef DEEPCARS_OBJECT_H
+#define DEEPCARS_OBJECT_H
 
 #include "resources/model.h"
 
@@ -52,4 +52,4 @@ object_t* o_create();
 // Frees object and all its used resources
 void o_free(object_t* object);
 
-#endif //DEEPCARS_DRAWABLEOBJECT_H
+#endif //DEEPCARS_OBJECT_H

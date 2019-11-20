@@ -15,7 +15,7 @@ typedef float* mat4;
 typedef float* vec4;
 
 vec4 cvec4(double_t x, double_t y, double_t z, double_t l);
-void freeVec4(vec4 vec);
+void vec4_free(vec4 vec);
 mat4 cmat4();
 void freeMat4(mat4 mat);
 

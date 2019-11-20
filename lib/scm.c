@@ -5,7 +5,7 @@
 #ifdef __GNUC__
 #pragma implementation "sceneManager.h"
 #endif
-#include "sceneManager.h"
+#include "scm.h"
 
 // List of all pushed scenes
 list_t* scenes;
@@ -55,7 +55,7 @@ void scm_load_scene(uint32_t id, bool free)
    if(!scene)
    {
       printf("[sceneManager.c][ERROR]: Unable to find scene with id %i", id);
-      exit(1);
+      exit(EXIT_FAILURE);
    }
 
    current_scene = scene;

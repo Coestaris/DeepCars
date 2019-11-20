@@ -17,24 +17,37 @@
 #include "../../oil/oil.h"
 #include "../structs.h"
 
+// Storing all data required for drawing the texture
 typedef struct _texture
 {
+   // Path to the texture file
    const char* fn;
+
+   // OpenGL texture ID
    GLuint texID;
 
-   vec2f_t center;
-
+   // Size of the texture
    int width;
    int height;
 
+   // Some texture data used by OIL
    texData* data;
 
 } texture_t;
 
-texture_t* t_create(const char* fn, vec2f_t center);
+// texture_t constructor
+texture_t* t_create(const char* fn);
+
+// Frees all resources used by texture and deletes OpenGL texture
 void t_free(texture_t* tex);
+
+// Deletes OpenGL texture
 void t_unload(texture_t* tex);
+
+// Loads texture from specified file
 void t_load(texture_t* tex);
+
+// Binds specified texture
 void t_bind(texture_t* tex);
 
 #endif //DEEPCARS_TEXTURE_H

@@ -6,7 +6,7 @@
 
 typedef GLXContext (* glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
 
-static bool w_isExtensionSupported(const char* extList, const char* extension)
+static bool w_is_extension_supported(const char* extList, const char* extension)
 {
    const char* start;
    const char* where, * terminator;
@@ -31,36 +31,36 @@ static bool w_isExtensionSupported(const char* extList, const char* extension)
    return false;
 }
 
-static int ctxErrorHandler(Display* dpy, XErrorEvent* ev)
+static int w_ctx_error_handler(Display* dpy, XErrorEvent* ev)
 {
    printf("[win.c][ERROR]: == CONTEXT ERROR ==");
    printf("[win.c][ERROR]: Type: %i, Error code: %i", ev->type, ev->error_code);
    printf("[win.c][ERROR]: Minor code: %i, Request code: %i,", ev->minor_code, ev->request_code);
    printf("[win.c][ERROR]: Resource ID: %lu, Serial number: %lu", ev->resourceid, ev->serial);
-   exit(1);
+   exit(EXIT_FAILURE);
 }
 
 int glx_major_version = GLX_DEFAULT_MAJOR_VERSION;
 int glx_minor_version = GLX_DEFAULT_MINOR_VERSION;
 int glx_flags = GLX_DEFAULT_FLAGS;
 
-void w_setGLXContextVersion(int major, int minor, int flags)
+void w_set_glx_context_version(int major, int minor, int flags)
 {
    glx_major_version = major;
    glx_minor_version = minor;
    glx_flags = flags;
 }
 
-winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
-                    const char* winCaption, bool verbose, FILE* vf)
+win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t win_y,
+                     const char* win_caption, bool verbose, FILE* vf)
 {
-   winInfo_t* info = malloc(sizeof(winInfo_t));
+   win_info_t* info = malloc(sizeof(win_info_t));
 
-   info->w = winW;
-   info->h = winH;
-   info->caption = winCaption;
-   info->lockedFps = DEFAULT_LOCKED_FPS;
-   info->lastFrame = 0;
+   info->w = win_w;
+   info->h = win_h;
+   info->caption = win_caption;
+   info->locked_fps = DEFAULT_LOCKED_FPS;
+   info->last_frame = 0;
 
    if (verbose)
    {
@@ -70,7 +70,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
    if (!info->display)
    {
       fprintf(vf, "[win.c][ERROR]: Failed to open X display\n");
-      exit(1);
+      exit(EXIT_FAILURE);
    }
 
    // Get a matching FB config
@@ -99,7 +99,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
        ((glx_major == 1) && (glx_minor < 3)) || (glx_major < 1))
    {
       fprintf(vf, "[win.c][ERROR]: Invalid GLX version. Required GLX 1.3 or higher\n");
-      exit(1);
+      exit(EXIT_FAILURE);
    }
 
    if (verbose)
@@ -110,7 +110,7 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
    if (!fbc)
    {
       fprintf(vf, "[win.c][ERROR]: Failed to retrieve a framebuffer config\n");
-      exit(1);
+      exit(EXIT_FAILURE);
    }
    if (verbose)
       fprintf(vf, "[win.c]: Found %d matching FB configs.\n", fbcount);
@@ -163,27 +163,27 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
    swa.border_pixel = 0;
    swa.event_mask = StructureNotifyMask;
 
-   info->colorMap = cmap;
+   info->color_map = cmap;
 
    if (verbose)
    {
       fprintf(vf, "[win.c]: Creating window\n");
-      fprintf(vf, "[win.c]: WinW: %i, winH: %i, winX: %i, winY: %i, caption: \"%s\"\n",
-              winW, winH, winX, winY, winCaption);
+      fprintf(vf, "[win.c]: WinW: %i, win_h: %i, win_x: %i, win_y: %i, caption: \"%s\"\n",
+              win_w, win_h, win_x, win_y, win_caption);
    }
    info->win = XCreateWindow(info->display, RootWindow(info->display, vi->screen),
-                             winX, winY, winW, winH, 0, vi->depth, InputOutput, vi->visual,
+                             win_x, win_y, win_w, win_h, 0, vi->depth, InputOutput, vi->visual,
                              CWBorderPixel | CWColormap | CWEventMask, &swa);
    if (!info->win)
    {
       fprintf(vf, "[win.c][ERROR]: Failed to create window.\n");
-      exit(1);
+      exit(EXIT_FAILURE);
    }
 
    // Done with the visual info data
    XFree(vi);
 
-   XStoreName(info->display, info->win, winCaption);
+   XStoreName(info->display, info->win, win_caption);
 
    if (verbose)
       fprintf(vf, "[win.c]: Mapping window\n");
@@ -206,14 +206,14 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
    // Note this error handler is global.  All display connections in all threads
    // of a process use the same error handler, so be sure to guard against other
    // threads issuing X commands while this code is running.
-   int (* oldHandler)(Display*, XErrorEvent*) = XSetErrorHandler(&ctxErrorHandler);
+   int (* old_handler)(Display*, XErrorEvent*) = XSetErrorHandler(&w_ctx_error_handler);
 
    if (verbose)
       fprintf(vf, "[win.c]: Creating GL Context\n");
 
    // Check for the GLX_ARB_create_context extension string and the function.
    // If either is not present, use GLX 1.3 context creation method.
-   if (!w_isExtensionSupported(glxExts, "GLX_ARB_create_context") || !glXCreateContextAttribsARB)
+   if (!w_is_extension_supported(glxExts, "GLX_ARB_create_context") || !glXCreateContextAttribsARB)
    {
       fprintf(vf, "[win.c]: glXCreateContextAttribsARB() not found... using old-style GLX context\n");
       ctx = glXCreateNewContext(info->display, bestFbc, GLX_RGBA_TYPE, 0, True);
@@ -260,12 +260,12 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
    XSync(info->display, False);
 
    // Restore the original error handler
-   XSetErrorHandler(oldHandler);
+   XSetErrorHandler(old_handler);
 
    if (!ctx)
    {
       fprintf(vf, "[win.c][ERROR]: Failed to create an OpenGL context\n");
-      exit(1);
+      exit(EXIT_FAILURE);
    }
 
    // Verifying that context is a direct context
@@ -291,25 +291,25 @@ winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
    return info;
 }
 
-void w_destroy(winInfo_t* w)
+void w_destroy(win_info_t* w)
 {
    glXMakeCurrent(w->display, 0, 0);
    glXDestroyContext(w->display, w->context);
 
    XDestroyWindow(w->display, w->win);
-   XFreeColormap(w->display, w->colorMap);
+   XFreeColormap(w->display, w->color_map);
    XCloseDisplay(w->display);
 
    free(w);
 }
 
-void w_swapBuffers(winInfo_t* w)
+void w_swap_buffers(win_info_t* w)
 {
    glXSwapBuffers(w->display, w->win);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void w_printInfo()
+void w_print_info()
 {
    printf("[win.c][GL Spec]: Vendor: %s\n", (char*) glGetString(GL_VENDOR));
    printf("[win.c][GL Spec]: Using OpenGL Version: %s\n", (char*) glGetString(GL_VERSION));

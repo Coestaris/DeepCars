@@ -2,89 +2,120 @@
 // Created by maxim on 9/11/19.
 //
 
-#include <errno.h>
+#ifdef __GNUC__
+#pragma implementation "model.h"
+#endif
 #include "model.h"
 
+// Initial length of all vectors
+#define START_LEN_COUNT 10
+// Increase size multiplier of vectors
+#define INCREASE_LEN 1.5
 
-#define pushModelProp(model, prop, type, item) {                                                \
-        if(model->modelLen->prop ## Count > model->modelLen->prop ##MaxCount - 1)               \
+// Adds new element to a specified model in a specified property
+// If vector is not big enough to fit new element it will be resized
+// and size will be increased in INCREASE_LEN times
+#define M_PUSH_MODEL_PROP(model, prop, type, item) {                                            \
+        if(model->model_len->prop ## _count > model->model_len->prop ##_max_count - 1)          \
         {                                                                                       \
-            size_t newLen = (int)((float)model->modelLen->prop ##MaxCount * INCREASE_LEN);      \
+            size_t newLen = (int)((float)model->model_len->prop ##_max_count * INCREASE_LEN);   \
             model->prop = realloc(model-> prop, sizeof(type) * newLen);                         \
-            model->modelLen->prop ##MaxCount = newLen;                                          \
+            model->model_len->prop ##_max_count = newLen;                                       \
         }                                                                                       \
-        model->prop[model->modelLen->prop ##Count++] = item;                                    \
+        model->prop[model->model_len->prop ##_count++] = item;                                  \
     }
 
-#define START_LEN_COUNT 10
-#define INCREASE_LEN 1.5
+// Maximum length of token in a file.
+// Token is any char sequence between white spaces
 #define MAX_WORD_LEN 256
 
-typedef enum
+// Count of vertex per face to be stored in VAO. Always use triangles...
+#define VERTEX_PER_FACE 3
+
+// All supported descriptor types
+typedef enum _obj_descriptor_type
 {
-   od_vertex,
-   od_vertexNormal,
-   od_vertexTex,
-   od_face,
-   od_group,
-   od_object,
-   od_mtllib,
-   od_usemtl,
-   od_comment
+   OD_VERTEX,
+   OD_VERTEX_NORMAL,
+   od_VERTEX_TEX,
+   OD_FACE,
+   OD_GROUP,
+   OD_OBJECT,
+   OD_MTLLIB,
+   OD_USEMLT,
+   OD_COMMENT
 
-} objDescriptorType_t;
+} obj_descriptor_type_t;
 
+// Represents descriptor and it's string value to compare with words
 typedef struct
 {
    const char* string;
-   objDescriptorType_t type;
+   obj_descriptor_type_t type;
 
-} objDescriptor_t;
+} obj_descriptor_t;
 
-void m_pushVertex(model_t* model, vec4 vec);
-void m_pushNormal(model_t* model, vec4 vec);
-void m_pushTexCoord(model_t* model, vec4 vec);
-void m_pushFace(model_t* model, modelFace_t* face);
-void m_pushGroupName(model_t* model, char* groupName);
-void m_pushMtlLib(model_t* model, char* mtlLib);
-void m_pushUsedMaterial(model_t* model, material_t* usedMaterial);
+// Push element to a specified array of model
+void m_push_vertex(model_t* model, vec4 vec);
+void m_push_normal(model_t* model, vec4 vec);
+void m_push_tex_coord(model_t* model, vec4 vec);
+void m_push_face(model_t* model, model_face_t* face);
+void m_push_group_name(model_t* model, char* group_name);
+void m_push_mtllib(model_t* model, char* mtllib);
+void m_push_used_material(model_t* model, material_t* used_material);
 
-objDescriptor_t allowedDescriptors[] =
-        {
-                {"v",      od_vertex},
-                {"vn",     od_vertexNormal},
-                {"vt",     od_vertexTex},
-                {"f",      od_face},
-                {"g",      od_group},
-                {"o",      od_object},
-                {"mtllib", od_mtllib},
-                {"usemtl", od_usemtl},
-                {"#",      od_comment}
-        };
+// List of all supported descriptors
+obj_descriptor_t allowed_descriptors[] =
+{
+        // Contains single vertex information, possible 4 values
+       {"v",      OD_VERTEX},
+        // Contains single normal information, possible 4 values
+       {"vn",     OD_VERTEX_NORMAL},
+        // Contains single texture coordinate information, possible 4 values
+       {"vt",     od_VERTEX_TEX},
+        // Contains single face information, can have from 3 to MAX_FACE_LEN values
+       {"f",      OD_FACE},
+        // Describes group name of all following faces, can have several values separated with spaces
+       {"g",      OD_GROUP},
+        // Describes name of current object
+       {"o",      OD_OBJECT},
+        // Describes name of material library
+       {"mtllib", OD_MTLLIB},
+        // Describes material of all next faces
+       {"usemtl", OD_USEMLT},
+        // Just a comment
+       {"#",      OD_COMMENT}
+};
 
-modelFace_t* face;
-char word[MAX_WORD_LEN];
-const size_t descriptorsCount = sizeof(allowedDescriptors) / sizeof(allowedDescriptors[0]);
-vec4 buffVec;
+// Array to store current word to proceed
+char              word[MAX_WORD_LEN];
+// Buffer face to store temp values
+model_face_t*     face;
+// Buffer vector to store temp values
+vec4              buff_vec;
+// Total count of supported descriptors
+const size_t      descriptors_count = sizeof(allowed_descriptors) / sizeof(allowed_descriptors[0]);
 
-bool isSeparator(char sym)
+// Return true if symbol is white space (separator)
+bool m_is_separator(char sym)
 {
    return (sym == ' ' || sym == '\n' || sym == '\t' || sym == '\0');
 }
 
-bool readNextWord(const char* string, size_t* startIndex, size_t endIndex)
+// Separate string to words storing result to word
+bool m_read_next_word(const char* string, size_t* start_index, size_t end_index)
 {
-   if (*startIndex >= endIndex)
+   if (*start_index >= end_index)
       return false;
 
-   size_t start = *startIndex;
+   size_t start = *start_index;
 
-   while (isSeparator(string[start])) start++;
-   *startIndex = start;
+   while (m_is_separator(string[start])) start++;
+   *start_index = start;
 
-   while (!isSeparator(string[*startIndex])) (*startIndex)++;
+   while (!m_is_separator(string[*start_index])) (*start_index)++;
 
-   size_t len = *startIndex - start;
+   size_t len = *start_index - start;
    assert(len < MAX_WORD_LEN);
 
    memset(word, 0, len + 1);
@@ -92,7 +123,8 @@ bool readNextWord(const char* string, size_t* startIndex, size_t endIndex)
    return true;
 }
 
-void parseFace(int32_t* i1, int32_t* i2, int32_t* i3)
+// Parses face word and stores result to i1, i2, i3 separating it by whitespaces
+void m_parse_face(int32_t* i1, int32_t* i2, int32_t* i3)
 {
    int32_t* ptr = i1;
    size_t power = 0;
@@ -112,203 +144,210 @@ void parseFace(int32_t* i1, int32_t* i2, int32_t* i3)
    }
 }
 
-double_t parsedouble_t(size_t lineIndex)
+// Parse double stored in word
+double_t m_parse_double(size_t line_index)
 {
    char* err;
    double_t d = strtod(word, &err);
 
-   if (isSeparator(*err) && errno != ERANGE && errno != HUGE_VAL)
+   if (m_is_separator(*err) && errno != ERANGE && errno != HUGE_VAL)
       return d;
    else
    {
-      printf("[model.c][ERROR]: Unable to parse %s. Expected float point value at line %li\n", word, lineIndex);
+      printf("[model.c][ERROR]: Unable to parse %s. Expected float point value at line %li\n", word, line_index);
       exit(EXIT_FAILURE);
    }
 }
 
-void proceedLine(model_t* model, const char* string, size_t startIndex, size_t endIndex, size_t lineIndex)
+// Separates string slice between specified indices into words
+// and proceeding it storing results to a model. It will determine
+// descriptor type and validate its inputs
+void m_proceed_line(model_t* model, const char* string, size_t start_index, size_t end_index, size_t line_index)
 {
-   if (startIndex == endIndex)
+   if (start_index == end_index)
       return;
 
-   objDescriptor_t* descriptor = NULL;
-   size_t wordCount = 0;
+   obj_descriptor_t* descriptor = NULL;
+   size_t word_count = 0;
 
-   while ((readNextWord(string, &startIndex, endIndex)))
+   // iterate through all words
+   while ((m_read_next_word(string, &start_index, end_index)))
    {
-      if (wordCount == 0)
+      // first word is always descriptor's type
+      if (word_count == 0)
       {
-         for (size_t i = 0; i < descriptorsCount; i++)
-            if (!strcmp(word, allowedDescriptors[i].string))
+         for (size_t i = 0; i < descriptors_count; i++)
+            if (!strcmp(word, allowed_descriptors[i].string))
             {
-               descriptor = &allowedDescriptors[i];
+               descriptor = &allowed_descriptors[i];
             }
 
          if (descriptor == NULL)
          {
-            printf("[model.c][ERROR]: %s is unknown line descriptor at line %li\n", word, lineIndex);
+            printf("[model.c][ERROR]: %s is unknown line descriptor at line %li\n", word, line_index);
             exit(EXIT_FAILURE);
          }
-
-         //printf("Descriptor: %s\n", descriptor->string);
       }
       else
       {
-         if (descriptor->type == od_comment)
+         if (descriptor->type == OD_COMMENT)
             continue;
-         if (descriptor->type == od_vertex)
+         if (descriptor->type == OD_VERTEX)
          {
-            if (wordCount > 4)
+            if (word_count > 4)
             {
-               printf("[model.c][ERROR]: Too many arguments for vertex descriptor at line %li\n", lineIndex);
+               printf("[model.c][ERROR]: Too many arguments for vertex descriptor at line %li\n", line_index);
                exit(EXIT_FAILURE);
             }
-            buffVec[wordCount - 1] = (float) parsedouble_t(lineIndex);
+            buff_vec[word_count - 1] = (float) m_parse_double(line_index);
          }
-         if (descriptor->type == od_vertexNormal)
+         if (descriptor->type == OD_VERTEX_NORMAL)
          {
-            if (wordCount > 3)
+            if (word_count > 3)
             {
-               printf("[model.c][ERROR]: Too many arguments for normal descriptor at line %li\n", lineIndex);
+               printf("[model.c][ERROR]: Too many arguments for normal descriptor at line %li\n", line_index);
                exit(EXIT_FAILURE);
             }
-            buffVec[wordCount - 1] = (float) parsedouble_t(lineIndex);
+            buff_vec[word_count - 1] = (float) m_parse_double(line_index);
          }
-         if (descriptor->type == od_face)
+         if (descriptor->type == OD_FACE)
          {
-            assert(wordCount < MAX_FACE_LEN);
+            assert(word_count < MAX_FACE_LEN);
 
             int32_t i1 = -1, i2 = -1, i3 = -1;
-            parseFace(&i1, &i2, &i3);
+            m_parse_face(&i1, &i2, &i3);
 
             if (i2 == -1 && i3 == -1)
             {
-               face->vertID[wordCount - 1] = i1;
+               face->vert_id[word_count - 1] = i1;
             }
             else
             {
-               face->vertID[wordCount - 1] = i3;
-               face->texID[wordCount - 1] = i2;
-               face->normalID[wordCount - 1] = i1;
+               face->vert_id[word_count - 1] = i3;
+               face->tex_id[word_count - 1] = i2;
+               face->normal_id[word_count - 1] = i1;
             }
          }
       }
-      wordCount++;
+      word_count++;
    }
 
-   if (descriptor->type == od_comment)
+   // push cached result to a model
+   if (descriptor->type == OD_COMMENT)
       return;
-   if (descriptor->type == od_vertex)
+   if (descriptor->type == OD_VERTEX)
    {
-      m_pushVertex(model, vec4_ccpy(buffVec));
-      fillVec4(buffVec, 0, 0, 0, 0);
+      m_push_vertex(model, vec4_ccpy(buff_vec));
+      fillVec4(buff_vec, 0, 0, 0, 0);
    }
-   if (descriptor->type == od_vertexNormal)
+   if (descriptor->type == OD_VERTEX_NORMAL)
    {
-      m_pushNormal(model, vec4_ccpy(buffVec));
-      fillVec4(buffVec, 0, 0, 0, 0);
+      m_push_normal(model, vec4_ccpy(buff_vec));
+      fillVec4(buff_vec, 0, 0, 0, 0);
    }
 
-   if (descriptor->type == od_face)
+   if (descriptor->type == OD_FACE)
    {
-      modelFace_t* newFace = malloc(sizeof(modelFace_t));
-      newFace->parent = model;
-      newFace->count = wordCount - 1;
-      memcpy(newFace->normalID, face->normalID, sizeof(face->normalID));
-      memcpy(newFace->vertID, face->vertID, sizeof(face->vertID));
-      memcpy(newFace->texID, face->texID, sizeof(face->texID));
-      m_pushFace(model, newFace);
+      model_face_t* new_face = malloc(sizeof(model_face_t));
+      new_face->parent = model;
+      new_face->count = word_count - 1;
+      memcpy(new_face->normal_id, face->normal_id, sizeof(face->normal_id));
+      memcpy(new_face->vert_id, face->vert_id, sizeof(face->vert_id));
+      memcpy(new_face->tex_id, face->tex_id, sizeof(face->tex_id));
+      m_push_face(model, new_face);
 
-      memset(face->normalID, -1, sizeof(face->normalID));
-      memset(face->texID, -1, sizeof(face->texID));
+      memset(face->normal_id, -1, sizeof(face->normal_id));
+      memset(face->tex_id, -1, sizeof(face->tex_id));
    }
 }
 
-void parseLines(model_t* model, const char* str)
+// Separates input to lines and for each of them calls m_proceed_line
+void m_parse_lines(model_t* model, const char* str)
 {
-   size_t startIndex = 0;
-   size_t endIndex = 0;
-   size_t lineIndex = 0;
+   size_t start_index = 0;
+   size_t end_index = 0;
+   size_t line_index = 0;
 
    size_t i = 0;
    while (str[i] != '\0')
    {
       if (str[i] != '\n' && str[i] != '\0')
       {
-         startIndex = i;
+         start_index = i;
          while (str[i] != '\n' && str[i] != '\0')
          {
             i++;
          }
-         endIndex = i - 1;
-         proceedLine(model, str, startIndex, endIndex, lineIndex++);
+         end_index = i - 1;
+         m_proceed_line(model, str, start_index, end_index, line_index++);
       }
       else
       {
-         if (str[i] == '\n' && endIndex != i - 1)
-            lineIndex++;
+         if (str[i] == '\n' && end_index != i - 1)
+            line_index++;
          i++;
       }
    }
 }
 
+//
+// m_create()
+//
 model_t* m_create()
 {
    model_t* model = malloc(sizeof(model_t));
-   model->modelLen = malloc(sizeof(modelLen_t));
-   model->modelLen->verticesMaxCount = START_LEN_COUNT;
-   model->modelLen->normalsMaxCount = START_LEN_COUNT;
-   model->modelLen->texCoordsMaxCount = START_LEN_COUNT;
-   model->modelLen->facesMaxCount = START_LEN_COUNT;
-   model->modelLen->groupNamesMaxCount = START_LEN_COUNT;
-   model->modelLen->mtlLibsMaxCount = START_LEN_COUNT;
-   model->modelLen->usedMaterialsMaxCount = START_LEN_COUNT;
+   model->model_len = malloc(sizeof(model_len_t));
+   model->model_len->vertices_max_count = START_LEN_COUNT;
+   model->model_len->normals_max_count = START_LEN_COUNT;
+   model->model_len->tex_coords_max_count = START_LEN_COUNT;
+   model->model_len->faces_max_count = START_LEN_COUNT;
+   model->model_len->group_names_max_count = START_LEN_COUNT;
+   model->model_len->mtl_libs_max_count = START_LEN_COUNT;
 
-   model->modelLen->verticesCount = 0;
-   model->modelLen->normalsCount = 0;
-   model->modelLen->texCoordsCount = 0;
-   model->modelLen->facesCount = 0;
-   model->modelLen->groupNamesCount = 0;
-   model->modelLen->mtlLibsCount = 0;
-   model->modelLen->usedMaterialsCount = 0;
+   model->model_len->vertices_count = 0;
+   model->model_len->normals_count = 0;
+   model->model_len->tex_coords_count = 0;
+   model->model_len->faces_count = 0;
+   model->model_len->group_names_count = 0;
+   model->model_len->mtl_libs_count = 0;
 
-   model->vertices = malloc(sizeof(vec4) * model->modelLen->verticesMaxCount);
-   memset(model->vertices, 0, sizeof(vec4) * model->modelLen->verticesMaxCount);
+   model->vertices = malloc(sizeof(vec4) * model->model_len->vertices_max_count);
+   memset(model->vertices, 0, sizeof(vec4) * model->model_len->vertices_max_count);
 
-   model->normals = malloc(sizeof(vec4) * model->modelLen->normalsMaxCount);
-   memset(model->normals, 0, sizeof(vec4) * model->modelLen->normalsMaxCount);
+   model->normals = malloc(sizeof(vec4) * model->model_len->normals_max_count);
+   memset(model->normals, 0, sizeof(vec4) * model->model_len->normals_max_count);
 
-   model->texCoords = malloc(sizeof(vec4) * model->modelLen->texCoordsMaxCount);
-   memset(model->texCoords, 0, sizeof(vec4) * model->modelLen->texCoordsMaxCount);
+   model->tex_coords = malloc(sizeof(vec4) * model->model_len->tex_coords_max_count);
+   memset(model->tex_coords, 0, sizeof(vec4) * model->model_len->tex_coords_max_count);
 
-   model->faces = malloc(sizeof(modelFace_t**) * model->modelLen->facesMaxCount);
-   memset(model->faces, 0, sizeof(modelFace_t**) * model->modelLen->facesMaxCount);
+   model->faces = malloc(sizeof(model_face_t**) * model->model_len->faces_max_count);
+   memset(model->faces, 0, sizeof(model_face_t**) * model->model_len->faces_max_count);
 
-   model->groupNames = malloc(sizeof(char*) * model->modelLen->groupNamesMaxCount);
-   memset(model->groupNames, 0, sizeof(char*) * model->modelLen->groupNamesMaxCount);
+   model->group_names = malloc(sizeof(char*) * model->model_len->group_names_max_count);
+   memset(model->group_names, 0, sizeof(char*) * model->model_len->group_names_max_count);
 
-   model->mtlLibs = malloc(sizeof(char*) * model->modelLen->mtlLibsMaxCount);
-   memset(model->mtlLibs, 0, sizeof(char*) * model->modelLen->mtlLibsMaxCount);
+   model->mtl_libs = malloc(sizeof(char*) * model->model_len->mtl_libs_max_count);
+   memset(model->mtl_libs, 0, sizeof(char*) * model->model_len->mtl_libs_max_count);
 
-   model->usedMaterials = malloc(sizeof(material_t*) * model->modelLen->usedMaterialsMaxCount);
-   memset(model->usedMaterials, 0, sizeof(material_t*) * model->modelLen->usedMaterialsMaxCount);
-
-   model->objectName = NULL;
+   model->object_name = NULL;
    model->filename = NULL;
 
    return model;
 }
 
+//
+// m_load()
+//
 model_t* m_load(const char* filename)
 {
-   if (!buffVec)
-      buffVec = cvec4(0, 0, 0, 0);
+   if (!buff_vec)
+      buff_vec = cvec4(0, 0, 0, 0);
 
    if (!face)
    {
-      face = malloc(sizeof(modelFace_t));
-      memset(face->normalID, -1, sizeof(face->normalID));
-      memset(face->texID, -1, sizeof(face->texID));
+      face = malloc(sizeof(model_face_t));
+      memset(face->normal_id, -1, sizeof(face->normal_id));
+      memset(face->tex_id, -1, sizeof(face->tex_id));
    }
    FILE* f = fopen(filename, "r");
    if (!f)
@@ -329,49 +368,51 @@ model_t* m_load(const char* filename)
    model_t* model = m_create();
    model->filename = filename;
 
-   parseLines(model, data);
+   m_parse_lines(model, data);
 
    free(data);
    fclose(f);
 
    printf("[model.c]: Loaded model %s. Vertices: %li, Faces: %li\n",
-          filename, model->modelLen->verticesCount, model->modelLen->facesCount);
+          filename, model->model_len->vertices_count, model->model_len->faces_count);
 
    return model;
 }
 
+//
+// m_free()
+//
 void m_free(model_t* model)
 {
-   for (size_t i = 0; i < model->modelLen->verticesCount; i++)
-      freeVec4(model->vertices[i]);
+   glDeleteBuffers(1, &model->VAO);
+   glDeleteBuffers(1, &model->VBO);
+
+   for (size_t i = 0; i < model->model_len->vertices_count; i++)
+      vec4_free(model->vertices[i]);
    free(model->vertices);
 
-   for (size_t i = 0; i < model->modelLen->normalsCount; i++)
-      freeVec4(model->normals[i]);
+   for (size_t i = 0; i < model->model_len->normals_count; i++)
+      vec4_free(model->normals[i]);
    free(model->normals);
 
-   for (size_t i = 0; i < model->modelLen->texCoordsCount; i++)
-      freeVec4(model->texCoords[i]);
-   free(model->texCoords);
+   for (size_t i = 0; i < model->model_len->tex_coords_count; i++)
+      vec4_free(model->tex_coords[i]);
+   free(model->tex_coords);
 
-   for (size_t i = 0; i < model->modelLen->facesCount; i++)
+   for (size_t i = 0; i < model->model_len->faces_count; i++)
       free(model->faces[i]);
    free(model->faces);
 
-   for (size_t i = 0; i < model->modelLen->groupNamesCount; i++)
-      free(model->groupNames[i]);
-   free(model->groupNames);
+   for (size_t i = 0; i < model->model_len->group_names_count; i++)
+      free(model->group_names[i]);
+   free(model->group_names);
 
-   for (size_t i = 0; i < model->modelLen->mtlLibsCount; i++)
-      free(model->mtlLibs[i]);
-   free(model->mtlLibs);
+   for (size_t i = 0; i < model->model_len->mtl_libs_count; i++)
+      free(model->mtl_libs[i]);
+   free(model->mtl_libs);
 
-   for (size_t i = 0; i < model->modelLen->usedMaterialsCount; i++)
-      free(model->usedMaterials[i]);
-   free(model->usedMaterials);
-
-   free(model->objectName);
-   free(model->modelLen);
+   free(model->object_name);
+   free(model->model_len);
 
    if (model->VBO != 0)
       glDeleteBuffers(1, &(model->VBO));
@@ -383,125 +424,127 @@ void m_free(model_t* model)
    free(model);
 }
 
-inline void m_pushVertex(model_t* model, vec4 vec)
+inline void m_push_vertex(model_t* model, vec4 vec)
 {
    assert(vec);
-   pushModelProp(model, vertices, vec4, vec);
+   M_PUSH_MODEL_PROP(model, vertices, vec4, vec);
 }
 
-inline void m_pushNormal(model_t* model, vec4 vec)
+inline void m_push_normal(model_t* model, vec4 vec)
 {
    assert(vec);
-   pushModelProp(model, normals, vec4, vec);
+   M_PUSH_MODEL_PROP(model, normals, vec4, vec);
 }
 
-inline void m_pushTexCoord(model_t* model, vec4 vec)
+inline void m_push_tex_coord(model_t* model, vec4 vec)
 {
    assert(vec);
-   pushModelProp(model, texCoords, vec4, vec);
+   M_PUSH_MODEL_PROP(model, tex_coords, vec4, vec);
 }
 
-inline void m_pushFace(model_t* model, modelFace_t* face)
+inline void m_push_face(model_t* model, model_face_t* face)
 {
    assert(face);
-   pushModelProp(model, faces, modelFace_t*, face);
+   M_PUSH_MODEL_PROP(model, faces, model_face_t*, face);
 }
 
-inline void m_pushGroupName(model_t* model, char* groupName)
+inline void m_push_group_name(model_t* model, char* group_name)
 {
-   assert(groupName);
-   pushModelProp(model, groupNames, char*, groupName);
+   assert(group_name);
+   M_PUSH_MODEL_PROP(model, group_names, char*, group_name);
 }
 
-inline void m_pushMtlLib(model_t* model, char* mtlLib)
+inline void m_push_mtllib(model_t* model, char* mtllib)
 {
-   assert(mtlLib);
-   pushModelProp(model, mtlLibs, char*, mtlLib);
+   assert(mtllib);
+   M_PUSH_MODEL_PROP(model, mtl_libs, char*, mtllib);
 }
 
-inline void m_pushUsedMaterial(model_t* model, material_t* usedMaterial)
-{
-   assert(usedMaterial);
-   pushModelProp(model, usedMaterials, material_t*, usedMaterial);
-}
-
+//
+// m_info
+//
 void m_info(model_t* model)
 {
-   printf("[model.c]: Vertices (%li): \n", model->modelLen->verticesCount);
-   for (size_t i = 0; i < model->modelLen->verticesCount; i++)
+   printf("[model.c]: Vertices (%li): \n", model->model_len->vertices_count);
+   for (size_t i = 0; i < model->model_len->vertices_count; i++)
       printf("%li: %f %f %f [%f]\n",
              i, model->vertices[i][0],
              model->vertices[i][1],
              model->vertices[i][2],
              model->vertices[i][3]);
 
-   printf("\n[model.c]: Normals (%li): \n", model->modelLen->normalsCount);
-   for (size_t i = 0; i < model->modelLen->normalsCount; i++)
+   printf("\n[model.c]: Normals (%li): \n", model->model_len->normals_count);
+   for (size_t i = 0; i < model->model_len->normals_count; i++)
       printf("%li: %f %f %f\n",
              i, model->normals[i][0],
              model->normals[i][1],
              model->normals[i][2]);
 
-   printf("\n[model.c]: Faces (%li): \n", model->modelLen->facesCount);
-   for (size_t i = 0; i < model->modelLen->facesCount; i++)
+   printf("\n[model.c]: Faces (%li): \n", model->model_len->faces_count);
+   for (size_t i = 0; i < model->model_len->faces_count; i++)
    {
       printf("%li. ", i);
       for (size_t j = 0; j < model->faces[j]->count; j++)
       {
          printf("%i/%i/%i ",
-                model->faces[i]->vertID[j],
-                model->faces[i]->texID[j],
-                model->faces[i]->normalID[j]);
+                model->faces[i]->vert_id[j],
+                model->faces[i]->tex_id[j],
+                model->faces[i]->normal_id[j]);
       }
       putchar('\n');
    }
 }
 
+//
+// m_build
+//
 void m_build(model_t* model)
 {
-   bool useTexCoords = model->modelLen->texCoordsCount != 0 && model->faces[0]->texID[0] != -1;
-   bool useNormals = model->modelLen->normalsCount != 0 && model->faces[0]->normalID[0] != -1;
-   size_t vertPerFace = 3; //always triangles...
+   bool use_tex_coords = model->model_len->tex_coords_count != 0 && model->faces[0]->tex_id[0] != -1;
+   //bool use_normals = model->model_len->normals_count != 0 &&
+   //    (model->faces[0]->normal_id[0] != -1 || model->model_len->vertices_count == model->model_len->normals_count);
+   bool use_normals = false;
 
    size_t size =
-           model->modelLen->facesCount * vertPerFace * 3 +         //vertices
-           (useTexCoords ? (model->modelLen->facesCount * vertPerFace * 2) : 0) +  //texcoord
-           (useNormals ? (model->modelLen->facesCount * vertPerFace * 3) : 0);   //normals
+           model->model_len->faces_count * VERTEX_PER_FACE * 3 +                           // vertices
+           (use_tex_coords ? (model->model_len->faces_count * VERTEX_PER_FACE * 2) : 0) +  // texcoord
+           (use_normals ? (model->model_len->faces_count * VERTEX_PER_FACE * 3) : 0);      // normals
 
    float* buffer = malloc(sizeof(float) * size);
-   size_t bufferIndex = 0;
+   size_t buffer_index = 0;
 
-   for (size_t i = 0; i < model->modelLen->facesCount; i++)
-      for (size_t j = 0; j < vertPerFace; j++)
+   // storing all data to a buffer
+   for (size_t i = 0; i < model->model_len->faces_count; i++)
+      for (size_t j = 0; j < VERTEX_PER_FACE; j++)
       {
-         assert(model->faces[i]->vertID[j] <= model->modelLen->verticesCount);
-         uint32_t vertID = model->faces[i]->vertID[j] - 1;
+         assert(model->faces[i]->vert_id[j] <= model->model_len->vertices_count);
+         uint32_t vert_id = model->faces[i]->vert_id[j] - 1;
 
-         buffer[bufferIndex++] = model->vertices[vertID][0];
-         buffer[bufferIndex++] = model->vertices[vertID][1];
-         buffer[bufferIndex++] = model->vertices[vertID][2];
+         buffer[buffer_index++] = model->vertices[vert_id][0];
+         buffer[buffer_index++] = model->vertices[vert_id][1];
+         buffer[buffer_index++] = model->vertices[vert_id][2];
 
-         if (useTexCoords)
+         if (use_tex_coords)
          {
-            assert(model->faces[i]->texID[j] <= model->modelLen->texCoordsCount);
-            uint32_t texID = model->faces[i]->texID[j] - 1;
+            assert(model->faces[i]->tex_id[j] <= model->model_len->tex_coords_count);
+            uint32_t tex_id = model->faces[i]->tex_id[j] - 1;
 
-            buffer[bufferIndex++] = model->texCoords[texID][0];
-            buffer[bufferIndex++] = model->texCoords[texID][1];
+            buffer[buffer_index++] = model->tex_coords[tex_id][0];
+            buffer[buffer_index++] = model->tex_coords[tex_id][1];
          }
 
-         if (useNormals)
+         if (use_normals)
          {
-            assert(model->faces[i]->normalID[j] <= model->modelLen->normalsCount);
-            uint32_t normalID = model->faces[i]->normalID[j] - 1;
+            assert(model->faces[i]->normal_id[j] <= model->model_len->normals_count);
+            uint32_t normal_id = model->faces[i]->normal_id[j] - 1;
 
-            buffer[bufferIndex++] = model->normals[normalID][0];
-            buffer[bufferIndex++] = model->normals[normalID][1];
-            buffer[bufferIndex++] = model->normals[normalID][2];
+            buffer[buffer_index++] = model->normals[normal_id][0];
+            buffer[buffer_index++] = model->normals[normal_id][1];
+            buffer[buffer_index++] = model->normals[normal_id][2];
          }
       }
 
-   assert(bufferIndex != size - 1);
+   assert(buffer_index != size - 1);
 
    glGenBuffers(1, &model->VBO);
    glGenVertexArrays(1, &model->VAO);
@@ -509,48 +552,56 @@ void m_build(model_t* model)
    glBindBuffer(GL_ARRAY_BUFFER, model->VBO);
    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * size, buffer, GL_STATIC_DRAW);
 
+   // binding all necessary OpenGL attributes
    glBindVertexArray(model->VAO);
-   if (useNormals && useTexCoords)
+   if (use_normals && use_tex_coords)
    {
-      glVertexAttribPointer(0, vertPerFace, GL_FLOAT, GL_FALSE, (vertPerFace + 5) * sizeof(float),
+      // vertices (3 floats)
+      glVertexAttribPointer(0, VERTEX_PER_FACE, GL_FLOAT, GL_FALSE, (VERTEX_PER_FACE + 5) * sizeof(float),
                             (void*) 0);
       glEnableVertexAttribArray(0);
 
-      glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, (vertPerFace + 5) * sizeof(float),
-                            (void*) (vertPerFace * sizeof(float)));
+      // texture coordinates (2 floats)
+      glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, (VERTEX_PER_FACE + 5) * sizeof(float),
+                            (void*) (VERTEX_PER_FACE * sizeof(float)));
       glEnableVertexAttribArray(1);
 
-      glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, (vertPerFace + 5) * sizeof(float),
-                            (void*) ((vertPerFace + 2) * sizeof(float)));
+      // normals (3 floats)
+      glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, (VERTEX_PER_FACE + 5) * sizeof(float),
+                            (void*) ((VERTEX_PER_FACE + 2) * sizeof(float)));
       glEnableVertexAttribArray(2);
    }
-   else if (!useNormals && useTexCoords)
+   else if (!use_normals && use_tex_coords)
    {
-      glVertexAttribPointer(0, vertPerFace, GL_FLOAT, GL_FALSE, (vertPerFace + 2) * sizeof(float),
+      // vertices (3 floats)
+      glVertexAttribPointer(0, VERTEX_PER_FACE, GL_FLOAT, GL_FALSE, (VERTEX_PER_FACE + 2) * sizeof(float),
                             (void*) 0);
       glEnableVertexAttribArray(0);
 
-      glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, (vertPerFace + 2) * sizeof(float),
-                            (void*) (vertPerFace * sizeof(float)));
+      // texture coordinates (2 floats)
+      glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, (VERTEX_PER_FACE + 2) * sizeof(float),
+                            (void*) (VERTEX_PER_FACE * sizeof(float)));
       glEnableVertexAttribArray(1);
    }
-   else if (useNormals && !useTexCoords)
+   else if (use_normals && !use_tex_coords)
    {
-      glVertexAttribPointer(0, vertPerFace, GL_FLOAT, GL_FALSE, (vertPerFace + 3) * sizeof(float),
+      // vertices (3 floats)
+      glVertexAttribPointer(0, VERTEX_PER_FACE, GL_FLOAT, GL_FALSE, (VERTEX_PER_FACE + 3) * sizeof(float),
                             (void*) 0);
       glEnableVertexAttribArray(0);
 
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (vertPerFace + 3) * sizeof(float),
-                            (void*) (vertPerFace * sizeof(float)));
+      // normals (3 floats)
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (VERTEX_PER_FACE + 3) * sizeof(float),
+                            (void*) (VERTEX_PER_FACE * sizeof(float)));
       glEnableVertexAttribArray(1);
    }
    else //no normals and coords
    {
-      glVertexAttribPointer(0, vertPerFace, GL_FLOAT, GL_FALSE, vertPerFace * sizeof(float),
+      // vertices (3 floats)
+      glVertexAttribPointer(0, VERTEX_PER_FACE, GL_FLOAT, GL_FALSE, VERTEX_PER_FACE * sizeof(float),
                             (void*) 0);
       glEnableVertexAttribArray(0);
    }
-   glBindVertexArray(model->VAO);
 
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindVertexArray(0);

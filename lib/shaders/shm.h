@@ -2,8 +2,8 @@
 // Created by maxim on 8/31/19.
 //
 
-#ifndef DEEPCARS_SHADERMGR_H
-#define DEEPCARS_SHADERMGR_H
+#ifndef DEEPCARS_SHM_H
+#define DEEPCARS_SHM_H
 
 #include <assert.h>
 
@@ -31,4 +31,4 @@ void s_free(void);
 // Returns shader with specified id
 shader_t* s_getShader(int id);
 
-#endif //DEEPCARS_SHADERMGR_H
+#endif //DEEPCARS_SHM_H

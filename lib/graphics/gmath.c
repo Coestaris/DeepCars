@@ -26,7 +26,7 @@ mat4 cmat4()
    return m;
 }
 
-inline void freeVec4(vec4 vec)
+inline void vec4_free(vec4 vec)
 {
    free(vec);
 }

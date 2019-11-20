@@ -5,7 +5,7 @@
 #ifdef __GNUC__
 #pragma implementation "shaderMgr.h"
 #endif
-#include "shaderMgr.h"
+#include "shm.h"
 
 // Soring shader and its id
 typedef struct _shm_node

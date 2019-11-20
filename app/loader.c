@@ -6,14 +6,14 @@
 #include "../lib/graphics/win.h"
 #include "../lib/graphics/graphics.h"
 #include "../lib/updater.h"
-#include "../lib/shaders/shaderMgr.h"
-#include "../lib/sceneManager.h"
+#include "../lib/shaders/shm.h"
+#include "../lib/scm.h"
 
 #include "objects/obj_cube.h"
 #include "winDefaults.h"
 #include "objects/obj_camera_control.h"
 
-winInfo_t* win;
+win_info_t* win;
 list_t* models;
 mat4 view;
 
@@ -64,7 +64,7 @@ void app_initGraphics(void)
 
    view = cmat4();
    if (VERBOSE)
-      w_printInfo();
+      w_print_info();
 
    u_init();
    scm_init();

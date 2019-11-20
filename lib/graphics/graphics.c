@@ -4,7 +4,7 @@
 
 #include "graphics.h"
 #include "../shaders/shader.h"
-#include "../shaders/shaderMgr.h"
+#include "../shaders/shm.h"
 
 vec4 COLOR_WHITE;
 vec4 COLOR_SILVER;
@@ -61,22 +61,22 @@ void gr_init(mat4 _proj, mat4 _view)
 
 void gr_free(void)
 {
-   freeVec4(COLOR_WHITE);
-   freeVec4(COLOR_SILVER);
-   freeVec4(COLOR_GRAY);
-   freeVec4(COLOR_BLACK);
-   freeVec4(COLOR_RED);
-   freeVec4(COLOR_MAROON);
-   freeVec4(COLOR_YELLOW);
-   freeVec4(COLOR_OLIVE);
-   freeVec4(COLOR_LIME);
-   freeVec4(COLOR_GREEN);
-   freeVec4(COLOR_AQUA);
-   freeVec4(COLOR_TEAL);
-   freeVec4(COLOR_BLUE);
-   freeVec4(COLOR_NAVY);
-   freeVec4(COLOR_FUCHSIA);
-   freeVec4(COLOR_PURPLE);
+   vec4_free(COLOR_WHITE);
+   vec4_free(COLOR_SILVER);
+   vec4_free(COLOR_GRAY);
+   vec4_free(COLOR_BLACK);
+   vec4_free(COLOR_RED);
+   vec4_free(COLOR_MAROON);
+   vec4_free(COLOR_YELLOW);
+   vec4_free(COLOR_OLIVE);
+   vec4_free(COLOR_LIME);
+   vec4_free(COLOR_GREEN);
+   vec4_free(COLOR_AQUA);
+   vec4_free(COLOR_TEAL);
+   vec4_free(COLOR_BLUE);
+   vec4_free(COLOR_NAVY);
+   vec4_free(COLOR_FUCHSIA);
+   vec4_free(COLOR_PURPLE);
 
    freeMat4(projMat);
    freeMat4(view_mat);
@@ -88,7 +88,7 @@ void gr_draw_model(model_t* model)
    glBindBuffer(GL_ARRAY_BUFFER, model->VBO);
    glBindVertexArray(model->VAO);
 
-   glDrawArrays(GL_TRIANGLES, 0, model->modelLen->facesCount * 3);
+   glDrawArrays(GL_TRIANGLES, 0, model->model_len->faces_count * 3);
 
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindVertexArray(0);

@@ -2,13 +2,18 @@
 // Created by maxim on 8/31/19.
 //
 
+#ifdef __GNUC__
+#pragma implementation "texture.h"
+#endif
 #include "texture.h"
 
-texture_t* t_create(const char* fn, vec2f_t center)
+//
+// t_create()
+//
+texture_t* t_create(const char* fn)
 {
    texture_t* t = malloc(sizeof(texture_t));
    t->fn = fn;
-   t->center = center;
    t->data = malloc(sizeof(texData));
 
    t->data->wrappingMode = OIL_DEFAULT_WRAPPING;
@@ -21,17 +26,26 @@ texture_t* t_create(const char* fn, vec2f_t center)
    return t;
 }
 
+//
+// t_free()
+//
 void t_free(texture_t* tex)
 {
    free(tex->data);
    free(tex);
 }
 
+//
+// t_unload()
+//
 void t_unload(texture_t* tex)
 {
    glDeleteTextures(1, &tex->texID);
 }
 
+//
+// t_load()
+//
 void t_load(texture_t* tex)
 {
    tex->texID = oilTextureFromPngFile(
@@ -54,6 +68,9 @@ void t_load(texture_t* tex)
           tex->fn, tex->width, tex->height);
 }
 
+//
+// t_bind()
+//
 inline void t_bind(texture_t* tex)
 {
    glBindTexture(GL_TEXTURE_2D, tex->texID);

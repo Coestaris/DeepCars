@@ -2,8 +2,8 @@
 // Created by maxim on 11/18/19.
 //
 
-#ifndef DEEPCARS_SCENEMANAGER_H
-#define DEEPCARS_SCENEMANAGER_H
+#ifndef DEEPCARS_SCM_H
+#define DEEPCARS_SCM_H
 
 #include "scene.h"
 #include "updater.h"
@@ -26,4 +26,4 @@ void scm_free(void);
 // Get loaded scene
 scene_t* scm_get_current(void);
 
-#endif //DEEPCARS_SCENEMANAGER_H
+#endif //DEEPCARS_SCM_H

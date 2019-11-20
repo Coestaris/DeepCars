@@ -10,7 +10,7 @@
 #include "graphics/graphics.h"
 #include "shaders/shader.h"
 #include "scene.h"
-#include "sceneManager.h"
+#include "scm.h"
 
 // Initial count of objects
 #define OBJECT_COUNT_START 50
@@ -34,11 +34,11 @@ uint64_t    frames;
 //
 uint32_t    keys_state[256];
 uint32_t    mouse_state[10];
-uint32_t    mouseX;
-uint32_t    mouseY;
+uint32_t    mouse_x;
+uint32_t    mouse_y;
 
 // Current X window allocated in win.h
-winInfo_t*  default_win;
+win_info_t*  default_win;
 
 // Global list of all drawable objects
 list_t*     objects;
@@ -83,7 +83,7 @@ void u_draw_func(void)
                                    object->position, object->scale, object->rotation);
    }
 
-   w_swapBuffers(default_win);
+   w_swap_buffers(default_win);
 }
 
 //
@@ -91,7 +91,7 @@ void u_draw_func(void)
 //
 vec2f_t u_get_mouse_pos()
 {
-   return vec2f(mouseX, mouseY);
+   return vec2f(mouse_x, mouse_y);
 }
 
 //
@@ -163,8 +163,8 @@ void u_event_handler(XEvent event)
          break;
       case MotionNotify:
       {
-         mouseX = event.xbutton.x;
-         mouseY = event.xbutton.y;
+         mouse_x = event.xbutton.x;
+         mouse_y = event.xbutton.y;
          for (size_t i = 0; i < mousemove_listeners->count; i++)
             ((object_t*) mousemove_listeners->collection[i])->mousemove_event_func(
                     mousemove_listeners->collection[i],
@@ -264,7 +264,7 @@ void u_init(void)
 //
 // u_start_loop
 //
-void u_start_loop(winInfo_t* info)
+void u_start_loop(win_info_t* info)
 {
    XEvent event;
    XSelectInput(info->display, info->win,

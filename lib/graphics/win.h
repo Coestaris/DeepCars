@@ -19,36 +19,37 @@
 #include "gmath.h"
 #include "camera.h"
 
-typedef struct _winInfo
+typedef struct _win_info
 {
 
    Display* display;
 
    Window win;
    GLXContext context;
-   Colormap colorMap;
+   Colormap color_map;
 
    uint16_t w;
    uint16_t h;
 
    const char* caption;
 
-   uint16_t lockedFps;
-   double_t lastFrame;
+   uint16_t locked_fps;
+   double_t last_frame;
    mat4 projection;
 
-} winInfo_t;
+} win_info_t;
 
 #define GLX_DEFAULT_MAJOR_VERSION 3
 #define GLX_DEFAULT_MINOR_VERSION 0
 #define GLX_DEFAULT_FLAGS         GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB
 #define DEFAULT_LOCKED_FPS        60
 
-winInfo_t* w_create(uint16_t winW, uint16_t winH, uint16_t winX, uint16_t winY,
-                    const char* winCaption, bool verbose, FILE* vf);
-void w_setGLXContextVersion(int major, int minor, int flags);
-void w_destroy(winInfo_t* w);
-void w_swapBuffers(winInfo_t* w);
-void w_printInfo();
+win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t win_y,
+                     const char* win_caption, bool verbose, FILE* vf);
+
+void w_set_glx_context_version(int major, int minor, int flags);
+void w_destroy(win_info_t* w);
+void w_swap_buffers(win_info_t* w);
+void w_print_info();
 
 #endif //DEEPCARS_WIN_H

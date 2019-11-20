@@ -25,15 +25,15 @@ camera_t* c_create(vec4 position, vec4 up)
 void c_free(camera_t* camera)
 {
    if (camera->position)
-      freeVec4(camera->position);
+      vec4_free(camera->position);
    if (camera->target)
-      freeVec4(camera->target);
+      vec4_free(camera->target);
    if (camera->direction)
-      freeVec4(camera->direction);
-   freeVec4(camera->up);
+      vec4_free(camera->direction);
+   vec4_free(camera->up);
 
-   freeVec4(camera->_cameraRight);
-   freeVec4(camera->_cameraUp);
+   vec4_free(camera->_cameraRight);
+   vec4_free(camera->_cameraUp);
    freeMat4(camera->_component1);
    freeMat4(camera->_component2);
 

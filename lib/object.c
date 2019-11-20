@@ -5,7 +5,7 @@
 #ifdef __GNUC__
 #pragma implementation "drawableObject.h"
 #endif
-#include "drawableObject.h"
+#include "object.h"
 
 //
 // o_free

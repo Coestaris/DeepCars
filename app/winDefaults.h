@@ -14,7 +14,7 @@
 
 #define MODELID_CUBE 0
 
-extern winInfo_t* win;
+extern win_info_t* win;
 extern list_t* models;
 extern mat4 view;
 

@@ -137,7 +137,7 @@ shader_t* sh_create(char* vertexPath, char* fragmentPath)
 
    if (!sh_load(sh))
    {
-      exit(1);
+      exit(EXIT_FAILURE);
    }
 
    printf("[shader.c]: Loaded shader. vertex path: %s, fragment path: %s\n",

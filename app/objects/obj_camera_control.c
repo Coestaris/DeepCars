@@ -85,9 +85,9 @@ void camera_destroyFunc(object_t* this)
 {
    if (cameraDirCpy)
    {
-      freeVec4(cameraDirCpy);
+      vec4_free(cameraDirCpy);
       cameraDirCpy = NULL;
-      freeVec4(cameraCrossCpy);
+      vec4_free(cameraCrossCpy);
    }
 }
 

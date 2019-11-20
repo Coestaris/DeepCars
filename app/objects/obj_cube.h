@@ -5,7 +5,7 @@
 #ifndef DEEPCARS_OBJ_CUBE_H
 #define DEEPCARS_OBJ_CUBE_H
 
-#include "../../lib/objectInclude.h"
+#include "../../lib/object_include.h"
 #include "../winDefaults.h"
 
 object_t* create_cube(vec3f_t pos, float size, vec4 color);
