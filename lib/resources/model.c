@@ -509,43 +509,68 @@ void m_build(model_t* model)
            (use_tex_coords ? (model->model_len->faces_count * VERTEX_PER_FACE * 2) : 0) +  // tex coords
            (use_normals ? (model->model_len->faces_count * VERTEX_PER_FACE * 3) : 0);      // normals
 
+  /* for (size_t i = 0; i < model->model_len->faces_count; i++)
+      if(model->faces[i]->count > VERTEX_PER_FACE)
+         size += (model->faces[i]->count - 3) * 3 * 3;
+*/
    float* buffer = malloc(sizeof(float) * size);
    size_t buffer_index = 0;
 
    // storing all data to a buffer
    for (size_t i = 0; i < model->model_len->faces_count; i++)
-      for (size_t j = 0; j < VERTEX_PER_FACE; j++)
+   {
+      /*if(model->faces[i]->count > VERTEX_PER_FACE)
       {
-         assert(model->faces[i]->vert_id[j] <= model->model_len->vertices_count);
-         uint32_t vert_id = model->faces[i]->vert_id[j] - 1;
-
-         buffer[buffer_index++] = model->vertices[vert_id][0];
-         buffer[buffer_index++] = model->vertices[vert_id][1];
-         buffer[buffer_index++] = model->vertices[vert_id][2];
-
-         if (use_tex_coords)
+         //given face with more than 3 vertices. Triangulation is required
+         for(size_t tria = 0; tria < model->faces[i]->count - 2; tria++)
          {
-            assert(model->faces[i]->tex_id[j] <= model->model_len->tex_coords_count);
-            uint32_t tex_id = supposed_normals ?
-                    model->faces[i]->vert_id[j] - 1 :
-                    model->faces[i]->tex_id[j] - 1;
+            buffer[buffer_index++] = model->vertices[model->faces[i]->vert_id[0] - 1][0];
+            buffer[buffer_index++] = model->vertices[model->faces[i]->vert_id[0] - 1][1];
+            buffer[buffer_index++] = model->vertices[model->faces[i]->vert_id[0] - 1][2];
 
-            buffer[buffer_index++] = model->tex_coords[tex_id][0];
-            buffer[buffer_index++] = model->tex_coords[tex_id][1];
-         }
+            buffer[buffer_index++] = model->vertices[model->faces[i]->vert_id[tria + 1] - 1][0];
+            buffer[buffer_index++] = model->vertices[model->faces[i]->vert_id[tria + 1] - 1][1];
+            buffer[buffer_index++] = model->vertices[model->faces[i]->vert_id[tria + 1] - 1][2];
 
-         if (use_normals)
-         {
-            assert(model->faces[i]->normal_id[j] <= model->model_len->normals_count);
-            uint32_t normal_id = model->faces[i]->normal_id[j] - 1;
-
-            buffer[buffer_index++] = model->normals[normal_id][0];
-            buffer[buffer_index++] = model->normals[normal_id][1];
-            buffer[buffer_index++] = model->normals[normal_id][2];
+            buffer[buffer_index++] = model->vertices[model->faces[i]->vert_id[tria + 2] - 1][0];
+            buffer[buffer_index++] = model->vertices[model->faces[i]->vert_id[tria + 2] - 1][1];
+            buffer[buffer_index++] = model->vertices[model->faces[i]->vert_id[tria + 2] - 1][2];
          }
       }
+      else*/
+      {
+         for (size_t j = 0; j < VERTEX_PER_FACE; j++)
+         {
+            assert(model->faces[i]->vert_id[j] <= model->model_len->vertices_count);
+            uint32_t vert_id = model->faces[i]->vert_id[j] - 1;
+            buffer[buffer_index++] = model->vertices[vert_id][0];
+            buffer[buffer_index++] = model->vertices[vert_id][1];
+            buffer[buffer_index++] = model->vertices[vert_id][2];
 
-   assert(buffer_index != size - 1);
+            if (use_tex_coords)
+            {
+               assert(model->faces[i]->tex_id[j] <= model->model_len->tex_coords_count);
+               uint32_t tex_id = supposed_normals ?
+                                 model->faces[i]->vert_id[j] - 1 :
+                                 model->faces[i]->tex_id[j] - 1;
+
+               buffer[buffer_index++] = model->tex_coords[tex_id][0];
+               buffer[buffer_index++] = model->tex_coords[tex_id][1];
+            }
+
+            if (use_normals)
+            {
+               assert(model->faces[i]->normal_id[j] <= model->model_len->normals_count);
+               uint32_t normal_id = model->faces[i]->normal_id[j] - 1;
+
+               buffer[buffer_index++] = model->normals[normal_id][0];
+               buffer[buffer_index++] = model->normals[normal_id][1];
+               buffer[buffer_index++] = model->normals[normal_id][2];
+            }
+         }
+      }
+   }
+   assert(buffer_index == size);
 
    glGenBuffers(1, &model->VBO);
    glGenVertexArrays(1, &model->VAO);

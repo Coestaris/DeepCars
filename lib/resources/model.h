@@ -21,7 +21,7 @@
 #include "../graphics/material.h"
 
 // Max count of vertices per face
-#define MAX_FACE_LEN 5
+#define MAX_FACE_LEN 100
 
 struct _model;
 
