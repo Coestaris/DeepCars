@@ -5,8 +5,8 @@
 #ifndef DEEPCARS_LOADER_H
 #define DEEPCARS_LOADER_H
 
-void app_initGraphics(void);
-void app_loadResources(void);
+void app_init_graphics(void);
+void app_load_resources(void);
 void app_run(void);
 
 void app_fin(void);

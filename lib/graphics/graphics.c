@@ -2,9 +2,10 @@
 // Created by maxim on 8/26/19.
 //
 
+#ifdef __GNUC__
+#pragma implementation "graphics.h"
+#endif
 #include "graphics.h"
-#include "../shaders/shader.h"
-#include "../shaders/shm.h"
 
 vec4 COLOR_WHITE;
 vec4 COLOR_SILVER;
@@ -78,9 +79,9 @@ void gr_free(void)
    vec4_free(COLOR_FUCHSIA);
    vec4_free(COLOR_PURPLE);
 
-   freeMat4(projMat);
-   freeMat4(view_mat);
-   freeMat4(modelMat);
+   mat4_free(projMat);
+   mat4_free(view_mat);
+   mat4_free(modelMat);
 }
 
 void gr_draw_model(model_t* model)
@@ -111,9 +112,9 @@ void gr_draw_model_simpleColor(
                shader_simpleColored->uniform_locations[SH_SIMPLECOLORED_VIEW],
                view_mat);
 
-   identityMat(modelMat);
-   translateMat(modelMat, (float) pos.x, (float) pos.y, (float) pos.z);
-   scaleMat(modelMat, (float) scale.x, (float) scale.y, (float) scale.z);
+   mat4_identity(modelMat);
+   mat4_translate(modelMat, (float) pos.x, (float) pos.y, (float) pos.z);
+   mat4_scale(modelMat, (float) scale.x, (float) scale.y, (float) scale.z);
 
    sh_set_mat4(shader_simpleColored,
                shader_simpleColored->uniform_locations[SH_SIMPLECOLORED_MODEL],

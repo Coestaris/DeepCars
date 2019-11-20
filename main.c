@@ -2,8 +2,8 @@
 
 int main(int argc, char* argv[])
 {
-   app_initGraphics();
-   app_loadResources();
+   app_init_graphics();
+   app_load_resources();
 
    app_run();
 

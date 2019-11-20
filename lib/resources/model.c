@@ -238,12 +238,12 @@ void m_proceed_line(model_t* model, const char* string, size_t start_index, size
    if (descriptor->type == OD_VERTEX)
    {
       m_push_vertex(model, vec4_ccpy(buff_vec));
-      fillVec4(buff_vec, 0, 0, 0, 0);
+      vec4_fill(buff_vec, 0, 0, 0, 0);
    }
    if (descriptor->type == OD_VERTEX_NORMAL)
    {
       m_push_normal(model, vec4_ccpy(buff_vec));
-      fillVec4(buff_vec, 0, 0, 0, 0);
+      vec4_fill(buff_vec, 0, 0, 0, 0);
    }
 
    if (descriptor->type == OD_FACE)
@@ -501,13 +501,12 @@ void m_info(model_t* model)
 void m_build(model_t* model)
 {
    bool use_tex_coords = model->model_len->tex_coords_count != 0 && model->faces[0]->tex_id[0] != -1;
-   //bool use_normals = model->model_len->normals_count != 0 &&
-   //    (model->faces[0]->normal_id[0] != -1 || model->model_len->vertices_count == model->model_len->normals_count);
-   bool use_normals = false;
+   bool use_normals = model->model_len->normals_count != 0 && model->faces[0]->normal_id[0] != -1;
+   bool supposed_normals = use_normals && model->model_len->vertices_count == model->model_len->normals_count;
 
    size_t size =
            model->model_len->faces_count * VERTEX_PER_FACE * 3 +                           // vertices
-           (use_tex_coords ? (model->model_len->faces_count * VERTEX_PER_FACE * 2) : 0) +  // texcoord
+           (use_tex_coords ? (model->model_len->faces_count * VERTEX_PER_FACE * 2) : 0) +  // tex coords
            (use_normals ? (model->model_len->faces_count * VERTEX_PER_FACE * 3) : 0);      // normals
 
    float* buffer = malloc(sizeof(float) * size);
@@ -527,7 +526,9 @@ void m_build(model_t* model)
          if (use_tex_coords)
          {
             assert(model->faces[i]->tex_id[j] <= model->model_len->tex_coords_count);
-            uint32_t tex_id = model->faces[i]->tex_id[j] - 1;
+            uint32_t tex_id = supposed_normals ?
+                    model->faces[i]->vert_id[j] - 1 :
+                    model->faces[i]->tex_id[j] - 1;
 
             buffer[buffer_index++] = model->tex_coords[tex_id][0];
             buffer[buffer_index++] = model->tex_coords[tex_id][1];

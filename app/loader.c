@@ -6,46 +6,45 @@
 #include "../lib/graphics/win.h"
 #include "../lib/graphics/graphics.h"
 #include "../lib/updater.h"
-#include "../lib/shaders/shm.h"
 #include "../lib/scm.h"
 
 #include "objects/obj_cube.h"
-#include "winDefaults.h"
+#include "win_defaults.h"
 #include "objects/obj_camera_control.h"
 
-win_info_t* win;
-list_t* models;
-mat4 view;
+win_info_t*    win;
+list_t*        models;
+mat4           view;
 
-model_t* getModel(uint32_t id)
+model_t* get_model(uint32_t id)
 {
    return models->collection[id];
 }
 
-model_t* loadAndBuildModel(const char* filename)
+model_t* load_and_build_model(const char* filename)
 {
    model_t* model = m_load(filename);
    m_build(model);
    return model;
 }
 
-void app_loadResources(void)
+void app_load_resources(void)
 {
    //models
    models = list_create(10);
-   list_push(models, loadAndBuildModel("teapot.obj"));
+   list_push(models, load_and_build_model("teapot.obj"));
 
    //scenes
    scene_t* menu = sc_create(SCENEID_MENU);
    list_push(menu->startup_objects, create_cube(vec3f(11, 11, 12), .05f, COLOR_GREEN));
    list_push(menu->startup_objects, create_cube(vec3f(12, 13, 0), .05f, COLOR_BLUE));
    list_push(menu->startup_objects, create_cube(vec3f(13, 0, 11), .05f, COLOR_RED));
-   list_push(menu->startup_objects, create_cameraControl());
+   list_push(menu->startup_objects, create_camera_control());
 
    scm_push_scene(menu);
 }
 
-void app_initGraphics(void)
+void app_init_graphics(void)
 {
    win = w_create(
            WIN_WIDTH,
@@ -55,12 +54,12 @@ void app_initGraphics(void)
            VERBOSE,
            stdout);
 
-   const float angleOfView = 60.0f;
+   const float angle_of_view = 60.0f;
    const float near = 0.1f;
    const float far = 200.0f;
-   const float imageAspectRatio = (float) win->w / (float) win->h;
+   const float image_aspect_ratio = (float) win->w / (float) win->h;
    win->projection = cmat4();
-   perspectiveFovMat(win->projection, angleOfView, imageAspectRatio, near, far);
+   mat4_perspective_fov(win->projection, angle_of_view, image_aspect_ratio, near, far);
 
    view = cmat4();
    if (VERBOSE)

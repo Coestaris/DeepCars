@@ -2,16 +2,29 @@
 // Created by maxim on 4/30/19.
 //
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
+#pragma ide diagnostic ignored "OCInconsistentNamingInspection"
+
+#ifdef __GNUC__
+#pragma implementation "gmath.h"
+#endif
 #include "gmath.h"
 
+//
+// cvec4()
+//
 vec4 cvec4(double_t x, double_t y, double_t z, double_t l)
 {
    vec4 a = malloc(sizeof(float) * 4);
-   fillVec4(a, x, y, z, l);
+   vec4_fill(a, x, y, z, l);
    return a;
 }
 
-inline void fillVec4(vec4 a, double_t x, double_t y, double_t z, double_t l)
+//
+// vec4_fill()
+//
+inline void vec4_fill(vec4 a, double_t x, double_t y, double_t z, double_t l)
 {
    a[0] = x;
    a[1] = y;
@@ -19,6 +32,9 @@ inline void fillVec4(vec4 a, double_t x, double_t y, double_t z, double_t l)
    a[3] = l;
 }
 
+//
+// cmat4()
+//
 mat4 cmat4()
 {
    mat4 m = malloc(sizeof(float) * 4 * 4);
@@ -26,69 +42,60 @@ mat4 cmat4()
    return m;
 }
 
+//
+// vec4_free()
+//
 inline void vec4_free(vec4 vec)
 {
    free(vec);
 }
 
-inline void freeMat4(mat4 mat)
+//
+// mat4_free()
+//
+inline void mat4_free(mat4 mat)
 {
    free(mat);
 }
 
-inline void identityMat(mat4 m)
+//
+// mat4_identity()
+//
+inline void mat4_identity(mat4 m)
 {
-   m[0] = 1;
-   m[1] = 0;
-   m[2] = 0;
-   m[3] = 0;
-   m[4] = 0;
-   m[5] = 1;
-   m[6] = 0;
-   m[7] = 0;
-   m[8] = 0;
-   m[9] = 0;
-   m[10] = 1;
-   m[11] = 0;
-   m[12] = 0;
-   m[13] = 0;
-   m[14] = 0;
-   m[15] = 1;
+   m[0] =  1;   m[1] =  0;   m[2] =  0;   m[3] =  0;
+   m[4] =  0;   m[5] =  1;   m[6] =  0;   m[7] =  0;
+   m[8] =  0;   m[9] =  0;   m[10] = 1;   m[11] = 0;
+   m[12] = 0;   m[13] = 0;   m[14] = 0;   m[15] = 1;
 }
 
-inline void printVec4(vec4 vec)
+//
+// vec4_print()
+//
+inline void vec4_print(vec4 vec)
 {
    printf("Vec4[%.3f, %.3f, %.3f, %.3f]\n", vec[0], vec[1], vec[2], vec[3]);
 }
 
-inline void fillMat4(mat4 m,
-                     float a1, float a2, float a3, float a4,
-                     float b1, float b2, float b3, float b4,
-                     float c1, float c2, float c3, float c4,
-                     float d1, float d2, float d3, float d4)
+//
+// mat4_fill()
+//
+inline void mat4_fill(mat4 m,
+                      float a1, float a2, float a3, float a4,
+                      float b1, float b2, float b3, float b4,
+                      float c1, float c2, float c3, float c4,
+                      float d1, float d2, float d3, float d4)
 {
-   m[0] = a1;
-   m[1] = a2;
-   m[2] = a3;
-   m[3] = a4;
-
-   m[4] = b1;
-   m[5] = b2;
-   m[6] = b3;
-   m[7] = b4;
-
-   m[8] = c1;
-   m[9] = c2;
-   m[10] = c3;
-   m[11] = c4;
-
-   m[12] = d1;
-   m[13] = d2;
-   m[14] = d3;
-   m[15] = d4;
+   m[0] =  a1;   m[1] =  a2;   m[2] =  a3;   m[3] =  a4;
+   m[4] =  b1;   m[5] =  b2;   m[6] =  b3;   m[7] =  b4;
+   m[8] =  c1;   m[9] =  c2;   m[10] = c3;   m[11] = c4;
+   m[12] = d1;   m[13] = d2;   m[14] = d3;   m[15] = d4;
 }
 
-inline void printMat4(mat4 mat)
+//
+// mat4_print()
+//
+inline void mat4_print(mat4 mat)
 {
    printf("Mat4 [\n     ");
    for (int i = 0; i < 16; i++)
@@ -96,6 +103,9 @@ inline void printMat4(mat4 mat)
    printf("]\n");
 }
 
+//
+// vec4_cpy()
+//
 inline void vec4_cpy(vec4 dest, vec4 src)
 {
    dest[0] = src[0];
@@ -104,12 +114,18 @@ inline void vec4_cpy(vec4 dest, vec4 src)
    dest[3] = src[3];
 }
 
+//
+// vec4_ccpy()
+//
 vec4 vec4_ccpy(vec4 v)
 {
    vec4 b = cvec4(v[0], v[1], v[2], v[3]);
    return b;
 }
 
+//
+// vec4_addf()
+//
 inline void vec4_addf(vec4 v, float value)
 {
    v[0] += value;
@@ -118,6 +134,9 @@ inline void vec4_addf(vec4 v, float value)
    v[3] += value;
 }
 
+//
+// vec4_addv()
+//
 inline void vec4_addv(vec4 v, vec4 value)
 {
    v[0] += value[0];
@@ -126,6 +145,9 @@ inline void vec4_addv(vec4 v, vec4 value)
    v[3] += value[3];
 }
 
+//
+// vec4_subf()
+//
 inline void vec4_subf(vec4 v, float value)
 {
    v[0] -= value;
@@ -134,6 +156,9 @@ inline void vec4_subf(vec4 v, float value)
    v[3] -= value;
 }
 
+//
+// vec4_subv()
+//
 inline void vec4_subv(vec4 v, vec4 value)
 {
    v[0] -= value[0];
@@ -142,6 +167,9 @@ inline void vec4_subv(vec4 v, vec4 value)
    v[3] -= value[3];
 }
 
+//
+// vec4_mulf()
+//
 inline void vec4_mulf(vec4 v, float value)
 {
    v[0] *= value;
@@ -150,6 +178,9 @@ inline void vec4_mulf(vec4 v, float value)
    v[3] *= value;
 }
 
+//
+// vec4_scalar_mulv()
+//
 inline float vec4_scalar_mulv(vec4 a, vec4 b)
 {
    float v = 0;
@@ -160,6 +191,9 @@ inline float vec4_scalar_mulv(vec4 a, vec4 b)
    return v;
 }
 
+//
+// vec4_cross()
+//
 inline void vec4_cross(vec4 a, vec4 b)
 {
    float x, y, z;
@@ -172,17 +206,26 @@ inline void vec4_cross(vec4 a, vec4 b)
    a[3] = 0;
 }
 
+//
+// vec4_len()
+//
 float vec4_len(vec4 v)
 {
    return sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
 }
 
+//
+// vec4_norm()
+//
 inline void vec4_norm(vec4 v)
 {
    float len = vec4_len(v);
    vec4_mulf(v, 1 / len);
 }
 
+//
+// vec4_mulm()
+//
 inline void vec4_mulm(vec4 v, mat4 m)
 {
    float cpy[4] = {v[0], v[1], v[2], v[3]};
@@ -193,24 +236,36 @@ inline void vec4_mulm(vec4 v, mat4 m)
              cpy[3] * m[i * 4 + 3];
 }
 
+//
+// mat4_addf()
+//
 inline void mat4_addf(mat4 m, float v)
 {
    for (int i = 0; i < 15; i++)
       m[i] += v;
 }
 
+//
+// mat4_addm()
+//
 inline void mat4_addm(mat4 m, mat4 v)
 {
    for (int i = 0; i < 15; i++)
       m[i] += v[i];
 }
 
+//
+// mat4_mulv()
+//
 inline void mat4_mulv(mat4 m, float v)
 {
    for (int i = 0; i < 15; i++)
       m[i] *= v;
 }
 
+//
+// mat4_mulm()
+//
 inline void mat4_mulm(mat4 m, mat4 v)
 {
    //save copy of m
@@ -229,125 +284,106 @@ inline void mat4_mulm(mat4 m, mat4 v)
    }
 }
 
-inline void translateMat(mat4 m, float x, float y, float z)
+//
+// mat4_translate()
+//
+inline void mat4_translate(mat4 m, float x, float y, float z)
 {
    m[3] += x;
    m[7] += y;
    m[11] += z;
 }
 
-inline void orthoMat(mat4 m, float n, float f, float r, float t)
+//
+// mat4_ortho()
+//
+inline void mat4_ortho(mat4 m, float n, float f, float r, float t)
 {
-   fillMat4(m,
-            1 / r, 0, 0, 0,
-            0, 1 / t, 0, 0,
-            0, 0, -2 / (f - n), -(f + n) / (f - n),
-            0, 0, 0, 1);
+   mat4_fill(m,
+             1 / r, 0, 0, 0,
+             0, 1 / t, 0, 0,
+             0, 0, -2 / (f - n), -(f + n) / (f - n),
+             0, 0, 0, 1);
 }
 
-inline void perspectiveFovMat(
+//
+// mat4_perspective_fov()
+//
+inline void mat4_perspective_fov(
         mat4 m,
-        float angleOfView, float imageAspectRatio,
+        float angle_of_view, float ratio,
         float n, float f)
 {
-   float scale = tanf(angleOfView * 0.5f * (float) M_PI / 180.0f) * n;
+   float scale = tanf(angle_of_view * 0.5f * (float) M_PI / 180.0f) * n;
 
-   float r = imageAspectRatio * scale;
+   float r = ratio * scale;
    float l = -r;
    float t = scale;
    float b = -t;
 
-   perspectiveMat(m, n, f, r, t);
+   mat4_perspective(m, n, f, r, t);
 }
 
-inline void perspectiveMat(mat4 m, float n, float f, float r, float t)
+//
+// mat4_perspective()
+//
+inline void mat4_perspective(mat4 m, float n, float f, float r, float t)
 {
-   fillMat4(m,
-            n / r, 0, 0, 0,
-            0, n / t, 0, 0,
-            0, 0, -(f + n) / (f - n), -2 * f * n / (f - n),
-            0, 0, -1, 0);
+   mat4_fill(m,
+             n / r, 0, 0, 0,
+             0, n / t, 0, 0,
+             0, 0, -(f + n) / (f - n), -2 * f * n / (f - n),
+             0, 0, -1, 0);
 }
 
 
-inline void scaleMat(mat4 m, float x, float y, float z)
+//
+// mat4_scale()
+//
+inline void mat4_scale(mat4 m, float x, float y, float z)
 {
    m[0] *= x;
    m[5] *= y;
    m[10] *= z;
 }
 
-inline void rotateMat4X(mat4 m, float angle)
+//
+// mat4_rotate_x()
+//
+inline void mat4_rotate_x(mat4 m, float angle)
 {
    float c = cosf(angle);
    float s = sinf(angle);
-   m[0] = 1;
-   m[1] = 0;
-   m[2] = 0;
-   m[3] = 0;
-
-   m[4] = 0;
-   m[5] = c;
-   m[6] = s;
-   m[7] = 0;
-
-   m[8] = 0;
-   m[9] = -s;
-   m[10] = c;
-   m[11] = 0;
-
-   m[12] = 0;
-   m[13] = 0;
-   m[14] = 0;
-   m[15] = 1;
+   m[0] =  1;   m[1] =  0;   m[2] =  0;    m[3] =  0;
+   m[4] =  0;   m[5] =  c;   m[6] =  s;    m[7] =  0;
+   m[8] =  0;   m[9] = -s;   m[10] = c;    m[11] = 0;
+   m[12] = 0;   m[13] = 0;   m[14] = 0;    m[15] = 1;
 }
 
-inline void rotateMat4Y(mat4 m, float angle)
+//
+// mat4_rotate_y()
+//
+inline void mat4_rotate_y(mat4 m, float angle)
 {
    float c = cosf(angle);
    float s = sinf(angle);
-   m[0] = c;
-   m[1] = 0;
-   m[2] = -s;
-   m[3] = 0;
-
-   m[4] = 0;
-   m[5] = 1;
-   m[6] = 0;
-   m[7] = 0;
-
-   m[8] = s;
-   m[9] = 0;
-   m[10] = c;
-   m[11] = 0;
-
-   m[12] = 0;
-   m[13] = 0;
-   m[14] = 0;
-   m[15] = 1;
+   m[0] =  c;    m[1] =  0;    m[2] = -s;    m[3] =  0;
+   m[4] =  0;    m[5] =  1;    m[6] =  0;    m[7] =  0;
+   m[8] =  s;    m[9] =  0;    m[10] = c;    m[11] = 0;
+   m[12] = 0;    m[13] = 0;    m[14] = 0;    m[15] = 1;
 }
 
-inline void rotateMat4Z(mat4 m, float angle)
+//
+// mat4_rotate_z()
+//
+inline void mat4_rotate_z(mat4 m, float angle)
 {
    float c = cosf(angle);
    float s = sinf(angle);
-   m[0] = c;
-   m[1] = -s;
-   m[2] = 0;
-   m[3] = 0;
-
-   m[4] = s;
-   m[5] = c;
-   m[6] = 0;
-   m[7] = 0;
-
-   m[8] = 0;
-   m[9] = 0;
-   m[10] = 1;
-   m[11] = 0;
-
-   m[12] = 0;
-   m[13] = 0;
-   m[14] = 0;
-   m[15] = 1;
+   m[0] =  c;    m[1] = -s;    m[2] =  0;    m[3] =  0;
+   m[4] =  s;    m[5] =  c;    m[6] =  0;    m[7] =  0;
+   m[8] =  0;    m[9] =  0;    m[10] = 1;    m[11] = 0;
+   m[12] = 0;    m[13] = 0;    m[14] = 0;    m[15] = 1;
 }
+
+#pragma clang diagnostic pop

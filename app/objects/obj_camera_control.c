@@ -4,45 +4,45 @@
 
 #include "obj_camera_control.h"
 
-float cameraPitch = 0;
-float cameraYaw = M_PI / 2;
 float dx;
 float dy;
-float pressMouseX;
-float pressMouseY;
-float lastdx = 0;
-float lastdy = 0;
-vec4 cameraDirCpy;
-vec4 cameraCrossCpy;
+float press_mouse_x;
+float press_mouse_y;
+vec4  camera_dir_cpy;
+vec4  camera_cross_cpy;
+float camera_pitch      = 0;
+float camera_yaw        = M_PI / 2;
+float lastdx            = 0;
+float lastdy            = 0;
 
-void camera_updateFunc(object_t* this)
+void camera_update_func(object_t* this)
 {
    scene_t* scene = scm_get_current();
-   cameraPitch = dy;
-   cameraYaw = dx + (float) M_PI / 2.0;
-   c_rotate(scene->camera, cameraPitch, cameraYaw);
+   camera_pitch = dy;
+   camera_yaw = (float)dx + (float) M_PI / 2.0;
+   c_rotate(scene->camera, camera_pitch, camera_yaw);
 
-   vec4_cpy(cameraDirCpy, scene->camera->direction);
-   vec4_mulf(cameraDirCpy, .2f);
+   vec4_cpy(camera_dir_cpy, scene->camera->direction);
+   vec4_mulf(camera_dir_cpy, .2f);
 
-   vec4_cpy(cameraCrossCpy, scene->camera->_cameraRight);
-   vec4_mulf(cameraCrossCpy, .2f);
+   vec4_cpy(camera_cross_cpy, scene->camera->_camera_right);
+   vec4_mulf(camera_cross_cpy, .2f);
 
    //left
    if (u_get_key_state(38) == KEY_PRESSED)
-      vec4_subv(scene->camera->position, cameraCrossCpy);
+      vec4_subv(scene->camera->position, camera_cross_cpy);
 
    //right
    if (u_get_key_state(40) == KEY_PRESSED)
-      vec4_addv(scene->camera->position, cameraCrossCpy);
+      vec4_addv(scene->camera->position, camera_cross_cpy);
 
    //forward
    if (u_get_key_state(25) == KEY_PRESSED)
-      vec4_subv(scene->camera->position, cameraDirCpy);
+      vec4_subv(scene->camera->position, camera_dir_cpy);
 
    //back
    if (u_get_key_state(39) == KEY_PRESSED)
-      vec4_addv(scene->camera->position, cameraDirCpy);
+      vec4_addv(scene->camera->position, camera_dir_cpy);
 
    //up
    if (u_get_key_state(65) == KEY_PRESSED)
@@ -52,13 +52,13 @@ void camera_updateFunc(object_t* this)
       scene->camera->position[1] -= 0.2f;
 }
 
-void camera_keyEventFunc(object_t* this, uint32_t key, uint32_t state)
+void camera_key_event_func(object_t* this, uint32_t key, uint32_t state)
 {
    if (key == 9) //esc
       u_close();
 }
 
-void camera_mouseEventFunc(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
+void camera_mouse_event_func(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
 {
    if (state == MOUSE_RELEASE)
    {
@@ -67,40 +67,40 @@ void camera_mouseEventFunc(object_t* this, uint32_t x, uint32_t y, uint32_t stat
    }
    else
    {
-      pressMouseX = x;
-      pressMouseY = y;
+      press_mouse_x = x;
+      press_mouse_y = y;
    }
 }
 
-void camera_mouseMoveEventFunc(object_t* this, uint32_t x, uint32_t y)
+void camera_mouse_move_event_func(object_t* this, uint32_t x, uint32_t y)
 {
    if (u_get_mouse_state(MOUSE_LEFT) == MOUSE_PRESSED)
    {
-      dx = ((float) x - (float) pressMouseX) / 100.0f + lastdx;
-      dy = ((float) y - (float) pressMouseY) / 100.0f + lastdy;
+      dx = ((float) x - (float) press_mouse_x) / 100.0f + lastdx;
+      dy = ((float) y - (float) press_mouse_y) / 100.0f + lastdy;
    }
 }
 
-void camera_destroyFunc(object_t* this)
+void camera_destroy_func(object_t* this)
 {
-   if (cameraDirCpy)
+   if (camera_dir_cpy)
    {
-      vec4_free(cameraDirCpy);
-      cameraDirCpy = NULL;
-      vec4_free(cameraCrossCpy);
+      vec4_free(camera_dir_cpy);
+      camera_dir_cpy = NULL;
+      vec4_free(camera_cross_cpy);
    }
 }
 
-object_t* create_cameraControl()
+object_t* create_camera_control()
 {
    object_t* this = o_create();
-   this->update_func = camera_updateFunc;
-   this->key_event_func = camera_keyEventFunc;
-   this->mouse_event_func = camera_mouseEventFunc;
-   this->mousemove_event_func = camera_mouseMoveEventFunc;
-   this->destroy_func = camera_destroyFunc;
+   this->update_func = camera_update_func;
+   this->key_event_func = camera_key_event_func;
+   this->mouse_event_func = camera_mouse_event_func;
+   this->mousemove_event_func = camera_mouse_move_event_func;
+   this->destroy_func = camera_destroy_func;
 
-   cameraDirCpy = cvec4(0, 0, 0, 0);
-   cameraCrossCpy = cvec4(0, 0, 0, 0);
+   camera_dir_cpy = cvec4(0, 0, 0, 0);
+   camera_cross_cpy = cvec4(0, 0, 0, 0);
    return this;
 }

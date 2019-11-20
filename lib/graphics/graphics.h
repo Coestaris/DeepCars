@@ -11,6 +11,8 @@
 
 #include "gmath.h"
 #include "../resources/model.h"
+#include "../shaders/shader.h"
+#include "../shaders/shm.h"
 
 void gr_fill(vec4 color);
 

@@ -10,7 +10,7 @@ object_t* create_cube(vec3f_t pos, float size, vec4 color)
    this->position = pos;
    this->scale = vec3f(size, size, size);
 
-   this->model = getModel(MODELID_CUBE);
+   this->model = get_model(MODELID_CUBE);
    this->color = color;
    return this;
 }

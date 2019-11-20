@@ -72,8 +72,8 @@ void u_draw_func(void)
    gr_fill(current_scene->back_color);
 
    // update view matrix according to current camera
-   identityMat(view_mat);
-   c_toMat(view_mat, current_scene->camera);
+   mat4_identity(view_mat);
+   c_to_mat(view_mat, current_scene->camera);
 
    for (size_t i = 0; i < objects->count; i++)
    {

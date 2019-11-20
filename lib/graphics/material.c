@@ -2,6 +2,9 @@
 // Created by maxim on 9/12/19.
 //
 
+#ifdef __GNUC__
+#pragma implementation "material.h"
+#endif
 #include "material.h"
 
 material_t* mt_create(texture_t* diffuse, texture_t* specular, float shininess)

@@ -6,8 +6,8 @@
 #define DEEPCARS_OBJ_CAMERA_CONTROL_H
 
 #include "../../lib/object_include.h"
-#include "../winDefaults.h"
+#include "../win_defaults.h"
 
-object_t* create_cameraControl();
+object_t* create_camera_control();
 
 #endif //DEEPCARS_OBJ_CAMERA_CONTROL_H
