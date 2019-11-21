@@ -100,6 +100,9 @@ typedef struct _model
    GLuint VBO; // vertex buffer object
    GLuint VAO; // vertex array object
 
+   // Actual size of triangles in model
+   GLuint triangles_count;
+
 } model_t;
 
 // model_t constructor

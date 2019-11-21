@@ -32,7 +32,7 @@ void app_load_resources(void)
 {
    //models
    models = list_create(10);
-   list_push(models, load_and_build_model("quad.obj"));
+   list_push(models, load_and_build_model("cube.obj"));
 
    //scenes
    scene_t* menu = sc_create(SCENEID_MENU);

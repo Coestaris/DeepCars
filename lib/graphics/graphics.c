@@ -89,7 +89,7 @@ void gr_draw_model(model_t* model)
    glBindBuffer(GL_ARRAY_BUFFER, model->VBO);
    glBindVertexArray(model->VAO);
 
-   glDrawArrays(GL_TRIANGLES, 0, model->model_len->faces_count * 3);
+   glDrawArrays(GL_TRIANGLES, 0, model->triangles_count * 3);
 
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindVertexArray(0);
@@ -122,4 +122,6 @@ void gr_draw_model_simpleColor(
 
    gr_draw_model(model);
    sh_use(NULL);
+
+   //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 }
