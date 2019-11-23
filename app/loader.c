@@ -8,7 +8,7 @@
 #include "../lib/updater.h"
 #include "../lib/scm.h"
 
-#include "objects/obj_cube.h"
+#include "objects/obj_dummy.h"
 #include "win_defaults.h"
 #include "objects/obj_camera_control.h"
 
@@ -33,13 +33,18 @@ void app_load_resources(void)
    //models
    models = list_create(10);
    list_push(models, load_and_build_model("cube.obj"));
+   list_push(models, load_and_build_model("torus.obj"));
+   list_push(models, load_and_build_model("teapot.obj"));
 
    //scenes
    scene_t* menu = sc_create(SCENEID_MENU);
-   list_push(menu->startup_objects, create_cube(vec3f(11, 11, 12), .3f, COLOR_GREEN));
-   list_push(menu->startup_objects, create_cube(vec3f(12, 13, 0), .3f, COLOR_BLUE));
-   list_push(menu->startup_objects, create_cube(vec3f(13, 0, 11), .6f, COLOR_RED));
+   list_push(menu->startup_objects, create_dummy(vec3f(6, 0, 12), .6f, COLOR_GREEN, get_model(MODELID_CUBE)));
+   list_push(menu->startup_objects, create_dummy(vec3f(11, 0, 12), .03f, COLOR_GREEN, get_model(MODELID_TORUS)));
+   list_push(menu->startup_objects, create_dummy(vec3f(6, 0, 6), .3f, COLOR_GREEN, get_model(MODELID_TEAPOT)));
    list_push(menu->startup_objects, create_camera_control());
+   menu->camera = c_create(
+           cvec4(0, 0, 15, 0),
+           cvec4(0, 1, 0, 0));
 
    scm_push_scene(menu);
 }

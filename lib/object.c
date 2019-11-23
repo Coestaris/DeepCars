@@ -3,7 +3,7 @@
 //
 
 #ifdef __GNUC__
-#pragma implementation "drawableObject.h"
+#pragma implementation "object.h"
 #endif
 #include "object.h"
 

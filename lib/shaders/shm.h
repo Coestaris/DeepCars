@@ -15,6 +15,7 @@
 #define SH_SIMPLECOLORED_MODEL 1
 #define SH_SIMPLECOLORED_VIEW  2
 #define SH_SIMPLECOLORED_PROJ  3
+#define SH_SIMPLECOLORED_VIEWER  4
 
 // Return true if shader with specified id stored in manager
 bool s_hasShader(int id);

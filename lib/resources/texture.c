@@ -40,6 +40,7 @@ void t_free(texture_t* tex)
 //
 void t_unload(texture_t* tex)
 {
+   printf("[texture.c]: Texture %s unloaded\n", tex->fn);
    glDeleteTextures(1, &tex->texID);
 }
 

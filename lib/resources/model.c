@@ -43,7 +43,8 @@ typedef enum _obj_descriptor_type
    OD_OBJECT,
    OD_MTLLIB,
    OD_USEMLT,
-   OD_COMMENT
+   OD_COMMENT,
+   OD_SMOOTH
 
 } obj_descriptor_type_t;
 
@@ -83,6 +84,8 @@ obj_descriptor_t allowed_descriptors[] =
        {"mtllib", OD_MTLLIB},
         // Describes material of all next faces
        {"usemtl", OD_USEMLT},
+       // Disable or enable mesh smoothing
+       {"s", OD_SMOOTH},
         // Just a comment
        {"#",      OD_COMMENT}
 };
@@ -420,7 +423,7 @@ void m_free(model_t* model)
    if (model->VAO != 0)
       glDeleteBuffers(1, &(model->VAO));
 
-   printf("[model.c]: Freed model %s", model->filename);
+   printf("[model.c]: Freed model %s\n", model->filename);
    free(model);
 }
 
@@ -542,12 +545,21 @@ void m_build(model_t* model)
                  (use_normals ? 3 : 0);
 
    size_t size = 0;
+   model->triangles_count = 0;
    for (size_t i = 0; i < model->model_len->faces_count; i++)
-         size += (model->faces[i]->count - 2) * floats_per_triangle * 3;
+   {
+      size += (model->faces[i]->count - 2) * floats_per_triangle * 3;
+      model->triangles_count += model->faces[i]->count - 2;
+   }
 
    float* buffer = malloc(sizeof(float) * size);
+   uint32_t* index_buffer = malloc(sizeof(uint32_t) * model->triangles_count* 2);
    size_t buffer_index = 0;
-   model->triangles_count = 0;
+   size_t index_buffer_index = 0;
+
+   // storing all vertices from object to a buffer
+   //for (size_t i = 0; i < model->model_len->vertices_count; i++)
+
 
    // storing all data to a buffer
    for (size_t i = 0; i < model->model_len->faces_count; i++)
@@ -558,19 +570,26 @@ void m_build(model_t* model)
          m_store_vertex(model, f, 0, buffer, &buffer_index, use_tex_coords, use_normals, supposed_normals);
          m_store_vertex(model, f, tria + 1, buffer, &buffer_index, use_tex_coords, use_normals, supposed_normals);
          m_store_vertex(model, f, tria + 2, buffer, &buffer_index, use_tex_coords, use_normals, supposed_normals);
-         model->triangles_count += 1;
       }
    }
    assert(buffer_index == size);
 
    glGenBuffers(1, &model->VBO);
+   glGenBuffers(1, &model->EBO);
    glGenVertexArrays(1, &model->VAO);
 
+   // 1. bind Vertex Array Object
+   glBindVertexArray(model->VAO);
+
+   // 2. copy our vertices array in a vertex buffer for OpenGL to use
    glBindBuffer(GL_ARRAY_BUFFER, model->VBO);
    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * buffer_index, buffer, GL_STATIC_DRAW);
 
-   // binding all necessary OpenGL attributes
-   glBindVertexArray(model->VAO);
+   // 3. copy our index array in a element buffer for OpenGL to use
+   //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->EBO);
+   //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * indices_buffer_index, indices_buffer, GL_STATIC_DRAW);
+
+   // 4. then set the vertex attributes pointers
    if (use_normals && use_tex_coords)
    {
       // vertices (3 floats)
@@ -622,9 +641,6 @@ void m_build(model_t* model)
 
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindVertexArray(0);
-
-   /*for(size_t i = 0; i < size; i++)
-       printf("%.2f%c", buffer[i], i && !((i + 1) % 6) ? '\n' : ' ');*/
 
    free(buffer);
 }

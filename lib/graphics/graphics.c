@@ -7,6 +7,9 @@
 #endif
 #include "graphics.h"
 
+// for current scene
+#include "../scm.h"
+
 vec4 COLOR_WHITE;
 vec4 COLOR_SILVER;
 vec4 COLOR_GRAY;
@@ -100,6 +103,15 @@ void gr_draw_model_simpleColor(
         vec3f_t pos, vec3f_t scale, vec3f_t rot)
 {
    sh_use(shader_simpleColored);
+   sh_set_vec3v(shader_simpleColored,
+                shader_simpleColored->uniform_locations[SH_SIMPLECOLORED_COLOR],
+                color[0], color[1], color[2]);
+
+   vec4 camera_pos = current_scene->camera->position;
+   sh_set_vec3v(shader_simpleColored,
+                shader_simpleColored->uniform_locations[SH_SIMPLECOLORED_VIEWER],
+                camera_pos[0], camera_pos[1], camera_pos[2]);
+
    sh_set_vec3v(shader_simpleColored,
                 shader_simpleColored->uniform_locations[SH_SIMPLECOLORED_COLOR],
                 color[0], color[1], color[2]);

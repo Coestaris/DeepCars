@@ -7,8 +7,10 @@ in vec3 Normal;
 in vec2 TexCoords;
 
 uniform vec3 objectColor;
+uniform vec3 viewerPosition;
 
 void main()
 {
-    FragColor = objectColor;
+    vec3 dir = normalize(viewerPosition - FragPos);
+    FragColor = objectColor * dot(dir, Normal);
 }

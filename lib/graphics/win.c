@@ -46,10 +46,10 @@ static bool w_is_extension_supported(const char* ext_list, const char* extension
 // Temporary GLX error handler. Required for creating 2.x contexts
 static int w_ctx_error_handler(Display* dpy, XErrorEvent* ev)
 {
-   printf("[win.c][ERROR]: == CONTEXT ERROR ==");
-   printf("[win.c][ERROR]: Type: %i, Error code: %i", ev->type, ev->error_code);
-   printf("[win.c][ERROR]: Minor code: %i, Request code: %i,", ev->minor_code, ev->request_code);
-   printf("[win.c][ERROR]: Resource ID: %lu, Serial number: %lu", ev->resourceid, ev->serial);
+   printf("[win.c][ERROR]: == CONTEXT ERROR ==\n");
+   printf("[win.c][ERROR]: Type: %i, Error code: %i\n", ev->type, ev->error_code);
+   printf("[win.c][ERROR]: Minor code: %i, Request code: %i,\n", ev->minor_code, ev->request_code);
+   printf("[win.c][ERROR]: Resource ID: %lu, Serial number: %lu\n", ev->resourceid, ev->serial);
    exit(EXIT_FAILURE);
 }
 

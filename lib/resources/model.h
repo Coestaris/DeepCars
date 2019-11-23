@@ -99,6 +99,7 @@ typedef struct _model
    // OpenGL buffer objects
    GLuint VBO; // vertex buffer object
    GLuint VAO; // vertex array object
+   GLuint EBO; // element buffer object (stores indices)
 
    // Actual size of triangles in model
    GLuint triangles_count;
