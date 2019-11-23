@@ -120,8 +120,8 @@ int sh_load(shader_t* sh)
 
    }
 
-   glDeleteShader(vertex_shader);
-   glDeleteShader(fragment_shader);
+   GL_CALL(glDeleteShader(vertex_shader))
+   GL_CALL(glDeleteShader(fragment_shader))
    return 1;
 }
 
@@ -153,7 +153,7 @@ void sh_free(shader_t* sh)
    printf("[shader.c]: Freed shader. vertex path: %s, fragment path: %s\n",
            sh->vertex_path, sh->fragment_path);
 
-   glDeleteProgram(sh->prog_id);
+   GL_CALL(glDeleteProgram(sh->prog_id))
 
    if (sh->uniform_locations)
       free(sh->uniform_locations);
@@ -166,78 +166,78 @@ void sh_free(shader_t* sh)
 //
 inline void sh_use(shader_t* sh)
 {
-   if (!sh) glUseProgram(0);
-   else glUseProgram(sh->prog_id);
+   if (!sh) GL_PCALL(glUseProgram(0))
+   else GL_PCALL(glUseProgram(sh->prog_id));
 }
 
 void sh_set_int(shader_t* sh, GLint location, int value)
 {
-   glUniform1i(location, value);
+   GL_PCALL(glUniform1i(location, value));
 }
 
 void sh_set_float(shader_t* sh, GLint location, float value)
 {
-   glUniform1f(location, value);
+   GL_PCALL(glUniform1f(location, value));
 }
 
 void sh_set_mat4(shader_t* sh, GLint location, mat4 value)
 {
-   glUniformMatrix4fv(location, 1, true, value);
+   GL_PCALL(glUniformMatrix4fv(location, 1, true, value));
 }
 
 void sh_set_vec3v(shader_t* sh, GLint location, float a, float b, float c)
 {
-   glUniform3f(location, a, b, c);
+   GL_PCALL(glUniform3f(location, a, b, c));
 }
 
 void sh_set_vec3(shader_t* sh, GLint location, vec4 v)
 {
-   glUniform3fv(location, 3, v);
+   GL_PCALL(glUniform3fv(location, 3, v));
 }
 
 void sh_set_vec4v(shader_t* sh, GLint locatione, float a, float b, float c, float d)
 {
-   glUniform4f(locatione, a, b, c, d);
+   GL_PCALL(glUniform4f(locatione, a, b, c, d));
 }
 
 void sh_set_vec4(shader_t* sh, GLint location, vec4 v)
 {
-   glUniform3fv(location, 4, v);
+   GL_PCALL(glUniform3fv(location, 4, v));
 }
 
 void sh_nset_int(shader_t* sh, const char* name, int value)
 {
-   sh_set_int(sh, glGetUniformLocation(sh->prog_id, name), value);
+   GL_PCALL(sh_set_int(sh, glGetUniformLocation(sh->prog_id, name), value));
 }
 
 void sh_nset_float(shader_t* sh, const char* name, float value)
 {
-   sh_set_float(sh, glGetUniformLocation(sh->prog_id, name), value);
+   GL_PCALL(sh_set_float(sh, glGetUniformLocation(sh->prog_id, name), value));
 }
 
 void sh_nset_mat4(shader_t* sh, const char* name, mat4 value)
 {
-   sh_set_mat4(sh, glGetUniformLocation(sh->prog_id, name), value);
+   GL_PCALL(sh_set_mat4(sh, glGetUniformLocation(sh->prog_id, name), value));
 }
 
 void sh_nset_vec3v(shader_t* sh, const char* name, float a, float b, float c)
 {
-   sh_set_vec3v(sh, glGetUniformLocation(sh->prog_id, name), a, b, c);
+   GL_PCALL(sh_set_vec3v(sh, glGetUniformLocation(sh->prog_id, name), a, b, c));
 }
 
 void sh_nset_vec3(shader_t* sh, const char* name, vec4 v)
 {
-   sh_set_vec3(sh, glGetUniformLocation(sh->prog_id, name), v);
+   GL_PCALL(sh_set_vec3(sh, glGetUniformLocation(sh->prog_id, name), v));
 }
 
 void sh_nset_vec4v(shader_t* sh, const char* name, float a, float b, float c, float d)
 {
-   sh_set_vec4v(sh, glGetUniformLocation(sh->prog_id, name), a, b, c, d);
+   GL_PCALL(sh_set_vec4v(sh, glGetUniformLocation(sh->prog_id, name), a, b, c, d));
 }
 
 void sh_nset_vec4(shader_t* sh, const char* name, vec4 v)
 {
-   sh_set_vec4(sh, glGetUniformLocation(sh->prog_id, name), v);
+   GL_PCALL(sh_set_vec4(sh, glGetUniformLocation(sh->prog_id, name), v));
 }
 
 //
@@ -251,28 +251,28 @@ void sh_info(shader_t* sh)
    GLint size; // size of the variable
    GLenum type; // type of the variable (float, vec3 or mat4, etc)
 
-   const GLsizei bufSize = 32; // maximum name length
-   GLchar name[bufSize]; // variable name in GLSL
+   const GLsizei buf_size = 32; // maximum name length
+   GLchar name[buf_size]; // variable name in GLSL
    GLsizei length; // name length
 
    printf("[shader.c][sh_info]: Shader vertex path: %s, Shader fragment path: %s\n", sh->vertex_path, sh->fragment_path);
    printf("[shader.c][sh_info]: Shader progID: %i\n", sh->prog_id);
 
-   glGetProgramiv(sh->prog_id, GL_ACTIVE_ATTRIBUTES, &count);
+   GL_CALL(glGetProgramiv(sh->prog_id, GL_ACTIVE_ATTRIBUTES, &count));
    printf("[shader.c][sh_info]: Active Attributes: %d\n", count);
 
    for (i = 0; i < count; i++)
    {
-      glGetActiveAttrib(sh->prog_id, (GLuint) i, bufSize, &length, &size, &type, name);
+      GL_CALL(glGetActiveAttrib(sh->prog_id, (GLuint) i, buf_size, &length, &size, &type, name));
       printf("[shader.c][sh_info]: Attribute %d:[type: %u, name: \"%s\"]\n", i, type, name);
    }
 
-   glGetProgramiv(sh->prog_id, GL_ACTIVE_UNIFORMS, &count);
+   GL_CALL(glGetProgramiv(sh->prog_id, GL_ACTIVE_UNIFORMS, &count));
    printf("[shader.c][sh_info]: Active Uniforms: %d\n", count);
 
    for (i = 0; i < count; i++)
    {
-      glGetActiveUniform(sh->prog_id, (GLuint) i, bufSize, &length, &size, &type, name);
+      GL_CALL(glGetActiveUniform(sh->prog_id, (GLuint) i, buf_size, &length, &size, &type, name));
       printf("[shader.c][sh_info]: Uniform %d:[type: %u, name: \"%s\"]\n", i, type, name);
    }
 

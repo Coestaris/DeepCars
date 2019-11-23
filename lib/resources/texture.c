@@ -47,7 +47,7 @@ void t_free(texture_t* tex)
 void t_unload(texture_t* tex)
 {
    printf("[texture.c]: Texture %s unloaded\n", tex->fn);
-   glDeleteTextures(1, &tex->texID);
+   GL_CALL(glDeleteTextures(1, &tex->texID));
    tex->texID = 0;
 }
 
@@ -81,13 +81,13 @@ void t_load(texture_t* tex)
 //
 inline void t_bind(texture_t* tex, GLenum target)
 {
-   glActiveTexture(GL_TEXTURE0);
+   GL_PCALL(glActiveTexture(GL_TEXTURE0));
    if(!tex)
    {
-      glBindTexture(GL_TEXTURE_2D, 0);
+      GL_PCALL(glBindTexture(GL_TEXTURE_2D, 0));
    }
    else
    {
-      glBindTexture(GL_TEXTURE_2D, tex->texID);
+      GL_PCALL(glBindTexture(GL_TEXTURE_2D, tex->texID));
    }
 }

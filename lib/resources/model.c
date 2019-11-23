@@ -401,9 +401,6 @@ model_t* m_load(const char* filename)
 //
 void m_free(model_t* model)
 {
-   glDeleteBuffers(1, &model->VAO);
-   glDeleteBuffers(1, &model->VBO);
-
    for (size_t i = 0; i < model->model_len->vertices_count; i++)
       vec4_free(model->vertices[i]);
    free(model->vertices);
@@ -432,10 +429,10 @@ void m_free(model_t* model)
    free(model->model_len);
 
    if (model->VBO != 0)
-      glDeleteBuffers(1, &(model->VBO));
+      GL_CALL(glDeleteBuffers(1, &(model->VBO)))
 
    if (model->VAO != 0)
-      glDeleteBuffers(1, &(model->VAO));
+      GL_CALL(glDeleteBuffers(1, &(model->VAO)))
 
    printf("[model.c]: Freed model %s\n", model->filename);
    free(model);
@@ -589,73 +586,73 @@ void m_build(model_t* model)
    }
    assert(buffer_index == size);
 
-   glGenBuffers(1, &model->VBO);
-   glGenBuffers(1, &model->EBO);
-   glGenVertexArrays(1, &model->VAO);
+   GL_CALL(glGenBuffers(1, &model->VBO))
+   //GL_CALL(glGenBuffers(1, &model->EBO))
+   GL_CALL(glGenVertexArrays(1, &model->VAO))
 
    // 1. bind Vertex Array Object
-   glBindVertexArray(model->VAO);
+   GL_CALL(glBindVertexArray(model->VAO))
 
    // 2. copy our vertices array in a vertex buffer for OpenGL to use
-   glBindBuffer(GL_ARRAY_BUFFER, model->VBO);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * buffer_index, buffer, GL_STATIC_DRAW);
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, model->VBO))
+   GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * buffer_index, buffer, GL_STATIC_DRAW))
 
    // 3. copy our index array in a element buffer for OpenGL to use
-   //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->EBO);
-   //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * indices_buffer_index, indices_buffer, GL_STATIC_DRAW);
+   //GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->EBO))
+   //GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * indices_buffer_index, indices_buffer, GL_STATIC_DRAW))
 
    // 4. then set the vertex attributes pointers
    if (use_normals && use_tex_coords)
    {
       // vertices (3 floats)
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                            (void*) 0);
-      glEnableVertexAttribArray(0);
+      GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                            (void*) 0))
+      GL_CALL(glEnableVertexAttribArray(0))
 
       // normals (3 floats)
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                            (void*)(3 * sizeof(float)));
-      glEnableVertexAttribArray(1);
+      GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                            (void*)(3 * sizeof(float))))
+      GL_CALL(glEnableVertexAttribArray(1))
 
       // texture coordinates (2 floats)
-      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                            (void*) (6 * sizeof(float)));
-      glEnableVertexAttribArray(2);
+      GL_CALL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                            (void*) (6 * sizeof(float))))
+      GL_CALL(glEnableVertexAttribArray(2))
    }
    else if (!use_normals && use_tex_coords)
    {
       // vertices (3 floats)
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                            (void*) 0);
-      glEnableVertexAttribArray(0);
+      GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                            (void*) 0))
+      GL_CALL(glEnableVertexAttribArray(0))
 
       // texture coordinates (2 floats)
-      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                            (void*) (3 * sizeof(float)));
-      glEnableVertexAttribArray(2);
+      GL_CALL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                            (void*) (3 * sizeof(float))))
+      GL_CALL(glEnableVertexAttribArray(2))
    }
    else if (use_normals && !use_tex_coords)
    {
       // vertices (3 floats)
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                            (void*) 0);
-      glEnableVertexAttribArray(0);
+      GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                            (void*) 0))
+      GL_CALL(glEnableVertexAttribArray(0))
 
       // normals (3 floats)
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                            (void*) (3 * sizeof(float)));
-      glEnableVertexAttribArray(1);
+      GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                            (void*) (3 * sizeof(float))))
+      GL_CALL(glEnableVertexAttribArray(1))
    }
    else //no normals and coords
    {
       // vertices (3 floats)
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-                            (void*) 0);
-      glEnableVertexAttribArray(0);
+      GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+                            (void*) 0))
+      GL_CALL(glEnableVertexAttribArray(0))
    }
 
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindVertexArray(0);
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0))
+   GL_CALL(glBindVertexArray(0))
 
    free(buffer);
 }

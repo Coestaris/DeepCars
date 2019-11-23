@@ -29,17 +29,17 @@ vec4 COLOR_PURPLE;
 
 void gr_fill(vec4 color)
 {
-   glClearColor(color[0], color[1], color[2], color[3]);
+   GL_PCALL(glClearColor(color[0], color[1], color[2], color[3]))
 }
 
 shader_t* shader_simple;
 shader_t* shader_textured;
 
-mat4 projMat;
+mat4 proj_mat;
 mat4 view_mat;
-mat4 modelMat;
+mat4 model_mat;
 
-void gr_init(mat4 _proj, mat4 _view)
+void gr_init(mat4 proj, mat4 view)
 {
    COLOR_WHITE = cvec4(1, 1, 1, 0);
    COLOR_SILVER = cvec4(.75, .75, .75, 0);
@@ -61,11 +61,11 @@ void gr_init(mat4 _proj, mat4 _view)
    shader_simple = s_getShader(SH_SIMPLECOLORED);
    shader_textured = s_getShader(SH_TEXTURED);
 
-   projMat = _proj;
-   view_mat = _view;
-   modelMat = cmat4();
+   proj_mat = proj;
+   view_mat = view;
+   model_mat = cmat4();
 
-   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   //GL_CALL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE))
 }
 
 void gr_free(void)
@@ -87,27 +87,24 @@ void gr_free(void)
    vec4_free(COLOR_FUCHSIA);
    vec4_free(COLOR_PURPLE);
 
-   mat4_free(projMat);
+   mat4_free(proj_mat);
    mat4_free(view_mat);
-   mat4_free(modelMat);
+   mat4_free(model_mat);
 }
 
 void gr_draw_model(model_t* model)
 {
-   //glBindBuffer(GL_ARRAY_BUFFER, model->VBO);
-   glBindVertexArray(model->VAO);
-
-   glDrawArrays(GL_TRIANGLES, 0, model->triangles_count * 3);
-
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindVertexArray(0);
+   GL_PCALL(glBindVertexArray(model->VAO))
+   GL_PCALL(glDrawArrays(GL_TRIANGLES, 0, model->triangles_count * 3))
+   GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, 0))
+   GL_PCALL(glBindVertexArray(0))
 }
 
 inline void gr_transform(vec3f_t pos, vec3f_t scale, vec3f_t rot)
 {
-   mat4_identity(modelMat);
-   mat4_translate(modelMat, (float) pos.x, (float) pos.y, (float) pos.z);
-   mat4_scale(modelMat, (float) scale.x, (float) scale.y, (float) scale.z);
+   mat4_identity(model_mat);
+   mat4_translate(model_mat, (float) pos.x, (float) pos.y, (float) pos.z);
+   mat4_scale(model_mat, (float) scale.x, (float) scale.y, (float) scale.z);
 
    //todo: rotation
 }
@@ -122,9 +119,9 @@ void gr_draw_model_textured(model_t* model, texture_t* texture)
    sh_set_vec3v(shader_textured, locations[SH_TEXTURED_VIEWER],
                 camera_pos[0], camera_pos[1], camera_pos[2]);
 
-   sh_set_mat4(shader_textured, locations[SH_TEXTURED_PROJ], projMat);
+   sh_set_mat4(shader_textured, locations[SH_TEXTURED_PROJ], proj_mat);
    sh_set_mat4(shader_textured, locations[SH_TEXTURED_VIEW], view_mat);
-   sh_set_mat4(shader_textured, locations[SH_TEXTURED_MODEL], modelMat);
+   sh_set_mat4(shader_textured, locations[SH_TEXTURED_MODEL], model_mat);
 
 
    t_bind(texture, GL_TEXTURE0);
@@ -146,9 +143,9 @@ void gr_draw_model_simple(model_t* model, vec4 color)
                 camera_pos[0], camera_pos[1], camera_pos[2]);
    sh_set_vec3v(shader_simple, locations[SH_SIMPLECOLORED_COLOR],
                 color[0], color[1], color[2]);
-   sh_set_mat4(shader_simple, locations[SH_SIMPLECOLORED_PROJ], projMat);
+   sh_set_mat4(shader_simple, locations[SH_SIMPLECOLORED_PROJ], proj_mat);
    sh_set_mat4(shader_simple, locations[SH_SIMPLECOLORED_VIEW], view_mat);
-   sh_set_mat4(shader_simple, locations[SH_SIMPLECOLORED_MODEL], modelMat);
+   sh_set_mat4(shader_simple, locations[SH_SIMPLECOLORED_MODEL], model_mat);
 
    gr_draw_model(model);
    sh_use(NULL);

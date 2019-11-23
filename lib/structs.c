@@ -5,7 +5,48 @@
 #ifdef __GNUC__
 #pragma implementation "structs.h"
 #endif
+
+#include <GL/gl.h>
+#include <stdlib.h>
+
 #include "structs.h"
+
+void gl_check(const char* line, int line_index, const char* file)
+{
+   GLenum error;
+   if((error = glGetError()) != GL_NO_ERROR)
+   {
+      const char* error_name = NULL;
+      switch(error)
+      {
+         case GL_INVALID_ENUM: error_name = "GL_INVALID_ENUM";
+            break;
+         case GL_INVALID_VALUE: error_name = "GL_INVALID_VALUE";
+            break;
+         case GL_INVALID_OPERATION: error_name = "GL_INVALID_OPERATION";
+            break;
+         case GL_STACK_OVERFLOW: error_name = "GL_STACK_OVERFLOW";
+            break;
+         case GL_STACK_UNDERFLOW: error_name = "GL_STACK_UNDERFLOW";
+            break;
+         case GL_OUT_OF_MEMORY: error_name = "GL_OUT_OF_MEMORY";
+            break;
+         case GL_INVALID_FRAMEBUFFER_OPERATION: error_name = "GL_INVALID_FRAMEBUFFER_OPERATION";
+            break;
+         case GL_CONTEXT_LOST: error_name = "GL_CONTEXT_LOST";
+            break;
+         case GL_TABLE_TOO_LARGE: error_name = "GL_TABLE_TOO_LARGE";
+            break;
+         default:
+            error_name = "unknown error";
+      }
+
+      printf("[GL ERROR]: Error type: %i (%s) occurred while processing \"%s\"\n[GL ERROR]: At %s at line %i",
+              error, error_name, line, file, line_index);
+
+      exit(EXIT_FAILURE);
+   }
+}
 
 //
 // vec2f

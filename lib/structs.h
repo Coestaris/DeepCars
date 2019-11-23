@@ -9,6 +9,24 @@
 #include <stddef.h>
 #include <math.h>
 
+#define VERBOSE true
+#define DEBUG_LEVEL 2 // 2 - glCall, glPCall. 1 - glCall
+
+#if DEBUG_LEVEL == 2
+#define GL_CALL(expr) { expr; gl_check(#expr, __LINE__, __FILE__); }
+#define GL_PCALL(expr) { expr; gl_check(#expr, __LINE__, __FILE__); }
+#elif DEBUG_LEVEL == 1
+#define GL_CALL(expr) { expr; gl_check(#expr, __LINE__, __FILE__); }
+#define GL_PCALL(expr) expr
+#else
+#define GL_CALL(expr) expr
+#define GL_PCALL(expr) expr
+#endif
+
+#if DEBUG_LEVEL > 0
+void gl_check(const char* line, int line_index, const char* file);
+#endif
+
 // 2 dimensional floating point vector
 typedef struct _vec2f
 {

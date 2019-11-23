@@ -8,7 +8,6 @@
 #define WIN_WIDTH  1200
 #define WIN_HEIGHT 800
 #define WIN_TITLE  "DeepCars"
-#define VERBOSE    true
 
 #define SCENEID_MENU 0
 

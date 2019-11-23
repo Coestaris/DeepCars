@@ -6,6 +6,7 @@
 #pragma implementation "win.h"
 #endif
 #include "win.h"
+#include "../structs.h"
 
 //
 // GLX setup parameters
@@ -298,9 +299,7 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
    info->context = ctx;
    glXMakeCurrent(info->display, info->win, ctx);
 
-   glEnable(GL_DEPTH_TEST);
-   glEnable(GL_TEXTURE_2D);
-
+   GL_CALL(glEnable(GL_DEPTH_TEST));
    return info;
 }
 
@@ -324,8 +323,8 @@ void w_destroy(win_info_t* w)
 //
 void w_swap_buffers(win_info_t* w)
 {
-   glXSwapBuffers(w->display, w->win);
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   GL_PCALL(glXSwapBuffers(w->display, w->win))
+   GL_PCALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT))
 }
 
 void w_print_info()
