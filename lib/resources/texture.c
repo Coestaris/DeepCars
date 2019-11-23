@@ -15,10 +15,11 @@ texture_t* t_create(const char* fn)
    texture_t* t = malloc(sizeof(texture_t));
    t->fn = fn;
    t->data = malloc(sizeof(texData));
+   t->texID = 0;
 
    t->data->wrappingMode = OIL_DEFAULT_WRAPPING;
    t->data->flipX = OIL_DEFAULT_FLIPX;
-   t->data->flipY = OIL_DEFAULT_FLIPY;
+   t->data->flipY = true;
    t->data->borderColor = OIL_DEFAULT_BORDERCOLOR;
    t->data->minFilter = OIL_DEFAULT_MIN;
    t->data->magFilter = OIL_DEFAULT_MAG;
@@ -31,6 +32,11 @@ texture_t* t_create(const char* fn)
 //
 void t_free(texture_t* tex)
 {
+   if( tex->texID)
+   {
+      t_unload(tex);
+   }
+
    free(tex->data);
    free(tex);
 }
@@ -42,6 +48,7 @@ void t_unload(texture_t* tex)
 {
    printf("[texture.c]: Texture %s unloaded\n", tex->fn);
    glDeleteTextures(1, &tex->texID);
+   tex->texID = 0;
 }
 
 //
@@ -59,7 +66,7 @@ void t_load(texture_t* tex)
    if (!tex->texID)
    {
       oilPrintError();
-      abort();
+      exit(EXIT_FAILURE);
    }
 
    tex->width = tex->data->out_width;
@@ -72,7 +79,15 @@ void t_load(texture_t* tex)
 //
 // t_bind()
 //
-inline void t_bind(texture_t* tex)
+inline void t_bind(texture_t* tex, GLenum target)
 {
-   glBindTexture(GL_TEXTURE_2D, tex->texID);
+   glActiveTexture(GL_TEXTURE0);
+   if(!tex)
+   {
+      glBindTexture(GL_TEXTURE_2D, 0);
+   }
+   else
+   {
+      glBindTexture(GL_TEXTURE_2D, tex->texID);
+   }
 }

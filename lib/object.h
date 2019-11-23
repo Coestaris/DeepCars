@@ -17,6 +17,30 @@ typedef void (* key_event_func_t)(struct _object* this, uint32_t key, uint32_t s
 typedef void (* mouse_event_func_t)(struct _object* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse);
 typedef void (* mousemove_event_func_t)(struct _object* this, uint32_t x, uint32_t y);
 
+typedef enum _draw_mode {
+   DM_SIMPLE,
+   DM_TEXTURED,
+   DM_TEXTURED_SHADED
+
+} draw_mode_t;
+
+typedef struct _draw_info_simple {
+   vec4 color;
+
+} draw_info_simple_t;
+
+typedef struct _draw_info_textured {
+   texture_t* texture;
+
+} draw_info_textured_t;
+
+typedef struct _draw_info_textured_shaded {
+   texture_t* diffuse;
+   texture_t* specular;
+   texture_t* emit;
+
+} draw_info_textured_shaded_t;
+
 // Struct that describes drawable object
 typedef struct _object
 {
@@ -38,8 +62,11 @@ typedef struct _object
    mouse_event_func_t mouse_event_func;
    mousemove_event_func_t mousemove_event_func;
 
-   //todo: delete
-   vec4 color;
+   // Shader data for drawing object
+   void* draw_info;
+
+   // Shader to used for drawing object
+   draw_mode_t draw_mode;
 
 } object_t;
 
@@ -51,5 +78,10 @@ object_t* o_create();
 
 // Frees object and all its used resources
 void o_free(object_t* object);
+
+// Sets rendering parameters of object
+void o_dm_simple(object_t* object, vec4 color);
+void o_dm_textured(object_t* object, texture_t* texture);
+void o_dm_textured_shaded(object_t* object, texture_t* diffuse, texture_t* specular, texture_t* emit);
 
 #endif //DEEPCARS_OBJECT_H

@@ -37,7 +37,7 @@ typedef enum _obj_descriptor_type
 {
    OD_VERTEX,
    OD_VERTEX_NORMAL,
-   od_VERTEX_TEX,
+   OD_VERTEX_TEX,
    OD_FACE,
    OD_GROUP,
    OD_OBJECT,
@@ -73,7 +73,7 @@ obj_descriptor_t allowed_descriptors[] =
         // Contains single normal information, possible 4 values
        {"vn",     OD_VERTEX_NORMAL},
         // Contains single texture coordinate information, possible 4 values
-       {"vt",     od_VERTEX_TEX},
+       {"vt",     OD_VERTEX_TEX},
         // Contains single face information, can have from 3 to MAX_FACE_LEN values
        {"f",      OD_FACE},
         // Describes group name of all following faces, can have several values separated with spaces
@@ -213,6 +213,15 @@ void m_proceed_line(model_t* model, const char* string, size_t start_index, size
             }
             buff_vec[word_count - 1] = (float) m_parse_double(line_index);
          }
+         if (descriptor->type == OD_VERTEX_TEX)
+         {
+            if (word_count > 2)
+            {
+               printf("[model.c][ERROR]: Too many arguments for tex coord descriptor at line %li\n", line_index);
+               exit(EXIT_FAILURE);
+            }
+            buff_vec[word_count - 1] = (float) m_parse_double(line_index);
+         }
          if (descriptor->type == OD_FACE)
          {
             assert(word_count < MAX_FACE_LEN);
@@ -246,6 +255,11 @@ void m_proceed_line(model_t* model, const char* string, size_t start_index, size
    if (descriptor->type == OD_VERTEX_NORMAL)
    {
       m_push_normal(model, vec4_ccpy(buff_vec));
+      vec4_fill(buff_vec, 0, 0, 0, 0);
+   }
+   if (descriptor->type == OD_VERTEX_TEX)
+   {
+      m_push_tex_coord(model, vec4_ccpy(buff_vec));
       vec4_fill(buff_vec, 0, 0, 0, 0);
    }
 
@@ -514,13 +528,6 @@ void m_store_vertex(
    buffer[(*buffer_index)++] = model->vertices[vert_index][1];
    buffer[(*buffer_index)++] = model->vertices[vert_index][2];
 
-   if(use_tex_coords)
-   {
-      size_t tex_index = f->tex_id[id] - 1;
-      buffer[(*buffer_index)++] = model->tex_coords[tex_index][0];
-      buffer[(*buffer_index)++] = model->tex_coords[tex_index][1];
-   }
-
    if(use_normal)
    {
       size_t norm_index = supposed_normals ? vert_index : f->normal_id[id] - 1;
@@ -528,6 +535,14 @@ void m_store_vertex(
       buffer[(*buffer_index)++] = model->normals[norm_index][1];
       buffer[(*buffer_index)++] = model->normals[norm_index][2];
    }
+
+   if(use_tex_coords)
+   {
+      size_t tex_index = f->tex_id[id] - 1;
+      buffer[(*buffer_index)++] = model->tex_coords[tex_index][0];
+      buffer[(*buffer_index)++] = model->tex_coords[tex_index][1];
+   }
+
 }
 
 //
@@ -553,9 +568,9 @@ void m_build(model_t* model)
    }
 
    float* buffer = malloc(sizeof(float) * size);
-   uint32_t* index_buffer = malloc(sizeof(uint32_t) * model->triangles_count* 2);
+   //uint32_t* index_buffer = malloc(sizeof(uint32_t) * model->triangles_count* 2);
    size_t buffer_index = 0;
-   size_t index_buffer_index = 0;
+   //size_t index_buffer_index = 0;
 
    // storing all vertices from object to a buffer
    //for (size_t i = 0; i < model->model_len->vertices_count; i++)
@@ -593,48 +608,48 @@ void m_build(model_t* model)
    if (use_normals && use_tex_coords)
    {
       // vertices (3 floats)
-      glVertexAttribPointer(0, VERTEX_PER_FACE, GL_FLOAT, GL_FALSE, (VERTEX_PER_FACE + 5) * sizeof(float),
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
                             (void*) 0);
       glEnableVertexAttribArray(0);
 
-      // texture coordinates (2 floats)
-      glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, (VERTEX_PER_FACE + 5) * sizeof(float),
-                            (void*) (VERTEX_PER_FACE * sizeof(float)));
+      // normals (3 floats)
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                            (void*)(3 * sizeof(float)));
       glEnableVertexAttribArray(1);
 
-      // normals (3 floats)
-      glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, (VERTEX_PER_FACE + 5) * sizeof(float),
-                            (void*) ((VERTEX_PER_FACE + 2) * sizeof(float)));
+      // texture coordinates (2 floats)
+      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                            (void*) (6 * sizeof(float)));
       glEnableVertexAttribArray(2);
    }
    else if (!use_normals && use_tex_coords)
    {
       // vertices (3 floats)
-      glVertexAttribPointer(0, VERTEX_PER_FACE, GL_FLOAT, GL_FALSE, (VERTEX_PER_FACE + 2) * sizeof(float),
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
                             (void*) 0);
       glEnableVertexAttribArray(0);
 
       // texture coordinates (2 floats)
-      glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, (VERTEX_PER_FACE + 2) * sizeof(float),
-                            (void*) (VERTEX_PER_FACE * sizeof(float)));
-      glEnableVertexAttribArray(1);
+      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                            (void*) (3 * sizeof(float)));
+      glEnableVertexAttribArray(2);
    }
    else if (use_normals && !use_tex_coords)
    {
       // vertices (3 floats)
-      glVertexAttribPointer(0, VERTEX_PER_FACE, GL_FLOAT, GL_FALSE, (VERTEX_PER_FACE + 3) * sizeof(float),
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
                             (void*) 0);
       glEnableVertexAttribArray(0);
 
       // normals (3 floats)
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, (VERTEX_PER_FACE + 3) * sizeof(float),
-                            (void*) (VERTEX_PER_FACE * sizeof(float)));
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                            (void*) (3 * sizeof(float)));
       glEnableVertexAttribArray(1);
    }
    else //no normals and coords
    {
       // vertices (3 floats)
-      glVertexAttribPointer(0, VERTEX_PER_FACE, GL_FLOAT, GL_FALSE, VERTEX_PER_FACE * sizeof(float),
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
                             (void*) 0);
       glEnableVertexAttribArray(0);
    }

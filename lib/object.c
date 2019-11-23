@@ -7,6 +7,9 @@
 #endif
 #include "object.h"
 
+// for color
+#include "graphics/graphics.h"
+
 //
 // o_free
 //
@@ -15,6 +18,7 @@ void o_free(object_t* object)
    if (object->destroy_func)
       object->destroy_func(object);
 
+   free(object->draw_info);
    free(object);
 }
 
@@ -23,9 +27,25 @@ void o_free(object_t* object)
 //
 object_t* o_clone(object_t* object)
 {
-   object_t* newObject = malloc(sizeof(object_t));
-   memcpy(newObject, object, sizeof(object_t));
-   return newObject;
+   object_t* new_object = malloc(sizeof(object_t));
+   memcpy(new_object, object, sizeof(object_t));
+   switch(new_object->draw_mode)
+   {
+      case DM_SIMPLE:
+         new_object->draw_info = malloc(sizeof(draw_info_simple_t));
+         memcpy(new_object->draw_info, object->draw_info, sizeof(draw_info_simple_t));
+         break;
+      case DM_TEXTURED:
+         new_object->draw_info = malloc(sizeof(draw_info_textured_t));
+         memcpy(new_object->draw_info, object->draw_info, sizeof(draw_info_textured_t));
+         break;
+      case DM_TEXTURED_SHADED:
+         new_object->draw_info = malloc(sizeof(draw_info_textured_shaded_t));
+         memcpy(new_object->draw_info, object->draw_info, sizeof(draw_info_textured_shaded_t));
+         break;
+   }
+
+   return new_object;
 }
 
 //
@@ -44,5 +64,49 @@ object_t* o_create()
    object->key_event_func = NULL;
    object->mouse_event_func = NULL;
    object->mousemove_event_func = NULL;
+
+   object->draw_info = NULL;
+   o_dm_simple(object, COLOR_WHITE);
    return object;
+}
+
+//
+// o_dm_simple()
+//
+void o_dm_simple(object_t* object, vec4 color)
+{
+   if(object->draw_info) free(object->draw_info);
+
+   object->draw_mode = DM_SIMPLE;
+   object->draw_info = malloc(sizeof(draw_info_simple_t));
+   draw_info_simple_t* info = (draw_info_simple_t*)object->draw_info;
+   info->color = color;
+}
+
+//
+// o_dm_textured()
+//
+void o_dm_textured(object_t* object, texture_t* texture)
+{
+   if(object->draw_info) free(object->draw_info);
+
+   object->draw_mode = DM_TEXTURED;
+   object->draw_info = malloc(sizeof(draw_info_textured_t));
+   draw_info_textured_t* info = (draw_info_textured_t*)object->draw_info;
+   info->texture = texture;
+}
+
+//
+// o_dm_textured_shaded()
+//
+void o_dm_textured_shaded(object_t* object, texture_t* diffuse, texture_t* specular, texture_t* emit)
+{
+   if(object->draw_info) free(object->draw_info);
+
+   object->draw_mode = DM_TEXTURED_SHADED;
+   object->draw_info = malloc(sizeof(draw_info_textured_shaded_t));
+   draw_info_textured_shaded_t* info = (draw_info_textured_shaded_t*)object->draw_info;
+   info->diffuse = diffuse;
+   info->specular = specular;
+   info->emit = emit;
 }

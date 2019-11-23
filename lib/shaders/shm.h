@@ -17,6 +17,14 @@
 #define SH_SIMPLECOLORED_PROJ  3
 #define SH_SIMPLECOLORED_VIEWER  4
 
+// "TEXUTED" shader uniform indices
+#define SH_TEXTURED 1
+#define SH_TEXTURED_TEXTURE 0
+#define SH_TEXTURED_MODEL 1
+#define SH_TEXTURED_VIEW  2
+#define SH_TEXTURED_PROJ  3
+#define SH_TEXTURED_VIEWER  4
+
 // Return true if shader with specified id stored in manager
 bool s_hasShader(int id);
 

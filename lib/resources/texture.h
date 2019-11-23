@@ -48,6 +48,6 @@ void t_unload(texture_t* tex);
 void t_load(texture_t* tex);
 
 // Binds specified texture
-void t_bind(texture_t* tex);
+void t_bind(texture_t* tex, GLenum target);
 
 #endif //DEEPCARS_TEXTURE_H

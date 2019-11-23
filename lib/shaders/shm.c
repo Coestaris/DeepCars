@@ -23,8 +23,8 @@ list_t* nodes;
 bool s_hasShader(int id)
 {
    for (size_t i = 0; i < nodes->count; i++)
-      if (((shm_node_t*)nodes->collection[i])->id == id) return 1;
-   return 0;
+      if (((shm_node_t*)nodes->collection[i])->id == id) return true;
+   return false;
 }
 
 //
@@ -33,7 +33,11 @@ bool s_hasShader(int id)
 void s_push(shader_t* shader, int id)
 {
    assert(shader != NULL);
-   assert(!s_hasShader(id));
+   if(s_hasShader(id))
+   {
+      printf("[shm.c]: Shader with same id already exists");
+      exit(EXIT_FAILURE);
+   }
 
    shm_node_t* node = malloc(sizeof(shm_node_t));
    node->shader = shader;
@@ -47,7 +51,7 @@ void s_set_uniform_location(size_t index, shader_t* sh, const char* uniform_name
 {
    if((sh->uniform_locations[index] = glGetUniformLocation(sh->prog_id, uniform_name)) == -1)
    {
-      printf("[shm.c]: Unable to get uniform location \"%s\" from shader %s\n", uniform_name, sh->fragment_path);
+      printf("[shm.c]: Unable to get uniform location of \"%s\" from shader %s\n", uniform_name, sh->fragment_path);
       //exit(EXIT_FAILURE);
    }
 }
@@ -59,7 +63,6 @@ void s_push_built_in_shaders()
 {
    shader_t* simple_colored = sh_create("../lib/shaders/shaders/simple_colored.vsh",
                                         "../lib/shaders/shaders/simple_colored.fsh");
-   sh_info(simple_colored);
 
    simple_colored->uniform_locations = malloc(sizeof(GLint) * 5);
    s_set_uniform_location(SH_SIMPLECOLORED_COLOR, simple_colored, "objectColor");
@@ -68,6 +71,20 @@ void s_push_built_in_shaders()
    s_set_uniform_location(SH_SIMPLECOLORED_PROJ, simple_colored, "projection");
    s_set_uniform_location(SH_SIMPLECOLORED_VIEWER, simple_colored, "viewerPosition");
    s_push(simple_colored, SH_SIMPLECOLORED);
+
+   shader_t* textured = sh_create("../lib/shaders/shaders/textured.vsh",
+                                        "../lib/shaders/shaders/textured.fsh");
+
+   textured->uniform_locations = malloc(sizeof(GLint) * 5);
+   s_set_uniform_location(SH_TEXTURED_TEXTURE, textured, "tex");
+   s_set_uniform_location(SH_TEXTURED_MODEL, textured, "model");
+   s_set_uniform_location(SH_TEXTURED_VIEW, textured, "view");
+   s_set_uniform_location(SH_TEXTURED_PROJ, textured, "projection");
+   s_set_uniform_location(SH_TEXTURED_VIEWER, textured, "viewerPosition");
+   s_push(textured, SH_TEXTURED);
+
+   sh_info(simple_colored);
+   sh_info(textured);
 }
 
 //

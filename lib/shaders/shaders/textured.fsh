@@ -6,11 +6,12 @@ in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
 
-uniform vec3 objectColor;
+uniform sampler2D tex;
 uniform vec3 viewerPosition;
 
 void main()
 {
     vec3 dir = normalize(viewerPosition - FragPos);
-    FragColor = objectColor * (dot(dir, Normal));
+    FragColor = texture(tex, TexCoords).xyz * dot(dir, Normal);
+    //FragColor = vec3(TexCoords.xy, 0);
 }

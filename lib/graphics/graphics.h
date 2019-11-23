@@ -19,10 +19,10 @@ void gr_fill(vec4 color);
 void gr_init(mat4 proj, mat4 view);
 void gr_free(void);
 
-void gr_draw_model(model_t* model);
-void gr_draw_model_simpleColor(
-        model_t* model, vec4 color,
-        vec3f_t pos, vec3f_t scale, vec3f_t rot);
+void gr_transform(vec3f_t pos, vec3f_t scale, vec3f_t rot);
+
+void gr_draw_model_simple(model_t* model, vec4 color);
+void gr_draw_model_textured(model_t* model, texture_t* texture);
 
 extern vec4 COLOR_WHITE;
 extern vec4 COLOR_SILVER;

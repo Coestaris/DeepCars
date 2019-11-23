@@ -7,6 +7,7 @@
 #include "../lib/graphics/graphics.h"
 #include "../lib/updater.h"
 #include "../lib/scm.h"
+#include "../lib/resources/txm.h"
 
 #include "objects/obj_dummy.h"
 #include "win_defaults.h"
@@ -30,18 +31,42 @@ model_t* load_and_build_model(const char* filename)
 
 void app_load_resources(void)
 {
-   //models
+   // textures
+   txm_push(0, 0, t_create("tex1.png"));
+   txm_push(1, 0, t_create("tex2.png"));
+   txm_push(2, 0, t_create("tex3.png"));
+
+   // models
    models = list_create(10);
    list_push(models, load_and_build_model("cube.obj"));
    list_push(models, load_and_build_model("torus.obj"));
    list_push(models, load_and_build_model("teapot.obj"));
 
-   //scenes
+   // scenes
    scene_t* menu = sc_create(SCENEID_MENU);
-   list_push(menu->startup_objects, create_dummy(vec3f(6, 0, 12), .6f, COLOR_GREEN, get_model(MODELID_CUBE)));
-   list_push(menu->startup_objects, create_dummy(vec3f(11, 0, 12), .03f, COLOR_GREEN, get_model(MODELID_TORUS)));
-   list_push(menu->startup_objects, create_dummy(vec3f(6, 0, 6), .3f, COLOR_GREEN, get_model(MODELID_TEAPOT)));
+   menu->back_color = COLOR_GRAY;
+   // objects
+   list_push(menu->startup_objects,
+           create_dummy(vec3f(6, 0, 12), .6f, COLOR_GREEN, get_model(MODELID_CUBE)));
+   list_push(menu->startup_objects,
+           create_dummy(vec3f(11, 0, 12), .03f, COLOR_GREEN, get_model(MODELID_TORUS)));
+   list_push(menu->startup_objects,
+           create_dummy(vec3f(6, 0, 6), .3f, COLOR_GREEN, get_model(MODELID_TEAPOT)));
+
+   list_push(menu->startup_objects,
+           create_textured_dummy(vec3f(-6, 0, -12), .6f, txm_get(1), get_model(MODELID_CUBE)));
+   list_push(menu->startup_objects,
+           create_textured_dummy(vec3f(-11, 0, -12), .03f, txm_get(1), get_model(MODELID_TORUS)));
+   list_push(menu->startup_objects,
+           create_textured_dummy(vec3f(-6, 0, -6), .3f, txm_get(1), get_model(MODELID_TEAPOT)));
+
+
    list_push(menu->startup_objects, create_camera_control());
+
+   // scopes
+   list_push(menu->required_tex_scopes, (void*)0);
+
+   // camera
    menu->camera = c_create(
            cvec4(0, 0, 15, 0),
            cvec4(0, 1, 0, 0));
@@ -73,6 +98,7 @@ void app_init_graphics(void)
    u_init();
    scm_init();
    s_init();
+   txm_init();
    gr_init(win->projection, view);
 }
 
@@ -84,6 +110,7 @@ void app_run(void)
 
 void app_fin()
 {
+   printf("[loader.c]: CLOSING....\n");
    s_free();
 
    u_clear_objects(true);
@@ -95,6 +122,7 @@ void app_fin()
 
    scm_free();
    gr_free();
+   txm_free(true);
 
    w_destroy(win);
 }

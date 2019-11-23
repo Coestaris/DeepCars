@@ -255,23 +255,30 @@ void sh_info(shader_t* sh)
    GLchar name[bufSize]; // variable name in GLSL
    GLsizei length; // name length
 
+   printf("[shader.c][sh_info]: Shader vertex path: %s, Shader fragment path: %s\n", sh->vertex_path, sh->fragment_path);
+   printf("[shader.c][sh_info]: Shader progID: %i\n", sh->prog_id);
+
    glGetProgramiv(sh->prog_id, GL_ACTIVE_ATTRIBUTES, &count);
-   printf("[shader.c]: Active Attributes: %d\n", count);
+   printf("[shader.c][sh_info]: Active Attributes: %d\n", count);
 
    for (i = 0; i < count; i++)
    {
       glGetActiveAttrib(sh->prog_id, (GLuint) i, bufSize, &length, &size, &type, name);
-
-      printf("[shader.c]: Attribute #%d Type: %u Name: %s\n", i, type, name);
+      printf("[shader.c][sh_info]: Attribute %d:[type: %u, name: \"%s\"]\n", i, type, name);
    }
 
    glGetProgramiv(sh->prog_id, GL_ACTIVE_UNIFORMS, &count);
-   printf("[shader.c]: Active Uniforms: %d\n", count);
+   printf("[shader.c][sh_info]: Active Uniforms: %d\n", count);
 
    for (i = 0; i < count; i++)
    {
       glGetActiveUniform(sh->prog_id, (GLuint) i, bufSize, &length, &size, &type, name);
-
-      printf("[shader.c]: Uniform #%d Type: %u Name: %s\n", i, type, name);
+      printf("[shader.c][sh_info]: Uniform %d:[type: %u, name: \"%s\"]\n", i, type, name);
    }
+
+   printf("[shader.c][sh_info]: Uniform Locations: ");
+   for(i = 0; i < 5; i++)
+      printf("%i, ", sh->uniform_locations[i]);
+   printf("\n");
+
 }
