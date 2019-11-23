@@ -122,4 +122,11 @@ void m_info(model_t* model);
 // This method should be called before rendering
 void m_build(model_t* model);
 
+// Creates model of 4-vertex plane
+model_t* m_create_plane();
+
+// Moves the model to zero along the specified axes.
+// If norm_scale is set, scales the vertices of the model to the range of [1,0]
+void m_normalize(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_pos, bool norm_scale);
+
 #endif //DEEPCARS_MODEL_H

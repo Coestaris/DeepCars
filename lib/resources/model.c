@@ -7,6 +7,10 @@
 #endif
 #include "model.h"
 
+// for FLT_MIN, FLT_MAX
+#include <float.h>
+
+
 // Initial length of all vectors
 #define START_LEN_COUNT 10
 // Increase size multiplier of vectors
@@ -549,7 +553,7 @@ void m_build(model_t* model)
 {
    bool use_tex_coords = model->model_len->tex_coords_count != 0 && model->faces[0]->tex_id[0] != -1;
    bool use_normals = model->model_len->normals_count != 0 && model->faces[0]->normal_id[0] != -1;
-   bool supposed_normals = use_normals && model->model_len->vertices_count == model->model_len->normals_count;
+   //bool supposed_normals = use_normals && model->model_len->vertices_count == model->model_len->normals_count;
 
    size_t floats_per_triangle =
                  3 +
@@ -579,9 +583,9 @@ void m_build(model_t* model)
       model_face_t* f = model->faces[i];
       for(size_t tria = 0; tria < f->count - 2; tria++)
       {
-         m_store_vertex(model, f, 0, buffer, &buffer_index, use_tex_coords, use_normals, supposed_normals);
-         m_store_vertex(model, f, tria + 1, buffer, &buffer_index, use_tex_coords, use_normals, supposed_normals);
-         m_store_vertex(model, f, tria + 2, buffer, &buffer_index, use_tex_coords, use_normals, supposed_normals);
+         m_store_vertex(model, f, 0, buffer, &buffer_index, use_tex_coords, use_normals, false);
+         m_store_vertex(model, f, tria + 1, buffer, &buffer_index, use_tex_coords, use_normals, false);
+         m_store_vertex(model, f, tria + 2, buffer, &buffer_index, use_tex_coords, use_normals, false);
       }
    }
    assert(buffer_index == size);
@@ -655,4 +659,86 @@ void m_build(model_t* model)
    GL_CALL(glBindVertexArray(0))
 
    free(buffer);
+}
+
+model_t* m_create_plane()
+{
+   model_t* model = m_create();
+   m_push_vertex(model, cvec4(0, 0, 1, 0));
+   m_push_vertex(model, cvec4(1, 0, 1, 0));
+   m_push_vertex(model, cvec4(1, 0, 0, 0));
+   m_push_vertex(model, cvec4(0, 0, 0, 0));
+
+   m_push_normal(model, cvec4(0, 1, 0, 0));
+   m_push_normal(model, cvec4(0, 1, 0, 0));
+   m_push_normal(model, cvec4(0, 1, 0, 0));
+   m_push_normal(model, cvec4(0, 1, 0, 0));
+
+    m_push_tex_coord(model, cvec4(0, 1, 0, 0));
+    m_push_tex_coord(model, cvec4(1, 1, 0, 0));
+    m_push_tex_coord(model, cvec4(0, 0, 0, 0));
+    m_push_tex_coord(model, cvec4(1, 0, 0, 0));
+
+   model_face_t* f = malloc(sizeof(model_face_t));
+   f->count = 4;
+   f->vert_id[0] = 1;    f->vert_id[1] = 2;    f->vert_id[2] = 3;    f->vert_id[3] = 4;
+   f->normal_id[0] = 1;  f->normal_id[1] = 2;  f->normal_id[2] = 3;  f->normal_id[3] = 4;
+   f->tex_id[0] = 1;     f->tex_id[1] = 2;     f->tex_id[2] = 3;     f->tex_id[3] = 4;
+   m_push_face(model, f);
+
+   return model;
+}
+
+//
+// m_normalize()
+//
+void m_normalize(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_pos, bool norm_scale)
+{
+   float maxX = FLT_MIN, maxY = FLT_MIN, maxZ = FLT_MIN;
+   float minX = FLT_MAX, minY = FLT_MAX, minZ = FLT_MAX;
+
+   for(size_t i = 0; i < model->model_len->vertices_count; i++)
+   {
+      vec4 vertex = model->vertices[i];
+      if(vertex[0] < minX) minX = vertex[0];
+      if(vertex[1] < minY) minY = vertex[1];
+      if(vertex[2] < minZ) minZ = vertex[2];
+      if(vertex[0] > maxX) maxX = vertex[0];
+      if(vertex[1] > maxY) maxY = vertex[1];
+      if(vertex[2] > maxZ) maxZ = vertex[2];
+   }
+
+   float scale = 0; // maximum of 3 variables
+
+   if(norm_scale)
+   {
+      float dx = maxX - minX;
+      float dy = maxY - minY;
+      float dz = maxZ - minZ;
+      if (dx > dy)
+      {
+         if (dx > dz) scale = dx;
+         else scale = dz;
+      }
+      else
+      {
+         if (dx > dz) scale = dy;
+         else if (dy > dz) scale = dy;
+         else scale = dz;
+      }
+   }
+
+   for(size_t i = 0; i < model->model_len->vertices_count; i++)
+   {
+      vec4 vertex = model->vertices[i];
+      if(norm_x_pos) vertex[0] -= minX;
+      if(norm_y_pos) vertex[1] -= minY;
+      if(norm_z_pos) vertex[2] -= minZ;
+      if(norm_scale)
+      {
+         vertex[0] /= scale;
+         vertex[1] /= scale;
+         vertex[2] /= scale;
+      }
+   }
 }

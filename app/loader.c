@@ -25,6 +25,7 @@ model_t* get_model(uint32_t id)
 model_t* load_and_build_model(const char* filename)
 {
    model_t* model = m_load(filename);
+   m_normalize(model, false, true, false, true);
    m_build(model);
    return model;
 }
@@ -41,24 +42,33 @@ void app_load_resources(void)
    list_push(models, load_and_build_model("cube.obj"));
    list_push(models, load_and_build_model("torus.obj"));
    list_push(models, load_and_build_model("teapot.obj"));
+   model_t* plane = m_create_plane();
+   m_normalize(plane, false, true, false, true);
+   m_build(plane);
+
+   list_push(models, plane);
 
    // scenes
    scene_t* menu = sc_create(SCENEID_MENU);
    menu->back_color = COLOR_GRAY;
    // objects
-   list_push(menu->startup_objects,
-           create_dummy(vec3f(6, 0, 12), .6f, COLOR_GREEN, get_model(MODELID_CUBE)));
-   list_push(menu->startup_objects,
-           create_dummy(vec3f(11, 0, 12), .03f, COLOR_GREEN, get_model(MODELID_TORUS)));
-   list_push(menu->startup_objects,
-           create_dummy(vec3f(6, 0, 6), .3f, COLOR_GREEN, get_model(MODELID_TEAPOT)));
 
    list_push(menu->startup_objects,
-           create_textured_dummy(vec3f(-6, 0, -12), .6f, txm_get(1), get_model(MODELID_CUBE)));
+             create_dummy(vec3f(-50, 0, -50), 100, COLOR_GRAY, get_model(MODELID_PLANE)));
+
    list_push(menu->startup_objects,
-           create_textured_dummy(vec3f(-11, 0, -12), .03f, txm_get(1), get_model(MODELID_TORUS)));
+           create_dummy(vec3f(16, 0, 4), 10, COLOR_GREEN, get_model(MODELID_CUBE)));
    list_push(menu->startup_objects,
-           create_textured_dummy(vec3f(-6, 0, -6), .3f, txm_get(1), get_model(MODELID_TEAPOT)));
+           create_dummy(vec3f(4, 0, 16), 10, COLOR_GREEN, get_model(MODELID_TORUS)));
+   list_push(menu->startup_objects,
+           create_dummy(vec3f(16, 0, 16), 10, COLOR_GREEN, get_model(MODELID_TEAPOT)));
+
+   list_push(menu->startup_objects,
+           create_textured_dummy(vec3f(-16, 0, -4), 10, txm_get(1), get_model(MODELID_CUBE)));
+   list_push(menu->startup_objects,
+           create_textured_dummy(vec3f(-4, 0, -16), 10, txm_get(1), get_model(MODELID_TORUS)));
+   list_push(menu->startup_objects,
+           create_textured_dummy(vec3f(-16, 0, -16), 10, txm_get(1), get_model(MODELID_TEAPOT)));
 
 
    list_push(menu->startup_objects, create_camera_control());
