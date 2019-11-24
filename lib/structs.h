@@ -9,7 +9,9 @@
 #include <stddef.h>
 #include <math.h>
 
+// Output debug information
 #define VERBOSE true
+
 #define DEBUG_LEVEL 2 // 2 - glCall, glPCall. 1 - glCall
 
 #if DEBUG_LEVEL == 2

@@ -31,9 +31,14 @@ object_t* o_clone(object_t* object)
    memcpy(new_object, object, sizeof(object_t));
    switch(new_object->draw_mode)
    {
-      case DM_SIMPLE:
-         new_object->draw_info = malloc(sizeof(draw_info_simple_t));
-         memcpy(new_object->draw_info, object->draw_info, sizeof(draw_info_simple_t));
+      case DM_COLORED:
+         new_object->draw_info = malloc(sizeof(draw_info_colored_t));
+         memcpy(new_object->draw_info, object->draw_info, sizeof(draw_info_colored_t));
+         break;
+      case DM_COLORED_SHADED:
+         new_object->draw_info = malloc(sizeof(draw_info_colored_shaded_t));
+         memcpy(new_object->draw_info, object->draw_info, sizeof(draw_info_colored_shaded_t));
+         break;
          break;
       case DM_TEXTURED:
          new_object->draw_info = malloc(sizeof(draw_info_textured_t));
@@ -66,21 +71,35 @@ object_t* o_create()
    object->mousemove_event_func = NULL;
 
    object->draw_info = NULL;
-   o_dm_simple(object, COLOR_WHITE);
+   o_dm_colored(object, COLOR_WHITE);
    return object;
 }
 
 //
-// o_dm_simple()
+// o_dm_colored()
 //
-void o_dm_simple(object_t* object, vec4 color)
+void o_dm_colored(object_t* object, vec4 color)
 {
    if(object->draw_info) free(object->draw_info);
 
-   object->draw_mode = DM_SIMPLE;
-   object->draw_info = malloc(sizeof(draw_info_simple_t));
-   draw_info_simple_t* info = (draw_info_simple_t*)object->draw_info;
+   object->draw_mode = DM_COLORED;
+   object->draw_info = malloc(sizeof(draw_info_colored_t));
+   draw_info_colored_t* info = (draw_info_colored_t*)object->draw_info;
    info->color = color;
+}
+
+//
+// o_dm_colored()
+//
+void o_dm_colored_shaded(object_t* object, vec4 color, float ambient)
+{
+   if(object->draw_info) free(object->draw_info);
+
+   object->draw_mode = DM_COLORED_SHADED;
+   object->draw_info = malloc(sizeof(draw_info_colored_shaded_t));
+   draw_info_colored_shaded_t* info = (draw_info_colored_shaded_t*)object->draw_info;
+   info->color = color;
+   info->ambient = ambient;
 }
 
 //

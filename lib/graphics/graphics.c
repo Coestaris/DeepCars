@@ -32,7 +32,8 @@ void gr_fill(vec4 color)
    GL_PCALL(glClearColor(color[0], color[1], color[2], color[3]))
 }
 
-shader_t* shader_simple;
+shader_t* shader_colored;
+shader_t* shader_colored_shaded;
 shader_t* shader_textured;
 
 mat4 proj_mat;
@@ -58,7 +59,8 @@ void gr_init(mat4 proj, mat4 view)
    COLOR_FUCHSIA = cvec4(1, 0, 1, 0);
    COLOR_PURPLE = cvec4(.5, 0, .5, 0);
 
-   shader_simple = s_getShader(SH_SIMPLECOLORED);
+   shader_colored = s_getShader(SH_COLORED);
+   shader_colored_shaded = s_getShader(SH_COLORED_SHADED);
    shader_textured = s_getShader(SH_TEXTURED);
 
    proj_mat = proj;
@@ -115,13 +117,11 @@ void gr_draw_model_textured(model_t* model, texture_t* texture)
    GLint* locations = shader_textured->uniform_locations;
    vec4 camera_pos = current_scene->camera->position;
 
-   sh_set_int(shader_textured, locations[SH_TEXTURED_TEXTURE], 0);
-   sh_set_vec3v(shader_textured, locations[SH_TEXTURED_VIEWER],
-                camera_pos[0], camera_pos[1], camera_pos[2]);
-
-   sh_set_mat4(shader_textured, locations[SH_TEXTURED_PROJ], proj_mat);
-   sh_set_mat4(shader_textured, locations[SH_TEXTURED_VIEW], view_mat);
-   sh_set_mat4(shader_textured, locations[SH_TEXTURED_MODEL], model_mat);
+   sh_set_int(locations[SH_TEXTURED_TEXTURE], 0);
+   sh_set_vec3v(locations[SH_TEXTURED_VIEWER], camera_pos[0], camera_pos[1], camera_pos[2]);
+   sh_set_mat4(locations[SH_TEXTURED_PROJ], proj_mat);
+   sh_set_mat4(locations[SH_TEXTURED_VIEW], view_mat);
+   sh_set_mat4(locations[SH_TEXTURED_MODEL], model_mat);
 
 
    t_bind(texture, GL_TEXTURE0);
@@ -131,21 +131,37 @@ void gr_draw_model_textured(model_t* model, texture_t* texture)
    sh_use(NULL);
 }
 
-void gr_draw_model_simple(model_t* model, vec4 color)
+void gr_draw_model_colored_shaded(model_t* model, vec4 color, float ambient)
 {
-   sh_use(shader_simple);
-   GLint* locations = shader_simple->uniform_locations;
+   sh_use(shader_colored_shaded);
+   GLint* locations = shader_colored_shaded->uniform_locations;
    vec4 camera_pos = current_scene->camera->position;
 
-   sh_set_vec3v(shader_simple, locations[SH_SIMPLECOLORED_COLOR],
+   sh_set_vec3v(locations[SH_COLORED_SHADED_COLOR], color[0], color[1], color[2]);
+   sh_set_vec3v(locations[SH_COLORED_SHADED_VIEWER], camera_pos[0], camera_pos[1], camera_pos[2]);
+   sh_set_vec3v(locations[SH_COLORED_SHADED_COLOR], color[0], color[1], color[2]);
+   sh_set_mat4(locations[SH_COLORED_SHADED_PROJ], proj_mat);
+   sh_set_mat4(locations[SH_COLORED_SHADED_VIEW], view_mat);
+   sh_set_mat4(locations[SH_COLORED_SHADED_MODEL], model_mat);
+   sh_set_float(locations[SH_COLORED_SHADED_AMBIENT], ambient);
+
+   gr_draw_model(model);
+   sh_use(NULL);
+}
+
+void gr_draw_model_colored(model_t* model, vec4 color)
+{
+   sh_use(shader_colored);
+   GLint* locations = shader_colored->uniform_locations;
+   vec4 camera_pos = current_scene->camera->position;
+
+   sh_set_vec3v(locations[SH_COLORED_COLOR],
                 color[0], color[1], color[2]);
-   sh_set_vec3v(shader_simple, locations[SH_SIMPLECOLORED_VIEWER],
-                camera_pos[0], camera_pos[1], camera_pos[2]);
-   sh_set_vec3v(shader_simple, locations[SH_SIMPLECOLORED_COLOR],
+   sh_set_vec3v(locations[SH_COLORED_COLOR],
                 color[0], color[1], color[2]);
-   sh_set_mat4(shader_simple, locations[SH_SIMPLECOLORED_PROJ], proj_mat);
-   sh_set_mat4(shader_simple, locations[SH_SIMPLECOLORED_VIEW], view_mat);
-   sh_set_mat4(shader_simple, locations[SH_SIMPLECOLORED_MODEL], model_mat);
+   sh_set_mat4(locations[SH_COLORED_PROJ], proj_mat);
+   sh_set_mat4(locations[SH_COLORED_VIEW], view_mat);
+   sh_set_mat4(locations[SH_COLORED_MODEL], model_mat);
 
    gr_draw_model(model);
    sh_use(NULL);

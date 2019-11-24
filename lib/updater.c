@@ -83,16 +83,25 @@ void u_draw_func(void)
       {
          switch(object->draw_mode)
          {
-            case DM_SIMPLE:
-               gr_draw_model_simple(object->model, ((draw_info_simple_t*)object->draw_info)->color);
+            case DM_COLORED:
+            {
+               gr_draw_model_colored(object->model, ((draw_info_colored_t*) object->draw_info)->color);
+            }
+               break;
+            case DM_COLORED_SHADED:
+            {
+               draw_info_colored_shaded_t* info = ((draw_info_colored_shaded_t*) object->draw_info);
+               gr_draw_model_colored_shaded(object->model, info->color, info->ambient);
+            }
                break;
             case DM_TEXTURED:
-               gr_draw_model_textured(object->model, ((draw_info_textured_t*)object->draw_info)->texture);
+            {
+               gr_draw_model_textured(object->model, ((draw_info_textured_t*) object->draw_info)->texture);
+            }
                break;
             case DM_TEXTURED_SHADED:
             default:
                abort();
-               break;
          }
       }
    }

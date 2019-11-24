@@ -43,13 +43,13 @@ void sh_free(shader_t* sh);
 //
 // Sets uniform variable by its location
 //
-void sh_set_int(shader_t* sh, GLint location, int value);
-void sh_set_float(shader_t* sh, GLint location, float value);
-void sh_set_mat4(shader_t* sh, GLint location, mat4 value);
-void sh_set_vec3v(shader_t* sh, GLint location, float a, float b, float c);
-void sh_set_vec3(shader_t* sh, GLint location, vec4 v);
-void sh_set_vec4v(shader_t* sh, GLint location, float a, float b, float c, float d);
-void sh_set_vec4(shader_t* sh, GLint location, vec4 v);
+void sh_set_int(GLint location, int value);
+void sh_set_float(GLint location, float value);
+void sh_set_mat4(GLint location, mat4 value);
+void sh_set_vec3v(GLint location, float a, float b, float c);
+void sh_set_vec3(GLint location, vec4 v);
+void sh_set_vec4v(GLint location, float a, float b, float c, float d);
+void sh_set_vec4(GLint location, vec4 v);
 
 //
 // Sets uniform variable by its name

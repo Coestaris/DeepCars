@@ -51,7 +51,7 @@ void s_set_uniform_location(size_t index, shader_t* sh, const char* uniform_name
 {
    if((sh->uniform_locations[index] = glGetUniformLocation(sh->prog_id, uniform_name)) == -1)
    {
-      printf("[shm.c]: Unable to get uniform location of \"%s\" from shader %s\n", uniform_name, sh->fragment_path);
+      printf("[shm.c][ERROR]: Unable to get uniform location of \"%s\" from shader %s\n", uniform_name, sh->fragment_path);
       //exit(EXIT_FAILURE);
    }
 }
@@ -61,19 +61,30 @@ void s_set_uniform_location(size_t index, shader_t* sh, const char* uniform_name
 //
 void s_push_built_in_shaders()
 {
-   shader_t* simple_colored = sh_create("../lib/shaders/shaders/simple_colored.vsh",
-                                        "../lib/shaders/shaders/simple_colored.fsh");
+   shader_t* colored = sh_create("../lib/shaders/shaders/colored.vsh",
+                                 "../lib/shaders/shaders/colored.fsh");
 
-   simple_colored->uniform_locations = malloc(sizeof(GLint) * 5);
-   s_set_uniform_location(SH_SIMPLECOLORED_COLOR, simple_colored, "objectColor");
-   s_set_uniform_location(SH_SIMPLECOLORED_MODEL, simple_colored, "model");
-   s_set_uniform_location(SH_SIMPLECOLORED_VIEW, simple_colored, "view");
-   s_set_uniform_location(SH_SIMPLECOLORED_PROJ, simple_colored, "projection");
-   s_set_uniform_location(SH_SIMPLECOLORED_VIEWER, simple_colored, "viewerPosition");
-   s_push(simple_colored, SH_SIMPLECOLORED);
+   colored->uniform_locations = malloc(sizeof(GLint) * 4);
+   s_set_uniform_location(SH_COLORED_COLOR, colored, "objectColor");
+   s_set_uniform_location(SH_COLORED_MODEL, colored, "model");
+   s_set_uniform_location(SH_COLORED_VIEW, colored, "view");
+   s_set_uniform_location(SH_COLORED_PROJ, colored, "projection");
+   s_push(colored, SH_COLORED);
+
+   shader_t* colored_shaded = sh_create("../lib/shaders/shaders/colored_shaded.vsh",
+                                        "../lib/shaders/shaders/colored_shaded.fsh");
+
+   colored_shaded->uniform_locations = malloc(sizeof(GLint) * 6);
+   s_set_uniform_location(SH_COLORED_SHADED_COLOR, colored_shaded, "objectColor");
+   s_set_uniform_location(SH_COLORED_SHADED_MODEL, colored_shaded, "model");
+   s_set_uniform_location(SH_COLORED_SHADED_VIEW, colored_shaded, "view");
+   s_set_uniform_location(SH_COLORED_SHADED_PROJ, colored_shaded, "projection");
+   s_set_uniform_location(SH_COLORED_SHADED_VIEWER, colored_shaded, "viewerPosition");
+   s_set_uniform_location(SH_COLORED_SHADED_AMBIENT, colored_shaded, "ambient");
+   s_push(colored_shaded, SH_COLORED_SHADED);
 
    shader_t* textured = sh_create("../lib/shaders/shaders/textured.vsh",
-                                        "../lib/shaders/shaders/textured.fsh");
+                                  "../lib/shaders/shaders/textured.fsh");
 
    textured->uniform_locations = malloc(sizeof(GLint) * 5);
    s_set_uniform_location(SH_TEXTURED_TEXTURE, textured, "tex");
@@ -82,9 +93,6 @@ void s_push_built_in_shaders()
    s_set_uniform_location(SH_TEXTURED_PROJ, textured, "projection");
    s_set_uniform_location(SH_TEXTURED_VIEWER, textured, "viewerPosition");
    s_push(textured, SH_TEXTURED);
-
-   sh_info(simple_colored);
-   sh_info(textured);
 }
 
 //

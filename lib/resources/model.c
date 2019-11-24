@@ -674,10 +674,10 @@ model_t* m_create_plane()
    m_push_normal(model, cvec4(0, 1, 0, 0));
    m_push_normal(model, cvec4(0, 1, 0, 0));
 
-    m_push_tex_coord(model, cvec4(0, 1, 0, 0));
-    m_push_tex_coord(model, cvec4(1, 1, 0, 0));
-    m_push_tex_coord(model, cvec4(0, 0, 0, 0));
-    m_push_tex_coord(model, cvec4(1, 0, 0, 0));
+   m_push_tex_coord(model, cvec4(0, 1, 0, 0));
+   m_push_tex_coord(model, cvec4(1, 1, 0, 0));
+   m_push_tex_coord(model, cvec4(0, 0, 0, 0));
+   m_push_tex_coord(model, cvec4(1, 0, 0, 0));
 
    model_face_t* f = malloc(sizeof(model_face_t));
    f->count = 4;

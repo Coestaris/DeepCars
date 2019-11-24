@@ -170,74 +170,74 @@ inline void sh_use(shader_t* sh)
    else GL_PCALL(glUseProgram(sh->prog_id));
 }
 
-void sh_set_int(shader_t* sh, GLint location, int value)
+inline void sh_set_int(GLint location, int value)
 {
    GL_PCALL(glUniform1i(location, value));
 }
 
-void sh_set_float(shader_t* sh, GLint location, float value)
+inline void sh_set_float(GLint location, float value)
 {
    GL_PCALL(glUniform1f(location, value));
 }
 
-void sh_set_mat4(shader_t* sh, GLint location, mat4 value)
+inline void sh_set_mat4(GLint location, mat4 value)
 {
    GL_PCALL(glUniformMatrix4fv(location, 1, true, value));
 }
 
-void sh_set_vec3v(shader_t* sh, GLint location, float a, float b, float c)
+inline void sh_set_vec3v(GLint location, float a, float b, float c)
 {
    GL_PCALL(glUniform3f(location, a, b, c));
 }
 
-void sh_set_vec3(shader_t* sh, GLint location, vec4 v)
+inline void sh_set_vec3(GLint location, vec4 v)
 {
    GL_PCALL(glUniform3fv(location, 3, v));
 }
 
-void sh_set_vec4v(shader_t* sh, GLint locatione, float a, float b, float c, float d)
+inline void sh_set_vec4v(GLint location, float a, float b, float c, float d)
 {
-   GL_PCALL(glUniform4f(locatione, a, b, c, d));
+   GL_PCALL(glUniform4f(location, a, b, c, d));
 }
 
-void sh_set_vec4(shader_t* sh, GLint location, vec4 v)
+inline void sh_set_vec4(GLint location, vec4 v)
 {
    GL_PCALL(glUniform3fv(location, 4, v));
 }
 
-void sh_nset_int(shader_t* sh, const char* name, int value)
+inline void sh_nset_int(shader_t* sh, const char* name, int value)
 {
-   GL_PCALL(sh_set_int(sh, glGetUniformLocation(sh->prog_id, name), value));
+   GL_PCALL(sh_set_int(glGetUniformLocation(sh->prog_id, name), value));
 }
 
-void sh_nset_float(shader_t* sh, const char* name, float value)
+inline void sh_nset_float(shader_t* sh, const char* name, float value)
 {
-   GL_PCALL(sh_set_float(sh, glGetUniformLocation(sh->prog_id, name), value));
+   GL_PCALL(sh_set_float(glGetUniformLocation(sh->prog_id, name), value));
 }
 
-void sh_nset_mat4(shader_t* sh, const char* name, mat4 value)
+inline void sh_nset_mat4(shader_t* sh, const char* name, mat4 value)
 {
-   GL_PCALL(sh_set_mat4(sh, glGetUniformLocation(sh->prog_id, name), value));
+   GL_PCALL(sh_set_mat4(glGetUniformLocation(sh->prog_id, name), value));
 }
 
-void sh_nset_vec3v(shader_t* sh, const char* name, float a, float b, float c)
+inline void sh_nset_vec3v(shader_t* sh, const char* name, float a, float b, float c)
 {
-   GL_PCALL(sh_set_vec3v(sh, glGetUniformLocation(sh->prog_id, name), a, b, c));
+   GL_PCALL(sh_set_vec3v(glGetUniformLocation(sh->prog_id, name), a, b, c));
 }
 
-void sh_nset_vec3(shader_t* sh, const char* name, vec4 v)
+inline void sh_nset_vec3(shader_t* sh, const char* name, vec4 v)
 {
-   GL_PCALL(sh_set_vec3(sh, glGetUniformLocation(sh->prog_id, name), v));
+   GL_PCALL(sh_set_vec3(glGetUniformLocation(sh->prog_id, name), v));
 }
 
-void sh_nset_vec4v(shader_t* sh, const char* name, float a, float b, float c, float d)
+inline void sh_nset_vec4v(shader_t* sh, const char* name, float a, float b, float c, float d)
 {
-   GL_PCALL(sh_set_vec4v(sh, glGetUniformLocation(sh->prog_id, name), a, b, c, d));
+   GL_PCALL(sh_set_vec4v(glGetUniformLocation(sh->prog_id, name), a, b, c, d));
 }
 
-void sh_nset_vec4(shader_t* sh, const char* name, vec4 v)
+inline void sh_nset_vec4(shader_t* sh, const char* name, vec4 v)
 {
-   GL_PCALL(sh_set_vec4(sh, glGetUniformLocation(sh->prog_id, name), v));
+   GL_PCALL(sh_set_vec4(glGetUniformLocation(sh->prog_id, name), v));
 }
 
 //

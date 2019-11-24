@@ -9,16 +9,24 @@
 
 #include "shader.h"
 
-// "SIMPLECOLORED" shader uniform indices
-#define SH_SIMPLECOLORED 0
-#define SH_SIMPLECOLORED_COLOR 0
-#define SH_SIMPLECOLORED_MODEL 1
-#define SH_SIMPLECOLORED_VIEW  2
-#define SH_SIMPLECOLORED_PROJ  3
-#define SH_SIMPLECOLORED_VIEWER  4
+// "COLORED" shader uniform indices
+#define SH_COLORED 0
+#define SH_COLORED_COLOR 0
+#define SH_COLORED_MODEL 1
+#define SH_COLORED_VIEW  2
+#define SH_COLORED_PROJ  3
+
+// "COLORED_SHADED" shader uniform indices
+#define SH_COLORED_SHADED 1
+#define SH_COLORED_SHADED_COLOR 0
+#define SH_COLORED_SHADED_MODEL 1
+#define SH_COLORED_SHADED_VIEW  2
+#define SH_COLORED_SHADED_PROJ  3
+#define SH_COLORED_SHADED_VIEWER  4
+#define SH_COLORED_SHADED_AMBIENT  5
 
 // "TEXUTED" shader uniform indices
-#define SH_TEXTURED 1
+#define SH_TEXTURED 2
 #define SH_TEXTURED_TEXTURE 0
 #define SH_TEXTURED_MODEL 1
 #define SH_TEXTURED_VIEW  2

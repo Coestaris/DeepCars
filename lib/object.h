@@ -18,7 +18,8 @@ typedef void (* mouse_event_func_t)(struct _object* this, uint32_t x, uint32_t y
 typedef void (* mousemove_event_func_t)(struct _object* this, uint32_t x, uint32_t y);
 
 typedef enum _draw_mode {
-   DM_SIMPLE,
+   DM_COLORED,
+   DM_COLORED_SHADED,
    DM_TEXTURED,
    DM_TEXTURED_SHADED
 
@@ -27,7 +28,14 @@ typedef enum _draw_mode {
 typedef struct _draw_info_simple {
    vec4 color;
 
-} draw_info_simple_t;
+} draw_info_colored_t;
+
+typedef struct _draw_info_simple_shaded {
+   vec4 color;
+   float ambient;
+
+} draw_info_colored_shaded_t;
+
 
 typedef struct _draw_info_textured {
    texture_t* texture;
@@ -80,7 +88,8 @@ object_t* o_create();
 void o_free(object_t* object);
 
 // Sets rendering parameters of object
-void o_dm_simple(object_t* object, vec4 color);
+void o_dm_colored(object_t* object, vec4 color);
+void o_dm_colored_shaded(object_t* object, vec4 color, float ambient);
 void o_dm_textured(object_t* object, texture_t* texture);
 void o_dm_textured_shaded(object_t* object, texture_t* diffuse, texture_t* specular, texture_t* emit);
 
