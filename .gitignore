@@ -5,3 +5,5 @@ __pycache__/
 cmake-build-debug/
 
 *.bin
+
+lib/shaders/shaders/

@@ -268,20 +268,30 @@ inline void mat4_mulv(mat4 m, float v)
 //
 inline void mat4_mulm(mat4 m, mat4 v)
 {
-   //save copy of m
-   float cpy[16] = {
-           m[0], m[1], m[2], m[3],
-           m[4], m[5], m[6], m[7],
-           m[8], m[9], m[10], m[11],
-           m[12], m[13], m[14], m[15],
-   };
+   float m0  = m[0],  m1  = m[1],  m2  = m[2],  m3  = m[3],
+         m4  = m[4],  m5  = m[5],  m6  = m[6],  m7  = m[7],
+         m8  = m[8],  m9  = m[9],  m10 = m[10], m11 = m[11],
+         m12 = m[12], m13 = m[13], m14 = m[14], m15 = m[15];
 
-   for (int n = 0; n < 16; n++)
-   {
-      m[n] = 0;
-      for (int i = 0; i < 4; i++)
-         m[n] += cpy[i + (n / 4) * 4] * v[i * 4 + n % 4];
-   }
+   m[0] = m0 * v[0] + m1 * v[4] + m2 * v[8] + m3 * v[12];
+   m[1] = m0 * v[1] + m1 * v[5] + m2 * v[9] + m3 * v[13];
+   m[2] = m0 * v[2] + m1 * v[6] + m2 * v[10] + m3 * v[14];
+   m[3] = m0 * v[3] + m1 * v[7] + m2 * v[11] + m3 * v[15];
+
+   m[4] = m4 * v[0] + m5 * v[4] + m6 * v[8] + m7 * v[12];
+   m[5] = m4 * v[1] + m5 * v[5] + m6 * v[9] + m7 * v[13];
+   m[6] = m4 * v[2] + m5 * v[6] + m6 * v[10] + m7 * v[14];
+   m[7] = m4 * v[3] + m5 * v[7] + m6 * v[11] + m7 * v[15];
+
+   m[8] = m8 * v[0] + m9 * v[4] + m10 * v[8] + m11 * v[12];
+   m[9] = m8 * v[1] + m9 * v[5] + m10 * v[9] + m11 * v[13];
+   m[10] = m8 * v[2] + m9 * v[6] + m10 * v[10] + m11 * v[14];
+   m[11] = m8 * v[3] + m9 * v[7] + m10 * v[11] + m11 * v[15];
+
+   m[12] = m12 * v[0] + m13 * v[4] + m14 * v[8] + m15 * v[12];
+   m[13] = m12 * v[1] + m13 * v[5] + m14 * v[9] + m15 * v[13];
+   m[14] = m12 * v[2] + m13 * v[6] + m14 * v[10] + m15 * v[14];
+   m[15] = m12 * v[3] + m13 * v[7] + m14 * v[11] + m15 * v[15];
 }
 
 //
@@ -299,11 +309,25 @@ inline void mat4_translate(mat4 m, float x, float y, float z)
 //
 inline void mat4_ortho(mat4 m, float n, float f, float r, float t)
 {
-   mat4_fill(m,
-             1 / r, 0, 0, 0,
-             0, 1 / t, 0, 0,
-             0, 0, -2 / (f - n), -(f + n) / (f - n),
-             0, 0, 0, 1);
+   m[0] = 1 / r;
+   m[1] = 0;
+   m[2] = 0;
+   m[3] =  0;
+
+   m[4] = 0;
+   m[5] = 1 / t;
+   m[6] = 0;
+   m[7] = 0;
+
+   m[8] = 0;
+   m[9] = 0;
+   m[10] = -2 / (f - n);
+   m[11] = -(f + n) / (f - n);
+
+   m[12] = 0;
+   m[13] = 0;
+   m[14] = 0;
+   m[15] = 1;
 }
 
 //
@@ -317,9 +341,7 @@ inline void mat4_perspective_fov(
    float scale = tanf(angle_of_view * 0.5f * (float) M_PI / 180.0f) * n;
 
    float r = ratio * scale;
-   float l = -r;
    float t = scale;
-   float b = -t;
 
    mat4_perspective(m, n, f, r, t);
 }
@@ -329,11 +351,25 @@ inline void mat4_perspective_fov(
 //
 inline void mat4_perspective(mat4 m, float n, float f, float r, float t)
 {
-   mat4_fill(m,
-             n / r, 0, 0, 0,
-             0, n / t, 0, 0,
-             0, 0, -(f + n) / (f - n), -2 * f * n / (f - n),
-             0, 0, -1, 0);
+   m[0] = n / r;
+   m[1] = 0;
+   m[2] = 0;
+   m[3] = 0;
+
+   m[4] = 0;
+   m[5] = n / t;
+   m[6] = 0;
+   m[7] = 0;
+
+   m[8] = 0;
+   m[9] = 0;
+   m[10] = -(f + n) / (f - n);
+   m[11] = -2 * f * n / (f - n);
+
+   m[12] = 0;
+   m[13] = 0;
+   m[14] = -1;
+   m[15] = 0;
 }
 
 
@@ -345,6 +381,44 @@ inline void mat4_scale(mat4 m, float x, float y, float z)
    m[0] *= x;
    m[5] *= y;
    m[10] *= z;
+}
+
+//
+// mat4_rotate()
+//
+inline void mat4_rotate(mat4 m, float angle, float x, float y, float z)
+{
+   float c = cosf(angle);    // cosine
+   float s = sinf(angle);    // sine
+   float c1 = 1.0f - c;                // 1 - c
+   float m0 = m[0],  m4 = m[4],  m8 = m[8],  m12= m[12],
+           m1 = m[1],  m5 = m[5],  m9 = m[9],  m13= m[13],
+           m2 = m[2],  m6 = m[6],  m10= m[10], m14= m[14];
+
+   // build rotation matrix
+   float r0  = x * x * c1 + c;
+   float r1  = x * y * c1 + z * s;
+   float r2  = x * z * c1 - y * s;
+   float r4  = x * y * c1 - z * s;
+   float r5  = y * y * c1 + c;
+   float r6  = y * z * c1 + x * s;
+   float r8  = x * z * c1 + y * s;
+   float r9  = y * z * c1 - x * s;
+   float r10 = z * z * c1 + c;
+
+   // multiply rotation matrix
+   m[0]  = r0 * m0  + r4 * m1  + r8  * m2;
+   m[1]  = r1 * m0  + r5 * m1  + r9  * m2;
+   m[2]  = r2 * m0  + r6 * m1  + r10 * m2;
+   m[4]  = r0 * m4  + r4 * m5  + r8  * m6;
+   m[5]  = r1 * m4  + r5 * m5  + r9  * m6;
+   m[6]  = r2 * m4  + r6 * m5  + r10 * m6;
+   m[8]  = r0 * m8  + r4 * m9  + r8  * m10;
+   m[9]  = r1 * m8  + r5 * m9  + r9  * m10;
+   m[10] = r2 * m8  + r6 * m9  + r10 * m10;
+   m[12] = r0 * m12 + r4 * m13 + r8  * m14;
+   m[13] = r1 * m12 + r5 * m13 + r9  * m14;
+   m[14] = r2 * m12 + r6 * m13 + r10 * m14;
 }
 
 //

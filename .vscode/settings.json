@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "loader.h": "c",
+        "obj_dummy.h": "c",
+        "obj_camera_control.h": "c",
+        "win.h": "c",
+        "updater.h": "c",
+        "txm.h": "c",
+        "win_defaults.h": "c",
+        "scm.h": "c",
+        "graphics.h": "c"
+    }
+}

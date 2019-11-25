@@ -63,7 +63,7 @@ void app_load_resources(void)
    list_push(menu->startup_objects,
              create_colored_shaded_dummy(vec3f(16, 0, 4), 10, .3f, COLOR_GRAY, get_model(MODELID_CUBE)));
    list_push(menu->startup_objects,
-             create_colored_shaded_dummy(vec3f(4, 0, 16), 10, .3f, COLOR_GRAY, get_model(MODELID_TORUS)));
+             create_colored_shaded_dummy(vec3f(4, 0, 16), 10, .0f, COLOR_GRAY, get_model(MODELID_TORUS)));
    list_push(menu->startup_objects,
              create_colored_shaded_dummy(vec3f(16, 0, 16), 10, .3f, COLOR_GRAY, get_model(MODELID_TEAPOT)));
 

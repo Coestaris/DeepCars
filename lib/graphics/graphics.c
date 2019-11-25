@@ -40,6 +40,10 @@ mat4 proj_mat;
 mat4 view_mat;
 mat4 model_mat;
 
+mat4 x_rot_mat;
+mat4 y_rot_mat;
+mat4 z_rot_mat;
+
 void gr_init(mat4 proj, mat4 view)
 {
    COLOR_WHITE = cvec4(1, 1, 1, 0);
@@ -67,6 +71,10 @@ void gr_init(mat4 proj, mat4 view)
    view_mat = view;
    model_mat = cmat4();
 
+   x_rot_mat = cmat4();
+   y_rot_mat = cmat4();
+   z_rot_mat = cmat4();
+
    //GL_CALL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE))
 }
 
@@ -92,6 +100,10 @@ void gr_free(void)
    mat4_free(proj_mat);
    mat4_free(view_mat);
    mat4_free(model_mat);
+
+   mat4_free(x_rot_mat);
+   mat4_free(y_rot_mat);
+   mat4_free(z_rot_mat);
 }
 
 void gr_draw_model(model_t* model)
@@ -108,7 +120,13 @@ inline void gr_transform(vec3f_t pos, vec3f_t scale, vec3f_t rot)
    mat4_translate(model_mat, (float) pos.x, (float) pos.y, (float) pos.z);
    mat4_scale(model_mat, (float) scale.x, (float) scale.y, (float) scale.z);
 
-   //todo: rotation
+   mat4_rotate_x(x_rot_mat, rot.x);
+   mat4_rotate_y(y_rot_mat, rot.y);
+   mat4_rotate_z(z_rot_mat, rot.z);
+
+   mat4_mulm(model_mat, x_rot_mat);
+   mat4_mulm(model_mat, y_rot_mat);
+   mat4_mulm(model_mat, z_rot_mat);
 }
 
 void gr_draw_model_textured(model_t* model, texture_t* texture)
@@ -155,10 +173,8 @@ void gr_draw_model_colored(model_t* model, vec4 color)
    GLint* locations = shader_colored->uniform_locations;
    vec4 camera_pos = current_scene->camera->position;
 
-   sh_set_vec3v(locations[SH_COLORED_COLOR],
-                color[0], color[1], color[2]);
-   sh_set_vec3v(locations[SH_COLORED_COLOR],
-                color[0], color[1], color[2]);
+   sh_set_vec3v(locations[SH_COLORED_COLOR], color[0], color[1], color[2]);
+   sh_set_vec3v(locations[SH_COLORED_COLOR], color[0], color[1], color[2]);
    sh_set_mat4(locations[SH_COLORED_PROJ], proj_mat);
    sh_set_mat4(locations[SH_COLORED_VIEW], view_mat);
    sh_set_mat4(locations[SH_COLORED_MODEL], model_mat);

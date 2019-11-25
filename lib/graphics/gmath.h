@@ -46,13 +46,14 @@ void mat4_addm(mat4 m, mat4 v);
 // Multiplies given value to a matrix
 void mat4_mulv(mat4 m, float v);
 // Multiplies given matrix to a matrix.
-// Elementwise multiplication, not dot product
+// Matrix dot product
 void mat4_mulm(mat4 m, mat4 v);
 
 //
 // Matrix transformations
 //
 // Rotates matrix around specified axis
+void mat4_rotate(mat4 m, float angle, float x, float y, float z);
 void mat4_rotate_x(mat4 m, float angle);
 void mat4_rotate_y(mat4 m, float angle);
 void mat4_rotate_z(mat4 m, float angle);

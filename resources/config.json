@@ -3,7 +3,7 @@
     "shaders_dir" : "shaders/",
     "textures_dir" : "textures/",
 
-    "arhive_models" : false,
+    "arhive_models" : true,
     "models_auto_indices" : true,
 
     "output_file" : "resources.bin"
