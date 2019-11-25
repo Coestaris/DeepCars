@@ -1,0 +1,8 @@
+{
+    "models_dir" : "models",
+    "shaders_dir" : "shaders",
+    "textures_dir" : "textures",
+
+    "arhive_models" : true,
+    "models_auto_indices" : true
+}

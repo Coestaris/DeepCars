@@ -1,0 +1,23 @@
+{
+    "shaders" : [
+        { 
+            "fn" : "colored_sahded.glsl", 
+            "uniforms" : 
+            [
+                ""
+            ]
+        }
+    ],
+
+    "textures" : [
+        { "fn" : "tex1.png", "name" : "tex1" },
+        { "fn" : "tex1.png", "name" : "tex2" },
+        { "fn" : "tex1.png", "name" : "tex3" },
+    ],
+
+    "models": [
+        { "fn" : "cube.obj", "name" : "cube" },
+        { "fn" : "teapot.obj", "name" : "cube" },
+        { "fn" : "torus.obj", "name" : "torus" }
+    ]
+}
