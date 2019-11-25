@@ -1,3 +1,4 @@
+import src.common as cm
 import src.modelPacker as mp
 import src.shaderPacker as sp
 import src.texturePacker as tp
@@ -9,9 +10,6 @@ import src.texturePacker as tp
 #   4 bytes: chunk crc
 #   n bytes: chunk data
 
-def write_chunk(list, chunk):
-    pass
-
 if __name__ == "__main__":
     packers = [ 
         mp.get_packer(), 
@@ -19,11 +17,9 @@ if __name__ == "__main__":
         tp.get_packer() 
     ]
 
-    bytes = []
-    count = 0
-    for packer in packers:
-        chunks = packer.proceed()
-        for chunk in chunks:
-            write_chunk(bytes, chunk)
-        
-    pass
+    with open(cm.PATH_PREFIX + cm.config["output_file"], mode="wb") as file:
+        for packer in packers:
+            chunks = packer.proceed()
+            file.write(bytes(cm.int32tobytes(len(chunks))))
+            for chunk in chunks:
+                file.write(bytes(chunk))

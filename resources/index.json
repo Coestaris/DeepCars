@@ -12,7 +12,7 @@
     "textures" : [
         { "fn" : "tex1.png", "name" : "tex1" },
         { "fn" : "tex1.png", "name" : "tex2" },
-        { "fn" : "tex1.png", "name" : "tex3" },
+        { "fn" : "tex1.png", "name" : "tex3" }
     ],
 
     "models": [

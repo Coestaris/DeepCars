@@ -2,9 +2,9 @@
 from src import common as cm
 
 class shader_packer:
-    def __init__(self, path, file_mask):
+    def __init__(self, path, shaders):
         self.path = path
-        self.file_mask = file_mask
+        self.shaders = shaders
         pass
 
     def proceed(self):
@@ -12,5 +12,5 @@ class shader_packer:
 
 def get_packer():
     return shader_packer(
-        cm.PATH_PREFIX + cm.SHADERS_PATH, 
-        cm.SHADERS_FILE_MASK)
+        cm.PATH_PREFIX + cm.config["shaders_dir"],
+        cm.index["shaders"])
