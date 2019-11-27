@@ -3,8 +3,15 @@
     "shaders_dir" : "shaders/",
     "textures_dir" : "textures/",
 
-    "arhive_models" : true,
-    "models_auto_indices" : true,
+    "default_arhive_compression" : true,
+    "archive_auto_indices" : true,
+
+    "texture_default_wrapping" : "repeat",
+    "texture_default_min_filter" : "mipmap_linear",
+    "texture_default_mag_filter" : "linear",
+    "texture_default_flip" : 2,
+    "texture_default_compression" : "dxt5",
+    "texture_auto_indices": true,
 
     "output_file" : "resources.bin"
 }

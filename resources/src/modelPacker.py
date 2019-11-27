@@ -11,11 +11,11 @@ from zlib import compress
 # m bytes: model data
 
 class model_packer:
-    def __init__(self, path, models, auto_index, arhive):
+    def __init__(self, path, models, config):
         self.path = path
         self.models = models
-        self.auto_index = auto_index
-        self.archive = arhive
+        self.auto_index = config["archive_auto_indices"]
+        self.default_archive = config["default_arhive_compression"]
         pass
 
     def proceed(self):
@@ -30,13 +30,17 @@ class model_packer:
             if self.auto_index == False:
                 index = model["index"]
 
+            archive = self.default_archive
+            if "arhive" in model:
+                archive = model["arhive"]
+
             chunk = []
             chunk += cm.int32tobytes(index)
             chunk += cm.int16tobytes(len(model["name"]))
             chunk += model["name"].encode("utf-8")
-            chunk += [1 if self.archive == True else 0]
+            chunk += [1 if archive == True else 0]
             
-            if(self.archive):
+            if archive:
                 compresssed = compress(bytes(data.encode("utf-8")))[2:-4]
                 chunk += cm.int32tobytes(len(compresssed))
                 chunk += compresssed
@@ -54,5 +58,4 @@ def get_packer():
     return model_packer(
         cm.PATH_PREFIX + cm.config["models_dir"],
         cm.index["models"],
-        cm.config["models_auto_indices"],
-        cm.config["arhive_models"])
+        cm.config)
