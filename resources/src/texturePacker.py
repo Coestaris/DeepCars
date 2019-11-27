@@ -101,6 +101,7 @@ class texture_packer:
             if self.auto_indices == False:
                 index = texture["index"]
 
+            print(imsize)
             chunk = []
             with open(tmp, mode='rb') as file:
                 chunk += cm.int32tobytes(index)

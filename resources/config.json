@@ -13,5 +13,5 @@
     "texture_default_compression" : "dxt5",
     "texture_auto_indices": true,
 
-    "output_file" : "resources.bin"
+    "output_file" : "../cmake-build-debug/resources.bin"
 }

@@ -101,7 +101,7 @@ void u_draw_func(void)
                break;
             case DM_TEXTURED_SHADED:
             default:
-               abort();
+               exit(EXIT_FAILURE);
          }
       }
    }
