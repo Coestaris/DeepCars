@@ -13,6 +13,15 @@
 #include <stdbool.h>
 #include "../../oil/crc32.h"
 
+// Reads as many bytes as the specified parameter occupies.
+// If reading failed, an error will be thrown
+#define READ(param)                                                                       \
+   if(fread(&param, sizeof(param), 1, f) != 1)                                            \
+   {                                                                                      \
+      printf("[pack.c][ERROR]: Unable to read %s of size %li", #param, sizeof(param));    \
+      exit(EXIT_FAILURE);                                                                 \
+   }
+
 struct _pack_chunk {
    size_t id;
    void (*handler)(uint8_t* data, size_t length);
@@ -42,16 +51,11 @@ struct _pack_chunk supported_chunks[] = {
    {1, p_handler_shader },
    {2, p_handler_texture },
 };
+
 const size_t supported_chunks_count = sizeof(supported_chunks) / sizeof(struct _pack_chunk);
 
+// Bytes from which the file must begin to be considered as a pack file
 char magic_bytes[] = { 'D', 'P', 'A', 'C', 'K' };
-
-#define READ(param)                                                                    \
-   if(fread(&param, sizeof(param), 1, f) != 1)                                         \
-   {                                                                                   \
-      printf("[pack.c][ERROR]: Unable to read %s of size %li", #param, sizeof(param)); \
-      exit(EXIT_FAILURE);                                                                         \
-   }
 
 
 //
