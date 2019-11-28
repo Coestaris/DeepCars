@@ -19,9 +19,6 @@ scene_t* sc_create(uint32_t id)
    scene->startup_objects = list_create(20);
    scene->back_color = COLOR_BLACK;
 
-   scene->required_model_scopes = list_create(10);
-   scene->required_tex_scopes = list_create(10);
-
    return scene;
 }
 
@@ -39,9 +36,5 @@ void sc_free(scene_t* scene)
 
    list_free(scene->lights);
    list_free(scene->startup_objects);
-
-   list_free(scene->required_model_scopes);
-   list_free(scene->required_tex_scopes);
-
    free(scene);
 }

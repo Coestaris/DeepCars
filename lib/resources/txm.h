@@ -9,13 +9,6 @@
 
 #include "texture.h"
 
-// Maximum count of scopes
-#define MAX_LOADED_SCOPES 100
-
-// States of all possible scopes
-extern bool loaded_scopes[MAX_LOADED_SCOPES];
-
-
 // Inits all necessary txm resources
 void txm_init();
 
@@ -27,12 +20,6 @@ void txm_free(bool free_tex);
 texture_t* txm_get(size_t id);
 
 // Adds new texture to texture manager
-void txm_push(size_t id, size_t scope, texture_t* tex);
-
-// Loads all textures with specified scope
-void txm_load_scope(size_t scope);
-
-// Unloads all textures with specified scope
-void txm_unload_scope(size_t scope);
+void txm_push(size_t id, texture_t* tex);
 
 #endif //DEEPCARS_TXM_H

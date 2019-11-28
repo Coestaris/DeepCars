@@ -37,15 +37,6 @@ void scm_push_scene(scene_t* scene)
    list_push(scenes, scene);
 }
 
-// Returns true if scope required by specified scene
-bool scm_is_tex_scope_required(scene_t* scene, int scope)
-{
-   for(size_t i = 0; i < scene->required_tex_scopes->count; i++)
-      if(((size_t)scene->required_tex_scopes->collection[i]) == scope)
-         return true;
-   return false;
-}
-
 //
 // scm_load_scene
 //
@@ -66,17 +57,6 @@ void scm_load_scene(uint32_t id, bool free)
 
    current_scene = scene;
    u_clear_objects(free);
-
-   //todo: model scope
-
-   // unload all no longer required scopes and load required ones
-   for(size_t i = 0; i < MAX_LOADED_SCOPES; i++)
-   {
-      if(loaded_scopes[i] && !scm_is_tex_scope_required(current_scene, i))
-         txm_unload_scope(i);
-      else if(!loaded_scopes[i] && scm_is_tex_scope_required(current_scene, i))
-         txm_load_scope(i);
-   }
 
    for (size_t i = 0; i < scene->startup_objects->count; i++)
       u_push_object(o_clone((object_t*) scene->startup_objects->collection[i]));

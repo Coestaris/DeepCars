@@ -24,14 +24,6 @@ typedef struct _scene
    // Set of objects that loads to an updater when scene is will be loading
    list_t* startup_objects;
 
-   // Lists of texture and model scopes that should be loaded when
-   // loading this scene. Scopes will be loaded by the respective managers.
-   // Algorithm:
-   //  1. Unload all loaded scopes that aren't needed by current scene
-   //  2. Load all unloaded scopes that are needed by current scene
-   list_t* required_tex_scopes;
-   list_t* required_model_scopes;
-
    //todo: delete
    vec4 back_color;
 

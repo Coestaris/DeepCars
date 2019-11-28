@@ -72,7 +72,7 @@ typedef struct _model_len
 typedef struct _model
 {
    // Path to the model file
-   const char* filename;
+   char* filename;
 
    // List of all vertices used in this model
    vec4* vertices;
@@ -108,6 +108,9 @@ typedef struct _model
 
 // model_t constructor
 model_t* m_create();
+
+// Loads model from .obj formatted source text
+model_t* m_load_s(char* name, char* source);
 
 // Loads model from .obj file
 model_t* m_load(const char* filename);

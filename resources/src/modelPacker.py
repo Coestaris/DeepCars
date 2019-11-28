@@ -8,6 +8,7 @@ from zlib import compress
 # n bytes: model name
 # 1 byte : arhive type (0 - none, 1 - zlib)
 # 4 bytes: data length
+# 4 bytes: uncompressed data length
 # m bytes: model data
 
 class model_packer:
@@ -41,14 +42,14 @@ class model_packer:
             chunk += [1 if archive == True else 0]
             
             if archive:
-                compresssed = compress(bytes(data.encode("utf-8")))[2:-4]
+                compresssed = compress(bytes(data.encode("utf-8")))
                 chunk += cm.int32tobytes(len(compresssed))
-                chunk += compresssed
                 chunk += cm.int32tobytes(len(data))
+                chunk += compresssed
             else:
                 chunk += cm.int32tobytes(len(data))
-                chunk += data.encode("utf-8")
                 chunk += cm.int32tobytes(len(data))
+                chunk += data.encode("utf-8")
 
             chunks.append(cm.create_chunk(chunk, cm.MODEL_CHUNK_TYPE))
 

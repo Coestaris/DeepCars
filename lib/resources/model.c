@@ -353,13 +353,17 @@ model_t* m_create()
    model->object_name = NULL;
    model->filename = NULL;
 
+   model->VBO = 0;
+   model->VAO = 0;
+   model->EBO = 0;
+
    return model;
 }
 
 //
 // m_load()
 //
-model_t* m_load(const char* filename)
+model_t* m_load_s(char* name, char* source)
 {
    if (!buff_vec)
       buff_vec = cvec4(0, 0, 0, 0);
@@ -370,6 +374,24 @@ model_t* m_load(const char* filename)
       memset(face->normal_id, -1, sizeof(face->normal_id));
       memset(face->tex_id, -1, sizeof(face->tex_id));
    }
+
+   model_t* model = m_create();
+   model->filename = name;
+
+   m_parse_lines(model, source);
+
+   printf("[model.c]: Loaded model \"%s\". Vertices: %li, Faces: %li\n",
+           name, model->model_len->vertices_count, model->model_len->faces_count);
+
+   return model;
+}
+
+//
+// m_load()
+//
+model_t* m_load(const char* filename)
+{
+
    FILE* f = fopen(filename, "r");
    if (!f)
    {
@@ -386,17 +408,10 @@ model_t* m_load(const char* filename)
 
    fread(data, size, 1, f);
 
-   model_t* model = m_create();
-   model->filename = filename;
-
-   m_parse_lines(model, data);
+   model_t* model = m_load_s(strdup(filename), data);
 
    free(data);
    fclose(f);
-
-   printf("[model.c]: Loaded model %s. Vertices: %li, Faces: %li\n",
-          filename, model->model_len->vertices_count, model->model_len->faces_count);
-
    return model;
 }
 
@@ -438,7 +453,9 @@ void m_free(model_t* model)
    if (model->VAO != 0)
       GL_CALL(glDeleteBuffers(1, &(model->VAO)))
 
-   printf("[model.c]: Freed model %s\n", model->filename);
+   printf("[model.c]: Freed model \"%s\"\n", model->filename);
+
+   free(model->filename);
    free(model);
 }
 

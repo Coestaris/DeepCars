@@ -36,9 +36,9 @@ model_t* load_and_build_model(const char* filename)
 void app_load_resources(void)
 {
    // textures
-   txm_push(0, 0, t_create("tex1.png"));
-   txm_push(1, 0, t_create("tex2.png"));
-   txm_push(2, 0, t_create("tex3.png"));
+   txm_push(0, t_create("tex1.png"));
+   txm_push(1, t_create("tex2.png"));
+   txm_push(2, t_create("tex3.png"));
 
    // models
    models = list_create(10);
@@ -75,9 +75,6 @@ void app_load_resources(void)
            create_textured_dummy(vec3f(-16, 0, -16), 10, txm_get(1), get_model(MODELID_TEAPOT)));
 
    list_push(menu->startup_objects, create_camera_control());
-
-   // scopes
-   list_push(menu->required_tex_scopes, (void*)0);
 
    // camera
    menu->camera = c_create(
@@ -125,14 +122,11 @@ void app_fin()
 {
    vec4_free(plane_color);
    printf("[loader.c]: CLOSING....\n");
-   s_free();
+   s_free(true);
 
    u_clear_objects(true);
    u_free();
 
-   for (size_t i = 0; i < models->count; i++)
-      m_free((model_t*) models->collection[i]);
-   list_free(models);
 
    scm_free();
    gr_free();

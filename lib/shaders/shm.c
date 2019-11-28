@@ -101,7 +101,7 @@ void s_push_built_in_shaders()
 void s_init()
 {
    nodes = list_create(10);
-   s_push_built_in_shaders();
+   //s_push_built_in_shaders();
 }
 
 //
@@ -119,10 +119,13 @@ shader_t* s_getShader(int id)
 //
 // s_free
 //
-void s_free(void)
+void s_free(bool free_shaders)
 {
-   for (size_t i = 0; i < nodes->count; i++)
-      sh_free(((shm_node_t*)nodes->collection[i])->shader);
+   if(free_shaders)
+   {
+      for (size_t i = 0; i < nodes->count; i++)
+         sh_free(((shm_node_t*) nodes->collection[i])->shader);
+   }
 
    list_free_elements(nodes);
    list_free(nodes);
