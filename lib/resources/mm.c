@@ -8,7 +8,6 @@
 #include "mm.h"
 
 #include <string.h>
-#include "../structs.h"
 
 // Contains data necessary for indexing models in a list
 typedef struct _mm_node {

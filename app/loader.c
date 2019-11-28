@@ -12,44 +12,18 @@
 #include "objects/obj_dummy.h"
 #include "win_defaults.h"
 #include "objects/obj_camera_control.h"
+#include "../lib/resources/mm.h"
+#include "../lib/resources/pack.h"
 
 win_info_t*    win;
-list_t*        models;
 mat4           view;
 
 vec4 plane_color;
 vec4 sky_color;
 
-model_t* get_model(uint32_t id)
-{
-   return models->collection[id];
-}
-
-model_t* load_and_build_model(const char* filename)
-{
-   model_t* model = m_load(filename);
-   m_normalize(model, false, true, false, true);
-   m_build(model);
-   return model;
-}
-
 void app_load_resources(void)
 {
-   // textures
-   txm_push(0, t_create("tex1.png"));
-   txm_push(1, t_create("tex2.png"));
-   txm_push(2, t_create("tex3.png"));
-
-   // models
-   models = list_create(10);
-   list_push(models, load_and_build_model("cube.obj"));
-   list_push(models, load_and_build_model("torus.obj"));
-   list_push(models, load_and_build_model("teapot.obj"));
-   model_t* plane = m_create_plane();
-   m_normalize(plane, true, true, true, true);
-   m_build(plane);
-
-   list_push(models, plane);
+   p_load("resources.bin");
 
    // scenes
    scene_t* menu = sc_create(SCENEID_MENU);
@@ -57,22 +31,24 @@ void app_load_resources(void)
    // objects
 
    plane_color = cvec4(129 / 255.0f, 146 / 255.0f, 89 / 255.0f, 0);
+/*
    list_push(menu->startup_objects,
              create_colored_dummy(vec3f(-500, 0, -500), 1000, plane_color, get_model(MODELID_PLANE)));
+*/
 
    list_push(menu->startup_objects,
-             create_colored_shaded_dummy(vec3f(16, 0, 4), 10, .3f, COLOR_GRAY, get_model(MODELID_CUBE)));
+             create_colored_shaded_dummy(vec3f(16, 0, 4), 10, .3f, COLOR_GRAY, mm_get(MODELID_CUBE)));
    list_push(menu->startup_objects,
-             create_colored_shaded_dummy(vec3f(4, 0, 16), 10, .0f, COLOR_GRAY, get_model(MODELID_TORUS)));
+             create_colored_shaded_dummy(vec3f(4, 0, 16), 10, .0f, COLOR_GRAY, mm_get(MODELID_TORUS)));
    list_push(menu->startup_objects,
-             create_colored_shaded_dummy(vec3f(16, 0, 16), 10, .3f, COLOR_GRAY, get_model(MODELID_TEAPOT)));
+             create_colored_shaded_dummy(vec3f(16, 0, 16), 10, .3f, COLOR_GRAY, mm_get(MODELID_TEAPOT)));
 
    list_push(menu->startup_objects,
-           create_textured_dummy(vec3f(-16, 0, -4), 10, txm_get(1), get_model(MODELID_CUBE)));
+           create_textured_dummy(vec3f(-16, 0, -4), 10, txm_get(1), mm_get(MODELID_CUBE)));
    list_push(menu->startup_objects,
-           create_textured_dummy(vec3f(-4, 0, -16), 10, txm_get(1), get_model(MODELID_TORUS)));
+           create_textured_dummy(vec3f(-4, 0, -16), 10, txm_get(1), mm_get(MODELID_TORUS)));
    list_push(menu->startup_objects,
-           create_textured_dummy(vec3f(-16, 0, -16), 10, txm_get(1), get_model(MODELID_TEAPOT)));
+           create_textured_dummy(vec3f(-16, 0, -16), 10, txm_get(1), mm_get(MODELID_TEAPOT)));
 
    list_push(menu->startup_objects, create_camera_control());
 
@@ -109,6 +85,8 @@ void app_init_graphics(void)
    scm_init();
    s_init();
    txm_init();
+   mm_init();
+
    gr_init(win->projection, view);
 }
 
@@ -122,7 +100,6 @@ void app_fin()
 {
    vec4_free(plane_color);
    printf("[loader.c]: CLOSING....\n");
-   s_free(true);
 
    u_clear_objects(true);
    u_free();
@@ -130,7 +107,10 @@ void app_fin()
 
    scm_free();
    gr_free();
+
    txm_free(true);
+   mm_free(true);
+   s_free(true);
 
    w_destroy(win);
 }

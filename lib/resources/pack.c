@@ -15,6 +15,7 @@
 #include <zlib.h>
 #include "../../oil/crc32.h"
 #include "mm.h"
+#include "txm.h"
 
 // Reads as many bytes as the specified parameter occupies.
 // If reading failed, an error will be thrown
@@ -115,7 +116,104 @@ void p_handler_shader(uint8_t* data, size_t length)
 // Handles texture chunk and adds parsed textures to txm
 void p_handler_texture(uint8_t* data, size_t length)
 {
+   size_t count = 0;
 
+   uint32_t id;
+   uint16_t name_len;
+   uint32_t width;
+   uint32_t heigth;
+   uint8_t compression;
+   uint8_t wrapping;
+   uint8_t min;
+   uint8_t mag;
+   uint8_t flip;
+   uint32_t data_len;
+
+   READ_BUFF(id, sizeof(id));
+   READ_BUFF(name_len, sizeof(name_len));
+
+   char* name = malloc(name_len + 1);
+   READ_BUFF(*name, name_len);
+   name[name_len] = '\0';
+
+   READ_BUFF(width, sizeof(width));
+   READ_BUFF(heigth, sizeof(heigth));
+
+   READ_BUFF(compression, sizeof(compression));
+   READ_BUFF(wrapping, sizeof(wrapping));
+   READ_BUFF(min, sizeof(min));
+   READ_BUFF(mag, sizeof(mag));
+   READ_BUFF(flip, sizeof(flip));
+
+   READ_BUFF(data_len, sizeof(data_len));
+   uint8_t* tex_data = malloc(data_len);
+   READ_BUFF(*tex_data, data_len);
+
+   texture_t* t = t_create(name);
+
+   switch (wrapping)
+   {
+      case 1: t->data->wrappingMode = GL_MIRRORED_REPEAT;
+         break;
+      case 2: t->data->wrappingMode = GL_CLAMP_TO_EDGE;
+         break;
+      case 3: t->data->wrappingMode = GL_CLAMP_TO_BORDER;
+         break;
+
+      default:
+      case 0: t->data->wrappingMode = GL_REPEAT;
+         break;
+   }
+
+   switch (min)
+   {
+      case 1: t->data->minFilter = GL_NEAREST_MIPMAP_NEAREST;
+         break;
+      case 2: t->data->minFilter = GL_LINEAR;
+         break;
+      case 3: t->data->minFilter = GL_NEAREST;
+         break;
+
+      default:
+      case 0: t->data->minFilter = GL_LINEAR_MIPMAP_LINEAR;
+         break;
+   }
+
+   switch (mag)
+   {
+      case 1: t->data->magFilter = GL_NEAREST;
+         break;
+
+      default:
+      case 0: t->data->magFilter = GL_LINEAR;
+         break;
+   }
+
+   switch (flip)
+   {
+      case 1:
+         t->data->flipX = true;
+         t->data->flipY = false;
+         break;
+      case 2:
+         t->data->flipX = false;
+         t->data->flipY = true;
+         break;
+      case 3:
+         t->data->flipX = true;
+         t->data->flipY = true;
+         break;
+      default:
+      case 0:
+         t->data->flipX = false;
+         t->data->flipY = false;
+         break;
+   }
+
+   t_load_s(t, tex_data, data_len, compression == 0);
+   txm_push(id, t);
+
+   free(tex_data);
 }
 
 // Array of supported chunks

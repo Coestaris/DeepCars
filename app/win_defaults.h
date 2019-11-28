@@ -20,7 +20,4 @@ extern win_info_t* win;
 extern list_t* models;
 extern mat4 view;
 
-model_t* get_model(uint32_t id);
-model_t* get_material(uint32_t id);
-
 #endif //DEEPCARS_WIN_DEFAULTS_H

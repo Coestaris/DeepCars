@@ -5,7 +5,7 @@ import os
 
 # 4 bytes: image id
 # 2 bytes: image name len
-# 4 bytes: image name
+# n bytes: image name
 # 4 bytes: image width
 # 4 bytes: image height
 # 1 byte : image compression (0 - png, 1 - dds_no, 2 - dxt1, 3 - dxt3, 4 - dxt5)
