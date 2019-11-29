@@ -8,6 +8,9 @@
 #include "win.h"
 #include "../structs.h"
 
+#define W_LOG(format, ...) DC_LOG("win.c", format, __VA_ARGS__)
+#define W_ERROR(format, ...) DC_ERROR("win.c", format, __VA_ARGS__)
+
 //
 // GLX setup parameters
 //
@@ -47,11 +50,15 @@ static bool w_is_extension_supported(const char* ext_list, const char* extension
 // Temporary GLX error handler. Required for creating 2.x contexts
 static int w_ctx_error_handler(Display* dpy, XErrorEvent* ev)
 {
-   printf("[win.c][ERROR]: == CONTEXT ERROR ==\n");
-   printf("[win.c][ERROR]: Type: %i, Error code: %i\n", ev->type, ev->error_code);
-   printf("[win.c][ERROR]: Minor code: %i, Request code: %i,\n", ev->minor_code, ev->request_code);
-   printf("[win.c][ERROR]: Resource ID: %lu, Serial number: %lu\n", ev->resourceid, ev->serial);
-   exit(EXIT_FAILURE);
+   char buff[1024];
+   snprintf(buff, 1024, "== CONTEXT ERROR ==\n\
+      Type: %i, Error code: %i\n\
+      Minor code: %i, Request code: %i,\n\
+      Resource ID: %lu, Serial number: %lu\n",
+      ev->type, ev->error_code, ev->minor_code,
+      ev->request_code, ev->resourceid, ev->serial);
+
+   W_ERROR((const char*)buff, 0);
 }
 
 //
@@ -77,13 +84,12 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
 
    if (verbose)
    {
-      printf("[win.c]: Trying to open X display\n");
+      W_LOG("Trying to open X display",0);
    }
    info->display = XOpenDisplay(NULL);
    if (!info->display)
    {
-      printf("[win.c][ERROR]: Failed to open X display\n");
-      exit(EXIT_FAILURE);
+      W_ERROR("Failed to open X display",0);
    }
 
    // Get a matching FB config
@@ -104,33 +110,31 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
            };
 
    if (verbose)
-      printf("[win.c]: Checking GLX version\n");
+      W_LOG("Checking GLX version",0);
 
    int glx_major, glx_minor;
 
    if (!glXQueryVersion(info->display, &glx_major, &glx_minor) ||
        ((glx_major == 1) && (glx_minor < 3)) || (glx_major < 1))
    {
-      printf("[win.c][ERROR]: Invalid GLX version. Required GLX 1.3 or higher\n");
-      exit(EXIT_FAILURE);
+      W_ERROR("Invalid GLX version. Required GLX 1.3 or higher",0);
    }
 
    if (verbose)
-      printf("[win.c]: Getting matching framebuffer configs\n");
+      W_LOG("Getting matching framebuffer configs",0);
 
    int fbcount;
    GLXFBConfig* fbc = glXChooseFBConfig(info->display, DefaultScreen(info->display), visual_attribs, &fbcount);
    if (!fbc)
    {
-      printf("[win.c][ERROR]: Failed to retrieve a framebuffer config\n");
-      exit(EXIT_FAILURE);
+      W_ERROR("Failed to retrieve a framebuffer config",0);
    }
    if (verbose)
-      printf("[win.c]: Found %d matching FB configs.\n", fbcount);
+      W_LOG("Found %d matching FB configs", fbcount);
 
    // Pick the FB config/visual with the most samples per pixel
    if (verbose)
-      printf("[win.c]: Getting XVisualInfos\n");
+      W_LOG("[win.c]: Getting XVisualInfos",0);
    int best_fbc_index = -1, worst_fbc_index = -1, best_num_samp = -1, worst_num_samp = 999;
 
    for (size_t i = 0; i < fbcount; i++)
@@ -143,7 +147,7 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
          glXGetFBConfigAttrib(info->display, fbc[i], GLX_SAMPLES, &samples);
 
          if (verbose)
-            printf("[win.c]: [%2lu/%2i] Fbconfig: visual ID 0x%2lx: SAMPLE_BUFFERS = %d, SAMPLES = %d\n",
+            W_LOG("[%2lu/%2i] Fbconfig: visual ID 0x%2lx: SAMPLE_BUFFERS = %d, SAMPLES = %d",
                     i + 1, fbcount, vi->visualid, samp_buf, samples);
 
          if (best_fbc_index < 0 || (samp_buf && samples > best_num_samp))
@@ -161,13 +165,13 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
 
    // Get a visual
    if (verbose)
-      printf("[win.c]: Getting XVisual from FrameBuffer Config\n");
+      W_LOG("Getting XVisual from FrameBuffer Config",0);
    XVisualInfo* vi = glXGetVisualFromFBConfig(info->display, best_fbc);
    if (verbose)
-      printf("[win.c]: Chosen visual ID = 0x%lx\n", vi->visualid);
+      W_LOG("Chosen visual ID = 0x%lx", vi->visualid);
 
    if (verbose)
-      printf("[win.c]: Creating colormap\n");
+      W_LOG("Creating colormap",0);
    XSetWindowAttributes swa;
    Colormap cmap;
    swa.colormap = cmap = XCreateColormap(info->display, RootWindow(info->display, vi->screen),
@@ -180,8 +184,8 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
 
    if (verbose)
    {
-      printf("[win.c]: Creating window\n");
-      printf("[win.c]: WinW: %i, win_h: %i, win_x: %i, win_y: %i, caption: \"%s\"\n",
+     W_LOG("Creating window",0);
+     W_LOG("WinW: %i, win_h: %i, win_x: %i, win_y: %i, caption: \"%s\"",
               win_w, win_h, win_x, win_y, win_caption);
    }
    info->win = XCreateWindow(info->display, RootWindow(info->display, vi->screen),
@@ -189,8 +193,7 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
                              CWBorderPixel | CWColormap | CWEventMask, &swa);
    if (!info->win)
    {
-      printf("[win.c][ERROR]: Failed to create window.\n");
-      exit(EXIT_FAILURE);
+      W_ERROR("Failed to create window",0);
    }
 
    // Done with the visual info data
@@ -199,7 +202,7 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
    XStoreName(info->display, info->win, win_caption);
 
    if (verbose)
-      printf("[win.c]: Mapping window\n");
+      W_LOG("Mapping window",0);
    XMapWindow(info->display, info->win);
 
    // Get the default screen's GLX extension list
@@ -222,13 +225,13 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
    int (* old_handler)(Display*, XErrorEvent*) = XSetErrorHandler(&w_ctx_error_handler);
 
    if (verbose)
-      printf("[win.c]: Creating GL Context\n");
+      W_LOG("Creating GL Context",0);
 
    // Check for the GLX_ARB_create_context extension string and the function.
    // If either is not present, use GLX 1.3 context creation method.
    if (!w_is_extension_supported(glx_exts, "GLX_ARB_create_context") || !glXCreateContextAttribsARB)
    {
-      printf("[win.c]: glXCreateContextAttribsARB() not found... using old-style GLX context\n");
+      W_LOG("glXCreateContextAttribsARB() not found... using old-style GLX context",0);
       ctx = glXCreateNewContext(info->display, best_fbc, GLX_RGBA_TYPE, 0, True);
    }
       // If it does, try to get a GL 3.0 context!
@@ -243,7 +246,8 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
               };
 
       if (verbose)
-         printf("[win.c]: Creating context\n");
+         W_LOG("Creating context",0);
+
       ctx = glXCreateContextAttribsARB(info->display, best_fbc, 0, True, context_attribs);
 
       // Sync to ensure any errors generated are processed.
@@ -251,7 +255,7 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
       if (ctx)
       {
          if (verbose)
-            printf("[win.c]: Created GL 3.0 context\n");
+            W_LOG("Created GL 3.0 context",0);
       }
       else
       {
@@ -264,7 +268,7 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
          // GLX_CONTEXT_MINOR_VERSION_ARB = 0
          context_attribs[3] = 0;
 
-         printf("[win.c]: Failed to create GL 3.0 context... using old-style GLX context\n");
+         W_LOG("Failed to create GL 3.0 context... using old-style GLX context",0);
          ctx = glXCreateContextAttribsARB(info->display, best_fbc, 0, True, context_attribs);
       }
    }
@@ -277,24 +281,23 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
 
    if (!ctx)
    {
-      printf("[win.c][ERROR]: Failed to create an OpenGL context\n");
-      exit(EXIT_FAILURE);
+      W_ERROR("Failed to create an OpenGL context",0);
    }
 
    // Verifying that context is a direct context
    if (!glXIsDirect(info->display, ctx))
    {
       if (verbose)
-         printf("[win.c]: Indirect GLX rendering context obtained\n");
+         W_LOG("Indirect GLX rendering context obtained",0);
    }
    else
    {
       if (verbose)
-         printf("[win.c]: Direct GLX rendering context obtained\n");
+         W_LOG("Direct GLX rendering context obtained",0);
    }
 
    if (verbose)
-      printf("[win.c]: Making context current\n");
+      W_LOG("Making context current",0);
 
    info->context = ctx;
    glXMakeCurrent(info->display, info->win, ctx);
@@ -330,8 +333,8 @@ void w_swap_buffers(win_info_t* w)
 
 void w_print_info()
 {
-   printf("[win.c][GL Spec]: Vendor: %s\n", (char*) glGetString(GL_VENDOR));
-   printf("[win.c][GL Spec]: Using OpenGL Version: %s\n", (char*) glGetString(GL_VERSION));
-   printf("[win.c][GL Spec]: Using OpenGL Rendered: %s\n", (char*) glGetString(GL_RENDERER));
-   printf("[win.c][GL Spec]: GLSH Version: %s\n", (char*) glGetString(GL_SHADING_LANGUAGE_VERSION));
+   W_LOG("[GL_INFO]: Vendor: %s", (char*) glGetString(GL_VENDOR));
+   W_LOG("[GL_INFO]: Using OpenGL Version: %s", (char*) glGetString(GL_VERSION));
+   W_LOG("[GL_INFO]: Using OpenGL Rendered: %s", (char*) glGetString(GL_RENDERER));
+   W_LOG("[GL_INFO]: GLSH Version: %s", (char*) glGetString(GL_SHADING_LANGUAGE_VERSION));
 }

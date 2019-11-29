@@ -7,6 +7,9 @@
 #endif
 #include "graphics.h"
 
+#define GR_LOG(format, ...) DC_LOG("graphics.c", format, __VA_ARGS__)
+#define GR_ERROR(format, ...) DC_ERROR("graphics.c", format, __VA_ARGS__)
+
 // for current scene
 #include "../scm.h"
 

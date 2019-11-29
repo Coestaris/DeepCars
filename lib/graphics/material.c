@@ -7,6 +7,9 @@
 #endif
 #include "material.h"
 
+#define MT_LOG(format, ...) DC_LOG("material.c", format, __VA_ARGS__)
+#define MT_ERROR(format, ...) DC_ERROR("material.c", format, __VA_ARGS__)
+
 material_t* mt_create(texture_t* diffuse, texture_t* specular, float shininess)
 {
    material_t* material = malloc(sizeof(material_t));

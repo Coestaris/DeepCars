@@ -100,7 +100,7 @@ void app_run(void)
 void app_fin()
 {
    vec4_free(plane_color);
-   printf("[loader.c]: CLOSING....\n");
+   APP_LOG("Closing....",0);
 
    u_clear_objects(true);
    u_free();

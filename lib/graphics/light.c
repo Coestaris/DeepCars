@@ -7,6 +7,9 @@
 #endif
 #include "light.h"
 
+#define L_LOG(format, ...) DC_LOG("light.c", format, __VA_ARGS__)
+#define L_ERROR(format, ...) DC_ERROR("light.c", format, __VA_ARGS__)
+
 light_t* l_create()
 {}
 

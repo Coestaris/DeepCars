@@ -9,6 +9,9 @@
 
 #include "resources/txm.h"
 
+#define SCM_LOG(format, ...) DC_LOG("scm.c", format, __VA_ARGS__)
+#define SCM_ERROR(format, ...) DC_ERROR("scm.c", format, __VA_ARGS__)
+
 // List of all pushed scenes
 list_t* scenes;
 scene_t* current_scene = NULL;
@@ -51,8 +54,7 @@ void scm_load_scene(uint32_t id, bool free)
 
    if(!scene)
    {
-      printf("[sceneManager.c][ERROR]: Unable to find scene with id %i\n", id);
-      exit(EXIT_FAILURE);
+      SCM_ERROR("Unable to find scene with id %i", id);
    }
 
    current_scene = scene;

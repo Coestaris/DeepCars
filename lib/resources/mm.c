@@ -7,6 +7,9 @@
 #endif
 #include "mm.h"
 
+#define MM_LOG(format, ...) DC_LOG("mm.c", format, __VA_ARGS__)
+#define MM_ERROR(format, ...) DC_ERROR("mm.c", format, __VA_ARGS__)
+
 #include <string.h>
 
 // Contains data necessary for indexing models in a list

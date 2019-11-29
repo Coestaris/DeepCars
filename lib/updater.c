@@ -12,6 +12,9 @@
 #include "scene.h"
 #include "scm.h"
 
+#define U_LOG(format, ...) DC_LOG("updater.c", format, __VA_ARGS__)
+#define U_ERROR(format, ...) DC_ERROR("updater.c", format, __VA_ARGS__)
+
 // Initial count of objects
 #define OBJECT_COUNT_START 50
 
@@ -268,7 +271,7 @@ void u_measure_time(void)
       counter = 0;
       elapsed = 0;
 
-      printf("[updater.c]: FPS: %lf. Objects: %li\n", fps, objects->count);
+      U_LOG("FPS: %lf. Objects: %li", fps, objects->count);
    }
 }
 

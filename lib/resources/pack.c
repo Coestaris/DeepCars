@@ -7,6 +7,9 @@
 #endif
 #include "pack.h"
 
+#define P_LOG(format, ...) DC_LOG("pack.c", format, __VA_ARGS__)
+#define P_ERROR(format, ...) DC_ERROR("pack.c", format, __VA_ARGS__)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -21,19 +24,17 @@
 
 // Reads as many bytes as the specified parameter occupies.
 // If reading failed, an error will be thrown
-#define READ(param)                                                                       \
-   if(fread(&param, sizeof(param), 1, f) != 1)                                            \
-   {                                                                                      \
-      printf("[pack.c][ERROR]: Unable to read %s of size %li", #param, sizeof(param));    \
-      exit(EXIT_FAILURE);                                                                 \
+#define READ(param)                                                       \
+   if(fread(&param, sizeof(param), 1, f) != 1)                            \
+   {                                                                      \
+      P_ERROR("Unable to read %s of size %li", #param, sizeof(param));    \
    }
 
 #define READ_BUFF(buffer, cnt)                              \
       memcpy(&buffer, data + count, cnt); count += cnt;     \
-      if(count > length)                                   \
+      if(count > length)                                    \
       {                                                     \
-         printf("[pack.c][ERROR]: Buffer overflow");        \
-         exit(EXIT_FAILURE);                                \
+         P_ERROR("Buffer overflow",0);                      \
       }
 
 struct _pack_chunk {
@@ -58,9 +59,8 @@ void p_decompress(size_t in_len, size_t out_len, uint8_t* buff_in, uint8_t* buff
    int result;
    if ((result = inflate(&infstream, Z_NO_FLUSH)) != Z_OK)
    {
-      printf("[pack.c][ERROR]: Unable to decompress. ZLib error: %i", result);
+      P_ERROR("Unable to decompress. ZLib error: %i", result);
       inflateEnd(&infstream);
-      exit(EXIT_FAILURE);
    }
 
    inflateEnd(&infstream);
@@ -341,11 +341,11 @@ char magic_bytes[] = { 'D', 'P', 'A', 'C', 'K' };
 //
 void p_load(const char* name)
 {
+   P_LOG("Loading resource pack \"%s\"", name)
    FILE* f = fopen(name, "rb");
    if(!f)
    {
-      printf("[pack.c][ERROR]: Unable to open file %s", name);
-      exit(EXIT_FAILURE);
+      P_ERROR("Unable to open file \"%s\"", name);
    }
 
    char magic_buffer[sizeof(magic_bytes) / sizeof(char)];
@@ -354,8 +354,7 @@ void p_load(const char* name)
    for(size_t i = 0; i < sizeof(magic_buffer); i++)
       if(magic_buffer[i] != magic_bytes[i])
       {
-         printf("[pack.c][ERROR]: Magic bytes doesn't match");
-         exit(EXIT_FAILURE);
+         P_ERROR("Magic bytes doesn't match",0);
       }
 
    uint32_t ch_count = 0;
@@ -374,15 +373,13 @@ void p_load(const char* name)
       uint8_t* buffer = malloc(sizeof(uint8_t) * ch_len);
       if(fread(buffer, ch_len, 1, f) != 1)
       {
-         printf("[pack.c][ERROR]: Unable to read data from file");
-         exit(EXIT_FAILURE);
+         P_ERROR("Unable to read data from file",0);
       }
 
       uint32_t calculated_crc = CRC32(buffer, ch_len, 0xFFFFFFFF);
       if(ch_crc != calculated_crc)
       {
-         printf("[pack.c][ERROR]: Hashes doesn't match. Expected 0x%X but got 0x%X", ch_crc, calculated_crc);
-         exit(EXIT_FAILURE);
+         P_ERROR("Hashes doesn't match. Expected 0x%X but got 0x%X", ch_crc, calculated_crc);
       }
 
       bool found = false;
@@ -398,11 +395,9 @@ void p_load(const char* name)
 
       if(!found)
       {
-         printf("[pack.c][ERROR]: Unknown chunk type %i", ch_type);
-         exit(EXIT_FAILURE);
+         P_ERROR("Unknown chunk type %i", ch_type);
       }
       free(buffer);
    }
-
    fclose(f);
 }

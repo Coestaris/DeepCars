@@ -7,6 +7,9 @@
 #endif
 #include "scene.h"
 
+#define SC_LOG(format, ...) DC_LOG("scene.c", format, __VA_ARGS__)
+#define SC_ERROR(format, ...) DC_ERROR("scene.c", format, __VA_ARGS__)
+
 //
 // sc_create
 //

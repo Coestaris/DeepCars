@@ -7,6 +7,9 @@
 #endif
 #include "txm.h"
 
+#define TXM_LOG(format, ...) DC_LOG("txm.c", format, __VA_ARGS__)
+#define TXM_ERROR(format, ...) DC_ERROR("txm.c", format, __VA_ARGS__)
+
 #include <string.h>
 #include "../structs.h"
 

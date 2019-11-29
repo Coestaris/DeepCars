@@ -7,9 +7,11 @@
 #endif
 #include "model.h"
 
+#define M_LOG(format, ...) DC_LOG("model.c", format, __VA_ARGS__)
+#define M_ERROR(format, ...) DC_ERROR("model.c", format, __VA_ARGS__)
+
 // for FLT_MIN, FLT_MAX
 #include <float.h>
-
 
 // Initial length of all vectors
 #define START_LEN_COUNT 10
@@ -161,8 +163,7 @@ double_t m_parse_double(size_t line_index)
       return d;
    else
    {
-      printf("[model.c][ERROR]: Unable to parse %s. Expected float point value at line %li\n", word, line_index);
-      exit(EXIT_FAILURE);
+      M_ERROR("Unable to parse %s. Expected float point value at line %li", word, line_index);
    }
 }
 
@@ -191,8 +192,7 @@ void m_proceed_line(model_t* model, const char* string, size_t start_index, size
 
          if (descriptor == NULL)
          {
-            printf("[model.c][ERROR]: %s is unknown line descriptor at line %li\n", word, line_index);
-            exit(EXIT_FAILURE);
+            M_ERROR("%s is unknown line descriptor at line %li", word, line_index);
          }
       }
       else
@@ -203,8 +203,7 @@ void m_proceed_line(model_t* model, const char* string, size_t start_index, size
          {
             if (word_count > 4)
             {
-               printf("[model.c][ERROR]: Too many arguments for vertex descriptor at line %li\n", line_index);
-               exit(EXIT_FAILURE);
+               M_ERROR("Too many arguments for vertex descriptor at line %li", line_index);
             }
             buff_vec[word_count - 1] = (float) m_parse_double(line_index);
          }
@@ -212,8 +211,7 @@ void m_proceed_line(model_t* model, const char* string, size_t start_index, size
          {
             if (word_count > 3)
             {
-               printf("[model.c][ERROR]: Too many arguments for normal descriptor at line %li\n", line_index);
-               exit(EXIT_FAILURE);
+               M_ERROR("Too many arguments for normal descriptor at line %li", line_index);
             }
             buff_vec[word_count - 1] = (float) m_parse_double(line_index);
          }
@@ -221,8 +219,7 @@ void m_proceed_line(model_t* model, const char* string, size_t start_index, size
          {
             if (word_count > 2)
             {
-               printf("[model.c][ERROR]: Too many arguments for tex coord descriptor at line %li\n", line_index);
-               exit(EXIT_FAILURE);
+               M_ERROR("Too many arguments for tex coord descriptor at line %li", line_index);
             }
             buff_vec[word_count - 1] = (float) m_parse_double(line_index);
          }
@@ -380,7 +377,7 @@ model_t* m_load_s(char* name, char* source)
 
    m_parse_lines(model, source);
 
-   printf("[model.c]: Loaded model \"%s\". Vertices: %li, Faces: %li\n",
+   M_LOG("Loaded model \"%s\". Vertices: %li, Faces: %li",
            name, model->model_len->vertices_count, model->model_len->faces_count);
 
    return model;
@@ -395,8 +392,7 @@ model_t* m_load(const char* filename)
    FILE* f = fopen(filename, "r");
    if (!f)
    {
-      printf("[model.c][ERROR]: Unable to open file \"%s\"", filename);
-      return NULL;
+      M_ERROR("Unable to open file \"%s\"", filename);
    }
 
    fseek(f, 0, SEEK_END);
@@ -453,7 +449,7 @@ void m_free(model_t* model)
    if (model->VAO != 0)
       GL_CALL(glDeleteBuffers(1, &(model->VAO)))
 
-   printf("[model.c]: Freed model \"%s\"\n", model->filename);
+   M_LOG("Freed model \"%s\"", model->filename);
 
    free(model->filename);
    free(model);
@@ -500,33 +496,31 @@ inline void m_push_mtllib(model_t* model, char* mtllib)
 //
 void m_info(model_t* model)
 {
-   printf("[model.c]: Vertices (%li): \n", model->model_len->vertices_count);
+   M_LOG("Vertices (%li):", model->model_len->vertices_count);
    for (size_t i = 0; i < model->model_len->vertices_count; i++)
-      printf("%li: %f %f %f [%f]\n",
+      M_LOG("%li: %f %f %f [%f]",
              i, model->vertices[i][0],
              model->vertices[i][1],
              model->vertices[i][2],
              model->vertices[i][3]);
 
-   printf("\n[model.c]: Normals (%li): \n", model->model_len->normals_count);
+   M_LOG("Normals (%li): ", model->model_len->normals_count);
    for (size_t i = 0; i < model->model_len->normals_count; i++)
-      printf("%li: %f %f %f\n",
+      M_LOG("%li: %f %f %f",
              i, model->normals[i][0],
              model->normals[i][1],
              model->normals[i][2]);
 
-   printf("\n[model.c]: Faces (%li): \n", model->model_len->faces_count);
+   M_LOG("Faces (%li):", model->model_len->faces_count);
    for (size_t i = 0; i < model->model_len->faces_count; i++)
    {
-      printf("%li. ", i);
       for (size_t j = 0; j < model->faces[j]->count; j++)
       {
-         printf("%i/%i/%i ",
+         M_LOG("%i/%i/%i ",
                 model->faces[i]->vert_id[j],
                 model->faces[i]->tex_id[j],
                 model->faces[i]->normal_id[j]);
       }
-      putchar('\n');
    }
 }
 

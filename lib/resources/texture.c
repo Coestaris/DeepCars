@@ -7,6 +7,9 @@
 #endif
 #include "texture.h"
 
+#define T_LOG(format, ...) DC_LOG("texture.c", format, __VA_ARGS__)
+#define T_ERROR(format, ...) DC_ERROR("texture.c", format, __VA_ARGS__)
+
 //
 // t_create()
 //
@@ -32,7 +35,7 @@ texture_t* t_create(char* name)
 //
 void t_free(texture_t* tex)
 {
-   printf("[texture.c]: Texture \"%s\" unloaded\n", tex->name);
+   T_LOG("Texture \"%s\" unloaded", tex->name);
    if(tex->texID)
       GL_CALL(glDeleteTextures(1, &tex->texID));
 
@@ -56,8 +59,10 @@ GLuint t_load_dds(uint8_t* source, texData* tex_data, char* dds_format)
    GLuint tid = 0;
 
    // compare the `DDS ` signature
-   if(memcmp(source, "DDS ", 4) != 0)
-      goto exit;
+   if (memcmp(source, "DDS ", 4) != 0)
+   {
+      T_ERROR("DDS signatures doesn't match",0)
+   }
 
    // extract height, width, and amount of mipmaps - yes it is stored height then width
    height        = (source[12]) | (source[13] << 8U) | (source[14] << 16U) | (source[15] << 24U);
@@ -192,13 +197,11 @@ void t_load_s(texture_t* tex, uint8_t* source, size_t length, bool png)
 
    if(!png)
    {
-      printf("[texture.c]: DDS (%s) texture \"%s\" loaded. Width: %i, Height: %i\n",
-             dds_format, tex->name, tex->width, tex->height);
+      T_LOG("DDS (%s) texture \"%s\" loaded. Width: %i, Height: %i", dds_format, tex->name, tex->width, tex->height);
    }
    else
    {
-      printf("[texture.c]: PNG texture \"%s\" loaded. Width: %i, Height: %i\n",
-              tex->name, tex->width, tex->height);
+      T_LOG("PNG texture \"%s\" loaded. Width: %i, Height: %i", tex->name, tex->width, tex->height);
    }
 }
 
@@ -210,8 +213,7 @@ void t_load(texture_t* tex, const char* path, bool png)
    FILE* f = fopen(path, "rb");
    if(!f)
    {
-      printf("[texture.c][ERROR]: Unable to open file %s", path);
-      exit(EXIT_FAILURE);
+      T_ERROR("[texture.c][ERROR]: Unable to open file %s", path);
    }
 
    fseek(f, 0, SEEK_END);
@@ -221,8 +223,7 @@ void t_load(texture_t* tex, const char* path, bool png)
    uint8_t* buffer = malloc(len + 1);
    if(fread(buffer, len, 1, f) != 1)
    {
-      printf("[texture.c][ERROR]: Unable to read data from file");
-      exit(EXIT_FAILURE);
+      T_ERROR("[texture.c][ERROR]: Unable to read data from file",0);
    }
 
    t_load_s(tex, buffer, len, png);

@@ -5,6 +5,9 @@
 #ifndef DEEPCARS_WIN_DEFAULTS_H
 #define DEEPCARS_WIN_DEFAULTS_H
 
+#define APP_LOG(format, ...) DC_LOG("app", format, __VA_ARGS__)
+#define APP_ERROR(format, ...) DC_ERROR("app", format, __VA_ARGS__)
+
 #define RESOURCE_PACK_FILE "resources.bin"
 
 #define WIN_WIDTH  1200

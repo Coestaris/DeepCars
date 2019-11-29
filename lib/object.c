@@ -7,6 +7,9 @@
 #endif
 #include "object.h"
 
+#define O_LOG(format, ...) DC_LOG("object.c", format, __VA_ARGS__)
+#define O_ERROR(format, ...) DC_ERROR("object.c", format, __VA_ARGS__)
+
 // for color
 #include "graphics/graphics.h"
 

@@ -7,6 +7,9 @@
 #endif
 #include "shader.h"
 
+#define SH_LOG(format, ...) DC_LOG("shader.c", format, __VA_ARGS__)
+#define SH_ERROR(format, ...) DC_ERROR("shader.c", format, __VA_ARGS__)
+
 // Builds shader and loads it to a GPU memory
 void sh_compile_s(shader_t* sh,
                   uint8_t* vertex_source,   GLint vertex_len,
@@ -23,8 +26,7 @@ void sh_compile_s(shader_t* sh,
       vertex_shader = glCreateShader(GL_VERTEX_SHADER);
       if (!vertex_shader)
       {
-         printf("[shader.c]: Unable to create vertex shader\n");
-         exit(EXIT_FAILURE);
+         SH_ERROR("Unable to create vertex shader",0);
       }
       sh->programs |= 0x1u;
    }
@@ -34,8 +36,7 @@ void sh_compile_s(shader_t* sh,
       geometry_shader = glCreateShader(GL_GEOMETRY_SHADER);
       if (!geometry_shader)
       {
-         printf("[shader.c]: Unable to create geometry shader\n");
-         exit(EXIT_FAILURE);
+         SH_ERROR("Unable to create geometry shader",0);
       }
       sh->programs |= 0x2u;
    }
@@ -45,8 +46,7 @@ void sh_compile_s(shader_t* sh,
       fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
       if (!fragment_shader)
       {
-         printf("[shader.c]: Unable to create fragment shader\n");
-         exit(EXIT_FAILURE);
+         SH_ERROR("Unable to create fragment shader",0);
       }
       sh->programs |= 0x4u;
    }
@@ -60,9 +60,8 @@ void sh_compile_s(shader_t* sh,
       {
          char info_log[1024];
          GL_CALL(glGetShaderInfoLog(vertex_shader, 1024, NULL, info_log));
-         printf("[shader.c][ERROR]: The vertex shader of \"%s\" failed to compile with the following error:\n%s\n",
+         SH_ERROR("The vertex shader of \"%s\" failed to compile with the following error:\n%s",
                 sh->name, info_log);
-         exit(EXIT_FAILURE);
       }
    }
 
@@ -75,9 +74,8 @@ void sh_compile_s(shader_t* sh,
       {
          char info_log[1024];
          GL_CALL(glGetShaderInfoLog(geometry_shader, 1024, NULL, info_log));
-         printf("[shader.c][ERROR]: The fragment shader of \"%s\" failed to compile with the following error:\n%s\n",
+         SH_ERROR("The fragment shader of \"%s\" failed to compile with the following error:\n%s",
                 sh->name, info_log);
-         exit(EXIT_FAILURE);
       }
    }
 
@@ -90,17 +88,15 @@ void sh_compile_s(shader_t* sh,
       {
          char info_log[1024];
          GL_CALL(glGetShaderInfoLog(fragment_shader, 1024, NULL, info_log));
-         printf("[shader.c][ERROR]: The fragment shader of \"%s\" failed to compile with the following error:\n%s\n",
+         SH_ERROR("The fragment shader of \"%s\" failed to compile with the following error:\n%s",
                 sh->name, info_log);
-         exit(EXIT_FAILURE);
       }
 
    }
    sh->prog_id = glCreateProgram();
    if(!sh->prog_id)
    {
-      printf("[shader.c]: Unable to create program\n");
-      exit(EXIT_FAILURE);
+      SH_ERROR("Unable to create program",0);
    }
 
    if(fragment_source)
@@ -117,10 +113,8 @@ void sh_compile_s(shader_t* sh,
    {
       char info_log[1024];
       GL_CALL(glGetProgramInfoLog(sh->prog_id, 1024, NULL, info_log));
-      printf("[shader.c][ERROR]: The shader \"%s\" failed to link with the following errors:\n%s\n",
+      SH_ERROR("The shader \"%s\" failed to link with the following errors:\n%s",
              sh->name, info_log);
-      exit(EXIT_FAILURE);
-
    }
 
    if(vertex_source)
@@ -139,8 +133,7 @@ void sh_compile_s(shader_t* sh,
       sprintf(buff + strlen(buff), "%s, ", "fragment");
    buff[strlen(buff) - 2] = '\0';
 
-   printf("[shader.c]: Loaded shader \"%s\" (%s)\n",
-           sh->name, buff);
+   SH_LOG("Loaded shader \"%s\" (%s)", sh->name, buff);
 }
 
 void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* fragment_path)
@@ -157,8 +150,7 @@ void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* frag
       FILE* f = fopen(vertex_path, "rb");
       if(!f)
       {
-         printf("[shader.c][ERROR]: Unable to open file %s", vertex_path);
-         exit(EXIT_FAILURE);
+         SH_ERROR("Unable to open file %s", vertex_path);
       }
       fseek(f, 0, SEEK_END);
       vertex_len = ftell(f);
@@ -173,8 +165,7 @@ void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* frag
       FILE* f = fopen(geometry_path, "rb");
       if(!f)
       {
-         printf("[shader.c][ERROR]: Unable to open file %s", geometry_path);
-         exit(EXIT_FAILURE);
+         SH_ERROR("Unable to open file %s", geometry_path);
       }
       fseek(f, 0, SEEK_END);
       geometry_len = ftell(f);
@@ -189,8 +180,7 @@ void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* frag
       FILE* f = fopen(fragment_path, "rb");
       if(!f)
       {
-         printf("[shader.c][ERROR]: Unable to open file %s", fragment_path);
-         exit(EXIT_FAILURE);
+         SH_ERROR("Unable to open file %s", fragment_path);
       }
       fseek(f, 0, SEEK_END);
       fragment_len = ftell(f);
@@ -229,9 +219,7 @@ shader_t* sh_create(char* name)
 //
 void sh_free(shader_t* sh)
 {
-   printf("[shader.c]: Freed shader \"%s\"\n",
-           sh->name);
-
+   SH_LOG("Freed shader \"%s\"", sh->name);
    GL_CALL(glDeleteProgram(sh->prog_id))
 
    if (sh->uniform_locations)
@@ -335,30 +323,30 @@ void sh_info(shader_t* sh)
    GLchar name[buf_size]; // variable name in GLSL
    GLsizei length; // name length
 
-   printf("[shader.c][sh_info]: Shader: \"%s\"\n", sh->name);
-   printf("[shader.c][sh_info]: Shader progID: %i\n", sh->prog_id);
+   SH_LOG("[sh_info]: Shader: \"%s\"", sh->name);
+   SH_LOG("[sh_info]: Shader progID: %i", sh->prog_id);
 
    GL_CALL(glGetProgramiv(sh->prog_id, GL_ACTIVE_ATTRIBUTES, &count));
-   printf("[shader.c][sh_info]: Active Attributes: %d\n", count);
+   SH_LOG("[sh_info]: Active Attributes: %d", count);
 
    for (i = 0; i < count; i++)
    {
       GL_CALL(glGetActiveAttrib(sh->prog_id, (GLuint) i, buf_size, &length, &size, &type, name));
-      printf("[shader.c][sh_info]: Attribute %d:[type: %u, name: \"%s\"]\n", i, type, name);
+      SH_LOG("[sh_info]: Attribute %d:[type: %u, name: \"%s\"]", i, type, name);
    }
 
    GL_CALL(glGetProgramiv(sh->prog_id, GL_ACTIVE_UNIFORMS, &count));
-   printf("[shader.c][sh_info]: Active Uniforms: %d\n", count);
+   SH_LOG("sh_info]: Active Uniforms: %d", count);
 
    for (i = 0; i < count; i++)
    {
       GL_CALL(glGetActiveUniform(sh->prog_id, (GLuint) i, buf_size, &length, &size, &type, name));
-      printf("[shader.c][sh_info]: Uniform %d:[type: %u, name: \"%s\"]\n", i, type, name);
+      SH_LOG("[sh_info]: Uniform %d:[type: %u, name: \"%s\"]", i, type, name);
    }
 
-   printf("[shader.c][sh_info]: Uniform Locations: ");
+   SH_ERROR("[sh_info]: Uniform Locations: ",0);
    for(i = 0; i < 5; i++)
-      printf("%i, ", sh->uniform_locations[i]);
-   printf("\n");
+      SH_LOG("%i", sh->uniform_locations[i]);
+   SH_LOG("",0);
 
 }

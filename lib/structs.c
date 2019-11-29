@@ -8,9 +8,42 @@
 
 #include <GL/gl.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include "structs.h"
 
+#if VERBOSE == true
+void _log(const char* prefix, const char* format, ...)
+{
+   va_list argp;
+   va_start(argp, format);
+
+   printf("[%s]: ", prefix);
+   vprintf(format, argp);
+   putchar('\n');
+
+   va_end(argp);
+}
+
+void _error(const char* prefix, const char* file, size_t line, const char* format, ...)
+{
+   va_list argp;
+   va_start(argp, format);
+
+   printf("[%s][ERROR]: ", prefix);
+   vprintf(format, argp);
+   putchar('\n');
+   printf("[%s][ERROR]: Error occurred in file \"%s\" at line %li", prefix, file, line);
+
+   fflush(stdout);
+   fflush(stdin);
+
+   abort();
+   va_end(argp);
+}
+#endif
+
+#if DEBUG_LEVEL != 0
 void gl_check(const char* line, int line_index, const char* file)
 {
    GLenum error;
@@ -47,6 +80,7 @@ void gl_check(const char* line, int line_index, const char* file)
       exit(EXIT_FAILURE);
    }
 }
+#endif
 
 //
 // vec2f

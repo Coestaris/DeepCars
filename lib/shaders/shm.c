@@ -7,6 +7,9 @@
 #endif
 #include "shm.h"
 
+#define S_LOG(format, ...) DC_LOG("shm.c", format, __VA_ARGS__)
+#define S_ERROR(format, ...) DC_ERROR("shm.c", format, __VA_ARGS__)
+
 // Soring shader and its id
 typedef struct _shm_node
 {
@@ -35,8 +38,7 @@ void s_push(shader_t* shader, int id)
    assert(shader != NULL);
    if(s_has_shader(id))
    {
-      printf("[shm.c]: Shader with same id already exists");
-      exit(EXIT_FAILURE);
+      S_ERROR("Shader with same id already exists",0);
    }
 
    shm_node_t* node = malloc(sizeof(shm_node_t));
@@ -51,8 +53,7 @@ void s_set_uniform_location(size_t index, shader_t* sh, const char* uniform_name
 {
    if((sh->uniform_locations[index] = glGetUniformLocation(sh->prog_id, uniform_name)) == -1)
    {
-      printf("[shm.c][ERROR]: Unable to get uniform location of \"%s\" from shader %s\n", uniform_name, sh->name);
-      //exit(EXIT_FAILURE);
+      S_ERROR("Unable to get uniform location of \"%s\" from shader %s", uniform_name, sh->name);
    }
 }
 
