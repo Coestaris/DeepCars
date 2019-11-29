@@ -21,7 +21,6 @@ class shader_packer:
 
     def proceed(self):
         chunks = []
-        print(self.shaders)
         for i, shader in enumerate(self.shaders):
             compression = self.default_compression
             if "compression" in shader:
@@ -44,6 +43,11 @@ class shader_packer:
                 with open(self.path + shader["geometry"]) as file:
                     lists.append(file.read())
                 shader_flag |= 0x4
+
+            str = "[{}/{}]: Packing shader \"{}\" (".format(i + 1, len(self.shaders), shader["name"])
+            for list_i, list in enumerate(lists):
+                str += "{} bytes{}".format(len(list), ", " if list_i != len(lists) - 1 else ")")
+            print(str)
 
             index = i
             if self.auto_index == False:

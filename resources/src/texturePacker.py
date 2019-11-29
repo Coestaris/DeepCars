@@ -56,7 +56,6 @@ class texture_packer:
         pass
 
     def proceed(self):
-        print(self.textures)
         chunks = []
         for i, texture in enumerate(self.textures):
 
@@ -97,11 +96,13 @@ class texture_packer:
 
                 img.save(filename=tmp)
 
+            print("[{}/{}]: Packing texture \"{}\" ({}x{}) as {}".format(i + 1, len(self.textures), texture["name"], 
+                imsize[0], imsize[1], compress.upper()))
+
             index = i
             if self.auto_indices == False:
                 index = texture["index"]
 
-            print(imsize)
             chunk = []
             with open(tmp, mode='rb') as file:
                 chunk += cm.int32tobytes(index)

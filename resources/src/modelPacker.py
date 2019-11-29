@@ -26,12 +26,13 @@ class model_packer:
         pass
 
     def proceed(self):
-        print(self.models)
         chunks = []
         for i, model in enumerate(self.models):
             data = ""
             with open(self.path + model["fn"]) as file:
                 data = file.read()
+
+            print("[{}/{}]: Packing model \"{}\" ({} bytes)".format(i + 1, len(self.models), model["name"], len(data)))
 
             index = i
             if self.auto_index == False:
@@ -70,7 +71,7 @@ class model_packer:
             chunk += model["name"].encode("utf-8")
             chunk += cm.int8tobytes(normBitField)
             chunk += [1 if archive == True else 0]
-            
+
             if archive:
                 compresssed = compress(bytes(data.encode("utf-8")))
                 chunk += cm.int32tobytes(len(compresssed))
