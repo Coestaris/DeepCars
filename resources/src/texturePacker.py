@@ -10,7 +10,7 @@ import os
 # 4 bytes: image height
 # 1 byte : image compression (0 - png, 1 - dds_no, 2 - dxt1, 3 - dxt3, 4 - dxt5)
 # 1 byte : texture wrapping (0 - repeat, 1 - mirrored_repeat, 2 - clamp_to_edge, 3 - clamp_to_border)
-# 1 byte : min filter (0 - mipmap_linear, 1 - mipmap_nearest, 2 - linear, 3 - nearest)
+# 1 byte : min filter (0 - mipmap_linear, 1 - mipmap_nearest, 2 - linear, 3 -   )
 # 1 byte : mag filter (0 - linear, 1 - nearest)
 # 1 byte : flip (0 - no, 1 - flip x, 2 - flip y, 3 - flip both)
 # 4 bytes: data length

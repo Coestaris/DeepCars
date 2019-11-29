@@ -7,141 +7,220 @@
 #endif
 #include "shader.h"
 
-// Builds shader form string
-void sh_load_shader_src(const char* sz_shader_src, GLuint shader)
-{
-   GLchar* string_part[1];
-   string_part[0] = (GLchar*) sz_shader_src;
-
-   glShaderSource(shader, 1, (const GLchar**) string_part, NULL);
-}
-
-// Builds shader from file
-int sh_load_shader_file(const char* filename, GLuint shader)
-{
-   FILE* f = fopen(filename, "r");
-   if (!f) return 0;
-
-   fseek(f, 0, SEEK_END);
-
-   size_t size = (size_t) ftell(f);
-   fseek(f, 0, SEEK_SET);
-
-   char* rawInput = malloc(size + 1);
-   memset(rawInput, 0, size + 1);
-   fread(rawInput, size, size, f);
-
-   fclose(f);
-
-   sh_load_shader_src((const char*) rawInput, shader);
-
-   free(rawInput);
-   return 1;
-}
-
 // Builds shader and loads it to a GPU memory
-int sh_load(shader_t* sh)
+void sh_compile_s(shader_t* sh,
+                  uint8_t* vertex_source,   GLint vertex_len,
+                  uint8_t* geometry_source, GLint geometry_len,
+                  uint8_t* fragment_source, GLint fragment_len)
 {
-   GLuint vertex_shader;
-   GLuint fragment_shader;
-
-   vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-   fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-
-   if (vertex_shader == 0 || fragment_shader == 0)
-   {
-      printf("[shader.c]: Unable to create shaders\n");
-      return 0;
-   }
-
-   if (!sh_load_shader_file(sh->fragment_path, fragment_shader))
-   {
-      glDeleteShader(vertex_shader);
-      glDeleteShader(fragment_shader);
-      printf("[shader.c][ERROR]: The fragment shader at %s could not be found.\n",
-              sh->fragment_path);
-      return 0;
-   }
-
-   if (!sh_load_shader_file(sh->vertex_path, vertex_shader))
-   {
-      glDeleteShader(vertex_shader);
-      glDeleteShader(fragment_shader);
-      printf("[shader.c][ERROR]: The vertex shader at %s could not be found.\n",
-              sh->vertex_path);
-      return 0;
-   }
-
-   glCompileShader(vertex_shader);
-   glCompileShader(fragment_shader);
-
+   GLuint vertex_shader   = 0;
+   GLuint fragment_shader = 0;
+   GLuint geometry_shader = 0;
    GLint test_val;
 
-   glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &test_val);
-   if (test_val == GL_FALSE)
+   if (vertex_source)
    {
-      char infoLog[1024];
-      glGetShaderInfoLog(vertex_shader, 1024, NULL, infoLog);
-      printf("[shader.c][ERROR]: The vertex shader at %s failed to compile with the following error:\n%s\n",
-             sh->vertex_path, infoLog);
-      glDeleteShader(vertex_shader);
-      glDeleteShader(fragment_shader);
-      return 0;
+      vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+      if (!vertex_shader)
+      {
+         printf("[shader.c]: Unable to create vertex shader\n");
+         exit(EXIT_FAILURE);
+      }
+      sh->programs |= 0x1u;
    }
 
-   glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &test_val);
-   if (test_val == GL_FALSE)
+   if (geometry_source)
    {
-      char infoLog[1024];
-      glGetShaderInfoLog(fragment_shader, 1024, NULL, infoLog);
-      printf("[shader.c][ERROR]: The fragment shader at %s failed to compile with the following error:\n%s\n",
-             sh->fragment_path, infoLog);
-      glDeleteShader(vertex_shader);
-      glDeleteShader(fragment_shader);
-      return 0;
+      geometry_shader = glCreateShader(GL_GEOMETRY_SHADER);
+      if (!geometry_shader)
+      {
+         printf("[shader.c]: Unable to create geometry shader\n");
+         exit(EXIT_FAILURE);
+      }
+      sh->programs |= 0x2u;
    }
 
+   if (fragment_source)
+   {
+      fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+      if (!fragment_shader)
+      {
+         printf("[shader.c]: Unable to create fragment shader\n");
+         exit(EXIT_FAILURE);
+      }
+      sh->programs |= 0x4u;
+   }
+
+   if (vertex_source)
+   {
+      GL_CALL(glShaderSource(vertex_shader, 1, (const GLchar**)&vertex_source, &vertex_len))
+      GL_CALL(glCompileShader(vertex_shader));
+      GL_CALL(glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &test_val));
+      if (test_val == GL_FALSE)
+      {
+         char info_log[1024];
+         GL_CALL(glGetShaderInfoLog(vertex_shader, 1024, NULL, info_log));
+         printf("[shader.c][ERROR]: The vertex shader of \"%s\" failed to compile with the following error:\n%s\n",
+                sh->name, info_log);
+         exit(EXIT_FAILURE);
+      }
+   }
+
+   if (geometry_source)
+   {
+      GL_CALL(glShaderSource(geometry_shader, 1, (const GLchar**)&geometry_source, &geometry_len))
+      GL_CALL(glCompileShader(geometry_shader));
+      GL_CALL(glGetShaderiv(geometry_shader, GL_COMPILE_STATUS, &test_val));
+      if (test_val == GL_FALSE)
+      {
+         char info_log[1024];
+         GL_CALL(glGetShaderInfoLog(geometry_shader, 1024, NULL, info_log));
+         printf("[shader.c][ERROR]: The fragment shader of \"%s\" failed to compile with the following error:\n%s\n",
+                sh->name, info_log);
+         exit(EXIT_FAILURE);
+      }
+   }
+
+   if(fragment_source)
+   {
+      GL_CALL(glShaderSource(fragment_shader, 1, (const GLchar**)&fragment_source, &fragment_len))
+      GL_CALL(glCompileShader(fragment_shader));
+      GL_CALL(glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &test_val))
+      if (test_val == GL_FALSE)
+      {
+         char info_log[1024];
+         GL_CALL(glGetShaderInfoLog(fragment_shader, 1024, NULL, info_log));
+         printf("[shader.c][ERROR]: The fragment shader of \"%s\" failed to compile with the following error:\n%s\n",
+                sh->name, info_log);
+         exit(EXIT_FAILURE);
+      }
+
+   }
    sh->prog_id = glCreateProgram();
+   if(!sh->prog_id)
+   {
+      printf("[shader.c]: Unable to create program\n");
+      exit(EXIT_FAILURE);
+   }
 
-   glAttachShader(sh->prog_id, vertex_shader);
-   glAttachShader(sh->prog_id, fragment_shader);
+   if(fragment_source)
+      GL_CALL(glAttachShader(sh->prog_id, vertex_shader));
+   if(geometry_source)
+      GL_CALL(glAttachShader(sh->prog_id, geometry_shader));
+   if(fragment_source)
+      GL_CALL(glAttachShader(sh->prog_id, fragment_shader));
 
-   glLinkProgram(sh->prog_id);
+   GL_CALL(glLinkProgram(sh->prog_id));
 
-   glGetProgramiv(sh->prog_id, GL_LINK_STATUS, &test_val);
+   GL_CALL(glGetProgramiv(sh->prog_id, GL_LINK_STATUS, &test_val));
    if (test_val == GL_FALSE)
    {
-      char infoLog[1024];
-      glGetProgramInfoLog(sh->prog_id, 1024, NULL, infoLog);
-      printf("[shader.c][ERROR]: The programs %s and %s failed to link with the following errors:\n%s\n",
-             sh->vertex_path, sh->fragment_path, infoLog);
-      glDeleteProgram(sh->prog_id);
-      return 0;
+      char info_log[1024];
+      GL_CALL(glGetProgramInfoLog(sh->prog_id, 1024, NULL, info_log));
+      printf("[shader.c][ERROR]: The shader \"%s\" failed to link with the following errors:\n%s\n",
+             sh->name, info_log);
+      exit(EXIT_FAILURE);
 
    }
 
-   GL_CALL(glDeleteShader(vertex_shader))
-   GL_CALL(glDeleteShader(fragment_shader))
-   return 1;
+   if(vertex_source)
+      GL_CALL(glDeleteShader(vertex_shader));
+   if(geometry_source)
+      GL_CALL(glDeleteShader(geometry_shader));
+   if(fragment_source)
+      GL_CALL(glDeleteShader(fragment_shader));
+
+   char buff[100];
+   if(vertex_source)
+      sprintf(buff, "%s, ", "vertex");
+   if(geometry_source)
+      sprintf(buff + strlen(buff), "%s, ", "geometry");
+   if(fragment_source)
+      sprintf(buff + strlen(buff), "%s, ", "fragment");
+   buff[strlen(buff) - 2] = '\0';
+
+   printf("[shader.c]: Loaded shader \"%s\" (%s)\n",
+           sh->name, buff);
+}
+
+void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* fragment_path)
+{
+   uint8_t* vertex_source   = NULL;
+   uint8_t* geometry_source = NULL;
+   uint8_t* fragment_source = NULL;
+   size_t vertex_len        = 0;
+   size_t geometry_len      = 0;
+   size_t fragment_len      = 0;
+
+   if(vertex_path)
+   {
+      FILE* f = fopen(vertex_path, "rb");
+      if(!f)
+      {
+         printf("[shader.c][ERROR]: Unable to open file %s", vertex_path);
+         exit(EXIT_FAILURE);
+      }
+      fseek(f, 0, SEEK_END);
+      vertex_len = ftell(f);
+      fseek(f, 0, SEEK_SET);
+      vertex_source = malloc(vertex_len + 1);
+      fread(vertex_source, vertex_len, 1, f);
+      vertex_source[vertex_len] = 0;
+      fclose(f);
+   }
+   if(geometry_path)
+   {
+      FILE* f = fopen(geometry_path, "rb");
+      if(!f)
+      {
+         printf("[shader.c][ERROR]: Unable to open file %s", geometry_path);
+         exit(EXIT_FAILURE);
+      }
+      fseek(f, 0, SEEK_END);
+      geometry_len = ftell(f);
+      fseek(f, 0, SEEK_SET);
+      geometry_source = malloc(geometry_len + 1);
+      fread(geometry_source, geometry_len, 1, f);
+      geometry_source[geometry_len] = 0;
+      fclose(f);
+   }
+   if(fragment_path)
+   {
+      FILE* f = fopen(fragment_path, "rb");
+      if(!f)
+      {
+         printf("[shader.c][ERROR]: Unable to open file %s", fragment_path);
+         exit(EXIT_FAILURE);
+      }
+      fseek(f, 0, SEEK_END);
+      fragment_len = ftell(f);
+      fseek(f, 0, SEEK_SET);
+      fragment_source = malloc(fragment_len + 1);
+      fread(fragment_source, fragment_len, 1, f);
+      fragment_source[fragment_len] = 0;
+      fclose(f);
+   }
+
+   sh_compile_s(sh,
+           vertex_source, vertex_len,
+           geometry_source, geometry_len,
+           fragment_source, fragment_len);
+
+   if(vertex_source) free(vertex_source);
+   if(geometry_source) free(geometry_source);
+   if(fragment_source) free(fragment_source);
 }
 
 //
 // sh_create
 //
-shader_t* sh_create(char* vertexPath, char* fragmentPath)
+shader_t* sh_create(char* name)
 {
    shader_t* sh = malloc(sizeof(shader_t));
-   sh->fragment_path = fragmentPath;
-   sh->vertex_path = vertexPath;
    sh->prog_id = 0;
-
-   if (!sh_load(sh))
-   {
-      exit(EXIT_FAILURE);
-   }
-
-   printf("[shader.c]: Loaded shader. vertex path: %s, fragment path: %s\n",
-           vertexPath, fragmentPath);
+   sh->name = name;
+   sh->uniform_locations = NULL;
+   sh->programs = 0;
    return sh;
 }
 
@@ -150,14 +229,15 @@ shader_t* sh_create(char* vertexPath, char* fragmentPath)
 //
 void sh_free(shader_t* sh)
 {
-   printf("[shader.c]: Freed shader. vertex path: %s, fragment path: %s\n",
-           sh->vertex_path, sh->fragment_path);
+   printf("[shader.c]: Freed shader \"%s\"\n",
+           sh->name);
 
    GL_CALL(glDeleteProgram(sh->prog_id))
 
    if (sh->uniform_locations)
       free(sh->uniform_locations);
 
+   free(sh->name);
    free(sh);
 }
 
@@ -255,7 +335,7 @@ void sh_info(shader_t* sh)
    GLchar name[buf_size]; // variable name in GLSL
    GLsizei length; // name length
 
-   printf("[shader.c][sh_info]: Shader vertex path: %s, Shader fragment path: %s\n", sh->vertex_path, sh->fragment_path);
+   printf("[shader.c][sh_info]: Shader: \"%s\"\n", sh->name);
    printf("[shader.c][sh_info]: Shader progID: %i\n", sh->prog_id);
 
    GL_CALL(glGetProgramiv(sh->prog_id, GL_ACTIVE_ATTRIBUTES, &count));

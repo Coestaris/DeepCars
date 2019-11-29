@@ -63,9 +63,9 @@ void gr_init(mat4 proj, mat4 view)
    COLOR_FUCHSIA = cvec4(1, 0, 1, 0);
    COLOR_PURPLE = cvec4(.5, 0, .5, 0);
 
-   shader_colored = s_getShader(SH_COLORED);
-   shader_colored_shaded = s_getShader(SH_COLORED_SHADED);
-   shader_textured = s_getShader(SH_TEXTURED);
+   shader_colored = s_get_shader(SH_COLORED);
+   shader_colored_shaded = s_get_shader(SH_COLORED_SHADED);
+   shader_textured = s_get_shader(SH_TEXTURED);
 
    proj_mat = proj;
    view_mat = view;

@@ -23,8 +23,6 @@ vec4 sky_color;
 
 void app_load_resources(void)
 {
-   p_load("resources.bin");
-
    // scenes
    scene_t* menu = sc_create(SCENEID_MENU);
    menu->back_color = COLOR_WHITE;
@@ -44,11 +42,11 @@ void app_load_resources(void)
              create_colored_shaded_dummy(vec3f(16, 0, 16), 10, .3f, COLOR_GRAY, mm_get(MODELID_TEAPOT)));
 
    list_push(menu->startup_objects,
-           create_textured_dummy(vec3f(-16, 0, -4), 10, txm_get(1), mm_get(MODELID_CUBE)));
+           create_textured_dummy(vec3f(-16, 0, -4), 10, txm_get(0), mm_get(MODELID_CUBE)));
    list_push(menu->startup_objects,
            create_textured_dummy(vec3f(-4, 0, -16), 10, txm_get(1), mm_get(MODELID_TORUS)));
    list_push(menu->startup_objects,
-           create_textured_dummy(vec3f(-16, 0, -16), 10, txm_get(1), mm_get(MODELID_TEAPOT)));
+           create_textured_dummy(vec3f(-16, 0, -16), 10, txm_get(2), mm_get(MODELID_TEAPOT)));
 
    list_push(menu->startup_objects, create_camera_control());
 
@@ -86,6 +84,9 @@ void app_init_graphics(void)
    s_init();
    txm_init();
    mm_init();
+
+   p_load(RESOURCE_PACK_FILE);
+   s_setup_built_in_shaders();
 
    gr_init(win->projection, view);
 }

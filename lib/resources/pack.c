@@ -16,6 +16,8 @@
 #include "../../oil/crc32.h"
 #include "mm.h"
 #include "txm.h"
+#include "../shaders/shader.h"
+#include "../shaders/shm.h"
 
 // Reads as many bytes as the specified parameter occupies.
 // If reading failed, an error will be thrown
@@ -73,6 +75,7 @@ void p_handler_model(uint8_t* data, size_t length)
    uint16_t name_len;
    uint8_t arhive;
    uint32_t data_len;
+   uint8_t norm_flags;
    uint32_t uncomp_data_len;
 
    READ_BUFF(id,sizeof(id));
@@ -82,6 +85,7 @@ void p_handler_model(uint8_t* data, size_t length)
    READ_BUFF(*name, name_len);
    name[name_len] = '\0';
 
+   READ_BUFF(norm_flags, sizeof(norm_flags));
    READ_BUFF(arhive, sizeof(arhive));
    READ_BUFF(data_len, sizeof(data_len));
    READ_BUFF(uncomp_data_len, sizeof(uncomp_data_len));
@@ -101,6 +105,11 @@ void p_handler_model(uint8_t* data, size_t length)
    }
 
    model_t* m = m_load_s(strdup(name), (char*)model_data);
+   m_normalize(m,
+            norm_flags & 0x1u,
+            norm_flags & 0x2u,
+            norm_flags & 0x4u,
+            norm_flags & 0x8u);
    mm_push(id, m, true);
 
    free(name);
@@ -110,7 +119,105 @@ void p_handler_model(uint8_t* data, size_t length)
 // Handles shaders chunk and adds parsed shaders to shm
 void p_handler_shader(uint8_t* data, size_t length)
 {
+   size_t count = 0;
 
+   uint32_t id;
+   uint8_t compress;
+   uint8_t shader_flags;
+   uint32_t name_len;
+
+   READ_BUFF(id, sizeof(id));
+   READ_BUFF(name_len,sizeof(name_len));
+
+   char* name = malloc(name_len + 1);
+   READ_BUFF(*name, name_len);
+   name[name_len] = '\0';
+
+   READ_BUFF(shader_flags, sizeof(shader_flags));
+   READ_BUFF(compress, sizeof(compress));
+
+   bool has_vertex = shader_flags & 0x1u;
+   bool has_fragment = shader_flags & 0x2u;
+   bool has_geometry = shader_flags & 0x4u;
+
+   uint8_t* vertex_data    = NULL;
+   uint8_t* fragment_data  = NULL;
+   uint8_t* geometry_data  = NULL;
+   uint32_t vertex_len     = 0;
+   uint32_t fragment_len   = 0;
+   uint32_t geometry_len   = 0;
+
+   uint32_t uncomp_data_len;
+
+   if(has_vertex)
+   {
+      READ_BUFF(vertex_len, sizeof(vertex_len));
+      READ_BUFF(uncomp_data_len, sizeof(uncomp_data_len));
+      vertex_data = malloc(vertex_len);
+      READ_BUFF(*vertex_data, vertex_len);
+
+      if(compress)
+      {
+         uint8_t* decompressed = malloc(uncomp_data_len);
+         memset(decompressed, 0, uncomp_data_len);
+         p_decompress(vertex_len, uncomp_data_len, vertex_data, decompressed);
+
+         free(vertex_data);
+         vertex_data = decompressed;
+         vertex_len = uncomp_data_len;
+      }
+   }
+
+   if(has_fragment)
+   {
+      READ_BUFF(fragment_len, sizeof(fragment_len));
+      READ_BUFF(uncomp_data_len, sizeof(uncomp_data_len));
+      fragment_data = malloc(fragment_len);
+      READ_BUFF(*fragment_data, fragment_len);
+
+      if(compress)
+      {
+         uint8_t* decompressed = malloc(uncomp_data_len);
+         memset(decompressed, 0, uncomp_data_len);
+         p_decompress(fragment_len, uncomp_data_len, fragment_data, decompressed);
+
+         free(fragment_data);
+         fragment_data = decompressed;
+         fragment_len = uncomp_data_len;
+      }
+   }
+
+   if(has_geometry)
+   {
+      READ_BUFF(geometry_len, sizeof(geometry_len));
+      READ_BUFF(uncomp_data_len, sizeof(uncomp_data_len));
+      geometry_data = malloc(geometry_len);
+      READ_BUFF(*geometry_data, geometry_len);
+
+      if(compress)
+      {
+         uint8_t* decompressed = malloc(uncomp_data_len);
+         memset(decompressed, 0, uncomp_data_len);
+         p_decompress(geometry_len, uncomp_data_len, geometry_data, decompressed);
+
+         free(geometry_data);
+         geometry_data = decompressed;
+         geometry_len = uncomp_data_len;
+      }
+   }
+
+   shader_t* sh = sh_create(strdup(name));
+   sh_compile_s(sh,
+           vertex_data, vertex_len,
+           geometry_data, geometry_len,
+           fragment_data, fragment_len);
+
+   s_push(sh, id);
+
+   if(vertex_data) free(vertex_data);
+   if(fragment_data) free(fragment_data);
+   if(geometry_data) free(geometry_data);
+   free(name);
 }
 
 // Handles texture chunk and adds parsed textures to txm
@@ -149,7 +256,7 @@ void p_handler_texture(uint8_t* data, size_t length)
    uint8_t* tex_data = malloc(data_len);
    READ_BUFF(*tex_data, data_len);
 
-   texture_t* t = t_create(name);
+   texture_t* t = t_create(strdup(name));
 
    switch (wrapping)
    {
@@ -213,6 +320,7 @@ void p_handler_texture(uint8_t* data, size_t length)
    t_load_s(t, tex_data, data_len, compression == 0);
    txm_push(id, t);
 
+   free(name);
    free(tex_data);
 }
 

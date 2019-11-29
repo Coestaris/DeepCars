@@ -3,6 +3,10 @@
     "shaders_dir" : "shaders/",
     "textures_dir" : "textures/",
 
+    "model_default_normalize_x" : false,
+    "model_default_normalize_y" : true,
+    "model_default_normalize_z" : false,
+    "model_default_normalize_scale" : true,
     "model_default_compression" : true,
     "model_auto_indices" : true,
 

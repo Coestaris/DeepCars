@@ -21,7 +21,7 @@
 typedef struct _texture
 {
    // Name of the texture
-   const char* name;
+   char* name;
 
    // OpenGL texture ID
    GLuint texID;

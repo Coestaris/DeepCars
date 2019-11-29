@@ -20,11 +20,8 @@
 // Storing all necessary shader information
 typedef struct _shader
 {
-   // Path to a file with vertex shader
-   char* vertex_path;
-
-   // Path to a file with fragment shader
-   char* fragment_path;
+   // Name of current shader
+   char* name;
 
    // OpenGL program ID
    GLint prog_id;
@@ -32,10 +29,25 @@ typedef struct _shader
    // Precalculated uniform locations
    GLint* uniform_locations;
 
+   // Flag field that contains programs of the shaders
+   //    0x1 - has vertex program
+   //    0x2 - has fragment program
+   //    0x4 - has geometry program
+   uint8_t programs;
+
 } shader_t;
 
 // shader_t constructor
-shader_t* sh_create(char* vertexPath, char* fragmentPath);
+shader_t* sh_create(char* name);
+
+// compiles shader from source and loads it to a GPU memory
+void sh_compile_s(shader_t* sh,
+        uint8_t* vertex_source,   GLint vertex_len,
+        uint8_t* geometry_source, GLint geometry_len,
+        uint8_t* fragment_source, GLint fragment_len);
+
+// compiles shader from files and loads it to a GPU memory
+void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* fragment_path);
 
 // Frees shader and all its resources
 void sh_free(shader_t* sh);

@@ -5,6 +5,8 @@
 #ifndef DEEPCARS_WIN_DEFAULTS_H
 #define DEEPCARS_WIN_DEFAULTS_H
 
+#define RESOURCE_PACK_FILE "resources.bin"
+
 #define WIN_WIDTH  1200
 #define WIN_HEIGHT 800
 #define WIN_TITLE  "DeepCars"

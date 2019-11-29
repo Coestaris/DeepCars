@@ -10,7 +10,7 @@
 //
 // t_create()
 //
-texture_t* t_create(char* const name)
+texture_t* t_create(char* name)
 {
    texture_t* t = malloc(sizeof(texture_t));
    t->name = name;
@@ -33,9 +33,10 @@ texture_t* t_create(char* const name)
 void t_free(texture_t* tex)
 {
    printf("[texture.c]: Texture \"%s\" unloaded\n", tex->name);
-   if( tex->texID)
+   if(tex->texID)
       GL_CALL(glDeleteTextures(1, &tex->texID));
 
+   free(tex->name);
    free(tex->data);
    free(tex);
 }

@@ -5,7 +5,7 @@ from zlib import compress
 # 4 bytes: id
 # 2 bytes: name length
 # n bytes: name
-# 1 byte : shader flags. (0x1 - fragment, 0x2 - vertex, 0x4 - geometry)
+# 1 byte : shader flags. (0x1 - vertex, 0x2 - fragment, 0x4 - geometry)
 # 1 byte : compression 
 # 4 bytes: data length              | 
 # 4 bytes: uncompressed data length | m times
@@ -56,6 +56,7 @@ class shader_packer:
             chunk += cm.int8tobytes(shader_flag)
             chunk += cm.int8tobytes(compression)
             for list in lists:
+                list += '\n'
                 if compression:
                     compresssed = compress(bytes(list.encode("utf-8")))
                     chunk += cm.int32tobytes(len(compresssed))
