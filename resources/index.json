@@ -1,7 +1,9 @@
 {
     "shaders" : 
     [
-        {  "fn" : "colored_sahded.glsl",  "uniforms" : [ ] }
+        {  "vertex" : "default.vsh", "fragment" : "colored.fsh", "name" : "colored" },
+        {  "vertex" : "default.vsh", "fragment" : "colored_shaded.fsh", "name" : "colored_shaded" },
+        {  "vertex" : "default.vsh", "fragment" : "textured.fsh", "name" : "textured" }
     ],
 
     "textures" : 

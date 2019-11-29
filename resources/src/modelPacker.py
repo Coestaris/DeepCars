@@ -15,8 +15,8 @@ class model_packer:
     def __init__(self, path, models, config):
         self.path = path
         self.models = models
-        self.auto_index = config["archive_auto_indices"]
-        self.default_archive = config["default_arhive_compression"]
+        self.auto_index = config["model_auto_indices"]
+        self.default_archive = config["model_default_compression"]
         pass
 
     def proceed(self):

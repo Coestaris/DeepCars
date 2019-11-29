@@ -40,17 +40,17 @@ void t_free(texture_t* tex)
    free(tex);
 }
 
-GLuint t_load_dds(uint8_t* source, texData* tex_data)
+GLuint t_load_dds(uint8_t* source, texData* tex_data, char* dds_format)
 {
-   uint32_t width;
-   uint32_t height;
-   uint32_t mip_map_count;
+   const char* str_format = NULL;
 
-   uint32_t block_size;
-   uint32_t format;
-
-   uint32_t w;
-   uint32_t h;
+   uint32_t width = 0;
+   uint32_t height = 0;
+   uint32_t mip_map_count = 0;
+   uint32_t block_size = 0;
+   uint32_t format = 0;
+   uint32_t w = 0;
+   uint32_t h = 0;
 
    GLuint tid = 0;
 
@@ -75,16 +75,19 @@ GLuint t_load_dds(uint8_t* source, texData* tex_data)
          case '1': // DXT1
             format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
             block_size = 8;
+            str_format = "DXT1";
             break;
 
          case '3': // DXT3
             format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
             block_size = 16;
+            str_format = "DXT3";
             break;
 
          case '5': // DXT5
             format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
             block_size = 16;
+            str_format = "DXT5";
             break;
 
          case '0':
@@ -92,11 +95,16 @@ GLuint t_load_dds(uint8_t* source, texData* tex_data)
             // unsupported, else will error
             // as it adds sizeof(struct DDS_HEADER_DXT10) between pixels
             // so, buffer = malloc((file_size - 128) - sizeof(struct DDS_HEADER_DXT10));
-         default: goto exit;
+         default:
+            str_format = "unknown";
+            goto exit;
       }
    }
-   else // BC4U/BC4S/ATI2/BC55/R8G8_B8G8/G8R8_G8B8/UYVY-packed/YUY2-packed unsupported
+   else
+   {
+      str_format = "unknown";
       goto exit;
+   }
 
 
    // prepare new incomplete texture
@@ -121,7 +129,7 @@ GLuint t_load_dds(uint8_t* source, texData* tex_data)
    h = height;
 
    // loop through sending block at a time with the magic formula
-   // upload to opengl properly, note the offset transverses the pointer
+   // upload to OpenGL properly, note the offset transverses the pointer
    // assumes each mipmap is 1/2 the size of the previous mipmap
    for (size_t i=0; i < mip_map_count; i++)
    {
@@ -139,13 +147,11 @@ GLuint t_load_dds(uint8_t* source, texData* tex_data)
       h /= 2;
    }
 
-   // discard any odd mipmaps, ensure a complete texture
    GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mip_map_count - 1));
-   // unbind
    GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
-   // easy macro to get out quick and uniform (minus like 15 lines of bulk)
    exit:
+   snprintf(dds_format, 100, "%s, Mipmaps: %i", str_format, mip_map_count);
    return tid;
 }
 
@@ -154,6 +160,8 @@ GLuint t_load_dds(uint8_t* source, texData* tex_data)
 //
 void t_load_s(texture_t* tex, uint8_t* source, size_t length, bool png)
 {
+   char dds_format[100];
+
    if(png)
    {
       //todo:...
@@ -168,7 +176,7 @@ void t_load_s(texture_t* tex, uint8_t* source, size_t length, bool png)
    }
    else
    {
-      tex->texID = t_load_dds(source, tex->data);
+      tex->texID = t_load_dds(source, tex->data, (char*)dds_format);
    }
 
    tex->width = tex->data->out_width;
@@ -181,8 +189,16 @@ void t_load_s(texture_t* tex, uint8_t* source, size_t length, bool png)
    }
 
 
-   printf("[texture.c]: Texture \"%s\" loaded. Width: %i, Height: %i\n",
-          tex->name, tex->width, tex->height);
+   if(!png)
+   {
+      printf("[texture.c]: DDS (%s) texture \"%s\" loaded. Width: %i, Height: %i\n",
+             dds_format, tex->name, tex->width, tex->height);
+   }
+   else
+   {
+      printf("[texture.c]: PNG texture \"%s\" loaded. Width: %i, Height: %i\n",
+              tex->name, tex->width, tex->height);
+   }
 }
 
 //
