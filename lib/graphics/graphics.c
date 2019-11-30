@@ -166,6 +166,11 @@ void gr_draw_model_colored_shaded(model_t* model, vec4 color, float ambient)
    sh_set_mat4(locations[SH_COLORED_SHADED_MODEL], model_mat);
    sh_set_float(locations[SH_COLORED_SHADED_AMBIENT], ambient);
 
+   light_t* lt = (light_t*)current_scene->lights->collection[0];
+
+   sh_set_vec3v(locations[SH_COLORED_SHADED_L_COLOR], lt->color[0], lt->color[1], lt->color[2]);
+   sh_set_vec3v(locations[SH_COLORED_SHADED_L_POS], lt->direction[1], lt->direction[2], lt->direction[3]);
+
    gr_draw_model(model);
    sh_use(NULL);
 }

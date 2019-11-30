@@ -28,6 +28,14 @@ class model_packer:
     def proceed(self):
         chunks = []
         for i, model in enumerate(self.models):
+
+            files = [model["fn"]]
+            id = cm.get_id(self.path, model)
+            if cm.is_file_cached(id, self.path, files):
+                chunks.append(cm.get_cached_chunk(id))
+                print("[{}/{}]: Model \"{}\" already cached".format(i + 1, len(self.models), model["name"]))
+                continue
+
             data = ""
             with open(self.path + model["fn"]) as file:
                 data = file.read()
@@ -82,7 +90,10 @@ class model_packer:
                 chunk += cm.int32tobytes(len(data))
                 chunk += data.encode("utf-8")
 
-            chunks.append(cm.create_chunk(chunk, cm.MODEL_CHUNK_TYPE))
+            chunk = cm.create_chunk(chunk, cm.MODEL_CHUNK_TYPE)
+            chunks.append(chunk)
+
+            cm.cache_chunk(id, chunk)
 
         return chunks
 

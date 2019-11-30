@@ -59,6 +59,13 @@ class texture_packer:
         chunks = []
         for i, texture in enumerate(self.textures):
 
+            files = [texture["fn"]]
+            id = cm.get_id(self.path, texture)
+            if cm.is_file_cached(id, self.path, files):
+                chunks.append(cm.get_cached_chunk(id))
+                print("[{}/{}]: Texture \"{}\" already cached".format(i + 1, len(self.textures), texture["name"]))
+                continue
+
             wrapping = self.default_wrapping
             if "wrapping" in texture:
                 wrapping = texture["wrapping"]
@@ -121,7 +128,11 @@ class texture_packer:
                 chunk += b
 
             os.remove(tmp)
-            chunks.append(cm.create_chunk(chunk, cm.TEXTURE_CHUNK_TYPE))
+            
+            chunk = cm.create_chunk(chunk, cm.TEXTURE_CHUNK_TYPE)
+            chunks.append(chunk)
+
+            cm.cache_chunk(id, chunk)
 
         return chunks
 

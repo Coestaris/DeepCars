@@ -29,17 +29,19 @@ void app_load_resources(void)
    // objects
 
    plane_color = cvec4(129 / 255.0f, 146 / 255.0f, 89 / 255.0f, 0);
-/*
-   list_push(menu->startup_objects,
-             create_colored_dummy(vec3f(-500, 0, -500), 1000, plane_color, get_model(MODELID_PLANE)));
-*/
+   model_t* plane = m_create_plane();
+   m_normalize(plane, true, true, true, true);
+   mm_push(MODELID_PLANE, plane, true);
 
    list_push(menu->startup_objects,
-             create_colored_shaded_dummy(vec3f(16, 0, 4), 10, .3f, COLOR_GRAY, mm_get(MODELID_CUBE)));
+             create_colored_dummy(vec3f(-500, 0, -500), 1000, plane_color, mm_get(MODELID_PLANE)));
+
    list_push(menu->startup_objects,
-             create_colored_shaded_dummy(vec3f(4, 0, 16), 10, .0f, COLOR_GRAY, mm_get(MODELID_TORUS)));
+             create_colored_shaded_dummy(vec3f(16, 0, 4), 10, .01f, COLOR_GRAY, mm_get(MODELID_CUBE)));
    list_push(menu->startup_objects,
-             create_colored_shaded_dummy(vec3f(16, 0, 16), 10, .3f, COLOR_GRAY, mm_get(MODELID_TEAPOT)));
+             create_colored_shaded_dummy(vec3f(4, 0, 16), 10, .01f, COLOR_GRAY, mm_get(MODELID_TORUS)));
+   list_push(menu->startup_objects,
+             create_colored_shaded_dummy(vec3f(16, 0, 16), 10, .01f, COLOR_GRAY, mm_get(MODELID_TEAPOT)));
 
    list_push(menu->startup_objects,
            create_textured_dummy(vec3f(-16, 0, -4), 10, txm_get(0), mm_get(MODELID_CUBE)));
@@ -54,6 +56,11 @@ void app_load_resources(void)
    menu->camera = c_create(
            cvec4(0, 5, 15, 0),
            cvec4(0, 1, 0, 0));
+
+   light_t* direction = l_create(LT_DIRECTION);
+   vec4_cpy(direction->color, COLOR_WHITE);
+   vec4_fill(direction->direction, 0, -1, 0.5, 0);
+   list_push(menu->lights, direction);
 
    scm_push_scene(menu);
 }

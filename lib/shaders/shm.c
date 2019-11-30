@@ -70,13 +70,17 @@ void s_setup_built_in_shaders()
    s_set_uniform_location(SH_COLORED_PROJ, colored, "projection");
 
    shader_t* colored_shaded = s_get_shader(SH_COLORED_SHADED);
-   colored_shaded->uniform_locations = malloc(sizeof(GLint) * 6);
-   s_set_uniform_location(SH_COLORED_SHADED_COLOR, colored_shaded, "objectColor");
+   colored_shaded->uniform_locations = malloc(sizeof(GLint) * 8);
    s_set_uniform_location(SH_COLORED_SHADED_MODEL, colored_shaded, "model");
    s_set_uniform_location(SH_COLORED_SHADED_VIEW, colored_shaded, "view");
    s_set_uniform_location(SH_COLORED_SHADED_PROJ, colored_shaded, "projection");
-   s_set_uniform_location(SH_COLORED_SHADED_VIEWER, colored_shaded, "viewerPosition");
+
+   s_set_uniform_location(SH_COLORED_SHADED_COLOR, colored_shaded, "objectColor");
+   s_set_uniform_location(SH_COLORED_SHADED_VIEWER, colored_shaded, "viewPos");
    s_set_uniform_location(SH_COLORED_SHADED_AMBIENT, colored_shaded, "ambient");
+
+   s_set_uniform_location(SH_COLORED_SHADED_L_POS, colored_shaded, "lightPos");
+   s_set_uniform_location(SH_COLORED_SHADED_L_COLOR, colored_shaded, "lightColor");
 
    shader_t* textured = s_get_shader(SH_TEXTURED);
    textured->uniform_locations = malloc(sizeof(GLint) * 5);

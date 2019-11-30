@@ -24,6 +24,8 @@
 #define SH_COLORED_SHADED_PROJ  3
 #define SH_COLORED_SHADED_VIEWER  4
 #define SH_COLORED_SHADED_AMBIENT  5
+#define SH_COLORED_SHADED_L_POS  6
+#define SH_COLORED_SHADED_L_COLOR  7
 
 // "TEXUTED" shader uniform indices
 #define SH_TEXTURED 2

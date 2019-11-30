@@ -1,3 +1,8 @@
+#!/usr/bin/python3
+
+from glob import glob
+from os import rmdir, unlink, path
+from sys import argv
 import src.common as cm
 import src.modelPacker as mp
 import src.shaderPacker as sp
@@ -18,6 +23,18 @@ if __name__ == "__main__":
         tp.get_packer() 
     ]
 
+    if "clear" in argv:
+        for file in glob(cm.CACHE_DIR + "*"):
+            unlink(file)
+
+        if path.isdir(cm.CACHE_DIR):
+            rmdir(cm.CACHE_DIR)
+
+        if path.isfile(cm.CACHE_FILE):
+            unlink(cm.CACHE_FILE)
+
+        exit(1)
+
     chunks = []
     for packer in packers:
         chunks += packer.proceed()
@@ -27,3 +44,5 @@ if __name__ == "__main__":
         file.write(bytes(cm.int32tobytes(len(chunks))))
         for chunk in chunks:
             file.write(bytes(chunk))
+
+    cm.write_cache()

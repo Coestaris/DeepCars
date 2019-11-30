@@ -22,6 +22,18 @@ class shader_packer:
     def proceed(self):
         chunks = []
         for i, shader in enumerate(self.shaders):
+
+            files = []
+            if "vertex" in shader: files.append(shader["vertex"])
+            if "fragment" in shader: files.append(shader["fragment"])
+            if "geometry" in shader: files.append(shader["geometry"])
+
+            id = cm.get_id(self.path, shader)
+            if cm.is_file_cached(id, self.path, files):
+                chunks.append(cm.get_cached_chunk(id))
+                print("[{}/{}]: Shader \"{}\" already cached".format(i + 1, len(self.shaders), shader["name"]))
+                continue
+
             compression = self.default_compression
             if "compression" in shader:
                 compression = shader["compression"]
@@ -71,8 +83,10 @@ class shader_packer:
                     chunk += cm.int32tobytes(len(list))
                     chunk += list.encode("utf-8")
 
-            chunks.append(cm.create_chunk(chunk, cm.SHADER_CHUNK_TYPE))
-        
+            chunk = cm.create_chunk(chunk, cm.SHADER_CHUNK_TYPE)
+            chunks.append(chunk)
+            cm.cache_chunk(id, chunk)
+
         return chunks
 
 def get_packer():
