@@ -1,9 +1,8 @@
 {
     "shaders" : 
     [
-        {  "vertex" : "default.vsh", "fragment" : "colored.fsh", "name" : "colored" },
-        {  "vertex" : "default.vsh", "fragment" : "colored_shaded.fsh", "name" : "colored_shaded" },
-        {  "vertex" : "default.vsh", "fragment" : "textured.fsh", "name" : "textured" }
+        { "vertex" : "depthShader.vsh", "fragment" :  "depthShader.fsh", "name":  "depth" },
+        { "vertex" : "objectShader.vsh", "fragment" :  "objectShader.fsh", "name":  "object" }
     ],
 
     "textures" : 

@@ -7,7 +7,7 @@
 #endif
 #include "updater.h"
 
-#include "graphics/graphics.h"
+#include "graphics/rendering/graphics.h"
 #include "shaders/shader.h"
 #include "scene.h"
 #include "scm.h"

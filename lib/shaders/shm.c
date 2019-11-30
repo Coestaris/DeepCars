@@ -62,7 +62,7 @@ void s_set_uniform_location(size_t index, shader_t* sh, const char* uniform_name
 //
 void s_setup_built_in_shaders()
 {
-   shader_t* colored = s_get_shader(SH_COLORED);
+   /*shader_t* colored = s_get_shader(SH_COLORED);
    colored->uniform_locations = malloc(sizeof(GLint) * 4);
    s_set_uniform_location(SH_COLORED_COLOR, colored, "objectColor");
    s_set_uniform_location(SH_COLORED_MODEL, colored, "model");
@@ -88,7 +88,7 @@ void s_setup_built_in_shaders()
    s_set_uniform_location(SH_TEXTURED_MODEL, textured, "model");
    s_set_uniform_location(SH_TEXTURED_VIEW, textured, "view");
    s_set_uniform_location(SH_TEXTURED_PROJ, textured, "projection");
-   s_set_uniform_location(SH_TEXTURED_VIEWER, textured, "viewerPosition");
+   s_set_uniform_location(SH_TEXTURED_VIEWER, textured, "viewerPosition");*/
 }
 
 //

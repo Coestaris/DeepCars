@@ -9,7 +9,7 @@
 
 #include "structs.h"
 #include "graphics/camera.h"
-#include "graphics/graphics.h"
+#include "graphics/rendering/graphics.h"
 #include "graphics/light.h"
 #include "object.h"
 

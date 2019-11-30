@@ -17,44 +17,24 @@ typedef void (* key_event_func_t)(struct _object* this, uint32_t key, uint32_t s
 typedef void (* mouse_event_func_t)(struct _object* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse);
 typedef void (* mousemove_event_func_t)(struct _object* this, uint32_t x, uint32_t y);
 
-typedef enum _draw_mode {
-   DM_COLORED,
-   DM_COLORED_SHADED,
-   DM_TEXTURED,
-   DM_TEXTURED_SHADED
+typedef struct _draw_info {
 
-} draw_mode_t;
+   // Model to be rendered
+   model_t* model;
 
-typedef struct _draw_info_simple {
-   vec4 color;
+   bool shadows;
+   vec4 object_color;
 
-} draw_info_colored_t;
-
-typedef struct _draw_info_simple_shaded {
-   vec4 color;
-   float ambient;
-
-} draw_info_colored_shaded_t;
-
-
-typedef struct _draw_info_textured {
-   texture_t* texture;
-
-} draw_info_textured_t;
-
-typedef struct _draw_info_textured_shaded {
+   bool use_textures;
    texture_t* diffuse;
    texture_t* specular;
    texture_t* emit;
 
-} draw_info_textured_shaded_t;
+} draw_info_t;
 
 // Struct that describes drawable object
 typedef struct _object
 {
-   // Model to be rendered
-   model_t* model;
-
    // Transformation of object
    vec3f_t position;
    vec3f_t rotation;
@@ -71,10 +51,7 @@ typedef struct _object
    mousemove_event_func_t mousemove_event_func;
 
    // Shader data for drawing object
-   void* draw_info;
-
-   // Shader to used for drawing object
-   draw_mode_t draw_mode;
+   draw_info_t* draw_info;
 
 } object_t;
 

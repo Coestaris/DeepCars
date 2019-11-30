@@ -11,7 +11,7 @@
 #define O_ERROR(format, ...) DC_ERROR("object.c", format, __VA_ARGS__)
 
 // for color
-#include "graphics/graphics.h"
+#include "graphics/rendering/graphics.h"
 
 //
 // o_free

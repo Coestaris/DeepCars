@@ -4,7 +4,7 @@
 
 #include "loader.h"
 #include "../lib/graphics/win.h"
-#include "../lib/graphics/graphics.h"
+#include "../lib/graphics/rendering/graphics.h"
 #include "../lib/updater.h"
 #include "../lib/scm.h"
 #include "../lib/resources/txm.h"
