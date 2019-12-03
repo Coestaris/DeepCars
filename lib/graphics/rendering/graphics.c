@@ -92,22 +92,6 @@ void gr_init(mat4 proj, mat4 view)
    z_rot_mat = cmat4();
 
 
-   GL_CALL(glGenFramebuffers(1, &depthMapFBO));
-   GL_CALL(glGenTextures(1, &depthMap));
-   GL_CALL(glBindTexture(GL_TEXTURE_2D, depthMap));
-   GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-           SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-
-   GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO));
-   GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0));
-   GL_CALL(glDrawBuffer(GL_NONE));
-   GL_CALL(glReadBuffer(GL_NONE));
-   GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-
    light = l_create(LT_DIRECTION);
    vec4_fill(light->direction, 0, -1, .3f, 0);
 

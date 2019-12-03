@@ -74,41 +74,6 @@ void u_draw_func(void)
 {
    gr_fill(current_scene->back_color);
 
-   // update view matrix according to current camera
-   mat4_identity(view_mat);
-   c_to_mat(view_mat, current_scene->camera);
-
-   for (size_t i = 0; i < objects->count; i++)
-   {
-      object_t* object = (object_t*) objects->collection[i];
-      gr_transform(object->position, object->scale, object->rotation);
-      if (object->model)
-      {
-         switch(object->draw_mode)
-         {
-            case DM_COLORED:
-            {
-               gr_draw_model_colored(object->model, ((draw_info_colored_t*) object->draw_info)->color);
-            }
-               break;
-            case DM_COLORED_SHADED:
-            {
-               draw_info_colored_shaded_t* info = ((draw_info_colored_shaded_t*) object->draw_info);
-               gr_draw_model_colored_shaded(object->model, info->color, info->ambient);
-            }
-               break;
-            case DM_TEXTURED:
-            {
-               gr_draw_model_textured(object->model, ((draw_info_textured_t*) object->draw_info)->texture);
-            }
-               break;
-            case DM_TEXTURED_SHADED:
-            default:
-               exit(EXIT_FAILURE);
-         }
-      }
-   }
-
    w_swap_buffers(default_win);
 }
 

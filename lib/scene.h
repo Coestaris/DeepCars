@@ -19,8 +19,7 @@ typedef struct _scene
    uint32_t id;
    // Light set of this scene
    list_t* lights;
-   // Camera to use in this scene
-   camera_t* camera;
+
    // Set of objects that loads to an updater when scene is will be loading
    list_t* startup_objects;
 

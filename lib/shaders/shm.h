@@ -35,6 +35,10 @@
 #define SH_TEXTURED_PROJ  3
 #define SH_TEXTURED_VIEWER  4
 
+#define SH_BLUR 3
+#define SH_BYPASS 4
+
+
 // Return true if shader with specified id stored in manager
 bool s_has_shader(int id);
 
