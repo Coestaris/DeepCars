@@ -1,8 +1,9 @@
 {
     "shaders" : 
     [
-        { "vertex" : "depthShader.vsh", "fragment" :  "depthShader.fsh", "name":  "depth" },
-        { "vertex" : "objectShader.vsh", "fragment" :  "objectShader.fsh", "name":  "object" }
+        { "vertex" : "default.vsh", "fragment" :  "default.fsh", "name":  "default" },
+        { "vertex" : "blur.vsh", "fragment" :  "blur.fsh", "name":  "blur" },
+        { "vertex" : "bypass.vsh", "fragment" :  "bypass.fsh", "name":  "bypass" }
     ],
 
     "textures" : 

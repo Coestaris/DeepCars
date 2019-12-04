@@ -16,9 +16,9 @@ typedef struct _render_stage {
    bool render_geometry;
    shader_t* shader;
 
-   void (*setup_obj_shader)(struct _render_stage this, object_t* render_obj);
-   void (*bind_shader)(struct _render_stage this);
-   void (*unbind_shader)(struct _render_stage this);
+   void (*setup_obj_shader)(struct _render_stage* this, object_t* render_obj);
+   void (*bind_shader)(struct _render_stage* this);
+   void (*unbind_shader)(struct _render_stage* this);
 
    void* data;
    bool final;
@@ -32,6 +32,8 @@ typedef struct _render_stage {
 
    GLuint fbo;
    GLuint tex;
+   GLuint vao;
+   GLuint ebo;
 
    struct _render_stage* prev_stage;
 

@@ -32,7 +32,7 @@ object_t* o_clone(object_t* object)
 {
    object_t* new_object = malloc(sizeof(object_t));
    memcpy(new_object, object, sizeof(object_t));
-   switch(new_object->draw_mode)
+/*   switch(new_object->draw_mode)
    {
       case DM_COLORED:
          new_object->draw_info = malloc(sizeof(draw_info_colored_t));
@@ -51,7 +51,7 @@ object_t* o_clone(object_t* object)
          new_object->draw_info = malloc(sizeof(draw_info_textured_shaded_t));
          memcpy(new_object->draw_info, object->draw_info, sizeof(draw_info_textured_shaded_t));
          break;
-   }
+   }*/
 
    return new_object;
 }
@@ -62,7 +62,6 @@ object_t* o_clone(object_t* object)
 object_t* o_create()
 {
    object_t* object = malloc(sizeof(object_t));
-   object->model = NULL;
    object->position = vec3f(0, 0, 0);
    object->rotation = vec3f(0, 0, 0);
    object->scale = vec3f(1, 1, 1);
@@ -73,11 +72,15 @@ object_t* o_create()
    object->mouse_event_func = NULL;
    object->mousemove_event_func = NULL;
 
-   object->draw_info = NULL;
-   o_dm_colored(object, COLOR_WHITE);
+   //o_dm_colored(object, COLOR_WHITE);
+
+   object->draw_info = malloc(sizeof(draw_info_t));
+   object->draw_info->model = NULL;
+   object->draw_info->drawable = false;
    return object;
 }
 
+/*
 //
 // o_dm_colored()
 //
@@ -131,4 +134,4 @@ void o_dm_textured_shaded(object_t* object, texture_t* diffuse, texture_t* specu
    info->diffuse = diffuse;
    info->specular = specular;
    info->emit = emit;
-}
+}*/

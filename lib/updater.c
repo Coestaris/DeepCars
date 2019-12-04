@@ -11,6 +11,7 @@
 #include "shaders/shader.h"
 #include "scene.h"
 #include "scm.h"
+#include "graphics/rendering/render_chain.h"
 
 #define U_LOG(format, ...) DC_LOG("updater.c", format, __VA_ARGS__)
 #define U_ERROR(format, ...) DC_ERROR("updater.c", format, __VA_ARGS__)
@@ -73,6 +74,39 @@ void u_close(void)
 void u_draw_func(void)
 {
    gr_fill(current_scene->back_color);
+
+   render_chain_t* chain = rc_get_current();
+   list_t* stages = chain->stages;
+
+   for(size_t i = 0; i < stages->count; i++)
+   {
+      render_stage_t* stage = (render_stage_t*)stages->collection[i];
+      gr_bind(stage);
+      sh_use(stage->shader);
+      stage->bind_shader(stage);
+
+      if(stage->render_geometry)
+      {
+         //render objects
+         for(size_t j = 0; j < objects->count; j++)
+         {
+            object_t* obj = objects->collection[j];
+            if(obj->draw_info->drawable)
+            {
+               stage->setup_obj_shader(stage, obj);
+               gr_render_object(obj);
+            }
+         }
+      }
+      else
+      {
+         //render from buffer to a buffer
+         gr_render_vao(stage->vao, stage->ebo);
+      }
+      stage->unbind_shader(stage);
+      sh_use(NULL);
+      gr_unbind(stage);
+   }
 
    w_swap_buffers(default_win);
 }

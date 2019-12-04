@@ -16,8 +16,10 @@ object_t* create_colored_shaded_dummy(vec3f_t pos, float size, float ambient, ve
    this->scale = vec3f(size, size, size);
    this->update_func = update;
 
-   this->model = model;
-   o_dm_colored_shaded(this, color, ambient);
+   this->draw_info->drawable = true;
+   this->draw_info->model = model;
+   //this->model = model;
+   //o_dm_colored_shaded(this, color, ambient);
    return this;
 }
 
@@ -27,8 +29,10 @@ object_t* create_colored_dummy(vec3f_t pos, float size, vec4 color, model_t* mod
    this->position = pos;
    this->scale = vec3f(size, size, size);
 
-   this->model = model;
-   o_dm_colored(this, color);
+   this->draw_info->drawable = true;
+   this->draw_info->model = model;
+   //this->model = model;
+   //o_dm_colored(this, color);
    return this;
 }
 
@@ -38,7 +42,8 @@ object_t* create_textured_dummy(vec3f_t pos, float size, texture_t* texture, mod
    this->position = pos;
    this->scale = vec3f(size, size, size);
 
-   this->model = model;
-   o_dm_textured(this, texture);
+   this->draw_info->drawable = true;
+   this->draw_info->model = model;
+   //o_dm_textured(this, texture);
    return this;
 }

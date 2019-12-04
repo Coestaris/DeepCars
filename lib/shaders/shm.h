@@ -10,34 +10,9 @@
 #include "shader.h"
 
 // "COLORED" shader uniform indices
-#define SH_COLORED 0
-#define SH_COLORED_COLOR 0
-#define SH_COLORED_MODEL 1
-#define SH_COLORED_VIEW  2
-#define SH_COLORED_PROJ  3
-
-// "COLORED_SHADED" shader uniform indices
-#define SH_COLORED_SHADED 1
-#define SH_COLORED_SHADED_COLOR 0
-#define SH_COLORED_SHADED_MODEL 1
-#define SH_COLORED_SHADED_VIEW  2
-#define SH_COLORED_SHADED_PROJ  3
-#define SH_COLORED_SHADED_VIEWER  4
-#define SH_COLORED_SHADED_AMBIENT  5
-#define SH_COLORED_SHADED_L_POS  6
-#define SH_COLORED_SHADED_L_COLOR  7
-
-// "TEXUTED" shader uniform indices
-#define SH_TEXTURED 2
-#define SH_TEXTURED_TEXTURE 0
-#define SH_TEXTURED_MODEL 1
-#define SH_TEXTURED_VIEW  2
-#define SH_TEXTURED_PROJ  3
-#define SH_TEXTURED_VIEWER  4
-
-#define SH_BLUR 3
-#define SH_BYPASS 4
-
+#define SH_DEFAULT 0
+#define SH_BLUR 1
+#define SH_BYPASS 2
 
 // Return true if shader with specified id stored in manager
 bool s_has_shader(int id);

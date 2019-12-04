@@ -14,6 +14,7 @@
 #include "objects/obj_camera_control.h"
 #include "../lib/resources/mm.h"
 #include "../lib/resources/pack.h"
+#include "../lib/graphics/rendering/render_chain.h"
 
 win_info_t*    win;
 mat4           view;
@@ -52,11 +53,6 @@ void app_load_resources(void)
 
    list_push(menu->startup_objects, create_camera_control());
 
-   // camera
-   menu->camera = c_create(
-           cvec4(0, 5, 15, 0),
-           cvec4(0, 1, 0, 0));
-
    light_t* direction = l_create(LT_DIRECTION);
    vec4_cpy(direction->color, COLOR_WHITE);
    vec4_fill(direction->direction, 0, -1, 0.5, 0);
@@ -92,10 +88,13 @@ void app_init_graphics(void)
    txm_init();
    mm_init();
 
+
    p_load(RESOURCE_PACK_FILE);
    s_setup_built_in_shaders();
 
    gr_init(win->projection, view);
+
+   rc_set_current(rc_default(win));
 }
 
 void app_run(void)

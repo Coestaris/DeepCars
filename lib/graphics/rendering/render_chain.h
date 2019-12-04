@@ -12,6 +12,7 @@
 #include "../../object.h"
 #include "../../shaders/shader.h"
 #include "../../shaders/shm.h"
+#include "../win.h"
 
 typedef struct _render_chain {
 
@@ -21,5 +22,9 @@ typedef struct _render_chain {
 } render_chain_t;
 
 render_chain_t* rc_create();
+void rc_set_current(render_chain_t* rc);
+render_chain_t* rc_get_current(void);
+
+render_chain_t* rc_default(win_info_t* info);
 
 #endif //DEEPCARS_RENDER_CHAIN_H

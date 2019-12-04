@@ -25,6 +25,7 @@ render_stage_t* rs_create(bool render_geometry, shader_t* shader)
    rs->tex_mag_filter = GL_NEAREST;
    rs->tex_wrapping = GL_REPEAT;
    rs->fbo = 0;
+   rs->vao = 0;
    rs->tex = 0;
 
    rs->proj = cmat4();

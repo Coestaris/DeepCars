@@ -17,7 +17,6 @@ scene_t* sc_create(uint32_t id)
 {
    scene_t* scene = malloc(sizeof(scene_t));
    scene->id = id;
-   scene->camera = NULL;
    scene->lights = list_create(20);
    scene->startup_objects = list_create(20);
    scene->back_color = COLOR_BLACK;
@@ -30,7 +29,6 @@ scene_t* sc_create(uint32_t id)
 //
 void sc_free(scene_t* scene)
 {
-   c_free(scene->camera);
    for (size_t i = 0; i < scene->lights->count; i++)
       l_free((light_t*) scene->lights->collection[i]);
 
