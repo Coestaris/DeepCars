@@ -16,7 +16,7 @@ typedef struct _render_stage {
    bool render_geometry;
    shader_t* shader;
 
-   void (*setup_obj_shader)(struct _render_stage* this, object_t* render_obj);
+   void (*setup_obj_shader)(struct _render_stage* this, object_t* render_obj, mat4 model_mat);
    void (*bind_shader)(struct _render_stage* this);
    void (*unbind_shader)(struct _render_stage* this);
 

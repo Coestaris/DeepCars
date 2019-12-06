@@ -49,9 +49,6 @@ typedef struct _win_info
    // Caprion of the window
    const char* caption;
 
-   // Projection matrix to use in rendering
-   mat4 projection;
-
 } win_info_t;
 
 // win_info_t constructor. Creates new XWindow and allocates OpenGL context

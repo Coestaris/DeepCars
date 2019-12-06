@@ -20,7 +20,8 @@ if __name__ == "__main__":
     packers = [ 
         mp.get_packer(), 
         sp.get_packer(), 
-        tp.get_packer() 
+        tp.get_texture_packer(),
+        tp.get_cubemap_packer(),
     ]
 
     if "clear" in argv:

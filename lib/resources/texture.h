@@ -41,14 +41,13 @@ texture_t* t_create(char* name);
 // Frees all resources used by texture and deletes OpenGL texture
 void t_free(texture_t* tex);
 
-// Loads texture from source buffer. If png == false using dds format
-void t_load_s(texture_t* tex, uint8_t* source, size_t length, bool png);
-
-// Loads texture from specified file. If png == false using dds format
-void t_load(texture_t* tex, const char* path, bool png);
-
 // Binds specified texture
 void t_bind(texture_t* tex, GLenum target);
 
+void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t height);
+
+void t_set_data_png(texture_t* texture, GLenum target, uint8_t* source, size_t length);
+
+void t_set_data_dds(texture_t* texture, GLenum target, GLenum fill_target, uint8_t* source, size_t length);
 
 #endif //DEEPCARS_TEXTURE_H

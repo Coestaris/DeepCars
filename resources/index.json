@@ -13,6 +13,24 @@
         { "fn" : "tex3.png", "name" : "tex3" }
     ],
 
+    "cubemaps": 
+    [
+        { 
+            "fns" : [
+                "skybox/right.jpg",
+                "skybox/left.jpg",
+                "skybox/top.jpg",
+                "skybox/bottom.jpg",
+                "skybox/front.jpg",
+                "skybox/back.jpg"
+            ],
+            "name" : "skybox",
+            "wrapping": "clamp_to_edge",
+            "min_filter": "linear",
+            "mag_filter": "linear"
+        }
+    ],
+
     "models": 
     [
         { "fn" : "cube.obj", "name" : "cube" },

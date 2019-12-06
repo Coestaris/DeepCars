@@ -19,37 +19,37 @@ void camera_update_func(object_t* this)
 {
    scene_t* scene = scm_get_current();
    camera_pitch = dy;
-   camera_yaw = (float)dx + (float) M_PI / 2.0;
-   /*c_rotate(scene->camera, camera_pitch, camera_yaw);
+   camera_yaw = dx + (float)(M_PI / 2.0);
+   c_rotate(camera, camera_pitch, camera_yaw);
 
-   vec4_cpy(camera_dir_cpy, scene->camera->direction);
+   vec4_cpy(camera_dir_cpy, camera->direction);
    vec4_mulf(camera_dir_cpy, .2f);
 
-   vec4_cpy(camera_cross_cpy, scene->camera->_camera_right);
+   vec4_cpy(camera_cross_cpy, camera->_camera_right);
    vec4_mulf(camera_cross_cpy, .2f);
 
    //left
    if (u_get_key_state(38) == KEY_PRESSED)
-      vec4_subv(scene->camera->position, camera_cross_cpy);
+      vec4_subv(camera->position, camera_cross_cpy);
 
    //right
    if (u_get_key_state(40) == KEY_PRESSED)
-      vec4_addv(scene->camera->position, camera_cross_cpy);
+      vec4_addv(camera->position, camera_cross_cpy);
 
    //forward
    if (u_get_key_state(25) == KEY_PRESSED)
-      vec4_subv(scene->camera->position, camera_dir_cpy);
+      vec4_subv(camera->position, camera_dir_cpy);
 
    //back
    if (u_get_key_state(39) == KEY_PRESSED)
-      vec4_addv(scene->camera->position, camera_dir_cpy);
+      vec4_addv(camera->position, camera_dir_cpy);
 
    //up
    if (u_get_key_state(65) == KEY_PRESSED)
-      scene->camera->position[1] += 0.2f;
+      camera->position[1] += 0.2f;
    //down
    if (u_get_key_state(50) == KEY_PRESSED)
-      scene->camera->position[1] -= 0.2f;*/
+      camera->position[1] -= 0.2f;
 }
 
 void camera_key_event_func(object_t* this, uint32_t key, uint32_t state)

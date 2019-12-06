@@ -18,6 +18,7 @@
 
 win_info_t*    win;
 mat4           view;
+camera_t*      camera;
 
 vec4 plane_color;
 vec4 sky_color;
@@ -26,7 +27,7 @@ void app_load_resources(void)
 {
    // scenes
    scene_t* menu = sc_create(SCENEID_MENU);
-   menu->back_color = COLOR_WHITE;
+   menu->back_color = COLOR_GRAY;
    // objects
 
    plane_color = cvec4(129 / 255.0f, 146 / 255.0f, 89 / 255.0f, 0);
@@ -71,14 +72,6 @@ void app_init_graphics(void)
            VERBOSE,
            stdout);
 
-   const float angle_of_view = 60.0f;
-   const float near = 0.1f;
-   const float far = 200.0f;
-   const float image_aspect_ratio = (float) win->w / (float) win->h;
-   win->projection = cmat4();
-   mat4_perspective_fov(win->projection, angle_of_view, image_aspect_ratio, near, far);
-
-   view = cmat4();
    if (VERBOSE)
       w_print_info();
 
@@ -92,9 +85,13 @@ void app_init_graphics(void)
    p_load(RESOURCE_PACK_FILE);
    s_setup_built_in_shaders();
 
-   gr_init(win->projection, view);
+   gr_init();
 
-   rc_set_current(rc_default(win));
+   camera = c_create(
+   cvec4(0, 5, 15, 0),
+   cvec4(0, 1, 0, 0));
+
+   rc_set_current(rc_default(win, camera));
 }
 
 void app_run(void)

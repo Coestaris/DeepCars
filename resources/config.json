@@ -2,6 +2,7 @@
     "models_dir" : "models/",
     "shaders_dir" : "shaders/",
     "textures_dir" : "textures/",
+    "cubemaps_dir" : "textures/",
 
     "model_default_normalize_x" : false,
     "model_default_normalize_y" : true,

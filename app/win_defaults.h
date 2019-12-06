@@ -22,7 +22,7 @@
 #define MODELID_PLANE 3
 
 extern win_info_t* win;
-extern list_t* models;
 extern mat4 view;
+extern camera_t* camera;
 
 #endif //DEEPCARS_WIN_DEFAULTS_H

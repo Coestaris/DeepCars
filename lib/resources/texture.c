@@ -44,7 +44,33 @@ void t_free(texture_t* tex)
    free(tex);
 }
 
-GLuint t_load_dds(uint8_t* source, texData* tex_data, char* dds_format)
+void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t height)
+{
+   GL_CALL(glGenTextures(1, &texture->texID));
+   if(!texture->texID) T_ERROR("Unable to create OpenGL texture",0);
+
+   GL_CALL(glBindTexture(target, texture->texID));
+
+   GL_CALL(glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0));
+   GL_CALL(glTexParameteri(target, GL_TEXTURE_MAG_FILTER, texture->data->magFilter));
+   GL_CALL(glTexParameteri(target, GL_TEXTURE_MIN_FILTER, texture->data->minFilter)); // don't forget to enable mipmaping
+   GL_CALL(glTexParameteri(target, GL_TEXTURE_WRAP_S, texture->data->wrappingMode));
+   GL_CALL(glTexParameteri(target, GL_TEXTURE_WRAP_T, texture->data->wrappingMode));
+
+   GL_CALL(glBindTexture(target, 0));
+
+   texture->width = width;
+   texture->height = height;
+}
+
+void t_set_data_png(texture_t* texture, GLenum target, uint8_t* source, size_t length)
+{
+
+}
+
+void t_get_dds_info(uint32_t* width, )
+
+void t_set_data_dds(texture_t* texture, GLenum target, GLenum fill_target, uint8_t* source, size_t length)
 {
    const char* str_format = NULL;
 
@@ -69,11 +95,6 @@ GLuint t_load_dds(uint8_t* source, texData* tex_data, char* dds_format)
    width         = (source[16]) | (source[17] << 8U) | (source[18] << 16U) | (source[19] << 24U);
    mip_map_count = (source[28]) | (source[29] << 8U) | (source[30] << 16U) | (source[31] << 24U);
 
-   tex_data->out_width = width;
-   tex_data->out_height = height;
-
-   // figure out what format to use for what fourCC file type it is
-   // block size is about physical chunk storage of compressed data in file (important)
    if(source[84] == 'D')
    {
       switch(source[87])
@@ -112,21 +133,7 @@ GLuint t_load_dds(uint8_t* source, texData* tex_data, char* dds_format)
       goto exit;
    }
 
-
-   // prepare new incomplete texture
-   GL_CALL(glGenTextures(1, &tid));
-   if(tid == 0)
-      goto exit;
-
-   // bind the texture
-   // make it complete by specifying all needed parameters and ensuring all mipmaps are filled
-   GL_CALL(glBindTexture(GL_TEXTURE_2D, tid));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mip_map_count - 1)); // opengl likes array length of mipmaps
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, tex_data->magFilter));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, tex_data->minFilter)); // don't forget to enable mipmaping
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, tex_data->wrappingMode));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, tex_data->wrappingMode));
+   GL_CALL(glBindTexture(target, texture->texID));
 
    // prepare some variables
    size_t offset = 0;
@@ -134,9 +141,6 @@ GLuint t_load_dds(uint8_t* source, texData* tex_data, char* dds_format)
    w = width;
    h = height;
 
-   // loop through sending block at a time with the magic formula
-   // upload to OpenGL properly, note the offset transverses the pointer
-   // assumes each mipmap is 1/2 the size of the previous mipmap
    for (size_t i=0; i < mip_map_count; i++)
    {
       if(w == 0 || h == 0)
@@ -147,97 +151,26 @@ GLuint t_load_dds(uint8_t* source, texData* tex_data, char* dds_format)
       }
 
       size = ((w + 3) / 4) * ((h + 3) / 4) * block_size;
-      GL_CALL(glCompressedTexImage2D(GL_TEXTURE_2D, i, format, w, h, 0, size, source + 128 + offset));
+      GL_CALL(glCompressedTexImage2D(fill_target, i, format, w, h, 0, size, source + 128 + offset));
       offset += size;
       w /= 2;
       h /= 2;
    }
 
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mip_map_count - 1));
-   GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+   GL_CALL(glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, mip_map_count - 1));
+   GL_CALL(glBindTexture(target, 0));
 
    exit:
-   snprintf(dds_format, 100, "%s, Mipmaps: %i", str_format, mip_map_count);
-   return tid;
+   return;
 }
 
-//
-// t_load_s()
-//
-void t_load_s(texture_t* tex, uint8_t* source, size_t length, bool png)
-{
-   char dds_format[100];
-
-   if(png)
-   {
-      //todo:...
-    /*  tex->texID = oilTextureFromPngFile(
-              (char*)path,
-              GL_RGBA,
-              OIL_TEX_WRAPPING | OIL_TEX_FLIPX | OIL_TEX_FLIPY |
-              OIL_TEX_BORDERCOLOR | OIL_TEX_MIN | OIL_TEX_MAG,
-              tex->data);*/
-
-
-   }
-   else
-   {
-      tex->texID = t_load_dds(source, tex->data, (char*)dds_format);
-   }
-
-   tex->width = tex->data->out_width;
-   tex->height = tex->data->out_height;
-
-   if (!tex->texID)
-   {
-      oilPrintError();
-      exit(EXIT_FAILURE);
-   }
-
-
-   if(!png)
-   {
-      T_LOG("DDS (%s) texture \"%s\" loaded. Width: %i, Height: %i", dds_format, tex->name, tex->width, tex->height);
-   }
-   else
-   {
-      T_LOG("PNG texture \"%s\" loaded. Width: %i, Height: %i", tex->name, tex->width, tex->height);
-   }
-}
-
-//
-// t_load()
-//
-void t_load(texture_t* tex, const char* path, bool png)
-{
-   FILE* f = fopen(path, "rb");
-   if(!f)
-   {
-      T_ERROR("[texture.c][ERROR]: Unable to open file %s", path);
-   }
-
-   fseek(f, 0, SEEK_END);
-   size_t len = ftell(f);
-   fseek(f, 0, SEEK_SET);
-
-   uint8_t* buffer = malloc(len + 1);
-   if(fread(buffer, len, 1, f) != 1)
-   {
-      T_ERROR("[texture.c][ERROR]: Unable to read data from file",0);
-   }
-
-   t_load_s(tex, buffer, len, png);
-
-   free(buffer);
-   fclose(f);
-}
 
 //
 // t_bind()
 //
 inline void t_bind(texture_t* tex, GLenum target)
 {
-   GL_PCALL(glActiveTexture(GL_TEXTURE0));
+   GL_PCALL(glActiveTexture(GL_TEXTURE0 + target));
    if(!tex)
    {
       GL_PCALL(glBindTexture(GL_TEXTURE_2D, 0));

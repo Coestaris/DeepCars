@@ -56,7 +56,7 @@ mat4 x_rot_mat;
 mat4 y_rot_mat;
 mat4 z_rot_mat;
 
-void gr_init(mat4 proj, mat4 view)
+void gr_init()
 {
    COLOR_WHITE = cvec4(1, 1, 1, 0);
    COLOR_SILVER = cvec4(.75, .75, .75, 0);
@@ -86,7 +86,7 @@ void gr_init(mat4 proj, mat4 view)
    //GL_CALL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE))
 }
 
-void gr_render_vao(GLuint vao, GLuint ebo)
+void gr_render_vao(GLuint vao)
 {
    GL_PCALL(glBindVertexArray(vao));
    //GL_PCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
@@ -133,7 +133,7 @@ void gr_draw_model(model_t* model)
    GL_PCALL(glBindVertexArray(0))
 }
 
-inline void gr_transform(vec3f_t pos, vec3f_t scale, vec3f_t rot)
+inline mat4 gr_transform(vec3f_t pos, vec3f_t scale, vec3f_t rot)
 {
    mat4_identity(model_mat);
    mat4_translate(model_mat, (float) pos.x, (float) pos.y, (float) pos.z);
@@ -146,20 +146,21 @@ inline void gr_transform(vec3f_t pos, vec3f_t scale, vec3f_t rot)
    mat4_mulm(model_mat, x_rot_mat);
    mat4_mulm(model_mat, y_rot_mat);
    mat4_mulm(model_mat, z_rot_mat);
+
+   return model_mat;
 }
 
 void gr_render_object(object_t* obj)
 {
-   gr_transform(obj->position, obj->scale, obj->rotation);
    gr_draw_model(obj->draw_info->model);
 }
 
 void gr_bind(render_stage_t* stage)
 {
+   GL_PCALL(glViewport(0, 0, stage->tex_width, stage->tex_height))
    if(!stage->final)
    {
       GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, stage->fbo));
-      GL_PCALL(glViewport(0, 0, stage->tex_height, stage->tex_width))
    }
 }
 

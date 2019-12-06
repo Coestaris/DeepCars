@@ -48,16 +48,16 @@ void rs_free(render_stage_t* rs)
 
 void rs_build_tex(render_stage_t* rs)
 {
-   GL_CALL(glGenFramebuffers(1, &rs->fbo));
    GL_CALL(glGenTextures(1, &rs->tex));
    GL_CALL(glBindTexture(GL_TEXTURE_2D, rs->tex));
-   GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, rs->tex_format,
-                        rs->tex_width, rs->tex_height, 0, rs->tex_format, GL_FLOAT, NULL));
    GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, rs->tex_min_filter));
    GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, rs->tex_mag_filter));
    GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, rs->tex_wrapping));
    GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, rs->tex_wrapping));
+   GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, rs->tex_format,
+                        rs->tex_width, rs->tex_height, 0, rs->tex_format, GL_FLOAT, NULL));
 
+   GL_CALL(glGenFramebuffers(1, &rs->fbo));
    GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
 
    GLenum attachment;
@@ -84,7 +84,7 @@ void rs_build_tex(render_stage_t* rs)
    }
 
    GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, rs->tex, 0));
-   GL_CALL(glDrawBuffer(GL_NONE));
-   GL_CALL(glReadBuffer(GL_NONE));
+   //GL_CALL(glDrawBuffer(GL_NONE));
+   //GL_CALL(glReadBuffer(GL_NONE));
    GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }

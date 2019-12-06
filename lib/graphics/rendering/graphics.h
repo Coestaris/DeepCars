@@ -18,16 +18,16 @@
 
 void gr_fill(vec4 color);
 
-void gr_init(mat4 proj, mat4 view);
+void gr_init(void);
 void gr_free(void);
 
-void gr_transform(vec3f_t pos, vec3f_t scale, vec3f_t rot);
+mat4 gr_transform(vec3f_t pos, vec3f_t scale, vec3f_t rot);
 
 //void gr_draw_model_colored(model_t* model, vec4 color);
 //void gr_draw_model_colored_shaded(model_t* model, vec4 color, float ambient);
 //void gr_draw_model_textured(model_t* model, texture_t* texture);
 void gr_render_object(object_t* obj);
-void gr_render_vao(GLuint vao, GLuint ebo);
+void gr_render_vao(GLuint vao);
 void gr_bind(render_stage_t* stage);
 void gr_unbind(render_stage_t* stage);
 

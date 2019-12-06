@@ -4,6 +4,7 @@ from wand import image
 import os
 
 # 4 bytes: image id
+# 1 bytes: maps count (for cubemaps)
 # 2 bytes: image name len
 # n bytes: image name
 # 4 bytes: image width
@@ -42,6 +43,101 @@ mag_dict = {
     "linear" : 0,
     "nearest" : 1,
 }
+
+class cubemap_packer:
+    def __init__(self, path, cubemaps, config):
+        self.path = path
+        self.cubemaps = cubemaps
+        self.default_wrapping = config["texture_default_wrapping"]
+        self.default_min = config["texture_default_min_filter"]
+        self.default_mag = config["texture_default_mag_filter"]
+        self.default_flip = config["texture_default_flip"]
+        self.default_compression = config["texture_default_compression"]
+        self.auto_indices = config["texture_auto_indices"]
+        pass
+
+    def proceed(self):
+        chunks = []
+        for i, cubemap in enumerate(self.cubemaps):
+
+            files = cubemap["fns"]
+            id = cm.get_id(self.path, cubemap)
+            if cm.is_file_cached(id, self.path, files):
+                chunks.append(cm.get_cached_chunk(id))
+                print("[{}/{}]: Cubemap \"{}\" already cached".format(i + 1, len(self.cubemaps), cubemap["name"]))
+                continue
+                
+            wrapping = self.default_wrapping
+            if "wrapping" in cubemap:
+                wrapping = cubemap["wrapping"]
+
+            min = self.default_min
+            if "min_filter" in cubemap:
+                compress = cubemap["min_filter"]
+
+            mag = self.default_mag
+            if "mag_filter" in cubemap:
+                compress = cubemap["mag_filter"]
+
+            flip = self.default_flip
+            if "flip" in cubemap:
+                flip = cubemap["flip"]
+
+            compress = self.default_compression
+            if "compression" in cubemap:
+                compress = cubemap["compression"]
+
+
+            if compress == "dds_no":
+                compress == "no"
+
+            if compress == "png":
+                tmps = ['tmp{}.png'.format(i) for i in range(0, len(cubemap["fns"]))]
+            else:
+                tmps = ['tmp{}.dds'.format(i) for i in range(0, len(cubemap["fns"]))]
+
+            imsize = ()
+            for j, fn in enumerate(cubemap["fns"]):
+                with image.Image(filename=self.path + fn) as img:
+                    imsize = img.size
+                    if compress != "png":
+                        img.compression = compress
+
+                    img.save(filename=tmps[j])
+
+            print("[{}/{}]: Packing cubemap \"{}\" ({}x{}, {} maps) as {}".format(i + 1, len(self.cubemaps), cubemap["name"], 
+                imsize[0], imsize[1], len(cubemap["fns"]), compress.upper()))
+
+            index = i
+            if self.auto_indices == False:
+                index = cubemap["index"]
+
+            chunk = []
+            chunk += cm.int32tobytes(index) 
+            chunk += cm.int8tobytes(len(cubemap["fns"]))
+            chunk += cm.int16tobytes(len(cubemap["name"]))
+            chunk += cubemap["name"].encode("utf-8")
+            chunk += cm.int32tobytes(imsize[0])
+            chunk += cm.int32tobytes(imsize[1])
+            chunk += cm.int8tobytes(compression_dict[compress])
+            chunk += cm.int8tobytes(texture_wrapping_dict[wrapping])
+            chunk += cm.int8tobytes(min_dict[min])
+            chunk += cm.int8tobytes(mag_dict[mag])
+            chunk += cm.int8tobytes(flip)
+            
+            for tmp in tmps:
+                with open(tmp, mode='rb') as file:
+                    b = file.read()
+                    chunk += cm.int32tobytes(len(b))
+                    chunk += b
+                os.remove(tmp)
+                
+            chunk = cm.create_chunk(chunk, cm.CUBEMAP_CHUNK_TYPE)
+            chunks.append(chunk)
+
+            cm.cache_chunk(id, chunk)
+
+        return chunks
 
 class texture_packer:
     def __init__(self, path, textures, config):
@@ -136,8 +232,14 @@ class texture_packer:
 
         return chunks
 
-def get_packer():
+def get_texture_packer():
     return texture_packer(
         cm.PATH_PREFIX + cm.config["textures_dir"],
         cm.index["textures"],
+        cm.config)
+
+def get_cubemap_packer():
+    return cubemap_packer(
+        cm.PATH_PREFIX + cm.config["cubemaps_dir"],
+        cm.index["cubemaps"],
         cm.config)
