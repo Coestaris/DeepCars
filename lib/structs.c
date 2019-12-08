@@ -77,7 +77,8 @@ void gl_check(const char* line, int line_index, const char* file)
       printf("[GL ERROR]: Error type: %i (%s) occurred while processing \"%s\"\n[GL ERROR]: At %s at line %i",
               error, error_name, line, file, line_index);
 
-      exit(EXIT_FAILURE);
+      abort();
+      //exit(EXIT_FAILURE);
    }
 }
 #endif

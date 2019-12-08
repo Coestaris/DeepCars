@@ -63,12 +63,10 @@ void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t he
    texture->height = height;
 }
 
-void t_set_data_png(texture_t* texture, GLenum target, uint8_t* source, size_t length)
+void t_set_data_png(texture_t* texture, GLenum target, GLenum fill_target, uint8_t* source, size_t length)
 {
 
 }
-
-void t_get_dds_info(uint32_t* width, )
 
 void t_set_data_dds(texture_t* texture, GLenum target, GLenum fill_target, uint8_t* source, size_t length)
 {
@@ -168,15 +166,15 @@ void t_set_data_dds(texture_t* texture, GLenum target, GLenum fill_target, uint8
 //
 // t_bind()
 //
-inline void t_bind(texture_t* tex, GLenum target)
+inline void t_bind(texture_t* tex, GLenum active, GLenum target)
 {
-   GL_PCALL(glActiveTexture(GL_TEXTURE0 + target));
+   GL_PCALL(glActiveTexture(GL_TEXTURE0 + active));
    if(!tex)
    {
-      GL_PCALL(glBindTexture(GL_TEXTURE_2D, 0));
+      GL_PCALL(glBindTexture(target, 0));
    }
    else
    {
-      GL_PCALL(glBindTexture(GL_TEXTURE_2D, tex->texID));
+      GL_PCALL(glBindTexture(target, tex->texID));
    }
 }

@@ -53,7 +53,6 @@ class cubemap_packer:
         self.default_mag = config["texture_default_mag_filter"]
         self.default_flip = config["texture_default_flip"]
         self.default_compression = config["texture_default_compression"]
-        self.auto_indices = config["texture_auto_indices"]
         pass
 
     def proceed(self):
@@ -109,7 +108,7 @@ class cubemap_packer:
                 imsize[0], imsize[1], len(cubemap["fns"]), compress.upper()))
 
             index = i
-            if self.auto_indices == False:
+            if "index" in cubemap:
                 index = cubemap["index"]
 
             chunk = []
@@ -148,7 +147,6 @@ class texture_packer:
         self.default_mag = config["texture_default_mag_filter"]
         self.default_flip = config["texture_default_flip"]
         self.default_compression = config["texture_default_compression"]
-        self.auto_indices = config["texture_auto_indices"]
         pass
 
     def proceed(self):
@@ -203,12 +201,13 @@ class texture_packer:
                 imsize[0], imsize[1], compress.upper()))
 
             index = i
-            if self.auto_indices == False:
+            if "index" in texture:
                 index = texture["index"]
 
             chunk = []
             with open(tmp, mode='rb') as file:
                 chunk += cm.int32tobytes(index)
+                chunk += cm.int8tobytes(1)
                 chunk += cm.int16tobytes(len(texture["name"]))
                 chunk += texture["name"].encode("utf-8")
                 chunk += cm.int32tobytes(imsize[0])

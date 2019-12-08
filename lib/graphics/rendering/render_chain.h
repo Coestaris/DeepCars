@@ -21,8 +21,12 @@ typedef struct _render_chain {
 
 } render_chain_t;
 
+void rc_build(render_chain_t* rc);
+
 render_chain_t* rc_create();
+
 void rc_set_current(render_chain_t* rc);
+
 render_chain_t* rc_get_current(void);
 
 render_chain_t* rc_default(win_info_t* info, camera_t* camera);

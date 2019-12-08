@@ -76,7 +76,7 @@ void u_draw_func(void)
 {
    render_chain_t* chain = rc_get_current();
    list_t* stages = chain->stages;
-   gr_fill(current_scene->back_color);
+   //gr_fill(current_scene->back_color);
 
    for(size_t i = 0; i < stages->count; i++)
    {
@@ -85,7 +85,7 @@ void u_draw_func(void)
       gr_bind(stage);
       stage->bind_shader(stage);
 
-      if(stage->render_geometry)
+      if(stage->render_mode == RM_GEOMETRY)
       {
          glEnable(GL_DEPTH_TEST);
          //render objects
@@ -102,11 +102,16 @@ void u_draw_func(void)
          glDisable(GL_DEPTH_TEST);
 
       }
-      else
+      else if(stage->render_mode == RM_BYPASS || stage->render_mode == RM_FRAMEBUFFER)
       {
          //render from buffer to a buffer
          gr_render_vao(stage->vao);
       }
+      else if(stage->render_mode == RM_CUSTOM || stage->render_mode == RM_CUSTOM_FRAMEBUFFER)
+      {
+         stage->custom_draw_func(stage);
+      }
+
       stage->unbind_shader(stage);
       gr_unbind(stage);
       sh_use(NULL);

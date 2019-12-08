@@ -7,11 +7,11 @@
 #endif
 #include "render_stage.h"
 
-render_stage_t* rs_create(bool render_geometry, shader_t* shader)
+render_stage_t* rs_create(render_mode_t render_mode, shader_t* shader)
 {
    render_stage_t* rs = malloc(sizeof(render_stage_t));
    rs->shader = shader;
-   rs->render_geometry = render_geometry;
+   rs->render_mode = render_mode;
 
    rs->bind_shader = NULL;
    rs->setup_obj_shader = NULL;

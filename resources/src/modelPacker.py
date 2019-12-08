@@ -16,7 +16,6 @@ class model_packer:
     def __init__(self, path, models, config):
         self.path = path
         self.models = models
-        self.auto_index = config["model_auto_indices"]
         self.default_archive = config["model_default_compression"]
 
         self.default_normalize_x = config["model_default_normalize_x"]
@@ -43,7 +42,7 @@ class model_packer:
             print("[{}/{}]: Packing model \"{}\" ({} bytes)".format(i + 1, len(self.models), model["name"], len(data)))
 
             index = i
-            if self.auto_index == False:
+            if "index" in model:
                 index = model["index"]
 
             archive = self.default_archive

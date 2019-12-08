@@ -16,7 +16,6 @@ class shader_packer:
         self.path = path
         self.shaders = shaders
         self.default_compression = config["shader_default_compression"]
-        self.auto_index = config["shader_auto_indices"]
         pass
 
     def proceed(self):
@@ -62,7 +61,7 @@ class shader_packer:
             print(str)
 
             index = i
-            if self.auto_index == False:
+            if "index" in shader:
                 index = shader["index"]
 
             chunk = []

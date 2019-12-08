@@ -226,6 +226,7 @@ void p_handler_texture(uint8_t* data, size_t length)
    size_t count = 0;
 
    uint32_t id;
+   uint8_t maps;
    uint16_t name_len;
    uint32_t width;
    uint32_t heigth;
@@ -237,6 +238,7 @@ void p_handler_texture(uint8_t* data, size_t length)
    uint32_t data_len;
 
    READ_BUFF(id, sizeof(id));
+   READ_BUFF(maps, sizeof(maps));
    READ_BUFF(name_len, sizeof(name_len));
 
    char* name = malloc(name_len + 1);
@@ -251,10 +253,6 @@ void p_handler_texture(uint8_t* data, size_t length)
    READ_BUFF(min, sizeof(min));
    READ_BUFF(mag, sizeof(mag));
    READ_BUFF(flip, sizeof(flip));
-
-   READ_BUFF(data_len, sizeof(data_len));
-   uint8_t* tex_data = malloc(data_len);
-   READ_BUFF(*tex_data, data_len);
 
    texture_t* t = t_create(strdup(name));
 
@@ -316,12 +314,26 @@ void p_handler_texture(uint8_t* data, size_t length)
          t->data->flipY = false;
          break;
    }
+   GLenum target = maps == 1 ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP;
+   GLenum filltarget = maps == 1 ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 
-   t_load_s(t, tex_data, data_len, compression == 0);
+   t_set_params(t, target, width, heigth);
+
+   for(size_t map = 0; map < maps; map++)
+   {
+      READ_BUFF(data_len, sizeof(data_len));
+      uint8_t* tex_data = malloc(data_len);
+      READ_BUFF(*tex_data, data_len);
+
+      if (compression == 0)
+         t_set_data_png(t, target, filltarget + map, tex_data, data_len);
+      else
+         t_set_data_dds(t, target, filltarget + map, tex_data, data_len);
+      free(tex_data);
+   }
+
    txm_push(id, t);
-
    free(name);
-   free(tex_data);
 }
 
 // Array of supported chunks
@@ -329,6 +341,7 @@ struct _pack_chunk supported_chunks[] = {
    {0, p_handler_model },
    {1, p_handler_shader },
    {2, p_handler_texture },
+   {3, p_handler_texture },
 };
 
 const size_t supported_chunks_count = sizeof(supported_chunks) / sizeof(struct _pack_chunk);

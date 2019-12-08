@@ -67,6 +67,9 @@ void mat4_scale(mat4 m, float x, float y, float z);
 // Fills matrix as identity matrix
 void mat4_identity(mat4 m);
 
+// Fills one matrix with elements from another one
+void mat4_cpy(mat4 dest, mat4 src);
+
 //
 // Matrix fills
 //

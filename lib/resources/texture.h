@@ -42,11 +42,11 @@ texture_t* t_create(char* name);
 void t_free(texture_t* tex);
 
 // Binds specified texture
-void t_bind(texture_t* tex, GLenum target);
+void t_bind(texture_t* tex, GLenum active, GLenum target);
 
 void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t height);
 
-void t_set_data_png(texture_t* texture, GLenum target, uint8_t* source, size_t length);
+void t_set_data_png(texture_t* texture, GLenum target, GLenum fill_target, uint8_t* source, size_t length);
 
 void t_set_data_dds(texture_t* texture, GLenum target, GLenum fill_target, uint8_t* source, size_t length);
 

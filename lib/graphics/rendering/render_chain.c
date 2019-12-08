@@ -50,7 +50,7 @@ void bind_bypass(render_stage_t* stage)
 
 void unbind_bypass(render_stage_t* stage)
 {
-   t_bind(NULL, 0);
+   t_bind(NULL, 0, GL_TEXTURE_2D);
 }
 
 
@@ -82,9 +82,105 @@ void setup_default(render_stage_t* stage, object_t* object, mat4 model_mat)
            object->draw_info->object_color[2]);
    sh_nset_mat4(stage->shader, "model", model_mat);
 }
+
+void bind_skybox(render_stage_t* stage)
+{
+   default_shader_data_t* data = (default_shader_data_t*)stage->data;
+   c_to_mat(data->buffmat, data->camera);
+
+   sh_nset_mat4(stage->shader, "view", data->buffmat);
+   sh_nset_mat4(stage->shader, "projection", stage->proj);
+   sh_nset_int(stage->shader, "skybox", 0);
+
+   glActiveTexture(GL_TEXTURE0);
+   t_bind(txm_get(10), 0, GL_TEXTURE_CUBE_MAP);
+   // skybox cube
+}
+
+void unbind_skybox(render_stage_t* stage)
+{
+   t_bind(NULL, 0, GL_TEXTURE_CUBE_MAP);
+
+}
+
+void draw_skybox(render_stage_t* stage)
+{
+   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, stage->prev_stage->fbo));
+
+   /*GL_PCALL(glEnable(GL_DEPTH_TEST));
+   GL_PCALL(glDepthFunc(GL_LEQUAL));  // change depth function so depth test passes when values are equal to depth buffer's content
+
+   GL_PCALL(glBindVertexArray(stage->vao));
+   GL_PCALL(glDrawArrays(GL_TRIANGLES, 0, 36));
+
+   GL_PCALL(glBindVertexArray(0));
+   GL_PCALL(glDepthFunc(GL_LESS)); // set depth function back to default
+   GL_PCALL(glDisable(GL_DEPTH_TEST));*/
+
+   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+}
+
 GLuint quad_vao;
 GLuint quad_vbo;
 GLuint quad_ebo;
+
+GLuint cube_vao;
+GLuint cube_vbo;
+
+void setup_cube()
+{
+   float skyboxVertices[] = {
+           // positions
+           -1.0f,  1.0f, -1.0f,
+           -1.0f, -1.0f, -1.0f,
+           1.0f, -1.0f, -1.0f,
+           1.0f, -1.0f, -1.0f,
+           1.0f,  1.0f, -1.0f,
+           -1.0f,  1.0f, -1.0f,
+           -1.0f, -1.0f,  1.0f,
+           -1.0f, -1.0f, -1.0f,
+           -1.0f,  1.0f, -1.0f,
+           -1.0f,  1.0f, -1.0f,
+           -1.0f,  1.0f,  1.0f,
+           -1.0f, -1.0f,  1.0f,
+           1.0f, -1.0f, -1.0f,
+           1.0f, -1.0f,  1.0f,
+           1.0f,  1.0f,  1.0f,
+           1.0f,  1.0f,  1.0f,
+           1.0f,  1.0f, -1.0f,
+           1.0f, -1.0f, -1.0f,
+           -1.0f, -1.0f,  1.0f,
+           -1.0f,  1.0f,  1.0f,
+           1.0f,  1.0f,  1.0f,
+           1.0f,  1.0f,  1.0f,
+           1.0f, -1.0f,  1.0f,
+           -1.0f, -1.0f,  1.0f,
+           -1.0f,  1.0f, -1.0f,
+           1.0f,  1.0f, -1.0f,
+           1.0f,  1.0f,  1.0f,
+           1.0f,  1.0f,  1.0f,
+           -1.0f,  1.0f,  1.0f,
+           -1.0f,  1.0f, -1.0f,
+           -1.0f, -1.0f, -1.0f,
+           -1.0f, -1.0f,  1.0f,
+           1.0f, -1.0f, -1.0f,
+           1.0f, -1.0f, -1.0f,
+           -1.0f, -1.0f,  1.0f,
+           1.0f, -1.0f,  1.0f
+   };
+
+   GL_CALL(glGenVertexArrays(1, &cube_vao));
+   GL_CALL(glGenBuffers(1, &cube_vbo));
+   GL_CALL(glBindVertexArray(cube_vao));
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, cube_vbo));
+   GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW));
+   GL_CALL(glEnableVertexAttribArray(0));
+   GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0));
+
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+
+   GL_CALL(glBindVertexArray(0));
+}
 
 void setup_quad()
 {
@@ -122,25 +218,59 @@ void setup_quad()
    GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
 
+void rc_build(render_chain_t* rc)
+{
+   for(size_t i = 0; i < rc->stages->count; i++)
+   {
+      render_stage_t* stage = rc->stages->collection[i];
+      if(stage->render_mode == RM_GEOMETRY ||
+         stage->render_mode == RM_FRAMEBUFFER ||
+         stage->render_mode == RM_CUSTOM_FRAMEBUFFER)
+
+         rs_build_tex(stage);
+
+      if(i != 0)
+         stage->prev_stage = rc->stages->collection[i - 1];
+   }
+}
+
 render_chain_t* rc_default(win_info_t* info, camera_t* camera)
 {
-   setup_quad();
+   if(!quad_vbo) setup_quad();
+   if(!cube_vbo) setup_cube();
 
+   mat4 proj_mat = cmat4();
+   create_perspective(info, proj_mat, 65.0f, 0.1f, 200);
+
+   shader_t* skybox_shader = s_get_shader(SH_SKYBOX);
    shader_t* default_shader = s_get_shader(SH_DEFAULT);
-   //shader_t* gaussian_shader = s_get_shader(SH_BLUR);
+   shader_t* gaussian_shader = s_get_shader(SH_BLUR);
    shader_t* bypass_shader = s_get_shader(SH_BYPASS);
 
-   render_stage_t* geometry = rs_create(true, default_shader);
+   render_stage_t* geometry = rs_create(RM_GEOMETRY, default_shader);
    geometry->tex_width = info->w;
    geometry->tex_height = info->h;
    geometry->bind_shader = bind_default;
    geometry->setup_obj_shader = setup_default;
    geometry->unbind_shader = unbind_default;
-   create_perspective(info, geometry->proj, 65.0f, 0.1f, 200);
+   mat4_cpy(geometry->proj, proj_mat);
    mat4_identity(geometry->view);
-   default_shader_data_t* data = (geometry->data = malloc(sizeof(default_shader_data_t)));
-   data->buffmat = cmat4();
-   data->camera = camera;
+   default_shader_data_t* geometry_data = (geometry->data = malloc(sizeof(default_shader_data_t)));
+   geometry_data->buffmat = cmat4();
+   geometry_data->camera = camera;
+
+   render_stage_t* skybox = rs_create(RM_CUSTOM, skybox_shader);
+   skybox->tex_width = info->w;
+   skybox->tex_height = info->h;
+   skybox->bind_shader = bind_skybox;
+   skybox->custom_draw_func = draw_skybox;
+   skybox->unbind_shader = unbind_skybox;
+   mat4_cpy(skybox->proj, proj_mat);
+   mat4_identity(skybox->view);
+   skybox->vao = cube_vao;
+   default_shader_data_t* skybox_data = (skybox->data = malloc(sizeof(default_shader_data_t)));
+   skybox_data->buffmat = cmat4();
+   skybox_data->camera = camera;
 
 /*
    render_stage_t* blur = rs_create(false, bypass_shader);
@@ -155,7 +285,7 @@ render_chain_t* rc_default(win_info_t* info, camera_t* camera)
    mat4_identity(blur->proj);
 */
 
-   render_stage_t* bypass = rs_create(false, bypass_shader);
+   render_stage_t* bypass = rs_create(RM_BYPASS, bypass_shader);
    bypass->tex_width = info->w;
    bypass->tex_height = info->h;
    bypass->bind_shader = bind_bypass;
@@ -164,18 +294,16 @@ render_chain_t* rc_default(win_info_t* info, camera_t* camera)
    bypass->ebo = quad_ebo;
    mat4_identity(bypass->view);
    mat4_identity(bypass->proj);
-   bypass->final = true;
 
    render_chain_t* rc = rc_create();
    list_push(rc->stages, geometry);
+   //list_push(rc->stages, skybox);
    //list_push(rc->stages, blur);
    list_push(rc->stages, bypass);
 
-   rs_build_tex(geometry);
-   //rs_build_tex(blur);
-   //rs_build_tex(bypass);
-   //blur->prev_stage = geometry;
-   bypass->prev_stage = geometry;
+   mat4_free(proj_mat);
+
+   rc_build(rc);
    return rc;
 }
 
