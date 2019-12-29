@@ -690,6 +690,8 @@ model_t* m_create_plane()
    m_push_tex_coord(model, cvec4(0, 0, 0, 0));
    m_push_tex_coord(model, cvec4(1, 0, 0, 0));
 
+   model->filename = strdup("__generated_plane");
+
    model_face_t* f = malloc(sizeof(model_face_t));
    f->count = 4;
    f->vert_id[0] = 1;    f->vert_id[1] = 2;    f->vert_id[2] = 3;    f->vert_id[3] = 4;
