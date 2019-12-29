@@ -38,8 +38,8 @@ void _error(const char* prefix, const char* file, size_t line, const char* forma
    fflush(stdout);
    fflush(stdin);
 
-   abort();
    va_end(argp);
+   abort();
 }
 #endif
 
@@ -76,6 +76,9 @@ void gl_check(const char* line, int line_index, const char* file)
 
       printf("[GL ERROR]: Error type: %i (%s) occurred while processing \"%s\"\n[GL ERROR]: At %s at line %i",
               error, error_name, line, file, line_index);
+
+      fflush(stdout); // stdout не успевает высерать все сообщение.
+      fflush(stdin);
 
       abort();
       //exit(EXIT_FAILURE);

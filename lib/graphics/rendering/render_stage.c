@@ -20,13 +20,16 @@ render_stage_t* rs_create(render_mode_t render_mode, shader_t* shader)
 
    rs->tex_width = 1024;
    rs->tex_height = 1024;
-   rs->tex_format = GL_RGBA;
+   rs->attachments = 0;
    rs->tex_min_filter = GL_NEAREST;
    rs->tex_mag_filter = GL_NEAREST;
    rs->tex_wrapping = GL_REPEAT;
    rs->fbo = 0;
    rs->vao = 0;
-   rs->tex = 0;
+
+   rs->color_tex = 0;
+   rs->depth_tex = 0;
+   rs->stencil_tex = 0;
 
    rs->proj = cmat4();
    rs->view = cmat4();
@@ -37,7 +40,9 @@ render_stage_t* rs_create(render_mode_t render_mode, shader_t* shader)
 void rs_free(render_stage_t* rs)
 {
    if(rs->fbo) GL_CALL(glDeleteFramebuffers(1, &rs->fbo));
-   if(rs->tex) GL_CALL(glDeleteTextures(1, &rs->tex));
+   if(rs->color_tex) GL_CALL(glDeleteTextures(1, &rs->color_tex));
+   if(rs->depth_tex) GL_CALL(glDeleteTextures(1, &rs->color_tex));
+   if(rs->stencil_tex) GL_CALL(glDeleteTextures(1, &rs->color_tex));
 
    mat4_free(rs->proj);
    mat4_free(rs->view);
@@ -48,42 +53,47 @@ void rs_free(render_stage_t* rs)
 
 void rs_build_tex(render_stage_t* rs)
 {
-   GL_CALL(glGenTextures(1, &rs->tex));
-   GL_CALL(glBindTexture(GL_TEXTURE_2D, rs->tex));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, rs->tex_min_filter));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, rs->tex_mag_filter));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, rs->tex_wrapping));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, rs->tex_wrapping));
-   GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, rs->tex_format,
-                        rs->tex_width, rs->tex_height, 0, rs->tex_format, GL_FLOAT, NULL));
-
    GL_CALL(glGenFramebuffers(1, &rs->fbo));
    GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
 
-   GLenum attachment;
-   switch(rs->tex_format)
+   if(rs->attachments & TF_COLOR)
    {
-      default:
-      case GL_RED:
-      case GL_RG:
-      case GL_RGB:
-      case GL_BGR:
-      case GL_RGBA:
-      case GL_BGRA:
-         attachment = GL_COLOR_ATTACHMENT0;
-         break;
-      case GL_STENCIL_INDEX:
-         attachment = GL_STENCIL_ATTACHMENT;
-         break;
-      case GL_DEPTH_COMPONENT:
-         attachment = GL_DEPTH_ATTACHMENT;
-         break;
-      case GL_DEPTH_STENCIL:
-         attachment = GL_DEPTH_STENCIL_ATTACHMENT;
-         break;
+      GL_CALL(glGenTextures(1, &rs->color_tex));
+      GL_CALL(glBindTexture(GL_TEXTURE_2D, rs->color_tex));
+      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, rs->tex_min_filter));
+      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, rs->tex_mag_filter));
+      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, rs->tex_wrapping));
+      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, rs->tex_wrapping));
+      GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+                           rs->tex_width, rs->tex_height, 0, GL_RGBA, GL_FLOAT, NULL));
+      GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+
+      GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rs->color_tex, 0));
    }
 
-   GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, rs->tex, 0));
+   if(rs->attachments & TF_DEPTH)
+   {
+      GL_CALL(glGenTextures(1, &rs->depth_tex));
+      GL_CALL(glBindTexture(GL_TEXTURE_2D, rs->depth_tex));
+      GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F,
+                   rs->tex_width, rs->tex_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
+
+      GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+
+      GL_CALL(glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, rs->depth_tex, 0));
+   }
+
+   if(rs->attachments & TF_STENCIL)
+   {
+      GL_CALL(glGenTextures(1, &rs->stencil_tex));
+      GL_CALL(glBindTexture(GL_TEXTURE_2D, rs->stencil_tex));
+      GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_STENCIL_COMPONENTS,
+                           rs->tex_width, rs->tex_height, 0, GL_STENCIL_COMPONENTS, GL_FLOAT, NULL));
+      GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+
+      GL_CALL(glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, rs->stencil_tex, 0));
+   }
+
    //GL_CALL(glDrawBuffer(GL_NONE));
    //GL_CALL(glReadBuffer(GL_NONE));
    GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));

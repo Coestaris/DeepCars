@@ -17,6 +17,12 @@ typedef enum _render_mode {
 
 } render_mode_t;
 
+typedef enum tex_format {
+  TF_COLOR = 1,
+  TF_STENCIL = 2,
+  TF_DEPTH = 4,
+} tex_format_t;
+
 typedef struct _render_stage {
 
    mat4 proj;
@@ -34,15 +40,18 @@ typedef struct _render_stage {
 
    GLint tex_width;
    GLint tex_height;
-   GLenum tex_format;
    GLenum tex_min_filter;
    GLenum tex_mag_filter;
    GLenum tex_wrapping;
 
+   tex_format_t attachments;
+
    GLuint fbo;
-   GLuint tex;
+   GLuint color_tex;
+   GLuint depth_tex;
+   GLuint stencil_tex;
+
    GLuint vao;
-   GLuint ebo;
 
    struct _render_stage* prev_stage;
 

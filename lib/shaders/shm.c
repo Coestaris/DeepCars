@@ -84,7 +84,7 @@ void s_setup_built_in_shaders()
 
    shader_t* textured = s_get_shader(SH_TEXTURED);
    textured->uniform_locations = malloc(sizeof(GLint) * 5);
-   s_set_uniform_location(SH_TEXTURED_TEXTURE, textured, "tex");
+   s_set_uniform_location(SH_TEXTURED_TEXTURE, textured, "color_tex");
    s_set_uniform_location(SH_TEXTURED_MODEL, textured, "model");
    s_set_uniform_location(SH_TEXTURED_VIEW, textured, "view");
    s_set_uniform_location(SH_TEXTURED_PROJ, textured, "projection");

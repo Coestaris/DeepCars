@@ -45,7 +45,7 @@ void bind_bypass(render_stage_t* stage)
    sh_nset_mat4(stage->shader, "proj", stage->proj);
 
    glActiveTexture(GL_TEXTURE0);
-   glBindTexture(GL_TEXTURE_2D, stage->prev_stage->tex);
+   glBindTexture(GL_TEXTURE_2D, stage->prev_stage->color_tex);
 }
 
 void unbind_bypass(render_stage_t* stage)
@@ -85,7 +85,7 @@ void setup_default(render_stage_t* stage, object_t* object, mat4 model_mat)
 
 void bind_skybox(render_stage_t* stage)
 {
-   default_shader_data_t* data = (default_shader_data_t*)stage->data;
+/*   default_shader_data_t* data = (default_shader_data_t*)stage->data;
    c_to_mat(data->buffmat, data->camera);
 
    sh_nset_mat4(stage->shader, "view", data->buffmat);
@@ -93,28 +93,27 @@ void bind_skybox(render_stage_t* stage)
    sh_nset_int(stage->shader, "skybox", 0);
 
    glActiveTexture(GL_TEXTURE0);
-   t_bind(txm_get(10), 0, GL_TEXTURE_CUBE_MAP);
+   t_bind(txm_get(10), 0, GL_TEXTURE_CUBE_MAP);*/
    // skybox cube
 }
 
 void unbind_skybox(render_stage_t* stage)
 {
-   t_bind(NULL, 0, GL_TEXTURE_CUBE_MAP);
-
+   //t_bind(NULL, 0, GL_TEXTURE_CUBE_MAP);
 }
 
 void draw_skybox(render_stage_t* stage)
 {
-   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, stage->prev_stage->fbo));
+   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, stage->fbo));
 
    /*GL_PCALL(glEnable(GL_DEPTH_TEST));
-   GL_PCALL(glDepthFunc(GL_LEQUAL));  // change depth function so depth test passes when values are equal to depth buffer's content
+   GL_PCALL(glDepthFunc(GL_LEQUAL));  // change depth_tex function so depth_tex test passes when values are equal to depth_tex buffer's content
 
    GL_PCALL(glBindVertexArray(stage->vao));
    GL_PCALL(glDrawArrays(GL_TRIANGLES, 0, 36));
 
    GL_PCALL(glBindVertexArray(0));
-   GL_PCALL(glDepthFunc(GL_LESS)); // set depth function back to default
+   GL_PCALL(glDepthFunc(GL_LESS)); // set depth_tex function back to default
    GL_PCALL(glDisable(GL_DEPTH_TEST));*/
 
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
@@ -173,6 +172,8 @@ void setup_cube()
    GL_CALL(glGenBuffers(1, &cube_vbo));
    GL_CALL(glBindVertexArray(cube_vao));
    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, cube_vbo));
+
+   GL_CALL(glBindVertexArray(cube_vao));
    GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW));
    GL_CALL(glEnableVertexAttribArray(0));
    GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0));
@@ -231,6 +232,8 @@ void rc_build(render_chain_t* rc)
 
       if(i != 0)
          stage->prev_stage = rc->stages->collection[i - 1];
+      else
+         stage->prev_stage = NULL;
    }
 }
 
@@ -253,6 +256,7 @@ render_chain_t* rc_default(win_info_t* info, camera_t* camera)
    geometry->bind_shader = bind_default;
    geometry->setup_obj_shader = setup_default;
    geometry->unbind_shader = unbind_default;
+   geometry->attachments = TF_COLOR;
    mat4_cpy(geometry->proj, proj_mat);
    mat4_identity(geometry->view);
    default_shader_data_t* geometry_data = (geometry->data = malloc(sizeof(default_shader_data_t)));
@@ -291,7 +295,6 @@ render_chain_t* rc_default(win_info_t* info, camera_t* camera)
    bypass->bind_shader = bind_bypass;
    bypass->unbind_shader = unbind_bypass;
    bypass->vao = quad_vao;
-   bypass->ebo = quad_ebo;
    mat4_identity(bypass->view);
    mat4_identity(bypass->proj);
 

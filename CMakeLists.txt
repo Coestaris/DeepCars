@@ -13,6 +13,13 @@ target_sources(DeepCars PUBLIC ${oilHeaders})
 
 target_link_libraries(DeepCars X11 GL z m)
 
+# For gcov
+#target_compile_options(DeepCars PRIVATE "-fprofile-arcs")
+#target_compile_options(DeepCars PRIVATE "-ftest-coverage")
+#target_compile_options(DeepCars PRIVATE "--coverage")
+#target_link_libraries(DeepCars gcov)
+
+
 #add_custom_command(TARGET DeepCars POST_BUILD
 #        COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/resources/packer.py
 #        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources/

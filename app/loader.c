@@ -105,7 +105,7 @@ void app_fin()
    vec4_free(plane_color);
    APP_LOG("Closing....",0);
 
-   u_clear_objects(true);
+   u_clear_objects(false);
    u_free();
 
 

@@ -12,6 +12,7 @@
 #include "scene.h"
 #include "scm.h"
 #include "graphics/rendering/render_chain.h"
+#include "resources/txm.h"
 
 #define U_LOG(format, ...) DC_LOG("updater.c", format, __VA_ARGS__)
 #define U_ERROR(format, ...) DC_ERROR("updater.c", format, __VA_ARGS__)
@@ -52,6 +53,7 @@ list_t*     mouse_listeners;
 list_t*     mousemove_listeners;
 list_t*     update_listeners;
 
+
 // Get current millisecond of global time
 double_t u_get_millis(void)
 {
@@ -69,6 +71,14 @@ void u_close(void)
    closed = true;
 }
 
+
+typedef struct _default_shader_data {
+   camera_t* camera;
+   mat4 buffmat;
+
+} default_shader_data_t;
+GLuint cube_vao;
+GLuint quad_vao;
 
 // Main draw function.
 // Looping through all objects and draws it
@@ -116,6 +126,95 @@ void u_draw_func(void)
       gr_unbind(stage);
       sh_use(NULL);
    }
+
+/*
+
+   render_stage_t* stage = (render_stage_t*)(rc_get_current()->stages->collection[0]);
+
+   glBindFramebuffer(GL_FRAMEBUFFER, stage->fbo);
+
+   struct _default_shader_data* data = (struct _default_shader_data*)stage->data;
+   c_to_mat(data->buffmat, data->camera);
+
+   shader_t* scene_shader = s_get_shader(SH_DEFAULT);
+   glEnable(GL_DEPTH_TEST);
+
+   // ------
+   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+   glClear(GL_DEPTH_BUFFER_BIT);
+
+   sh_use(scene_shader);
+
+   sh_nset_mat4(scene_shader, "projection", stage->proj);
+   sh_nset_mat4(scene_shader, "view", data->buffmat);
+
+   //render objects
+   for(size_t j = 0; j < objects->count; j++)
+   {
+      object_t* obj = objects->collection[j];
+      if (obj->draw_info->drawable)
+      {
+         gr_transform(obj->position, obj->scale, obj->rotation);
+
+         sh_nset_vec3v(scene_shader, "objectColor",
+                       obj->draw_info->object_color[0],
+                       obj->draw_info->object_color[1],
+                       obj->draw_info->object_color[2]);
+         sh_nset_mat4(scene_shader, "model", model_mat);
+
+         gr_render_object(obj);
+      }
+   }
+   sh_use(NULL);
+
+
+   // draw skybox as last
+   shader_t* skybox_shader = s_get_shader(SH_SKYBOX);
+   glDepthFunc(GL_LEQUAL);  // change depth_tex function so depth_tex test passes when values are equal to depth_tex buffer's content
+
+   sh_use(skybox_shader);
+
+   data->buffmat[3] = 0;
+   data->buffmat[7] = 0;
+   data->buffmat[11] = 0;
+   data->buffmat[15] = 0;
+
+   sh_nset_mat4(skybox_shader, "projection", stage->proj);
+   sh_nset_mat4(skybox_shader, "view", data->buffmat);
+
+   // skybox cube
+   glBindVertexArray(cube_vao);
+   glActiveTexture(GL_TEXTURE0);
+   glBindTexture(GL_TEXTURE_CUBE_MAP, txm_get(10)->texID);
+   glDrawArrays(GL_TRIANGLES, 0, 36);
+   glBindVertexArray(0);
+   glDepthFunc(GL_LESS); // set depth_tex function back to default
+
+   sh_use(NULL);
+
+
+   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+   glClearColor(1.0f, 0, 1.0f, 1.0f);
+   glClear(GL_COLOR_BUFFER_BIT);
+
+   shader_t* bypass_shader = s_get_shader(SH_BYPASS);
+   render_stage_t* last_stage = (render_stage_t*)(rc_get_current()->stages->collection[2]);
+
+   sh_use(bypass_shader);
+   sh_nset_mat4(bypass_shader, "proj", last_stage->proj);
+
+   glDisable(GL_DEPTH_TEST);
+
+   glActiveTexture(GL_TEXTURE0);
+   glBindTexture(GL_TEXTURE_2D, stage->color_tex);
+
+   gr_render_vao(quad_vao);
+
+   sh_use(NULL);
+
+*/
 
    w_swap_buffers(default_win);
 }
