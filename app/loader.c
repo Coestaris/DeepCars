@@ -15,6 +15,7 @@
 #include "../lib/resources/mm.h"
 #include "../lib/resources/pack.h"
 #include "../lib/graphics/rendering/render_chain.h"
+#include "renderer.h"
 
 win_info_t*    win;
 mat4           view;
@@ -91,7 +92,7 @@ void app_init_graphics(void)
    cvec4(0, 5, 15, 0),
    cvec4(0, 1, 0, 0));
 
-   rc_set_current(rc_default(win, camera));
+   rc_set_current(get_chain(win, camera));
 }
 
 void app_run(void)

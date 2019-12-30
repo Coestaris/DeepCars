@@ -71,15 +71,6 @@ void u_close(void)
    closed = true;
 }
 
-
-typedef struct _default_shader_data {
-   camera_t* camera;
-   mat4 buffmat;
-
-} default_shader_data_t;
-GLuint cube_vao;
-GLuint quad_vao;
-
 // Main draw function.
 // Looping through all objects and draws it
 void u_draw_func(void)
@@ -159,6 +150,12 @@ void u_event_handler(XEvent event)
 {
    switch (event.type)
    {
+      case ClientMessage:
+      {
+         U_LOG("Force closing...",0);
+         u_close();
+         break;
+      }
       case KeyPress:
       {
          keys_state[event.xkey.keycode] = 1;
@@ -309,11 +306,15 @@ void u_init(void)
 //
 void u_start_loop(win_info_t* info)
 {
+
    XEvent event;
    XSelectInput(info->display, info->win,
        KeyPressMask      | KeyReleaseMask   | ButtonPressMask | ButtonReleaseMask    |
        PointerMotionMask | ButtonMotionMask | ExposureMask    | VisibilityChangeMask |
        ResizeRedirectMask);
+
+   Atom wmDelete = XInternAtom(info->display, "WM_DELETE_WINDOW", True);
+   XSetWMProtocols(info->display, info->win, &wmDelete, 1);
 
    default_win = info;
    // main app loop

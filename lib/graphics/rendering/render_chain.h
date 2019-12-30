@@ -21,6 +21,11 @@ typedef struct _render_chain {
 
 } render_chain_t;
 
+void rc_create_perspective(win_info_t* win, mat4 mat, float fov, float near, float far);
+void rc_create_ortho(win_info_t* win, mat4 mat, float near, float far);
+GLint rc_get_quad_vao(void);
+GLint rc_get_cube_vao(void);
+
 void rc_build(render_chain_t* rc);
 
 render_chain_t* rc_create();
@@ -28,7 +33,5 @@ render_chain_t* rc_create();
 void rc_set_current(render_chain_t* rc);
 
 render_chain_t* rc_get_current(void);
-
-render_chain_t* rc_default(win_info_t* info, camera_t* camera);
 
 #endif //DEEPCARS_RENDER_CHAIN_H
