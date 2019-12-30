@@ -54,7 +54,6 @@ void rs_free(render_stage_t* rs)
 void rs_build_tex(render_stage_t* rs)
 {
    GL_CALL(glGenFramebuffers(1, &rs->fbo));
-   GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
 
    if(rs->attachments & TF_COLOR)
    {
@@ -68,7 +67,9 @@ void rs_build_tex(render_stage_t* rs)
                            rs->tex_width, rs->tex_height, 0, GL_RGBA, GL_FLOAT, NULL));
       GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
+      GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
       GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rs->color_tex, 0));
+      GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
    }
 
    if(rs->attachments & TF_DEPTH)
@@ -80,7 +81,9 @@ void rs_build_tex(render_stage_t* rs)
 
       GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
+      GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
       GL_CALL(glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, rs->depth_tex, 0));
+      GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
    }
 
    if(rs->attachments & TF_STENCIL)
@@ -91,10 +94,11 @@ void rs_build_tex(render_stage_t* rs)
                            rs->tex_width, rs->tex_height, 0, GL_STENCIL_COMPONENTS, GL_FLOAT, NULL));
       GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
+      GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
       GL_CALL(glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, rs->stencil_tex, 0));
+      GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
    }
 
    //GL_CALL(glDrawBuffer(GL_NONE));
    //GL_CALL(glReadBuffer(GL_NONE));
-   GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }

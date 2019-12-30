@@ -157,7 +157,7 @@ void gr_render_object(object_t* obj)
 
 void gr_bind(render_stage_t* stage)
 {
-   GL_PCALL(glViewport(0, 0, stage->tex_width, stage->tex_height))
+   //GL_PCALL(glViewport(0, 0, stage->tex_width, stage->tex_height))
    if(stage->render_mode != RM_BYPASS && stage->render_mode != RM_CUSTOM)
    {
       GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, stage->fbo));

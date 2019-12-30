@@ -73,6 +73,8 @@ void bind_default(render_stage_t* stage)
    sh_nset_mat4(stage->shader, "projection", stage->proj);
    sh_nset_mat4(stage->shader, "view", data->buffmat);
 
+   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+   glClear(GL_DEPTH_BUFFER_BIT);
 }
 void setup_default(render_stage_t* stage, object_t* object, mat4 model_mat)
 {
@@ -85,28 +87,35 @@ void setup_default(render_stage_t* stage, object_t* object, mat4 model_mat)
 
 void bind_skybox(render_stage_t* stage)
 {
-/*   default_shader_data_t* data = (default_shader_data_t*)stage->data;
+   default_shader_data_t* data = (default_shader_data_t*)stage->data;
    c_to_mat(data->buffmat, data->camera);
+
+   data->buffmat[3] = 0;
+   data->buffmat[7] = 0;
+   data->buffmat[11] = 0;
+   data->buffmat[15] = 0;
 
    sh_nset_mat4(stage->shader, "view", data->buffmat);
    sh_nset_mat4(stage->shader, "projection", stage->proj);
    sh_nset_int(stage->shader, "skybox", 0);
 
-   glActiveTexture(GL_TEXTURE0);
-   t_bind(txm_get(10), 0, GL_TEXTURE_CUBE_MAP);*/
+   GL_PCALL(glActiveTexture(GL_TEXTURE0));
+   t_bind(txm_get(10), 0, GL_TEXTURE_CUBE_MAP);
    // skybox cube
 }
 
 void unbind_skybox(render_stage_t* stage)
 {
-   //t_bind(NULL, 0, GL_TEXTURE_CUBE_MAP);
+   t_bind(NULL, 0, GL_TEXTURE_CUBE_MAP);
+   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }
 
 void draw_skybox(render_stage_t* stage)
 {
-   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, stage->fbo));
+   stage->color_tex = stage->prev_stage->color_tex;
+   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, stage->prev_stage->fbo));
 
-   /*GL_PCALL(glEnable(GL_DEPTH_TEST));
+   GL_PCALL(glEnable(GL_DEPTH_TEST));
    GL_PCALL(glDepthFunc(GL_LEQUAL));  // change depth_tex function so depth_tex test passes when values are equal to depth_tex buffer's content
 
    GL_PCALL(glBindVertexArray(stage->vao));
@@ -114,7 +123,7 @@ void draw_skybox(render_stage_t* stage)
 
    GL_PCALL(glBindVertexArray(0));
    GL_PCALL(glDepthFunc(GL_LESS)); // set depth_tex function back to default
-   GL_PCALL(glDisable(GL_DEPTH_TEST));*/
+   GL_PCALL(glDisable(GL_DEPTH_TEST));
 
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }
@@ -256,7 +265,7 @@ render_chain_t* rc_default(win_info_t* info, camera_t* camera)
    geometry->bind_shader = bind_default;
    geometry->setup_obj_shader = setup_default;
    geometry->unbind_shader = unbind_default;
-   geometry->attachments = TF_COLOR;
+   geometry->attachments = TF_COLOR | TF_DEPTH;
    mat4_cpy(geometry->proj, proj_mat);
    mat4_identity(geometry->view);
    default_shader_data_t* geometry_data = (geometry->data = malloc(sizeof(default_shader_data_t)));
@@ -295,12 +304,10 @@ render_chain_t* rc_default(win_info_t* info, camera_t* camera)
    bypass->bind_shader = bind_bypass;
    bypass->unbind_shader = unbind_bypass;
    bypass->vao = quad_vao;
-   mat4_identity(bypass->view);
-   mat4_identity(bypass->proj);
 
    render_chain_t* rc = rc_create();
    list_push(rc->stages, geometry);
-   //list_push(rc->stages, skybox);
+   list_push(rc->stages, skybox);
    //list_push(rc->stages, blur);
    list_push(rc->stages, bypass);
 
