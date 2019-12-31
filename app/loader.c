@@ -24,6 +24,12 @@ camera_t*      camera;
 vec4 plane_color;
 vec4 sky_color;
 
+vec4 light_pos;
+mat4 light_view;
+mat4 light_proj;
+mat4 light_space;
+camera_t* light_camera;
+
 void app_load_resources(void)
 {
    // scenes
@@ -37,7 +43,8 @@ void app_load_resources(void)
    mm_push(MODELID_PLANE, plane, true);
 
    list_push(menu->startup_objects,
-             create_colored_dummy(vec3f(-500, 0, -500), 1000, plane_color, mm_get(MODELID_PLANE)));
+             create_textured_dummy(vec3f(-500, 0, -500), 1000, txm_get(3), mm_get(MODELID_PLANE)));
+/*
 
    list_push(menu->startup_objects,
              create_colored_shaded_dummy(vec3f(16, 0, 4), 10, .01f, COLOR_GRAY, mm_get(MODELID_CUBE)));
@@ -45,6 +52,7 @@ void app_load_resources(void)
              create_colored_shaded_dummy(vec3f(4, 0, 16), 10, .01f, COLOR_GRAY, mm_get(MODELID_TORUS)));
    list_push(menu->startup_objects,
              create_colored_shaded_dummy(vec3f(16, 0, 16), 10, .01f, COLOR_GRAY, mm_get(MODELID_TEAPOT)));
+*/
 
    list_push(menu->startup_objects,
            create_textured_dummy(vec3f(-16, 0, -4), 10, txm_get(0), mm_get(MODELID_CUBE)));
@@ -82,9 +90,7 @@ void app_init_graphics(void)
    txm_init();
    mm_init();
 
-
    p_load(RESOURCE_PACK_FILE);
-   s_setup_built_in_shaders();
 
    gr_init();
 
@@ -92,7 +98,22 @@ void app_init_graphics(void)
    cvec4(0, 5, 15, 0),
    cvec4(0, 1, 0, 0));
 
-   rc_set_current(get_chain(win, camera));
+   rc_create_perspective(win, proj_mat, 65.0f, 0.1f, 200);
+
+   light_pos = cvec4(0, 15, 0, 0);
+
+   light_proj = cmat4();
+   light_view = cmat4();
+   light_space = cmat4();
+
+   float near_plane = 1.0f, far_plane = 500;
+   rc_create_perspective(win, light_proj, 190, near_plane, far_plane);
+
+   light_camera = c_create(light_pos, camera->up);
+   light_camera->use_target = true;
+   light_camera->target = cvec4(-16, 0, -4, 0);
+   c_to_mat(light_view, light_camera);
+   rc_set_current(get_chain(win, camera, proj_mat));
 }
 
 void app_run(void)

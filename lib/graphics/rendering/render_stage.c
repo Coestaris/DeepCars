@@ -53,18 +53,20 @@ void rs_free(render_stage_t* rs)
 
 void rs_build_tex(render_stage_t* rs)
 {
-   GL_CALL(glGenFramebuffers(1, &rs->fbo));
+   if(!rs->fbo)
+      GL_CALL(glGenFramebuffers(1, &rs->fbo));
 
-   if(rs->attachments & TF_COLOR)
+   if(rs->attachments & TF_COLOR && !rs->color_tex)
    {
       GL_CALL(glGenTextures(1, &rs->color_tex));
       GL_CALL(glBindTexture(GL_TEXTURE_2D, rs->color_tex));
+      GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+                           rs->tex_width, rs->tex_height, 0, GL_RGBA, GL_FLOAT, NULL));
+
       GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, rs->tex_min_filter));
       GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, rs->tex_mag_filter));
       GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, rs->tex_wrapping));
       GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, rs->tex_wrapping));
-      GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                           rs->tex_width, rs->tex_height, 0, GL_RGBA, GL_FLOAT, NULL));
       GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
       GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
@@ -72,33 +74,39 @@ void rs_build_tex(render_stage_t* rs)
       GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
    }
 
-   if(rs->attachments & TF_DEPTH)
+   if(rs->attachments & TF_DEPTH && !rs->depth_tex)
    {
       GL_CALL(glGenTextures(1, &rs->depth_tex));
       GL_CALL(glBindTexture(GL_TEXTURE_2D, rs->depth_tex));
       GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F,
                    rs->tex_width, rs->tex_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
 
+      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, rs->tex_min_filter));
+      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, rs->tex_mag_filter));
+      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, rs->tex_wrapping));
+      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, rs->tex_wrapping));
       GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
       GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
-      GL_CALL(glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, rs->depth_tex, 0));
+      GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, rs->depth_tex, 0));
       GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
    }
 
-   if(rs->attachments & TF_STENCIL)
+   if(rs->attachments & TF_STENCIL && !rs->stencil_tex)
    {
       GL_CALL(glGenTextures(1, &rs->stencil_tex));
       GL_CALL(glBindTexture(GL_TEXTURE_2D, rs->stencil_tex));
       GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_STENCIL_COMPONENTS,
                            rs->tex_width, rs->tex_height, 0, GL_STENCIL_COMPONENTS, GL_FLOAT, NULL));
+
+      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, rs->tex_min_filter));
+      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, rs->tex_mag_filter));
+      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, rs->tex_wrapping));
+      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, rs->tex_wrapping));
       GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
       GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
-      GL_CALL(glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, rs->stencil_tex, 0));
+      GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, rs->stencil_tex, 0));
       GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
    }
-
-   //GL_CALL(glDrawBuffer(GL_NONE));
-   //GL_CALL(glReadBuffer(GL_NONE));
 }

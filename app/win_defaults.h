@@ -25,4 +25,10 @@ extern win_info_t* win;
 extern mat4 view;
 extern camera_t* camera;
 
+extern vec4 light_pos;
+extern mat4 light_view;
+extern mat4 light_proj;
+extern mat4 light_space;
+extern camera_t* light_camera;
+
 #endif //DEEPCARS_WIN_DEFAULTS_H

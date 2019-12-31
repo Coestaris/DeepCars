@@ -10,13 +10,6 @@
 #define GR_LOG(format, ...) DC_LOG("graphics.c", format, __VA_ARGS__)
 #define GR_ERROR(format, ...) DC_ERROR("graphics.c", format, __VA_ARGS__)
 
-#define SHADOW_WIDTH 1024
-#define SHADOW_HEIGHT 1024
-
-unsigned int depthMapFBO;
-unsigned int depthMap;
-
-#include "../camera.h"
 #include "../light.h"
 
 // for current scene
@@ -43,10 +36,6 @@ void gr_fill(vec4 color)
 {
    GL_PCALL(glClearColor(color[0], color[1], color[2], color[3]))
 }
-
-shader_t* shader_colored;
-shader_t* shader_colored_shaded;
-shader_t* shader_textured;
 
 mat4 proj_mat;
 mat4 view_mat;
@@ -157,7 +146,7 @@ void gr_render_object(object_t* obj)
 
 void gr_bind(render_stage_t* stage)
 {
-   //GL_PCALL(glViewport(0, 0, stage->tex_width, stage->tex_height))
+   GL_PCALL(glViewport(0, 0, stage->tex_width, stage->tex_height))
    if(stage->render_mode != RM_BYPASS && stage->render_mode != RM_CUSTOM)
    {
       GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, stage->fbo));
@@ -171,62 +160,3 @@ void gr_unbind(render_stage_t* stage)
       GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
    }
 }
-
-/*
-void gr_draw_model_textured(model_t* model, texture_t* texture)
-{
-   sh_use(shader_textured);
-   GLint* locations = shader_textured->uniform_locations;
-   vec4 camera_pos = current_scene->camera->position;
-
-   sh_set_int(locations[SH_TEXTURED_TEXTURE], 0);
-   sh_set_vec3v(locations[SH_TEXTURED_VIEWER], camera_pos[0], camera_pos[1], camera_pos[2]);
-   sh_set_mat4(locations[SH_TEXTURED_PROJ], proj_mat);
-   sh_set_mat4(locations[SH_TEXTURED_VIEW], view_mat);
-   sh_set_mat4(locations[SH_TEXTURED_MODEL], model_mat);
-
-   t_bind(texture, GL_TEXTURE0);
-   gr_draw_model(model);
-
-   t_bind(NULL, GL_TEXTURE0);
-   sh_use(NULL);
-}
-
-void gr_draw_model_colored_shaded(model_t* model, vec4 color, float ambient)
-{
-   sh_use(shader_colored_shaded);
-   GLint* locations = shader_colored_shaded->uniform_locations;
-   vec4 camera_pos = current_scene->camera->position;
-
-   sh_set_vec3v(locations[SH_COLORED_SHADED_COLOR], color[0], color[1], color[2]);
-   sh_set_vec3v(locations[SH_COLORED_SHADED_VIEWER], camera_pos[0], camera_pos[1], camera_pos[2]);
-   sh_set_vec3v(locations[SH_COLORED_SHADED_COLOR], color[0], color[1], color[2]);
-   sh_set_mat4(locations[SH_COLORED_SHADED_PROJ], proj_mat);
-   sh_set_mat4(locations[SH_COLORED_SHADED_VIEW], view_mat);
-   sh_set_mat4(locations[SH_COLORED_SHADED_MODEL], model_mat);
-   sh_set_float(locations[SH_COLORED_SHADED_AMBIENT], ambient);
-
-   light_t* lt = (light_t*)current_scene->lights->collection[0];
-
-   sh_set_vec3v(locations[SH_COLORED_SHADED_L_COLOR], lt->color[0], lt->color[1], lt->color[2]);
-   sh_set_vec3v(locations[SH_COLORED_SHADED_L_POS], lt->direction[1], lt->direction[2], lt->direction[3]);
-
-   gr_draw_model(model);
-   sh_use(NULL);
-}
-
-void gr_draw_model_colored(model_t* model, vec4 color)
-{
-   sh_use(shader_colored);
-   GLint* locations = shader_colored->uniform_locations;
-   vec4 camera_pos = current_scene->camera->position;
-
-   sh_set_vec3v(locations[SH_COLORED_COLOR], color[0], color[1], color[2]);
-   sh_set_vec3v(locations[SH_COLORED_COLOR], color[0], color[1], color[2]);
-   sh_set_mat4(locations[SH_COLORED_PROJ], proj_mat);
-   sh_set_mat4(locations[SH_COLORED_VIEW], view_mat);
-   sh_set_mat4(locations[SH_COLORED_MODEL], model_mat);
-
-   gr_draw_model(model);
-   sh_use(NULL);
-}*/

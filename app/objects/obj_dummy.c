@@ -47,6 +47,6 @@ object_t* create_textured_dummy(vec3f_t pos, float size, texture_t* texture, mod
    this->draw_info->drawable = true;
    this->draw_info->model = model;
    this->draw_info->object_color = COLOR_NAVY;
-   //o_dm_textured(this, texture);
+   this->draw_info->diffuse = texture;
    return this;
 }

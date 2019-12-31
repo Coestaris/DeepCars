@@ -158,6 +158,7 @@ void u_event_handler(XEvent event)
       }
       case KeyPress:
       {
+         //printf("%i\n", event.xkey.keycode);
          keys_state[event.xkey.keycode] = 1;
          for (size_t i = 0; i < key_listeners->count; i++)
             ((object_t*) key_listeners->collection[i])->key_event_func(

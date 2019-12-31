@@ -3,6 +3,7 @@
 //
 
 #include "obj_camera_control.h"
+#include "../renderer.h"
 
 float dx;
 float dy;
@@ -28,28 +29,49 @@ void camera_update_func(object_t* this)
    vec4_cpy(camera_cross_cpy, camera->_camera_right);
    vec4_mulf(camera_cross_cpy, .2f);
 
-   //left
+   //a
    if (u_get_key_state(38) == KEY_PRESSED)
       vec4_subv(camera->position, camera_cross_cpy);
 
-   //right
+   //d
    if (u_get_key_state(40) == KEY_PRESSED)
       vec4_addv(camera->position, camera_cross_cpy);
 
-   //forward
+   //w
    if (u_get_key_state(25) == KEY_PRESSED)
       vec4_subv(camera->position, camera_dir_cpy);
 
-   //back
+   //s
    if (u_get_key_state(39) == KEY_PRESSED)
       vec4_addv(camera->position, camera_dir_cpy);
+
+   // light move
+   // left
+   if (u_get_key_state(113) == KEY_PRESSED)
+      vec4_subv(light_pos, camera_cross_cpy);
+
+   // right
+   if (u_get_key_state(114) == KEY_PRESSED)
+      vec4_addv(light_pos, camera_cross_cpy);
+
+   // forward
+   if (u_get_key_state(111) == KEY_PRESSED)
+      vec4_subv(light_pos, camera_dir_cpy);
+
+   // back
+   if (u_get_key_state(116) == KEY_PRESSED)
+      vec4_addv(light_pos, camera_dir_cpy);
 
    //up
    if (u_get_key_state(65) == KEY_PRESSED)
       camera->position[1] += 0.2f;
+
    //down
    if (u_get_key_state(50) == KEY_PRESSED)
       camera->position[1] -= 0.2f;
+
+   if (u_get_key_state(105) == KEY_PRESSED)
+      switch_stages();
 }
 
 void camera_key_event_func(object_t* this, uint32_t key, uint32_t state)

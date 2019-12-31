@@ -26,6 +26,7 @@ void rc_create_ortho(win_info_t* win, mat4 mat, float near, float far);
 GLint rc_get_quad_vao(void);
 GLint rc_get_cube_vao(void);
 
+void rc_link(render_chain_t* rc);
 void rc_build(render_chain_t* rc);
 
 render_chain_t* rc_create();

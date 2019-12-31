@@ -317,19 +317,19 @@ inline void mat4_translate(mat4 m, float x, float y, float z)
 //
 inline void mat4_ortho(mat4 m, float n, float f, float r, float t)
 {
-   m[0] = 1 / r;
+   m[0] = 2 / r;
    m[1] = 0;
    m[2] = 0;
-   m[3] =  0;
+   m[3] = 0;
 
    m[4] = 0;
-   m[5] = 1 / t;
+   m[5] = 2 / t;
    m[6] = 0;
    m[7] = 0;
 
    m[8] = 0;
    m[9] = 0;
-   m[10] = -2 / (f - n);
+   m[10] = -2.0f / (f - n);
    m[11] = -(f + n) / (f - n);
 
    m[12] = 0;

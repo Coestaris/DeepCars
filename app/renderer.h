@@ -7,6 +7,14 @@
 
 #include "../lib/graphics/rendering/render_chain.h"
 
-render_chain_t* get_chain(win_info_t* win, camera_t* camera);
+#define SH_DEFAULT 0
+#define SH_BLUR 1
+#define SH_BYPASS 2
+#define SH_SKYBOX 3
+#define SH_DEPTH_SHADER 4
+#define SH_DEPTH_BYPASS 5
+
+void switch_stages(void);
+render_chain_t* get_chain(win_info_t* win, camera_t* camera, mat4 proj);
 
 #endif //DEEPCARS_RENDERER_H

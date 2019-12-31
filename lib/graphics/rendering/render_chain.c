@@ -38,6 +38,7 @@ void rc_create_ortho(win_info_t* win, mat4 mat, float near, float far)
 
 void rc_set_current(render_chain_t* rc)
 {
+   rc_link(rc);
    current_chain = rc;
 }
 
@@ -139,6 +140,18 @@ void setup_quad()
    GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
 
+void rc_link(render_chain_t* rc)
+{
+   for(size_t i = 0; i < rc->stages->count; i++)
+   {
+      render_stage_t* stage = rc->stages->collection[i];
+      if(i != 0)
+         stage->prev_stage = rc->stages->collection[i - 1];
+      else
+         stage->prev_stage = NULL;
+   }
+}
+
 void rc_build(render_chain_t* rc)
 {
    for(size_t i = 0; i < rc->stages->count; i++)
@@ -149,11 +162,6 @@ void rc_build(render_chain_t* rc)
          stage->render_mode == RM_CUSTOM_FRAMEBUFFER)
 
          rs_build_tex(stage);
-
-      if(i != 0)
-         stage->prev_stage = rc->stages->collection[i - 1];
-      else
-         stage->prev_stage = NULL;
    }
 }
 
