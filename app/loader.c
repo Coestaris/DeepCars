@@ -71,6 +71,23 @@ void app_load_resources(void)
    scm_push_scene(menu);
 }
 
+void ortho(
+      mat4 mat,
+      float left,
+      float right,
+      float bottom,
+      float top,
+      float zNear,
+      float zFar)
+{
+      mat[0 * 4 + 0] = 2.0f / (right - left);
+      mat[1 * 4 + 1] = 2.0f / (top - bottom);
+      mat[2 * 4 + 2] = - 2.0f / (zFar - zNear);
+      mat[3 * 4 + 0] = - (right + left) / (right - left);
+      mat[3 * 4 + 1] = - (top + bottom) / (top - bottom);
+      mat[3 * 4 + 2] = - (zFar + zNear) / (zFar - zNear);
+}
+
 void app_init_graphics(void)
 {
    win = w_create(
@@ -98,22 +115,29 @@ void app_init_graphics(void)
    cvec4(0, 5, 15, 0),
    cvec4(0, 1, 0, 0));
 
-   rc_create_perspective(win, proj_mat, 65.0f, 0.1f, 200);
+   rc_create_perspective(win, proj_mat, 65.f, 0.1f, 200);
+   //ortho(proj_mat, -1.0f, 1.0f, -1.0f, 1.0f, near_plane, far_plane);
 
-   light_pos = cvec4(0, 15, 0, 0);
+   light_pos = cvec4(0, 20, 0, 0);
 
    light_proj = cmat4();
    light_view = cmat4();
    light_space = cmat4();
 
-   float near_plane = 1.0f, far_plane = 500;
-   rc_create_perspective(win, light_proj, 190, near_plane, far_plane);
+   float near_plane = 1.0f, far_plane = 100.0f;
+   //rc_create_ortho(win, light_proj, near_plane, far_plane);
+   mat4_ortho(light_proj, near_plane, far_plane, 50, 50);
+   //ortho(light_proj, -1.0f, 1.0f, -1.0f, 1.0f, near_plane, far_plane);
 
    light_camera = c_create(light_pos, camera->up);
    light_camera->use_target = true;
    light_camera->target = cvec4(-16, 0, -4, 0);
    c_to_mat(light_view, light_camera);
+
+
    rc_set_current(get_chain(win, camera, proj_mat));
+
+   GL_PCALL(glEnable(GL_DEPTH_TEST));
 }
 
 void app_run(void)

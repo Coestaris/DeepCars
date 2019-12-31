@@ -122,21 +122,18 @@ void draw_skybox(render_stage_t* stage)
    stage->color_tex = stage->prev_stage->color_tex;
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, stage->prev_stage->fbo));
    {
-      GL_PCALL(glEnable(GL_DEPTH_TEST));
       GL_PCALL(glDepthFunc(GL_LEQUAL));
       GL_PCALL(glBindVertexArray(stage->vao));
       GL_PCALL(glDrawArrays(GL_TRIANGLES, 0, 36));
       GL_PCALL(glBindVertexArray(0));
       GL_PCALL(glDepthFunc(GL_LESS));
-      GL_PCALL(glDisable(GL_DEPTH_TEST));
    }
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }
 
 void bind_depth(render_stage_t* stage)
 {
-   GL_PCALL(glClearColor(.3,0,0,1));
-   GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
+   GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT));
 
    light_camera->position = light_pos;
    c_to_mat(light_view, light_camera);
@@ -144,12 +141,12 @@ void bind_depth(render_stage_t* stage)
    mat4_mulm(light_space, light_view);
 
    sh_nset_mat4(stage->shader, "lightSpaceMatrix", light_space);
-   glCullFace(GL_FRONT);
+   GL_PCALL(glCullFace(GL_FRONT));
 }
 
 void unbind_depth(render_stage_t* stage)
 {
-   glCullFace(GL_BACK);
+   GL_PCALL(glCullFace(GL_BACK));
 }
 
 void setup_object_depth(render_stage_t* stage, object_t* object, mat4 model_mat)
@@ -230,5 +227,6 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    rc_build(rc2);
 
    rc_link(rc1);
+
    return rc1;
 }

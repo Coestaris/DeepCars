@@ -48,5 +48,7 @@ object_t* create_textured_dummy(vec3f_t pos, float size, texture_t* texture, mod
    this->draw_info->model = model;
    this->draw_info->object_color = COLOR_NAVY;
    this->draw_info->diffuse = texture;
+   if(model->model_len->faces_count != 1)
+   this->update_func = update;
    return this;
 }

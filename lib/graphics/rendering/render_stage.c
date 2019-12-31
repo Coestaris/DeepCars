@@ -85,6 +85,11 @@ void rs_build_tex(render_stage_t* rs)
       GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, rs->tex_mag_filter));
       GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, rs->tex_wrapping));
       GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, rs->tex_wrapping));
+
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+      float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+      glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
       GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
       GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
