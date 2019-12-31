@@ -38,7 +38,7 @@ void app_load_resources(void)
    // objects
 
    plane_color = cvec4(129 / 255.0f, 146 / 255.0f, 89 / 255.0f, 0);
-   model_t* plane = m_create_plane();
+   model_t* plane = m_create_plane(30, 30, true);
    m_normalize(plane, true, true, true, true);
    mm_push(MODELID_PLANE, plane, true);
 

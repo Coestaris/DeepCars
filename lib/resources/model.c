@@ -672,32 +672,73 @@ void m_build(model_t* model)
    free(buffer);
 }
 
-model_t* m_create_plane()
+model_t* m_create_plane(uint32_t vpoly, uint32_t hpoly, bool global_uv)
 {
    model_t* model = m_create();
-   m_push_vertex(model, cvec4(0, 0, 1, 0));
-   m_push_vertex(model, cvec4(1, 0, 1, 0));
-   m_push_vertex(model, cvec4(1, 0, 0, 0));
-   m_push_vertex(model, cvec4(0, 0, 0, 0));
+   size_t faces = vpoly * hpoly;
+   size_t i = 1;
 
-   m_push_normal(model, cvec4(0, 1, 0, 0));
-   m_push_normal(model, cvec4(0, 1, 0, 0));
-   m_push_normal(model, cvec4(0, 1, 0, 0));
+   if(global_uv)
+   {
+      m_push_tex_coord(model, cvec4(0, 1, 0, 0));
+      m_push_tex_coord(model, cvec4(1, 1, 0, 0));
+      m_push_tex_coord(model, cvec4(1, 0, 0, 0));
+      m_push_tex_coord(model, cvec4(0, 0, 0, 0));
+   }
    m_push_normal(model, cvec4(0, 1, 0, 0));
 
-   m_push_tex_coord(model, cvec4(0, 1, 0, 0));
-   m_push_tex_coord(model, cvec4(1, 1, 0, 0));
-   m_push_tex_coord(model, cvec4(0, 0, 0, 0));
-   m_push_tex_coord(model, cvec4(1, 0, 0, 0));
+   for(size_t x = 0; x < vpoly; x++)
+   for(size_t y = 0; y < hpoly; y++)
+   {
+      float y1 = 1.0f / hpoly * y;
+      float y2 = 1.0f / hpoly * (y + 1);
+      float x1 = 1.0f / vpoly * x;
+      float x2 = 1.0f / vpoly * (x + 1);
 
+      m_push_vertex(model, cvec4(x1, 0, y2, 0));
+      m_push_vertex(model, cvec4(x2, 0, y2, 0));
+      m_push_vertex(model, cvec4(x2, 0, y1, 0));
+      m_push_vertex(model, cvec4(x1, 0, y1, 0));
+
+      if(!global_uv)
+      {
+         m_push_tex_coord(model, cvec4(x1, y2, 0, 0));
+         m_push_tex_coord(model, cvec4(x2, y2, 0, 0));
+         m_push_tex_coord(model, cvec4(x2, y1, 0, 0));
+         m_push_tex_coord(model, cvec4(x1, y1, 0, 0));
+      }
+
+      model_face_t* f = malloc(sizeof(model_face_t));
+      f->count = 4;
+      f->vert_id[0] = i++;
+      f->vert_id[1] = i++;
+      f->vert_id[2] = i++;
+      f->vert_id[3] = i++;
+
+      f->normal_id[0] = 1;
+      f->normal_id[1] = 1;
+      f->normal_id[2] = 1;
+      f->normal_id[3] = 1;
+
+      if(global_uv)
+      {
+         f->tex_id[0] = 1;
+         f->tex_id[1] = 2;
+         f->tex_id[2] = 3;
+         f->tex_id[3] = 4;
+      }
+      else
+      {
+         f->tex_id[0] = f->vert_id[0];
+         f->tex_id[1] = f->vert_id[1];
+         f->tex_id[2] = f->vert_id[2];
+         f->tex_id[3] = f->vert_id[3];
+      }
+      m_push_face(model, f);
+   }
+
+   model->model_len->faces_count = faces;
    model->filename = strdup("__generated_plane");
-
-   model_face_t* f = malloc(sizeof(model_face_t));
-   f->count = 4;
-   f->vert_id[0] = 1;    f->vert_id[1] = 2;    f->vert_id[2] = 3;    f->vert_id[3] = 4;
-   f->normal_id[0] = 1;  f->normal_id[1] = 2;  f->normal_id[2] = 3;  f->normal_id[3] = 4;
-   f->tex_id[0] = 1;     f->tex_id[1] = 2;     f->tex_id[2] = 3;     f->tex_id[3] = 4;
-   m_push_face(model, f);
 
    return model;
 }
