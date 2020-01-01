@@ -3,6 +3,7 @@ from glob import glob
 import time
 import os
 import json
+import struct
 import hashlib
 
 PATH_PREFIX = ""
@@ -11,6 +12,7 @@ MODEL_CHUNK_TYPE = 0
 SHADER_CHUNK_TYPE = 1
 TEXTURE_CHUNK_TYPE = 2
 CUBEMAP_CHUNK_TYPE = 3
+MATERIAL_CHUNK_TYPE = 4
 
 CACHE_FILE = "_cache.json"
 CACHE_DIR = "_cache/"
@@ -76,6 +78,14 @@ def int16tobytes(value):
         (value >> 8) & 0xFF,
     ]
 
+def float32Arraytobytes(values):
+    list = []
+    for value in values:
+        list += float32tobytes(value)
+    return list
+
+def float32tobytes(value):
+    return [b for b in bytearray(struct.pack("f", value))]
 
 def int32tobytes(value):
     return [

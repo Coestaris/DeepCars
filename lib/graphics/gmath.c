@@ -14,9 +14,9 @@
 //
 // cvec4()
 //
-vec4 cvec4(double_t x, double_t y, double_t z, double_t l)
+vec4 cvec4(float_t x, float_t y, float_t z, float_t l)
 {
-   vec4 a = malloc(sizeof(float) * 4);
+   vec4 a = malloc(sizeof(float_t) * 4);
    vec4_fill(a, x, y, z, l);
    return a;
 }
@@ -24,7 +24,7 @@ vec4 cvec4(double_t x, double_t y, double_t z, double_t l)
 //
 // vec4_fill()
 //
-inline void vec4_fill(vec4 a, double_t x, double_t y, double_t z, double_t l)
+inline void vec4_fill(vec4 a, float_t x, float_t y, float_t z, float_t l)
 {
    a[0] = x;
    a[1] = y;
@@ -37,8 +37,8 @@ inline void vec4_fill(vec4 a, double_t x, double_t y, double_t z, double_t l)
 //
 mat4 cmat4()
 {
-   mat4 m = malloc(sizeof(float) * 4 * 4);
-   memset(m, 0, sizeof(float) * 4 * 4);
+   mat4 m = malloc(sizeof(float_t) * 4 * 4);
+   memset(m, 0, sizeof(float_t) * 4 * 4);
    return m;
 }
 
@@ -89,10 +89,10 @@ inline void vec4_print(vec4 vec)
 // mat4_fill()
 //
 inline void mat4_fill(mat4 m,
-                      float a1, float a2, float a3, float a4,
-                      float b1, float b2, float b3, float b4,
-                      float c1, float c2, float c3, float c4,
-                      float d1, float d2, float d3, float d4)
+                      float_t a1, float_t a2, float_t a3, float_t a4,
+                      float_t b1, float_t b2, float_t b3, float_t b4,
+                      float_t c1, float_t c2, float_t c3, float_t c4,
+                      float_t d1, float_t d2, float_t d3, float_t d4)
 {
    m[0] =  a1;   m[1] =  a2;   m[2] =  a3;   m[3] =  a4;
    m[4] =  b1;   m[5] =  b2;   m[6] =  b3;   m[7] =  b4;
@@ -134,7 +134,7 @@ vec4 vec4_ccpy(vec4 v)
 //
 // vec4_addf()
 //
-inline void vec4_addf(vec4 v, float value)
+inline void vec4_addf(vec4 v, float_t value)
 {
    v[0] += value;
    v[1] += value;
@@ -156,7 +156,7 @@ inline void vec4_addv(vec4 v, vec4 value)
 //
 // vec4_subf()
 //
-inline void vec4_subf(vec4 v, float value)
+inline void vec4_subf(vec4 v, float_t value)
 {
    v[0] -= value;
    v[1] -= value;
@@ -178,7 +178,7 @@ inline void vec4_subv(vec4 v, vec4 value)
 //
 // vec4_mulf()
 //
-inline void vec4_mulf(vec4 v, float value)
+inline void vec4_mulf(vec4 v, float_t value)
 {
    v[0] *= value;
    v[1] *= value;
@@ -189,9 +189,9 @@ inline void vec4_mulf(vec4 v, float value)
 //
 // vec4_scalar_mulv()
 //
-inline float vec4_scalar_mulv(vec4 a, vec4 b)
+inline float_t vec4_scalar_mulv(vec4 a, vec4 b)
 {
-   float v = 0;
+   float_t v = 0;
    v += a[0] * b[0];
    v += a[1] * b[1];
    v += a[2] * b[2];
@@ -204,7 +204,7 @@ inline float vec4_scalar_mulv(vec4 a, vec4 b)
 //
 inline void vec4_cross(vec4 a, vec4 b)
 {
-   float x, y, z;
+   float_t x, y, z;
    x = a[1] * b[2] - a[2] * b[1];
    y = a[2] * b[0] - a[0] * b[2];
    z = a[0] * b[1] - a[1] * b[0];
@@ -217,7 +217,7 @@ inline void vec4_cross(vec4 a, vec4 b)
 //
 // vec4_len()
 //
-float vec4_len(vec4 v)
+float_t vec4_len(vec4 v)
 {
    return sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
 }
@@ -227,7 +227,7 @@ float vec4_len(vec4 v)
 //
 inline void vec4_norm(vec4 v)
 {
-   float len = vec4_len(v);
+   float_t len = vec4_len(v);
    vec4_mulf(v, 1 / len);
 }
 
@@ -236,7 +236,7 @@ inline void vec4_norm(vec4 v)
 //
 inline void vec4_mulm(vec4 v, mat4 m)
 {
-   float cpy[4] = {v[0], v[1], v[2], v[3]};
+   float_t cpy[4] = {v[0], v[1], v[2], v[3]};
    for (int i = 0; i < 4; i++)
       v[i] = cpy[0] * m[i * 4] +
              cpy[1] * m[i * 4 + 1] +
@@ -247,7 +247,7 @@ inline void vec4_mulm(vec4 v, mat4 m)
 //
 // mat4_addf()
 //
-inline void mat4_addf(mat4 m, float v)
+inline void mat4_addf(mat4 m, float_t v)
 {
    for (int i = 0; i < 15; i++)
       m[i] += v;
@@ -265,7 +265,7 @@ inline void mat4_addm(mat4 m, mat4 v)
 //
 // mat4_mulv()
 //
-inline void mat4_mulv(mat4 m, float v)
+inline void mat4_mulv(mat4 m, float_t v)
 {
    for (int i = 0; i < 15; i++)
       m[i] *= v;
@@ -276,7 +276,7 @@ inline void mat4_mulv(mat4 m, float v)
 //
 inline void mat4_mulm(mat4 m, mat4 v)
 {
-   float m0  = m[0],  m1  = m[1],  m2  = m[2],  m3  = m[3],
+   float_t m0  = m[0],  m1  = m[1],  m2  = m[2],  m3  = m[3],
          m4  = m[4],  m5  = m[5],  m6  = m[6],  m7  = m[7],
          m8  = m[8],  m9  = m[9],  m10 = m[10], m11 = m[11],
          m12 = m[12], m13 = m[13], m14 = m[14], m15 = m[15];
@@ -305,7 +305,7 @@ inline void mat4_mulm(mat4 m, mat4 v)
 //
 // mat4_translate()
 //
-inline void mat4_translate(mat4 m, float x, float y, float z)
+inline void mat4_translate(mat4 m, float_t x, float_t y, float_t z)
 {
    m[3] += x;
    m[7] += y;
@@ -315,7 +315,7 @@ inline void mat4_translate(mat4 m, float x, float y, float z)
 //
 // mat4_ortho()
 //
-inline void mat4_ortho(mat4 m, float n, float f, float r, float t)
+inline void mat4_ortho(mat4 m, float_t n, float_t f, float_t r, float_t t)
 {
    m[0] = 2 / r;
    m[1] = 0;
@@ -343,13 +343,13 @@ inline void mat4_ortho(mat4 m, float n, float f, float r, float t)
 //
 inline void mat4_perspective_fov(
         mat4 m,
-        float angle_of_view, float ratio,
-        float n, float f)
+        float_t angle_of_view, float_t ratio,
+        float_t n, float_t f)
 {
-   float scale = tanf(angle_of_view * 0.5f * (float) M_PI / 180.0f) * n;
+   float_t scale = tanf(angle_of_view * 0.5f * (float_t) M_PI / 180.0f) * n;
 
-   float r = ratio * scale;
-   float t = scale;
+   float_t r = ratio * scale;
+   float_t t = scale;
 
    mat4_perspective(m, n, f, r, t);
 }
@@ -357,7 +357,7 @@ inline void mat4_perspective_fov(
 //
 // mat4_perspective()
 //
-inline void mat4_perspective(mat4 m, float n, float f, float r, float t)
+inline void mat4_perspective(mat4 m, float_t n, float_t f, float_t r, float_t t)
 {
    m[0] = n / r;
    m[1] = 0;
@@ -384,7 +384,7 @@ inline void mat4_perspective(mat4 m, float n, float f, float r, float t)
 //
 // mat4_scale()
 //
-inline void mat4_scale(mat4 m, float x, float y, float z)
+inline void mat4_scale(mat4 m, float_t x, float_t y, float_t z)
 {
    m[0] *= x;
    m[5] *= y;
@@ -394,25 +394,25 @@ inline void mat4_scale(mat4 m, float x, float y, float z)
 //
 // mat4_rotate()
 //
-inline void mat4_rotate(mat4 m, float angle, float x, float y, float z)
+inline void mat4_rotate(mat4 m, float_t angle, float_t x, float_t y, float_t z)
 {
-   float c = cosf(angle);    // cosine
-   float s = sinf(angle);    // sine
-   float c1 = 1.0f - c;                // 1 - c
-   float m0 = m[0],  m4 = m[4],  m8 = m[8],  m12= m[12],
+   float_t c = cosf(angle);    // cosine
+   float_t s = sinf(angle);    // sine
+   float_t c1 = 1.0f - c;                // 1 - c
+   float_t m0 = m[0],  m4 = m[4],  m8 = m[8],  m12= m[12],
            m1 = m[1],  m5 = m[5],  m9 = m[9],  m13= m[13],
            m2 = m[2],  m6 = m[6],  m10= m[10], m14= m[14];
 
    // build rotation matrix
-   float r0  = x * x * c1 + c;
-   float r1  = x * y * c1 + z * s;
-   float r2  = x * z * c1 - y * s;
-   float r4  = x * y * c1 - z * s;
-   float r5  = y * y * c1 + c;
-   float r6  = y * z * c1 + x * s;
-   float r8  = x * z * c1 + y * s;
-   float r9  = y * z * c1 - x * s;
-   float r10 = z * z * c1 + c;
+   float_t r0  = x * x * c1 + c;
+   float_t r1  = x * y * c1 + z * s;
+   float_t r2  = x * z * c1 - y * s;
+   float_t r4  = x * y * c1 - z * s;
+   float_t r5  = y * y * c1 + c;
+   float_t r6  = y * z * c1 + x * s;
+   float_t r8  = x * z * c1 + y * s;
+   float_t r9  = y * z * c1 - x * s;
+   float_t r10 = z * z * c1 + c;
 
    // multiply rotation matrix
    m[0]  = r0 * m0  + r4 * m1  + r8  * m2;
@@ -432,10 +432,10 @@ inline void mat4_rotate(mat4 m, float angle, float x, float y, float z)
 //
 // mat4_rotate_x()
 //
-inline void mat4_rotate_x(mat4 m, float angle)
+inline void mat4_rotate_x(mat4 m, float_t angle)
 {
-   float c = cosf(angle);
-   float s = sinf(angle);
+   float_t c = cosf(angle);
+   float_t s = sinf(angle);
    m[0] =  1;   m[1] =  0;   m[2] =  0;    m[3] =  0;
    m[4] =  0;   m[5] =  c;   m[6] =  s;    m[7] =  0;
    m[8] =  0;   m[9] = -s;   m[10] = c;    m[11] = 0;
@@ -445,10 +445,10 @@ inline void mat4_rotate_x(mat4 m, float angle)
 //
 // mat4_rotate_y()
 //
-inline void mat4_rotate_y(mat4 m, float angle)
+inline void mat4_rotate_y(mat4 m, float_t angle)
 {
-   float c = cosf(angle);
-   float s = sinf(angle);
+   float_t c = cosf(angle);
+   float_t s = sinf(angle);
    m[0] =  c;    m[1] =  0;    m[2] = -s;    m[3] =  0;
    m[4] =  0;    m[5] =  1;    m[6] =  0;    m[7] =  0;
    m[8] =  s;    m[9] =  0;    m[10] = c;    m[11] = 0;
@@ -458,10 +458,10 @@ inline void mat4_rotate_y(mat4 m, float angle)
 //
 // mat4_rotate_z()
 //
-inline void mat4_rotate_z(mat4 m, float angle)
+inline void mat4_rotate_z(mat4 m, float_t angle)
 {
-   float c = cosf(angle);
-   float s = sinf(angle);
+   float_t c = cosf(angle);
+   float_t s = sinf(angle);
    m[0] =  c;    m[1] = -s;    m[2] =  0;    m[3] =  0;
    m[4] =  s;    m[5] =  c;    m[6] =  0;    m[7] =  0;
    m[8] =  0;    m[9] =  0;    m[10] = 1;    m[11] = 0;

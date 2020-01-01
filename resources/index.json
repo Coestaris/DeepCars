@@ -41,5 +41,10 @@
         { "fn" : "cube.obj", "name" : "cube" },
         { "fn" : "teapot.obj", "name" : "cube" },
         { "fn" : "torus.obj", "name" : "torus" }
+    ],
+
+    "materials":
+    [
+        { "fn": "grass.json", "name": "grass" }
     ]
 }

@@ -3,6 +3,7 @@
     "shaders_dir" : "shaders/",
     "textures_dir" : "textures/",
     "cubemaps_dir" : "textures/",
+    "materials_dir" : "materials/",
 
     "model_default_normalize_x" : false,
     "model_default_normalize_y" : true,
@@ -17,6 +18,19 @@
     "texture_default_compression" : "dxt5",
 
     "shader_default_compression" : true,
+
+    "material_default_mode" : 2,
+    "material_default_ambient" : [0.2, 0.2, 0.2],
+    "material_default_map_ambient" : "",
+    "material_default_diffuse" : [0.8, 0.8, 0.8],
+    "material_default_map_diffuse" : "",
+    "material_default_shininess" : 32,
+    "material_default_specular" : [1, 1, 1],
+    "material_default_map_specular" : "",
+    "material_default_transparent" : 0,
+    "material_default_map_transparent" : "",
+    "material_default_map_normal" : "",
+
 
     "output_file" : "../cmake-build-debug/resources.bin"
 }

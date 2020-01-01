@@ -18,7 +18,7 @@ typedef float* mat4; // 16 floats
 typedef float* vec4; // 4 floats
 
 // Creates new vector with specified 4 values
-vec4 cvec4(double_t x, double_t y, double_t z, double_t l);
+vec4 cvec4(float_t x, float_t y, float_t z, float_t l);
 
 // Frees vector
 void vec4_free(vec4 vec);
@@ -40,11 +40,11 @@ void mat4_print(mat4 mat);
 // Matrix arithmetic
 //
 // Adds given value to a matrix
-void mat4_addf(mat4 m, float v);
+void mat4_addf(mat4 m, float_t v);
 // Adds given matrix to a matrix
 void mat4_addm(mat4 m, mat4 v);
 // Multiplies given value to a matrix
-void mat4_mulv(mat4 m, float v);
+void mat4_mulv(mat4 m, float_t v);
 // Multiplies given matrix to a matrix.
 // Matrix dot product
 void mat4_mulm(mat4 m, mat4 v);
@@ -53,16 +53,16 @@ void mat4_mulm(mat4 m, mat4 v);
 // Matrix transformations
 //
 // Rotates matrix around specified axis
-void mat4_rotate(mat4 m, float angle, float x, float y, float z);
-void mat4_rotate_x(mat4 m, float angle);
-void mat4_rotate_y(mat4 m, float angle);
-void mat4_rotate_z(mat4 m, float angle);
+void mat4_rotate(mat4 m, float_t angle, float_t x, float_t y, float_t z);
+void mat4_rotate_x(mat4 m, float_t angle);
+void mat4_rotate_y(mat4 m, float_t angle);
+void mat4_rotate_z(mat4 m, float_t angle);
 
 // Translates matrix on specified values
-void mat4_translate(mat4 m, float x, float y, float z);
+void mat4_translate(mat4 m, float_t x, float_t y, float_t z);
 
 // Scales matrix on specified values
-void mat4_scale(mat4 m, float x, float y, float z);
+void mat4_scale(mat4 m, float_t x, float_t y, float_t z);
 
 // Fills matrix as identity matrix
 void mat4_identity(mat4 m);
@@ -75,18 +75,18 @@ void mat4_cpy(mat4 dest, mat4 src);
 //
 // Fills matrix with specified values
 void mat4_fill(mat4 m,
-               float a1, float a2, float a3, float a4,
-               float b1, float b2, float b3, float b4,
-               float c1, float c2, float c3, float c4,
-               float d1, float d2, float d3, float d4);
+               float_t a1, float_t a2, float_t a3, float_t a4,
+               float_t b1, float_t b2, float_t b3, float_t b4,
+               float_t c1, float_t c2, float_t c3, float_t c4,
+               float_t d1, float_t d2, float_t d3, float_t d4);
 
 
 // Fills matrix as orthogonal projection
-void mat4_ortho(mat4 m, float n, float f, float r, float t);
+void mat4_ortho(mat4 m, float_t n, float_t f, float_t r, float_t t);
 // Fills matrix as perspective projection
-void mat4_perspective(mat4 m, float n, float f, float r, float t);
+void mat4_perspective(mat4 m, float_t n, float_t f, float_t r, float_t t);
 // Fills matrix as perspective projection using Angle of view and Window size ratio
-void mat4_perspective_fov(mat4 m, float angle_of_view, float ratio, float n, float f);
+void mat4_perspective_fov(mat4 m, float_t angle_of_view, float_t ratio, float_t n, float_t f);
 
 //
 // Vector operations
@@ -95,16 +95,16 @@ void mat4_perspective_fov(mat4 m, float angle_of_view, float ratio, float n, flo
 void vec4_cpy(vec4 dest, vec4 src);
 
 // Fills existing vector with specified values
-void vec4_fill(vec4 a, double_t x, double_t y, double_t z, double_t l);
+void vec4_fill(vec4 a, float_t x, float_t y, float_t z, float_t l);
 
 //
 // Vector arithmetic
 //
-void vec4_addf(vec4 v, float value);
+void vec4_addf(vec4 v, float_t value);
 void vec4_addv(vec4 v, vec4 value);
-void vec4_subf(vec4 v, float value);
+void vec4_subf(vec4 v, float_t value);
 void vec4_subv(vec4 v, vec4 value);
-void vec4_mulf(vec4 v, float value);
+void vec4_mulf(vec4 v, float_t value);
 float vec4_scalar_mulv(vec4 a, vec4 b);
 
 // Vectors dot product. Result will be stored in vector 'a'

@@ -10,14 +10,25 @@
 
 typedef struct _material
 {
-   texture_t* diffuse;
-   texture_t* specular;
+   int mode;
 
+   vec4 ambient;
+   texture_t* map_ambient;
+
+   vec4 diffuse;
+   texture_t* map_diffuse;
+
+   vec4 specular;
    float shininess;
+   texture_t* map_specular;
+
+   float transparent;
+   texture_t* map_transparent;
+   texture_t* map_normal;
 
 } material_t;
 
-material_t* mt_create(texture_t* diffuse, texture_t* specular, float shininess);
+material_t* mt_create();
 void mt_free(material_t* material);
 
 #endif //DEEPCARS_MATERIAL_H
