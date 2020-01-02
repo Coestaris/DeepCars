@@ -12,7 +12,6 @@
 #include "scene.h"
 #include "scm.h"
 #include "graphics/rendering/render_chain.h"
-#include "resources/txm.h"
 
 #define U_LOG(format, ...) DC_LOG("updater.c", format, __VA_ARGS__)
 #define U_ERROR(format, ...) DC_ERROR("updater.c", format, __VA_ARGS__)

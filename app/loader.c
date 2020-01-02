@@ -7,15 +7,13 @@
 #include "../lib/graphics/rendering/graphics.h"
 #include "../lib/updater.h"
 #include "../lib/scm.h"
-#include "../lib/resources/txm.h"
-
 #include "objects/obj_dummy.h"
 #include "win_defaults.h"
 #include "objects/obj_camera_control.h"
-#include "../lib/resources/mm.h"
 #include "../lib/resources/pack.h"
 #include "../lib/graphics/rendering/render_chain.h"
 #include "renderer.h"
+#include "../lib/resources/rmanager.h"
 
 win_info_t*    win;
 mat4           view;
@@ -40,26 +38,28 @@ void app_load_resources(void)
    plane_color = cvec4(129 / 255.0f, 146 / 255.0f, 89 / 255.0f, 0);
    model_t* plane = m_create_plane(30, 30, true);
    m_normalize(plane, true, true, true, true);
-   mm_push(MODELID_PLANE, plane, true);
+   m_build(plane);
+
+   rm_push(MODEL, plane, MODELID_PLANE);
 
    list_push(menu->startup_objects,
-             create_textured_dummy(vec3f(-500, 0, -500), 1000, txm_get(3), mm_get(MODELID_PLANE)));
-/*
+             create_textured_dummy(vec3f(-500, 0, -500), 1000,
+                   rm_get(TEXTURE, 3),
+                   rm_get(MODEL, MODELID_PLANE)));
 
    list_push(menu->startup_objects,
-             create_colored_shaded_dummy(vec3f(16, 0, 4), 10, .01f, COLOR_GRAY, mm_get(MODELID_CUBE)));
-   list_push(menu->startup_objects,
-             create_colored_shaded_dummy(vec3f(4, 0, 16), 10, .01f, COLOR_GRAY, mm_get(MODELID_TORUS)));
-   list_push(menu->startup_objects,
-             create_colored_shaded_dummy(vec3f(16, 0, 16), 10, .01f, COLOR_GRAY, mm_get(MODELID_TEAPOT)));
-*/
+           create_textured_dummy(vec3f(-16, 0, -4), 10,
+                     rm_get(TEXTURE, 0),
+                     rm_get(MODEL, MODELID_CUBE)));
 
    list_push(menu->startup_objects,
-           create_textured_dummy(vec3f(-16, 0, -4), 10, txm_get(0), mm_get(MODELID_CUBE)));
+           create_textured_dummy(vec3f(-4, 0, -16), 10,
+                     rm_get(TEXTURE, 1),
+                     rm_get(MODEL, MODELID_TORUS)));
    list_push(menu->startup_objects,
-           create_textured_dummy(vec3f(-4, 0, -16), 10, txm_get(1), mm_get(MODELID_TORUS)));
-   list_push(menu->startup_objects,
-           create_textured_dummy(vec3f(-16, 0, -16), 10, txm_get(2), mm_get(MODELID_TEAPOT)));
+           create_textured_dummy(vec3f(-16, 0, -16), 10,
+                     rm_get(TEXTURE, 2),
+                     rm_get(MODEL, MODELID_TEAPOT)));
 
    list_push(menu->startup_objects, create_camera_control());
 
@@ -69,23 +69,6 @@ void app_load_resources(void)
    list_push(menu->lights, direction);
 
    scm_push_scene(menu);
-}
-
-void ortho(
-      mat4 mat,
-      float left,
-      float right,
-      float bottom,
-      float top,
-      float zNear,
-      float zFar)
-{
-      mat[0 * 4 + 0] = 2.0f / (right - left);
-      mat[1 * 4 + 1] = 2.0f / (top - bottom);
-      mat[2 * 4 + 2] = - 2.0f / (zFar - zNear);
-      mat[3 * 4 + 0] = - (right + left) / (right - left);
-      mat[3 * 4 + 1] = - (top + bottom) / (top - bottom);
-      mat[3 * 4 + 2] = - (zFar + zNear) / (zFar - zNear);
 }
 
 void app_init_graphics(void)
@@ -104,8 +87,7 @@ void app_init_graphics(void)
    u_init();
    scm_init();
    s_init();
-   txm_init();
-   mm_init();
+   rm_init();
 
    p_load(RESOURCE_PACK_FILE);
 
@@ -158,8 +140,7 @@ void app_fin()
    scm_free();
    gr_free();
 
-   txm_free(true);
-   mm_free(true);
+   rm_free(true, true, true);
    s_free(true);
 
    w_destroy(win);

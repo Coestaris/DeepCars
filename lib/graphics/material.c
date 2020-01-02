@@ -35,5 +35,7 @@ void mt_free(material_t* material)
    vec4_free(material->ambient);
    vec4_free(material->diffuse);
    vec4_free(material->specular);
+   MT_LOG("Material \"%s\" freed", material->name);
+   free(material->name);
    free(material);
 }

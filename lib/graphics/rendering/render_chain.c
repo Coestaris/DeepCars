@@ -7,7 +7,6 @@
 #endif
 #include "render_chain.h"
 #include "../win.h"
-#include "../../resources/txm.h"
 
 render_chain_t* current_chain;
 

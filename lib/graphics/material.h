@@ -10,6 +10,8 @@
 
 typedef struct _material
 {
+   char* name;
+
    int mode;
 
    vec4 ambient;

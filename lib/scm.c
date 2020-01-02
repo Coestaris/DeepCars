@@ -7,8 +7,6 @@
 #endif
 #include "scm.h"
 
-#include "resources/txm.h"
-
 #define SCM_LOG(format, ...) DC_LOG("scm.c", format, __VA_ARGS__)
 #define SCM_ERROR(format, ...) DC_ERROR("scm.c", format, __VA_ARGS__)
 

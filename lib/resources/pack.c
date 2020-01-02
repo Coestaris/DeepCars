@@ -17,10 +17,10 @@
 #include <string.h>
 #include <zlib.h>
 #include "../../oil/crc32.h"
-#include "mm.h"
-#include "txm.h"
 #include "../shaders/shader.h"
 #include "../shaders/shm.h"
+#include "model.h"
+#include "rmanager.h"
 
 // Reads as many bytes as the specified parameter occupies.
 // If reading failed, an error will be thrown
@@ -110,7 +110,9 @@ void p_handler_model(uint8_t* data, size_t length)
             norm_flags & 0x2u,
             norm_flags & 0x4u,
             norm_flags & 0x8u);
-   mm_push(id, m, true);
+   m_build(m);
+
+   rm_push(MODEL, m, id);
 
    free(name);
    free(model_data);
@@ -332,7 +334,7 @@ void p_handler_texture(uint8_t* data, size_t length)
       free(tex_data);
    }
 
-   txm_push(id, t);
+   rm_push(TEXTURE, t, id);
    free(name);
 }
 
@@ -408,7 +410,7 @@ void p_load(const char* name)
 
       if(!found)
       {
-         P_ERROR("Unknown chunk type %i", ch_type);
+         //P_ERROR("Unknown chunk type %i", ch_type);
       }
       free(buffer);
    }

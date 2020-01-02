@@ -6,8 +6,8 @@
 #pragma implementation "renderer.h"
 #endif
 #include "renderer.h"
-#include "../lib/resources/txm.h"
 #include "win_defaults.h"
+#include "../lib/resources/rmanager.h"
 
 render_chain_t* rc1;
 render_chain_t* rc2;
@@ -108,7 +108,7 @@ void bind_skybox(render_stage_t* stage)
    sh_nset_int(stage->shader, "skybox", 0);
 
    GL_PCALL(glActiveTexture(GL_TEXTURE0));
-   t_bind(txm_get(10), 0, GL_TEXTURE_CUBE_MAP);
+   t_bind(rm_get(TEXTURE, 10), 0, GL_TEXTURE_CUBE_MAP);
 }
 
 void unbind_skybox(render_stage_t* stage)
