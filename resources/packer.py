@@ -7,7 +7,7 @@ import src.common as cm
 import src.modelPacker as mp
 import src.shaderPacker as sp
 import src.texturePacker as tp
-import src.materialPacker as mp
+import src.materialPacker as mtp
 
 # 5 bytes: magic bytes
 # 4 bytes: chunks count 
@@ -23,7 +23,8 @@ if __name__ == "__main__":
         sp.get_packer(), 
         tp.get_texture_packer(),
         tp.get_cubemap_packer(),
-        mp.get_packer()
+        mp.get_packer(),
+        mtp.get_packer()
     ]
 
     if "clear" in argv:

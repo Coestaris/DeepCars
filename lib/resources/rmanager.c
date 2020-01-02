@@ -50,20 +50,20 @@ void* rm_get(resource_type_t type, uint32_t id)
    {
       case TEXTURE:
          for(size_t i = 0; i < textures->count; i++)
-            if(((struct _texture_node*)textures->collection[0])->id == id) {
-               return textures->collection[0];
+            if(((struct _texture_node*)textures->collection[i])->id == id) {
+               return (((struct _texture_node*)textures->collection[i])->texture);
             }
          break;
       case MODEL:
-         for(size_t i = 0; i < textures->count; i++)
-            if(((struct _model_node*)models->collection[0])->id == id) {
-               return models->collection[0];
+         for(size_t i = 0; i < models->count; i++)
+            if(((struct _model_node*)models->collection[i])->id == id) {
+               return (((struct _model_node*)models->collection[i])->model);
             }
          break;
       case MATERIAL:
-         for(size_t i = 0; i < textures->count; i++)
-            if(((struct _material_node*)materials->collection[0])->id == id) {
-               return materials->collection[0];
+         for(size_t i = 0; i < materials->count; i++)
+            if(((struct _material_node*)materials->collection[i])->id == id) {
+               return (((struct _material_node*)materials->collection[i])->material);
             }
          break;
    }
@@ -79,20 +79,20 @@ void* rm_getn(resource_type_t type, const char* name)
    {
       case TEXTURE:
          for(size_t i = 0; i < textures->count; i++)
-            if(!strcmp(((struct _texture_node*)textures->collection[0])->texture->name, name)) {
-               return textures->collection[0];
+            if(!strcmp(((struct _texture_node*)textures->collection[i])->texture->name, name)) {
+               return (((struct _texture_node*)textures->collection[i])->texture);
             }
          break;
       case MODEL:
-         for(size_t i = 0; i < textures->count; i++)
-            if(!strcmp(((struct _model_node*)models->collection[0])->model->filename, name)) {
-               return models->collection[0];
+         for(size_t i = 0; i < models->count; i++)
+            if(!strcmp(((struct _model_node*)models->collection[i])->model->filename, name)) {
+               return (((struct _model_node*)models->collection[i])->model);
             }
          break;
       case MATERIAL:
-         for(size_t i = 0; i < textures->count; i++)
-            if(!strcmp(((struct _material_node*)materials->collection[0])->material->name, name)) {
-               return materials->collection[0];
+         for(size_t i = 0; i < materials->count; i++)
+            if(!strcmp(((struct _material_node*)materials->collection[i])->material->name, name)) {
+               return (((struct _material_node*)materials->collection[i])->material);
             }
          break;
    }
@@ -108,15 +108,18 @@ void rm_push(resource_type_t type, void* data, uint32_t id)
    {
       case TEXTURE:
       {
-         struct _texture_node* node = malloc(sizeof(struct _texture_node*));
-         node->id = id;
+         struct _texture_node* node = malloc(sizeof(struct _texture_node));
+         if(id == -1) node->id = textures->count;
+         else node->id = id;
          node->texture = data;
          list_push(textures, node);
       }
          break;
       case MODEL:
       {
-         struct _model_node* node = malloc(sizeof(struct _model_node*));
+         struct _model_node* node = malloc(sizeof(struct _model_node));
+         if(id == -1) node->id = models->count;
+         else node->id = id;
          node->id = id;
          node->model = data;
          list_push(models, node);
@@ -124,7 +127,9 @@ void rm_push(resource_type_t type, void* data, uint32_t id)
          break;
       case MATERIAL:
       {
-         struct _material_node* node = malloc(sizeof(struct _material_node*));
+         struct _material_node* node = malloc(sizeof(struct _material_node));
+         if(id == -1) node->id = materials->count;
+         else node->id = id;
          node->id = id;
          node->material = data;
          list_push(materials, node);
@@ -139,13 +144,13 @@ void rm_push(resource_type_t type, void* data, uint32_t id)
 void rm_free(bool free_tex, bool free_model, bool free_mat)
 {
    if(free_tex) for(size_t i = 0; i < textures->count; i++)
-         t_free(textures->collection[i]);
+         t_free(((struct _texture_node*)textures->collection[i])->texture);
 
    if(free_model) for(size_t i = 0; i < models->count; i++)
-         t_free(models->collection[i]);
+         m_free(((struct _model_node*)models->collection[i])->model);
 
    if(free_mat) for(size_t i = 0; i < materials->count; i++)
-         t_free(materials->collection[i]);
+         mt_free(((struct _material_node*)materials->collection[i])->material);
 
    list_free_elements(textures);
    list_free_elements(models);
@@ -155,5 +160,3 @@ void rm_free(bool free_tex, bool free_model, bool free_mat)
    list_free(models);
    list_free(materials);
 }
-
-

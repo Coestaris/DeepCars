@@ -6,6 +6,7 @@
 #pragma implementation "render_stage.h"
 #endif
 #include "render_stage.h"
+#include "../../resources/rmanager.h"
 
 render_stage_t* rs_create(render_mode_t render_mode, shader_t* shader)
 {
@@ -72,6 +73,15 @@ void rs_build_tex(render_stage_t* rs)
       GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
       GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rs->color_tex, 0));
       GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+
+      char* name = malloc(30);
+      snprintf(name, 30, "__generated_fb%i_color", rs->fbo);
+      texture_t* t = t_create(name);
+      t->type = GL_TEXTURE_2D;
+      t->height = rs->tex_height;
+      t->width = rs->tex_width;
+      t->texID = rs->color_tex;
+      rm_push(TEXTURE, t, -1);
    }
 
    if(rs->attachments & TF_DEPTH && !rs->depth_tex)
@@ -95,6 +105,15 @@ void rs_build_tex(render_stage_t* rs)
       GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
       GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, rs->depth_tex, 0));
       GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+
+      char* name = malloc(30);
+      snprintf(name, 30, "__generated_fb%i_depth", rs->fbo);
+      texture_t* t = t_create(name);
+      t->type = GL_TEXTURE_2D;
+      t->height = rs->tex_height;
+      t->width = rs->tex_width;
+      t->texID = rs->depth_tex;
+      rm_push(TEXTURE, t, -1);
    }
 
    if(rs->attachments & TF_STENCIL && !rs->stencil_tex)
@@ -113,5 +132,14 @@ void rs_build_tex(render_stage_t* rs)
       GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
       GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, rs->stencil_tex, 0));
       GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+
+      char* name = malloc(30);
+      snprintf(name, 30, "__generated_fb%i_stencil", rs->fbo);
+      texture_t* t = t_create(name);
+      t->type = GL_TEXTURE_2D;
+      t->height = rs->tex_height;
+      t->width = rs->tex_width;
+      t->texID = rs->stencil_tex;
+      rm_push(TEXTURE, t, -1);
    }
 }

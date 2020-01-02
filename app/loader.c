@@ -136,7 +136,6 @@ void app_fin()
    u_clear_objects(false);
    u_free();
 
-
    scm_free();
    gr_free();
 

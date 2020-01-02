@@ -33,6 +33,12 @@ typedef struct _texture
    // Some texture data used by OIL
    texData* data;
 
+   // Count of texture layers
+   size_t mipmaps;
+
+   // OpenGL texture type (GL_TEXTURE_2D, GL_CUBEMAP, etc.)
+   GLenum type;
+
 } texture_t;
 
 // texture_t constructor
@@ -46,8 +52,10 @@ void t_bind(texture_t* tex, GLenum active, GLenum target);
 
 void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t height);
 
-void t_set_data_png(texture_t* texture, GLenum target, GLenum fill_target, uint8_t* source, size_t length);
+void t_set_data_png(texture_t* texture, GLenum fill_target, uint8_t* source, size_t length);
 
-void t_set_data_dds(texture_t* texture, GLenum target, GLenum fill_target, uint8_t* source, size_t length);
+void t_set_data_dds(texture_t* texture, GLenum fill_target, uint8_t* source, size_t length);
+
+char* t_get_pretty_signature(texture_t* t);
 
 #endif //DEEPCARS_TEXTURE_H

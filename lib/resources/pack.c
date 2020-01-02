@@ -69,14 +69,14 @@ void p_decompress(size_t in_len, size_t out_len, uint8_t* buff_in, uint8_t* buff
 // Handles model chunk and adds parsed models to mm
 void p_handler_model(uint8_t* data, size_t length)
 {
-   size_t count = 0;
+   size_t      count = 0;
 
-   uint32_t id;
-   uint16_t name_len;
-   uint8_t arhive;
-   uint32_t data_len;
-   uint8_t norm_flags;
-   uint32_t uncomp_data_len;
+   uint32_t    id;
+   uint16_t    name_len;
+   uint8_t     arhive;
+   uint32_t    data_len;
+   uint8_t     norm_flags;
+   uint32_t    uncomp_data_len;
 
    READ_BUFF(id,sizeof(id));
    READ_BUFF(name_len,sizeof(name_len));
@@ -121,12 +121,12 @@ void p_handler_model(uint8_t* data, size_t length)
 // Handles shaders chunk and adds parsed shaders to shm
 void p_handler_shader(uint8_t* data, size_t length)
 {
-   size_t count = 0;
+   size_t      count = 0;
 
-   uint32_t id;
-   uint8_t compress;
-   uint8_t shader_flags;
-   uint32_t name_len;
+   uint32_t    id;
+   uint8_t     compress;
+   uint8_t     shader_flags;
+   uint32_t    name_len;
 
    READ_BUFF(id, sizeof(id));
    READ_BUFF(name_len,sizeof(name_len));
@@ -225,19 +225,19 @@ void p_handler_shader(uint8_t* data, size_t length)
 // Handles texture chunk and adds parsed textures to txm
 void p_handler_texture(uint8_t* data, size_t length)
 {
-   size_t count = 0;
+   size_t      count = 0;
 
-   uint32_t id;
-   uint8_t maps;
-   uint16_t name_len;
-   uint32_t width;
-   uint32_t heigth;
-   uint8_t compression;
-   uint8_t wrapping;
-   uint8_t min;
-   uint8_t mag;
-   uint8_t flip;
-   uint32_t data_len;
+   uint32_t    id;
+   uint8_t     maps;
+   uint16_t    name_len;
+   uint32_t    width;
+   uint32_t    heigth;
+   uint8_t     compression;
+   uint8_t     wrapping;
+   uint8_t     min;
+   uint8_t     mag;
+   uint8_t     flip;
+   uint32_t    data_len;
 
    READ_BUFF(id, sizeof(id));
    READ_BUFF(maps, sizeof(maps));
@@ -328,14 +328,126 @@ void p_handler_texture(uint8_t* data, size_t length)
       READ_BUFF(*tex_data, data_len);
 
       if (compression == 0)
-         t_set_data_png(t, target, filltarget + map, tex_data, data_len);
+         t_set_data_png(t, filltarget + map, tex_data, data_len);
       else
-         t_set_data_dds(t, target, filltarget + map, tex_data, data_len);
+         t_set_data_dds(t, filltarget + map, tex_data, data_len);
       free(tex_data);
    }
 
    rm_push(TEXTURE, t, id);
+
+   char* sig = t_get_pretty_signature(t);
+   P_LOG("Loaded %s", sig);
+   free(sig);
+
    free(name);
+}
+
+void p_handler_material(uint8_t* data, size_t length)
+{
+   size_t      count = 0;
+
+   uint32_t    id;
+   uint16_t    name_len;
+   uint8_t     mode;
+
+   uint16_t    ambient_len;
+   uint16_t    diffuse_len;
+   uint16_t    specular_len;
+   uint16_t    transparent_len;
+   uint16_t    normal_len;
+
+   char*       ambient;
+   char*       diffuse;
+   char*       specular;
+   char*       transparent;
+   char*       normal;
+
+   READ_BUFF(id, sizeof(id));
+   READ_BUFF(name_len, sizeof(name_len));
+   char* name = malloc(name_len + 1);
+   READ_BUFF(*name, name_len);
+   name[name_len] = '\0';
+
+   READ_BUFF(mode, sizeof(mode));
+
+   material_t* material = mt_create(name, mode);
+   READ_BUFF(*material->ambient, 12);
+   READ_BUFF(ambient_len, sizeof(ambient_len));
+   ambient = malloc(ambient_len + 1);
+   READ_BUFF(*ambient, ambient_len);
+   ambient[ambient_len] = '\0';
+
+   READ_BUFF(*material->diffuse, 12);
+   READ_BUFF(diffuse_len, sizeof(diffuse_len));
+   diffuse = malloc(diffuse_len + 1);
+   READ_BUFF(*diffuse, diffuse_len);
+   diffuse[diffuse_len] = '\0';
+
+   READ_BUFF(material->shininess, sizeof(material->shininess));
+   READ_BUFF(*material->specular, 12);
+   READ_BUFF(specular_len, sizeof(specular_len));
+   specular = malloc(specular_len + 1);
+   READ_BUFF(*specular, specular_len);
+   specular[specular_len] = '\0';
+
+   READ_BUFF(material->transparent, sizeof(material->transparent));
+   READ_BUFF(transparent_len, sizeof(transparent_len));
+   transparent = malloc(transparent_len + 1);
+   READ_BUFF(*transparent, transparent_len);
+   transparent[transparent_len] = '\0';
+
+   READ_BUFF(normal_len, sizeof(normal_len));
+   normal = malloc(normal_len + 1);
+   READ_BUFF(*normal, normal_len);
+   normal[normal_len] = '\0';
+
+   texture_t* t;
+   if(ambient_len)
+   {
+      t = rm_getn(TEXTURE, ambient);
+      if(!t) P_ERROR("Unable to find texture \"%s\"", ambient);
+      material->map_ambient = t;
+   }
+
+   if(diffuse_len)
+   {
+      t = rm_getn(TEXTURE, diffuse);
+      if(!t) P_ERROR("Unable to find texture \"%s\"", diffuse);
+      material->map_diffuse = t;
+   }
+
+   if(specular_len)
+   {
+      t = rm_getn(TEXTURE, specular);
+      if(!t) P_ERROR("Unable to find texture \"%s\"", specular);
+      material->map_specular = t;
+   }
+
+   if(transparent_len)
+   {
+      t = rm_getn(TEXTURE, transparent);
+      if(!t) P_ERROR("Unable to find texture \"%s\"", transparent);
+      material->map_ambient = t;
+   }
+
+   if(normal_len)
+   {
+      t = rm_getn(TEXTURE, normal);
+      if(!t) P_ERROR("Unable to find texture \"%s\"", normal);
+      material->map_ambient = t;
+   }
+
+   mt_build(material);
+   rm_push(MATERIAL, material, id);
+
+   P_LOG("Material \"%s\" loaded", name);
+
+   free(ambient);
+   free(diffuse);
+   free(specular);
+   free(transparent);
+   free(normal);
 }
 
 // Array of supported chunks
@@ -344,6 +456,7 @@ struct _pack_chunk supported_chunks[] = {
    {1, p_handler_shader },
    {2, p_handler_texture },
    {3, p_handler_texture },
+   {4, p_handler_material },
 };
 
 const size_t supported_chunks_count = sizeof(supported_chunks) / sizeof(struct _pack_chunk);
@@ -410,7 +523,7 @@ void p_load(const char* name)
 
       if(!found)
       {
-         //P_ERROR("Unknown chunk type %i", ch_type);
+         P_ERROR("Unknown chunk type %i", ch_type);
       }
       free(buffer);
    }

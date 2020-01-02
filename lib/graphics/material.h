@@ -8,11 +8,26 @@
 #include "gmath.h"
 #include "../resources/texture.h"
 
+/*# Modes:
+# 0 - no ambient           (ambient ignored)
+# 1 - ambient              (specular ignored)
+# 2 - ambient + specular
+# 3 - illum                (specular igroned, ambient ignored)
+# 4 - illum (no shadows)   (specular ignored, ambient ignored)
+*/
+typedef enum _material_type {
+   MT_DEFAULT_NO_AMBIENT = 0,
+   MT_DEFAULT_NO_SPECULAR = 1,
+   MT_DEFAULT = 2,
+   MT_ILLUM = 3,
+   MT_ILLUM_NO_SHADOWS = 4,
+
+} material_type;
+
 typedef struct _material
 {
    char* name;
-
-   int mode;
+   material_type mode;
 
    vec4 ambient;
    texture_t* map_ambient;
@@ -30,7 +45,8 @@ typedef struct _material
 
 } material_t;
 
-material_t* mt_create();
+material_t* mt_create(char* name, uint8_t mode);
 void mt_free(material_t* material);
+void mt_build(material_t* material);
 
 #endif //DEEPCARS_MATERIAL_H

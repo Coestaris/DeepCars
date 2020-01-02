@@ -19,6 +19,7 @@ texture_t* t_create(char* name)
    t->name = name;
    t->data = malloc(sizeof(texData));
    t->texID = 0;
+   t->mipmaps = 0;
 
    t->data->wrappingMode = OIL_DEFAULT_WRAPPING;
    t->data->flipX = OIL_DEFAULT_FLIPX;
@@ -59,16 +60,31 @@ void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t he
 
    GL_CALL(glBindTexture(target, 0));
 
+   texture->type = target;
    texture->width = width;
    texture->height = height;
 }
 
-void t_set_data_png(texture_t* texture, GLenum target, GLenum fill_target, uint8_t* source, size_t length)
+char* t_get_pretty_signature(texture_t* t)
 {
+   char* buffer = malloc(sizeof(char) * 100);
+
+   snprintf(buffer, 100, "%s %s \"%s\" [%ix%i](%li mipmap%s)",
+         t->mipmaps <= 1 ? "" : "DDS",
+         t->type == GL_TEXTURE_2D ? "texture" : "cubemap",
+         t->name, t->width, t->height, t->mipmaps,
+         t->mipmaps > 1 ? "s" : "");
+
+   return buffer;
 
 }
 
-void t_set_data_dds(texture_t* texture, GLenum target, GLenum fill_target, uint8_t* source, size_t length)
+void t_set_data_png(texture_t* texture, GLenum fill_target, uint8_t* source, size_t length)
+{
+   //todo:
+}
+
+void t_set_data_dds(texture_t* texture, GLenum fill_target, uint8_t* source, size_t length)
 {
    const char* str_format = NULL;
 
@@ -131,13 +147,14 @@ void t_set_data_dds(texture_t* texture, GLenum target, GLenum fill_target, uint8
       goto exit;
    }
 
-   GL_CALL(glBindTexture(target, texture->texID));
+   GL_CALL(glBindTexture(texture->type, texture->texID));
 
    // prepare some variables
    size_t offset = 0;
    size_t size = 0;
    w = width;
    h = height;
+   texture->mipmaps = mip_map_count;
 
    for (size_t i=0; i < mip_map_count; i++)
    {
@@ -155,8 +172,8 @@ void t_set_data_dds(texture_t* texture, GLenum target, GLenum fill_target, uint8
       h /= 2;
    }
 
-   GL_CALL(glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, mip_map_count - 1));
-   GL_CALL(glBindTexture(target, 0));
+   GL_CALL(glTexParameteri(texture->type, GL_TEXTURE_MAX_LEVEL, mip_map_count - 1));
+   GL_CALL(glBindTexture(texture->type, 0));
 
    exit:
    return;
