@@ -42,7 +42,7 @@ void setup_light(scene_t* scene)
 {
    scene->light = l_create();
    scene->light->position = cvec4(0, 20, 0, 0);
-   vec4_fill(scene->light->color, 0.7, 0.7, 0.7, 0);
+   vec4_fill(scene->light->color, 0.4, 0.4, 0.4, 0);
 
    float near_plane = 1.0f, far_plane = 100.0f;
    mat4_ortho(scene->light->light_proj, near_plane, far_plane, 50, 50);

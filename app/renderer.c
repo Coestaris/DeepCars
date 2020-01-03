@@ -168,8 +168,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 {
    shader_t* skybox_shader = s_get_shader(SH_SKYBOX);
    shader_t* default_shader = s_get_shader(SH_DEFAULT);
-   //shader_t* gaussian_shader = s_get_shader(SH_BLUR);
    shader_t* bypass_shader = s_get_shader(SH_BYPASS);
+   shader_t* gamma_shader = s_get_shader(SH_GAMMA);
    shader_t* depth_shader = s_get_shader(SH_DEPTH_SHADER);
    shader_t* depth_bypass_shader = s_get_shader(SH_DEPTH_BYPASS);
 
@@ -214,7 +214,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    skybox_data->buffmat = cmat4();
    skybox_data->camera = camera;
 
-   render_stage_t* bypass = rs_create(RM_BYPASS, bypass_shader);
+   render_stage_t* bypass = rs_create(RM_BYPASS, gamma_shader);
    bypass->tex_width = info->w;
    bypass->tex_height = info->h;
    bypass->bind_shader = bind_bypass;

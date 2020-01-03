@@ -8,7 +8,7 @@
 #include "../lib/graphics/rendering/render_chain.h"
 
 #define SH_DEFAULT 0
-#define SH_BLUR 1
+#define SH_GAMMA 1
 #define SH_BYPASS 2
 #define SH_SKYBOX 3
 #define SH_DEPTH_SHADER 4

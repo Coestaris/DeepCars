@@ -1,7 +1,6 @@
 {
     "mode": 2,
     "specular" : [0, 0, 0],
-    "ambient": [1, 1, 1],
     "map_diffuse" : "grass",
     "shininess": 256
 }

@@ -58,7 +58,7 @@ void rs_build_tex(render_stage_t* rs)
    {
       GL_CALL(glGenTextures(1, &rs->color_tex));
       GL_CALL(glBindTexture(GL_TEXTURE_2D, rs->color_tex));
-      GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+      GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F,
                            rs->tex_width, rs->tex_height, 0, GL_RGBA, GL_FLOAT, NULL));
 
       GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, rs->tex_min_filter));

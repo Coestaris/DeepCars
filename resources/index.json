@@ -2,7 +2,7 @@
     "shaders" : 
     [
         { "vertex" : "geometry_default.vsh", "fragment" :  "geometry_default.fsh", "name":  "geometry_default" },
-        { "vertex" : "blur.vsh", "fragment" :  "blur.fsh", "name":  "blur" },
+        { "vertex" : "gamma.vsh", "fragment" :  "gamma.fsh", "name":  "gamma" },
         { "vertex" : "bypass.vsh", "fragment" :  "bypass.fsh", "name":  "bypass" },
         { "vertex" : "skybox.vsh", "fragment" :  "skybox.fsh", "name":  "skybox" },
         { "vertex" : "depth_shader.vsh", "fragment" :  "depth_shader.fsh", "name":  "depth_shader" },
