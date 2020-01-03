@@ -8,29 +8,76 @@
 #include "render_stage.h"
 #include "../../resources/rmanager.h"
 
+#define RS_LOG(format, ...) DC_LOG("render_stage.c", format, __VA_ARGS__)
+#define RS_ERROR(format, ...) DC_ERROR("render_stage.c", format, __VA_ARGS__)
+
+void rs_set_color_options(attachment_options_t* ao)
+{
+   ao->tex_width = 1024;
+   ao->tex_height = 1024;
+   ao->tex_min_filter = GL_NEAREST;
+   ao->tex_mag_filter = GL_NEAREST;
+   ao->tex_wrapping_s = GL_REPEAT;
+   ao->tex_wrapping_t = GL_REPEAT;
+   ao->tex_int_format = GL_RGBA;
+   ao->tex_format = GL_RGBA;
+   ao->tex_border_color[0] = 0;
+   ao->tex_border_color[1] = 0;
+   ao->tex_border_color[2] = 0;
+   ao->tex_border_color[3] = 0;
+}
+
+void rs_set_depth_options(attachment_options_t* ao)
+{
+   ao->tex_width = 1024;
+   ao->tex_height = 1024;
+   ao->tex_min_filter = GL_NEAREST;
+   ao->tex_mag_filter = GL_NEAREST;
+   ao->tex_wrapping_s = GL_CLAMP_TO_BORDER;
+   ao->tex_wrapping_t = GL_CLAMP_TO_BORDER;
+   ao->tex_int_format = GL_DEPTH_COMPONENT;
+   ao->tex_format = GL_DEPTH_COMPONENT;
+   ao->tex_border_color[0] = 0;
+   ao->tex_border_color[1] = 0;
+   ao->tex_border_color[2] = 0;
+   ao->tex_border_color[3] = 0;
+}
+
 render_stage_t* rs_create(render_mode_t render_mode, shader_t* shader)
 {
    render_stage_t* rs = malloc(sizeof(render_stage_t));
    rs->shader = shader;
    rs->render_mode = render_mode;
 
-   rs->bind_shader = NULL;
+   rs->bind_shader      = NULL;
    rs->setup_obj_shader = NULL;
-   rs->unbind_shader = NULL;
-   rs->data = NULL;
+   rs->unbind_shader    = NULL;
+   rs->data             = NULL;
 
-   rs->tex_width = 1024;
-   rs->tex_height = 1024;
    rs->attachments = 0;
-   rs->tex_min_filter = GL_NEAREST;
-   rs->tex_mag_filter = GL_NEAREST;
-   rs->tex_wrapping = GL_REPEAT;
+   rs_set_color_options(&rs->color0_format);
+   rs_set_color_options(&rs->color1_format);
+   rs_set_color_options(&rs->color2_format);
+   rs_set_color_options(&rs->color3_format);
+   rs_set_color_options(&rs->color4_format);
+   rs_set_color_options(&rs->color5_format);
+   rs_set_depth_options(&rs->depth_format);
+   rs_set_color_options(&rs->stencil_format);
+
+   rs->width = 0;
+   rs->height = 0;
+
    rs->fbo = 0;
    rs->vao = 0;
 
-   rs->color_tex = 0;
-   rs->depth_tex = 0;
-   rs->stencil_tex = 0;
+   rs->color0_tex    = NULL;
+   rs->color1_tex    = NULL;
+   rs->color2_tex    = NULL;
+   rs->color3_tex    = NULL;
+   rs->color4_tex    = NULL;
+   rs->color5_tex    = NULL;
+   rs->depth_tex     = NULL;
+   rs->stencil_tex   = NULL;
 
    rs->proj = cmat4();
    rs->view = cmat4();
@@ -49,94 +96,106 @@ void rs_free(render_stage_t* rs)
    free(rs);
 }
 
+texture_t* rs_setup_tex(GLenum attachment, attachment_options_t options, GLuint fbo)
+{
+   GLuint id;
+   GL_CALL(glGenTextures(1, &id));
+   GL_CALL(glBindTexture(GL_TEXTURE_2D, id));
+   GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, options.tex_int_format,
+                        options.tex_width, options.tex_height, 0, options.tex_format, GL_FLOAT, NULL));
+
+   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, options.tex_min_filter));
+   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, options.tex_mag_filter));
+   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, options.tex_wrapping_s));
+   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, options.tex_wrapping_t));
+
+   GL_CALL(glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, options.tex_border_color));
+
+   GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+
+   GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, fbo));
+   GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, id, 0));
+   GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+
+   char* name = malloc(30);
+   snprintf(name, 30, "__generated_fb%i_%i", fbo, attachment);
+   texture_t* t = t_create(name);
+   t->type = GL_TEXTURE_2D;
+   t->height = options.tex_height;
+   t->width = options.tex_width;
+   t->texID = id;
+   rm_push(TEXTURE, t, -1);
+
+   return t;
+}
+
+void rs_check_sizes(render_stage_t* rs, attachment_options_t options)
+{
+   if(!rs->width)
+   {
+      rs->width = options.tex_width;
+      rs->height = options.tex_height;
+   }
+   else
+   {
+      if(rs->width != options.tex_width ||
+         rs->height != options.tex_height)
+      {
+         RS_ERROR("Sizes of attachments should be equal, i guess....",0);
+      }
+   }
+}
+
 void rs_build_tex(render_stage_t* rs)
 {
    if(!rs->fbo)
       GL_CALL(glGenFramebuffers(1, &rs->fbo));
 
-   if(rs->attachments & TF_COLOR && !rs->color_tex)
+   if(rs->attachments & TF_COLOR0 && !rs->color0_tex)
    {
-      GL_CALL(glGenTextures(1, &rs->color_tex));
-      GL_CALL(glBindTexture(GL_TEXTURE_2D, rs->color_tex));
-      GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F,
-                           rs->tex_width, rs->tex_height, 0, GL_RGBA, GL_FLOAT, NULL));
+      rs->color0_tex = rs_setup_tex(GL_COLOR_ATTACHMENT0, rs->color0_format, rs->fbo);
+      rs_check_sizes(rs, rs->color0_format);
+   }
 
-      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, rs->tex_min_filter));
-      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, rs->tex_mag_filter));
-      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, rs->tex_wrapping));
-      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, rs->tex_wrapping));
-      GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+   if(rs->attachments & TF_COLOR1 && !rs->color1_tex)
+   {
+      rs->color1_tex =rs_setup_tex(GL_COLOR_ATTACHMENT1, rs->color1_format, rs->fbo);
+      rs_check_sizes(rs, rs->color1_format);
+   }
 
-      GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
-      GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rs->color_tex, 0));
-      GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+   if(rs->attachments & TF_COLOR2 && !rs->color2_tex)
+   {
+      rs->color2_tex =rs_setup_tex(GL_COLOR_ATTACHMENT2, rs->color2_format, rs->fbo);
+      rs_check_sizes(rs, rs->color2_format);
+   }
 
-      char* name = malloc(30);
-      snprintf(name, 30, "__generated_fb%i_color", rs->fbo);
-      texture_t* t = t_create(name);
-      t->type = GL_TEXTURE_2D;
-      t->height = rs->tex_height;
-      t->width = rs->tex_width;
-      t->texID = rs->color_tex;
-      rm_push(TEXTURE, t, -1);
+   if(rs->attachments & TF_COLOR3 && !rs->color3_tex)
+   {
+      rs->color3_tex =rs_setup_tex(GL_COLOR_ATTACHMENT3, rs->color3_format, rs->fbo);
+      rs_check_sizes(rs, rs->color3_format);
+   }
+
+   if(rs->attachments & TF_COLOR4 && !rs->color4_tex)
+   {
+      rs->color4_tex =rs_setup_tex(GL_COLOR_ATTACHMENT4, rs->color4_format, rs->fbo);
+      rs_check_sizes(rs, rs->color4_format);
+   }
+
+   if(rs->attachments & TF_COLOR5 && !rs->color5_tex)
+   {
+      rs->color5_tex =rs_setup_tex(GL_COLOR_ATTACHMENT5, rs->color5_format, rs->fbo);
+      rs_check_sizes(rs, rs->color5_format);
    }
 
    if(rs->attachments & TF_DEPTH && !rs->depth_tex)
    {
-      GL_CALL(glGenTextures(1, &rs->depth_tex));
-      GL_CALL(glBindTexture(GL_TEXTURE_2D, rs->depth_tex));
-      GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F,
-                   rs->tex_width, rs->tex_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL));
-
-      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, rs->tex_min_filter));
-      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, rs->tex_mag_filter));
-      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, rs->tex_wrapping));
-      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, rs->tex_wrapping));
-
-      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
-      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
-      float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-      GL_CALL(glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor));
-      GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
-
-      GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
-      GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, rs->depth_tex, 0));
-      GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-
-      char* name = malloc(30);
-      snprintf(name, 30, "__generated_fb%i_depth", rs->fbo);
-      texture_t* t = t_create(name);
-      t->type = GL_TEXTURE_2D;
-      t->height = rs->tex_height;
-      t->width = rs->tex_width;
-      t->texID = rs->depth_tex;
-      rm_push(TEXTURE, t, -1);
+      rs->depth_tex = rs_setup_tex(GL_DEPTH_ATTACHMENT, rs->depth_format, rs->fbo);
+      rs_check_sizes(rs, rs->depth_format);
    }
 
    if(rs->attachments & TF_STENCIL && !rs->stencil_tex)
    {
-      GL_CALL(glGenTextures(1, &rs->stencil_tex));
-      GL_CALL(glBindTexture(GL_TEXTURE_2D, rs->stencil_tex));
-      GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_STENCIL_COMPONENTS,
-                           rs->tex_width, rs->tex_height, 0, GL_STENCIL_COMPONENTS, GL_FLOAT, NULL));
-
-      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, rs->tex_min_filter));
-      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, rs->tex_mag_filter));
-      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, rs->tex_wrapping));
-      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, rs->tex_wrapping));
-      GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
-
-      GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
-      GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, rs->stencil_tex, 0));
-      GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-
-      char* name = malloc(30);
-      snprintf(name, 30, "__generated_fb%i_stencil", rs->fbo);
-      texture_t* t = t_create(name);
-      t->type = GL_TEXTURE_2D;
-      t->height = rs->tex_height;
-      t->width = rs->tex_width;
-      t->texID = rs->stencil_tex;
-      rm_push(TEXTURE, t, -1);
+      rs->stencil_tex = rs_setup_tex(GL_DEPTH_ATTACHMENT, rs->stencil_format, rs->fbo);
+      rs_check_sizes(rs, rs->stencil_format);
    }
 }

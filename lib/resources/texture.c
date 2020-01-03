@@ -183,15 +183,15 @@ void t_set_data_dds(texture_t* texture, GLenum fill_target, uint8_t* source, siz
 //
 // t_bind()
 //
-inline void t_bind(texture_t* tex, GLenum active, GLenum target)
+inline void t_bind(texture_t* tex, GLenum active)
 {
    GL_PCALL(glActiveTexture(GL_TEXTURE0 + active));
    if(!tex)
    {
-      GL_PCALL(glBindTexture(target, 0));
+      GL_PCALL(glBindTexture(GL_TEXTURE_2D, 0));
    }
    else
    {
-      GL_PCALL(glBindTexture(target, tex->texID));
+      GL_PCALL(glBindTexture(tex->type, tex->texID));
    }
 }

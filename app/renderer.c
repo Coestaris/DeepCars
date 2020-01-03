@@ -29,27 +29,23 @@ void switch_stages()
 void bind_bypass(render_stage_t* stage)
 {
    sh_nset_int(stage->shader, "tex", 0);
-   glActiveTexture(GL_TEXTURE0);
-   glBindTexture(GL_TEXTURE_2D, stage->prev_stage->color_tex);
+   t_bind(stage->prev_stage->color0_tex, 0);
 }
 
 void unbind_bypass(render_stage_t* stage)
 {
-   t_bind(NULL, 0, GL_TEXTURE_2D);
 }
 
 void bind_depth_bypass(render_stage_t* stage)
 {
    sh_nset_int(stage->shader, "depth_map", 0);
-   glActiveTexture(GL_TEXTURE0);
-   glBindTexture(GL_TEXTURE_2D, stage->prev_stage->depth_tex);
+   t_bind(stage->prev_stage->depth_tex, 0);
    sh_nset_float(stage->shader, "near_plane", 1);
    sh_nset_float(stage->shader, "far_plane", 200);
 }
 
 void unbind_depth_bypass(render_stage_t* stage)
 {
-   t_bind(NULL, 0, GL_TEXTURE_2D);
 }
 
 void bind_geometry(render_stage_t* stage)
@@ -74,8 +70,7 @@ void bind_geometry(render_stage_t* stage)
    sh_nset_mat4(stage->shader, "lightSpaceMatrix", scene->light->light_space);
 
    sh_nset_int(stage->shader, "shadowMap", 0);
-   GL_PCALL(glActiveTexture(GL_TEXTURE0));
-   GL_PCALL(glBindTexture(GL_TEXTURE_2D, stage->prev_stage->depth_tex));
+   t_bind(stage->prev_stage->depth_tex, 0);
 
    sh_nset_int(stage->shader, "diffuseTexture", 1);
    sh_nset_int(stage->shader, "specularTexture", 2);
@@ -84,15 +79,13 @@ void bind_geometry(render_stage_t* stage)
 
 void unbind_geometry(render_stage_t* stage)
 {
-   t_bind(NULL, 0, GL_TEXTURE_2D);
-   t_bind(NULL, 1, GL_TEXTURE_2D);
 }
 
 void setup_object(render_stage_t* stage, object_t* object, mat4 model_mat)
 {
-   t_bind(object->draw_info->material->map_diffuse, 1, GL_TEXTURE_2D);
-   t_bind(object->draw_info->material->map_specular, 2, GL_TEXTURE_2D);
-   t_bind(object->draw_info->material->map_ambient, 3, GL_TEXTURE_2D);
+   t_bind(object->draw_info->material->map_diffuse, 1);
+   t_bind(object->draw_info->material->map_specular, 2);
+   t_bind(object->draw_info->material->map_ambient, 3);
 
    sh_nset_float(stage->shader, "shininess", object->draw_info->material->shininess);
 
@@ -115,19 +108,17 @@ void bind_skybox(render_stage_t* stage)
    sh_nset_mat4(stage->shader, "projection", stage->proj);
    sh_nset_int(stage->shader, "skybox", 0);
 
-   GL_PCALL(glActiveTexture(GL_TEXTURE0));
-   t_bind(scene->skybox, 0, GL_TEXTURE_CUBE_MAP);
+   t_bind(scene->skybox, 0);
 }
 
 void unbind_skybox(render_stage_t* stage)
 {
-   t_bind(NULL, 0, GL_TEXTURE_CUBE_MAP);
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }
 
 void draw_skybox(render_stage_t* stage)
 {
-   stage->color_tex = stage->prev_stage->color_tex;
+   stage->color0_tex = stage->prev_stage->color0_tex;
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, stage->prev_stage->fbo));
    {
       GL_PCALL(glDepthFunc(GL_LEQUAL));
@@ -174,27 +165,29 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shader_t* depth_bypass_shader = s_get_shader(SH_DEPTH_BYPASS);
 
    render_stage_t* depth = rs_create(RM_GEOMETRY, depth_shader);
-   depth->tex_width = 2048;
-   depth->tex_height = 2048;
+   depth->depth_format.tex_height = 2048;
+   depth->depth_format.tex_width = 2048;
    depth->bind_shader = bind_depth;
    depth->setup_obj_shader = setup_object_depth;
    depth->unbind_shader = unbind_depth;
    depth->attachments = TF_DEPTH;
 
    render_stage_t* depth_bypass = rs_create(RM_BYPASS, depth_bypass_shader);
-   depth_bypass->tex_width = info->w;
-   depth_bypass->tex_height = info->h;
+   depth_bypass->color0_format.tex_width = info->w;
+   depth_bypass->color0_format.tex_height = info->h;
    depth_bypass->bind_shader = bind_depth_bypass;
    depth_bypass->unbind_shader = unbind_depth_bypass;
    depth_bypass->vao = rc_get_quad_vao();
 
    render_stage_t* geometry = rs_create(RM_GEOMETRY, default_shader);
-   geometry->tex_width = info->w;
-   geometry->tex_height = info->h;
+   geometry->color0_format.tex_width = info->w;
+   geometry->color0_format.tex_height = info->h;
+   geometry->depth_format.tex_width = info->w;
+   geometry->depth_format.tex_height = info->h;
    geometry->bind_shader = bind_geometry;
    geometry->setup_obj_shader = setup_object;
    geometry->unbind_shader = unbind_geometry;
-   geometry->attachments = TF_COLOR | TF_DEPTH;
+   geometry->attachments = TF_COLOR0 | TF_DEPTH;
    mat4_cpy(geometry->proj, proj);
    mat4_identity(geometry->view);
    geometry_shader_data_t* geometry_data = (geometry->data = malloc(sizeof(geometry_shader_data_t)));
@@ -202,8 +195,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    geometry_data->camera = camera;
 
    render_stage_t* skybox = rs_create(RM_CUSTOM, skybox_shader);
-   skybox->tex_width = info->w;
-   skybox->tex_height = info->h;
+   skybox->color0_format.tex_width = info->w;
+   skybox->color0_format.tex_height = info->h;
    skybox->bind_shader = bind_skybox;
    skybox->custom_draw_func = draw_skybox;
    skybox->unbind_shader = unbind_skybox;
@@ -215,8 +208,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    skybox_data->camera = camera;
 
    render_stage_t* bypass = rs_create(RM_BYPASS, gamma_shader);
-   bypass->tex_width = info->w;
-   bypass->tex_height = info->h;
+   bypass->color0_format.tex_width = info->w;
+   bypass->color0_format.tex_height = info->h;
    bypass->bind_shader = bind_bypass;
    bypass->unbind_shader = unbind_bypass;
    bypass->vao = rc_get_quad_vao();
