@@ -1,5 +1,5 @@
 {
     "mode": 2,
     "map_diffuse": "box_diff",
-    "map_specular": "box_spec"
+    "shininess": 256
 }

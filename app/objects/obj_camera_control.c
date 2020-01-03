@@ -48,19 +48,19 @@ void camera_update_func(object_t* this)
    // light move
    // left
    if (u_get_key_state(113) == KEY_PRESSED)
-      vec4_subv(light_pos, camera_cross_cpy);
+      vec4_subv(scene->light->position, camera_cross_cpy);
 
    // right
    if (u_get_key_state(114) == KEY_PRESSED)
-      vec4_addv(light_pos, camera_cross_cpy);
+      vec4_addv(scene->light->position, camera_cross_cpy);
 
    // forward
    if (u_get_key_state(111) == KEY_PRESSED)
-      vec4_subv(light_pos, camera_dir_cpy);
+      vec4_subv(scene->light->position, camera_dir_cpy);
 
    // back
    if (u_get_key_state(116) == KEY_PRESSED)
-      vec4_addv(light_pos, camera_dir_cpy);
+      vec4_addv(scene->light->position, camera_dir_cpy);
 
    //up
    if (u_get_key_state(65) == KEY_PRESSED)

@@ -8,6 +8,8 @@
 #include "renderer.h"
 #include "win_defaults.h"
 #include "../lib/resources/rmanager.h"
+#include "../lib/scene.h"
+#include "../lib/scm.h"
 
 render_chain_t* rc1;
 render_chain_t* rc2;
@@ -58,15 +60,18 @@ void bind_geometry(render_stage_t* stage)
    geometry_shader_data_t* data = (geometry_shader_data_t*)stage->data;
    c_to_mat(data->buffmat, data->camera);
 
-   mat4_cpy(light_space, light_proj);
-   mat4_mulm(light_space, light_view);
+   scene_t* scene = scm_get_current();
+
+   mat4_cpy(scene->light->light_space, scene->light->light_proj);
+   mat4_mulm(scene->light->light_space, scene->light->light_view);
 
    sh_nset_mat4(stage->shader, "projection", stage->proj);
    sh_nset_mat4(stage->shader, "view", data->buffmat);
 
    sh_nset_vec3(stage->shader, "viewPos", data->camera->position);
-   sh_nset_vec3(stage->shader, "lightPos", light_pos);
-   sh_nset_mat4(stage->shader, "lightSpaceMatrix", light_space);
+   sh_nset_vec3(stage->shader, "lightColor", scene->light->color);
+   sh_nset_vec3(stage->shader, "lightPos", scene->light->position);
+   sh_nset_mat4(stage->shader, "lightSpaceMatrix", scene->light->light_space);
 
    sh_nset_int(stage->shader, "shadowMap", 0);
    GL_PCALL(glActiveTexture(GL_TEXTURE0));
@@ -99,6 +104,8 @@ void bind_skybox(render_stage_t* stage)
    geometry_shader_data_t* data = (geometry_shader_data_t*)stage->data;
    c_to_mat(data->buffmat, data->camera);
 
+   scene_t* scene = scm_get_current();
+
    data->buffmat[3] = 0;
    data->buffmat[7] = 0;
    data->buffmat[11] = 0;
@@ -109,7 +116,7 @@ void bind_skybox(render_stage_t* stage)
    sh_nset_int(stage->shader, "skybox", 0);
 
    GL_PCALL(glActiveTexture(GL_TEXTURE0));
-   t_bind(rm_get(TEXTURE, 10), 0, GL_TEXTURE_CUBE_MAP);
+   t_bind(scene->skybox, 0, GL_TEXTURE_CUBE_MAP);
 }
 
 void unbind_skybox(render_stage_t* stage)
@@ -134,14 +141,16 @@ void draw_skybox(render_stage_t* stage)
 
 void bind_depth(render_stage_t* stage)
 {
+   scene_t* scene = scm_get_current();
+
    GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT));
 
-   light_camera->position = light_pos;
-   c_to_mat(light_view, light_camera);
-   mat4_cpy(light_space, light_proj);
-   mat4_mulm(light_space, light_view);
+   scene->light->light_camera->position = scene->light->position;
+   c_to_mat(scene->light->light_view, scene->light->light_camera);
+   mat4_cpy(scene->light->light_space, scene->light->light_proj);
+   mat4_mulm(scene->light->light_space, scene->light->light_view);
 
-   sh_nset_mat4(stage->shader, "lightSpaceMatrix", light_space);
+   sh_nset_mat4(stage->shader, "lightSpaceMatrix", scene->light->light_space);
    GL_PCALL(glCullFace(GL_FRONT));
 }
 
@@ -171,8 +180,6 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    depth->setup_obj_shader = setup_object_depth;
    depth->unbind_shader = unbind_depth;
    depth->attachments = TF_DEPTH;
-   mat4_cpy(depth->proj, light_proj);
-   mat4_cpy(depth->view, light_view);
 
    render_stage_t* depth_bypass = rs_create(RM_BYPASS, depth_bypass_shader);
    depth_bypass->tex_width = info->w;
@@ -228,6 +235,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    rc_build(rc2);
 
    rc_link(rc1);
+
+   GL_PCALL(glEnable(GL_DEPTH_TEST));
 
    return rc1;
 }

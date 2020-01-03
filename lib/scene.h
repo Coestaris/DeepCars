@@ -23,8 +23,9 @@ typedef struct _scene
    // Set of objects that loads to an updater when scene is will be loading
    list_t* startup_objects;
 
-   //todo: delete
-   vec4 back_color;
+   texture_t* skybox;
+
+   light_t* light;
 
 } scene_t;
 

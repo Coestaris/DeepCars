@@ -37,3 +37,18 @@ void setup_objects(scene_t* scene)
 
    list_push(scene->startup_objects, create_camera_control());
 }
+
+void setup_light(scene_t* scene)
+{
+   scene->light = l_create();
+   scene->light->position = cvec4(0, 20, 0, 0);
+   vec4_fill(scene->light->color, 0.7, 0.7, 0.7, 0);
+
+   float near_plane = 1.0f, far_plane = 100.0f;
+   mat4_ortho(scene->light->light_proj, near_plane, far_plane, 50, 50);
+
+   scene->light->light_camera = c_create(scene->light->position, camera->up);
+   scene->light->light_camera->use_target = true;
+   scene->light->light_camera->target = cvec4(-16, 0, -4, 0);
+
+}

@@ -19,7 +19,6 @@ scene_t* sc_create(uint32_t id)
    scene->id = id;
    scene->lights = list_create(20);
    scene->startup_objects = list_create(20);
-   scene->back_color = COLOR_BLACK;
 
    return scene;
 }

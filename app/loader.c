@@ -19,21 +19,13 @@ win_info_t*    win;
 mat4           view;
 camera_t*      camera;
 
-vec4 plane_color;
-vec4 sky_color;
-
-vec4 light_pos;
-mat4 light_view;
-mat4 light_proj;
-mat4 light_space;
-camera_t* light_camera;
-
 void app_load_resources(void)
 {
    scene_t* menu = sc_create(SCENEID_MENU);
-   menu->back_color = COLOR_GRAY;
+   menu->skybox = rm_getn(TEXTURE, "skybox");
 
    setup_objects(menu);
+   setup_light(menu);
 
    scm_push_scene(menu);
 }
@@ -62,32 +54,12 @@ void app_init_graphics(void)
    gr_init();
 
    camera = c_create(
-   cvec4(0, 5, 15, 0),
-   cvec4(0, 1, 0, 0));
+         cvec4(0, 5, 15, 0),
+         cvec4(0, 1, 0, 0));
 
    rc_create_perspective(win, proj_mat, 65.f, 0.1f, 200);
-   //ortho(proj_mat, -1.0f, 1.0f, -1.0f, 1.0f, near_plane, far_plane);
-
-   light_pos = cvec4(0, 20, 0, 0);
-
-   light_proj = cmat4();
-   light_view = cmat4();
-   light_space = cmat4();
-
-   float near_plane = 1.0f, far_plane = 100.0f;
-   //rc_create_ortho(win, light_proj, near_plane, far_plane);
-   mat4_ortho(light_proj, near_plane, far_plane, 50, 50);
-   //ortho(light_proj, -1.0f, 1.0f, -1.0f, 1.0f, near_plane, far_plane);
-
-   light_camera = c_create(light_pos, camera->up);
-   light_camera->use_target = true;
-   light_camera->target = cvec4(-16, 0, -4, 0);
-   c_to_mat(light_view, light_camera);
-
 
    rc_set_current(get_chain(win, camera, proj_mat));
-
-   GL_PCALL(glEnable(GL_DEPTH_TEST));
 }
 
 void app_run(void)
@@ -98,7 +70,6 @@ void app_run(void)
 
 void app_fin()
 {
-   vec4_free(plane_color);
    APP_LOG("Closing....",0);
 
    u_clear_objects(false);

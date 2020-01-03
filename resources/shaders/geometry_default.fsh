@@ -16,6 +16,8 @@ uniform sampler2D ambientTexture;
 uniform float shininess;
 
 uniform vec3 lightPos;
+uniform vec3 lightColor;
+
 uniform vec3 viewPos;
 
 float ShadowCalculation(vec4 fragPosLightSpace)
@@ -58,7 +60,6 @@ void main()
 {
     vec3 color = texture(diffuseTexture, fs_in.TexCoords).rgb;
     vec3 normal = normalize(fs_in.Normal);
-    vec3 lightColor = vec3(0.3);
 
     // ambient
     vec3 ambient = texture(ambientTexture, fs_in.TexCoords).rgb * color;

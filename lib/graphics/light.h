@@ -6,28 +6,21 @@
 #define DEEPCARS_LIGHT_H
 
 #include "gmath.h"
-
-typedef enum _light_type
-{
-   LT_DIRECTION,
-   LT_POINT,
-   LT_SPOTLIGHT,
-
-} light_type_t;
+#include "camera.h"
 
 typedef struct _light
 {
-   light_type_t type;
-
    vec4 color;
-   float brightness;
+   vec4 position;
 
-   vec4 direction;
-   vec4 point;
+   mat4 light_view;
+   mat4 light_proj;
+   mat4 light_space;
+   camera_t* light_camera;
 
 } light_t;
 
-light_t* l_create(light_type_t type);
+light_t* l_create();
 void l_free(light_t* light);
 
 #endif //DEEPCARS_LIGHT_H
