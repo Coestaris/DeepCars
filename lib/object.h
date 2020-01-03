@@ -24,13 +24,10 @@ typedef struct _draw_info {
    // Model to be rendered
    model_t* model;
 
+   // Cast shadows?
    bool shadows;
-   vec4 object_color;
 
-   bool use_textures;
-   texture_t* diffuse;
-   texture_t* specular;
-   texture_t* emit;
+   material_t* material;
 
 } draw_info_t;
 

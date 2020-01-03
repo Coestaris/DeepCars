@@ -39,11 +39,14 @@ typedef struct _material
    float shininess;
    texture_t* map_specular;
 
-   float transparent;
+   vec4 transparent;
    texture_t* map_transparent;
    texture_t* map_normal;
 
 } material_t;
+
+void mt_init(void);
+void mt_fin(void);
 
 material_t* mt_create(char* name, uint8_t mode);
 void mt_free(material_t* material);

@@ -11,7 +11,8 @@
 
     "textures" : 
     [
-        { "fn" : "tex1.png", "name" : "tex1" },
+        { "fn" : "box_diff.png", "name" : "box_diff" },
+        { "fn" : "box_spec.png", "name" : "box_spec" },
         { "fn" : "tex2.png", "name" : "tex2" },
         { "fn" : "tex3.png", "name" : "tex3" },
         { "fn" : "grass.png", "name" : "grass" }
@@ -45,6 +46,7 @@
 
     "materials":
     [
-        { "fn": "grass.json", "name": "grass" }
+        { "fn": "grass.json", "name": "grass" },
+        { "fn": "default.json", "name": "default" }
     ]
 }

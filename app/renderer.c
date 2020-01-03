@@ -68,14 +68,13 @@ void bind_geometry(render_stage_t* stage)
    sh_nset_vec3(stage->shader, "lightPos", light_pos);
    sh_nset_mat4(stage->shader, "lightSpaceMatrix", light_space);
 
-   sh_nset_int(stage->shader, "shadowMap", 1);
-   GL_PCALL(glActiveTexture(GL_TEXTURE1));
+   sh_nset_int(stage->shader, "shadowMap", 0);
+   GL_PCALL(glActiveTexture(GL_TEXTURE0));
    GL_PCALL(glBindTexture(GL_TEXTURE_2D, stage->prev_stage->depth_tex));
 
-   /*
-     uniform sampler2D shadowMap;
-     uniform mat4 lightSpaceMatrix;
-     */
+   sh_nset_int(stage->shader, "diffuseTexture", 1);
+   sh_nset_int(stage->shader, "specularTexture", 2);
+   sh_nset_int(stage->shader, "ambientTexture", 3);
 }
 
 void unbind_geometry(render_stage_t* stage)
@@ -86,9 +85,11 @@ void unbind_geometry(render_stage_t* stage)
 
 void setup_object(render_stage_t* stage, object_t* object, mat4 model_mat)
 {
-   sh_nset_int(stage->shader, "diffuseTexture", 0);
-   GL_PCALL(glActiveTexture(GL_TEXTURE0));
-   t_bind(object->draw_info->diffuse, 0, GL_TEXTURE_2D);
+   t_bind(object->draw_info->material->map_diffuse, 1, GL_TEXTURE_2D);
+   t_bind(object->draw_info->material->map_specular, 2, GL_TEXTURE_2D);
+   t_bind(object->draw_info->material->map_ambient, 3, GL_TEXTURE_2D);
+
+   sh_nset_float(stage->shader, "shininess", object->draw_info->material->shininess);
 
    sh_nset_mat4(stage->shader, "model", model_mat);
 }
@@ -229,4 +230,17 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    rc_link(rc1);
 
    return rc1;
+}
+
+void free_stages(void)
+{
+   rs_free(rc1->stages->collection[0]); // depth
+   rs_free(rc1->stages->collection[1]); // geometry
+   rs_free(rc1->stages->collection[2]); // skybox
+   rs_free(rc1->stages->collection[3]); // bypass
+
+   rs_free(rc2->stages->collection[1]); // depth_bypass
+
+   rc_free(rc1, false);
+   rc_free(rc2, false);
 }

@@ -30,43 +30,10 @@ camera_t* light_camera;
 
 void app_load_resources(void)
 {
-   // scenes
    scene_t* menu = sc_create(SCENEID_MENU);
    menu->back_color = COLOR_GRAY;
-   // objects
 
-   plane_color = cvec4(129 / 255.0f, 146 / 255.0f, 89 / 255.0f, 0);
-   model_t* plane = m_create_plane(30, 30, true);
-   m_normalize(plane, true, true, true, true);
-   m_build(plane);
-
-   rm_push(MODEL, plane, MODELID_PLANE);
-
-   list_push(menu->startup_objects,
-             create_textured_dummy(vec3f(-500, 0, -500), 1000,
-                   rm_get(TEXTURE, 3),
-                   rm_get(MODEL, MODELID_PLANE)));
-
-   list_push(menu->startup_objects,
-           create_textured_dummy(vec3f(-16, 0, -4), 10,
-                     rm_get(TEXTURE, 0),
-                     rm_get(MODEL, MODELID_CUBE)));
-
-   list_push(menu->startup_objects,
-           create_textured_dummy(vec3f(-4, 0, -16), 10,
-                     rm_get(TEXTURE, 1),
-                     rm_get(MODEL, MODELID_TORUS)));
-   list_push(menu->startup_objects,
-           create_textured_dummy(vec3f(-16, 0, -16), 10,
-                     rm_get(TEXTURE, 2),
-                     rm_get(MODEL, MODELID_TEAPOT)));
-
-   list_push(menu->startup_objects, create_camera_control());
-
-   light_t* direction = l_create(LT_DIRECTION);
-   vec4_cpy(direction->color, COLOR_WHITE);
-   vec4_fill(direction->direction, 0, -1, 0.5, 0);
-   list_push(menu->lights, direction);
+   setup_objects(menu);
 
    scm_push_scene(menu);
 }
@@ -88,6 +55,7 @@ void app_init_graphics(void)
    scm_init();
    s_init();
    rm_init();
+   mt_init();
 
    p_load(RESOURCE_PACK_FILE);
 
@@ -136,8 +104,11 @@ void app_fin()
    u_clear_objects(false);
    u_free();
 
+   mt_fin();
    scm_free();
    gr_free();
+
+   free_stages();
 
    rm_free(true, true, true);
    s_free(true);

@@ -30,9 +30,9 @@ void rc_link(render_chain_t* rc);
 void rc_build(render_chain_t* rc);
 
 render_chain_t* rc_create();
+void rc_free(render_chain_t* rc, bool free_stages);
 
 void rc_set_current(render_chain_t* rc);
-
 render_chain_t* rc_get_current(void);
 
 #endif //DEEPCARS_RENDER_CHAIN_H

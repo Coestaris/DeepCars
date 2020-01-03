@@ -17,6 +17,17 @@ GLuint quad_ebo;
 GLuint cube_vao;
 GLuint cube_vbo;
 
+void rc_free(render_chain_t* rc, bool free_stages)
+{
+   if(free_stages)
+   {
+      for(size_t i = 0; i < rc->stages->count; i++)
+         rs_free(rc->stages->collection[i]);
+   }
+   if(rc->data) free(rc->data);
+   free(rc);
+}
+
 render_chain_t* rc_create()
 {
    render_chain_t* this = malloc(sizeof(render_chain_t));

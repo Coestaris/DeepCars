@@ -15,6 +15,7 @@
 #define SH_DEPTH_BYPASS 5
 
 void switch_stages(void);
+void free_stages(void);
 render_chain_t* get_chain(win_info_t* win, camera_t* camera, mat4 proj);
 
 #endif //DEEPCARS_RENDERER_H

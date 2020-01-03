@@ -391,7 +391,9 @@ void p_handler_material(uint8_t* data, size_t length)
    READ_BUFF(*specular, specular_len);
    specular[specular_len] = '\0';
 
-   READ_BUFF(material->transparent, sizeof(material->transparent));
+   float trans = 0;
+   READ_BUFF(trans, sizeof(trans));
+   vec4_fill(material->transparent, trans, trans, trans, 0);
    READ_BUFF(transparent_len, sizeof(transparent_len));
    transparent = malloc(transparent_len + 1);
    READ_BUFF(*transparent, transparent_len);

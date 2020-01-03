@@ -1,5 +1,6 @@
 {
     "mode": 2,
     "diffuse" : [1, 1, 1],
-    "map_diffuse" : "grass"
+    "map_diffuse" : "grass",
+    "shininess": 128
 }

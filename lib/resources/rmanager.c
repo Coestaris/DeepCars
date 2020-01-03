@@ -12,6 +12,9 @@
 #include "../graphics/material.h"
 #include "model.h"
 
+#define RM_LOG(format, ...) DC_LOG("rmanager.c", format, __VA_ARGS__)
+#define RM_ERROR(format, ...) DC_ERROR("rmanager.c", format, __VA_ARGS__)
+
 struct _texture_node {
    uint32_t id;
    texture_t* texture;
@@ -67,7 +70,9 @@ void* rm_get(resource_type_t type, uint32_t id)
             }
          break;
    }
-   return NULL;
+   RM_ERROR("Unable to find %s with id \"%i\"",
+            type == TEXTURE ? "texture" : (type == MODEL ? "model" : "material"),
+            id);
 }
 
 //
@@ -96,7 +101,10 @@ void* rm_getn(resource_type_t type, const char* name)
             }
          break;
    }
-   return NULL;
+
+   RM_ERROR("Unable to find %s with name \"%s\"",
+         type == TEXTURE ? "texture" : (type == MODEL ? "model" : "material"),
+         name);
 }
 
 //

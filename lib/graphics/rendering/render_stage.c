@@ -41,9 +41,6 @@ render_stage_t* rs_create(render_mode_t render_mode, shader_t* shader)
 void rs_free(render_stage_t* rs)
 {
    if(rs->fbo) GL_CALL(glDeleteFramebuffers(1, &rs->fbo));
-   if(rs->color_tex) GL_CALL(glDeleteTextures(1, &rs->color_tex));
-   if(rs->depth_tex) GL_CALL(glDeleteTextures(1, &rs->color_tex));
-   if(rs->stencil_tex) GL_CALL(glDeleteTextures(1, &rs->color_tex));
 
    mat4_free(rs->proj);
    mat4_free(rs->view);
@@ -96,10 +93,10 @@ void rs_build_tex(render_stage_t* rs)
       GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, rs->tex_wrapping));
       GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, rs->tex_wrapping));
 
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
+      GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
       float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-      glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+      GL_CALL(glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor));
       GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
       GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
