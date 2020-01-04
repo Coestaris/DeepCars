@@ -141,7 +141,7 @@ void rs_check_sizes(render_stage_t* rs, attachment_options_t options)
       if(rs->width != options.tex_width ||
          rs->height != options.tex_height)
       {
-         RS_ERROR("Sizes of attachments should be equal, i guess....",0);
+         RS_ERROR("Sizes of attachments should be equal, I guess....",0);
       }
    }
 }

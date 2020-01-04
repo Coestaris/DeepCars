@@ -167,14 +167,19 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    render_stage_t* depth = rs_create(RM_GEOMETRY, depth_shader);
    depth->depth_format.tex_height = 2048;
    depth->depth_format.tex_width = 2048;
+   depth->depth_format.tex_wrapping_t = GL_CLAMP_TO_BORDER;
+   depth->depth_format.tex_wrapping_s = GL_CLAMP_TO_BORDER;
+   depth->depth_format.tex_border_color[0] = 1;
+   depth->depth_format.tex_border_color[1] = 1;
+   depth->depth_format.tex_border_color[2] = 1;
    depth->bind_shader = bind_depth;
    depth->setup_obj_shader = setup_object_depth;
    depth->unbind_shader = unbind_depth;
    depth->attachments = TF_DEPTH;
 
    render_stage_t* depth_bypass = rs_create(RM_BYPASS, depth_bypass_shader);
-   depth_bypass->color0_format.tex_width = info->w;
-   depth_bypass->color0_format.tex_height = info->h;
+   depth_bypass->width = info->w;
+   depth_bypass->height = info->h;
    depth_bypass->bind_shader = bind_depth_bypass;
    depth_bypass->unbind_shader = unbind_depth_bypass;
    depth_bypass->vao = rc_get_quad_vao();
@@ -195,8 +200,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    geometry_data->camera = camera;
 
    render_stage_t* skybox = rs_create(RM_CUSTOM, skybox_shader);
-   skybox->color0_format.tex_width = info->w;
-   skybox->color0_format.tex_height = info->h;
+   skybox->width = info->w;
+   skybox->height = info->h;
    skybox->bind_shader = bind_skybox;
    skybox->custom_draw_func = draw_skybox;
    skybox->unbind_shader = unbind_skybox;
@@ -208,8 +213,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    skybox_data->camera = camera;
 
    render_stage_t* bypass = rs_create(RM_BYPASS, gamma_shader);
-   bypass->color0_format.tex_width = info->w;
-   bypass->color0_format.tex_height = info->h;
+   bypass->width = info->w;
+   bypass->height = info->h;
    bypass->bind_shader = bind_bypass;
    bypass->unbind_shader = unbind_bypass;
    bypass->vao = rc_get_quad_vao();
