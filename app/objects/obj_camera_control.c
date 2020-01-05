@@ -15,6 +15,7 @@ float camera_pitch      = 0;
 float camera_yaw        = M_PI / 2;
 float lastdx            = 0;
 float lastdy            = 0;
+bool  last_cntr         = false;
 
 void camera_update_func(object_t* this)
 {
@@ -71,7 +72,14 @@ void camera_update_func(object_t* this)
       camera->position[1] -= 0.2f;
 
    if (u_get_key_state(105) == KEY_PRESSED)
-      switch_stages();
+   {
+      if(!last_cntr)
+      {
+         switch_stages();
+         last_cntr = true;
+      }
+   }
+   else last_cntr = false;
 }
 
 void camera_key_event_func(object_t* this, uint32_t key, uint32_t state)

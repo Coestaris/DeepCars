@@ -26,36 +26,11 @@ void switch_stages()
    state = (state + 1) % 4;
 }
 
-void bind_bypass(render_stage_t* stage)
-{
-   sh_nset_int(stage->shader, "tex", 0);
-   texture_t* t = NULL;
-   switch(state)
-   {
-      case 0:
-         t = stage->prev_stage->color0_tex;
-         break;
-      case 1:
-         t = stage->prev_stage->prev_stage->color0_tex;
-         break;
-      case 2:
-         t = stage->prev_stage->prev_stage->color1_tex;
-         break;
-      default:
-         t = stage->prev_stage->prev_stage->color2_tex;
-         break;
-   }
-   t_bind(t, 0);
-}
-
-void unbind_bypass(render_stage_t* stage)
-{
-}
-
+// G BUFFER ROUTINES
 void bind_g_buffer(render_stage_t* stage)
 {
-   GL_PCALL(glClearColor(0.1f, 0.1f, 0.1f, 1.0f));
-   GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT));
+   GL_PCALL(glClearColor(0,0,0,0));
+   GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
 
    geometry_shader_data_t* data = (geometry_shader_data_t*)stage->data;
    c_to_mat(data->buffmat, data->camera);
@@ -85,6 +60,45 @@ void setup_object_g_buffer(render_stage_t* stage, object_t* object, mat4 model_m
    sh_nset_mat4(stage->shader, "model", model_mat);
 }
 
+// SKYBOX ROUTINES
+void bind_skybox(render_stage_t* stage)
+{
+   geometry_shader_data_t* data = (geometry_shader_data_t*)stage->data;
+   c_to_mat(data->buffmat, data->camera);
+
+   scene_t* scene = scm_get_current();
+
+   data->buffmat[3] = 0;
+   data->buffmat[7] = 0;
+   data->buffmat[11] = 0;
+   data->buffmat[15] = 0;
+
+   sh_nset_mat4(stage->shader, "view", data->buffmat);
+   sh_nset_mat4(stage->shader, "projection", stage->proj);
+   sh_nset_int(stage->shader, "skybox", 0);
+
+   t_bind(scene->skybox, 0);
+}
+
+void unbind_skybox(render_stage_t* stage)
+{
+   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+}
+
+void draw_skybox(render_stage_t* stage)
+{
+   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, stage->prev_stage->fbo));
+   {
+      GL_PCALL(glDepthFunc(GL_LEQUAL));
+      GL_PCALL(glBindVertexArray(stage->vao));
+      GL_PCALL(glDrawArrays(GL_TRIANGLES, 0, 36));
+      GL_PCALL(glBindVertexArray(0));
+      GL_PCALL(glDepthFunc(GL_LESS));
+   }
+   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+}
+
+// SHADING ROUTINES
 void bind_shading(render_stage_t* stage)
 {
    geometry_shader_data_t* data = stage->data;
@@ -96,9 +110,9 @@ void bind_shading(render_stage_t* stage)
 
    sh_nset_vec3(stage->shader, "viewPos", data->camera->position);
 
-   t_bind(stage->prev_stage->color0_tex, 0);
-   t_bind(stage->prev_stage->color1_tex, 1);
-   t_bind(stage->prev_stage->color2_tex, 2);
+   t_bind(stage->prev_stage->prev_stage->color0_tex, 0);
+   t_bind(stage->prev_stage->prev_stage->color1_tex, 1);
+   t_bind(stage->prev_stage->prev_stage->color2_tex, 2);
 
    for (size_t i = 0; i < lights->count; i++)
    {
@@ -131,20 +145,39 @@ void bind_shading(render_stage_t* stage)
 
 void unbind_shading(render_stage_t* stage)
 {
-/*
- * uniform sampler2D gPosition;
-uniform sampler2D gNormal;
-uniform sampler2D gAlbedoSpec;
-
- */
-
 }
 
+// GAMMA / BYPASS ROUTINES
+void bind_bypass(render_stage_t* stage)
+{
+   sh_nset_int(stage->shader, "tex", 0);
+   texture_t* t = NULL;
+   switch(state)
+   {
+      case 0:
+         t = stage->prev_stage->color0_tex;
+         break;
+      case 1:
+         t = stage->prev_stage->prev_stage->prev_stage->color0_tex;
+         break;
+      case 2:
+         t = stage->prev_stage->prev_stage->prev_stage->color1_tex;
+         break;
+      default:
+         t = stage->prev_stage->prev_stage->prev_stage->color2_tex;
+         break;
+   }
+   t_bind(t, 0);
+}
 
+void unbind_bypass(render_stage_t* stage)
+{
+}
 
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 {
    shader_t* g_buffer_shader = s_getn_shader("g_buffer");
+   shader_t* skybox_shader = s_getn_shader("skybox");
    shader_t* shading_shader = s_getn_shader("shading");
    shader_t* gamma_shader = s_getn_shader("gamma");
 
@@ -188,6 +221,19 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer_data->camera = camera;
    g_buffer_data->buffmat = cmat4();
 
+   render_stage_t* skybox = rs_create(RM_CUSTOM, skybox_shader);
+   skybox->width = info->w;
+   skybox->height = info->h;
+   skybox->bind_func = bind_skybox;
+   skybox->unbind_func = unbind_skybox;
+   skybox->custom_draw_func = draw_skybox;
+   mat4_cpy(skybox->proj, proj);
+   mat4_identity(skybox->view);
+   skybox->vao = rc_get_cube_vao();
+   geometry_shader_data_t* skybox_data = (skybox->data = malloc(sizeof(geometry_shader_data_t)));
+   skybox_data->buffmat = cmat4();
+   skybox_data->camera = camera;
+
    render_stage_t* shading = rs_create(RM_FRAMEBUFFER, shading_shader);
    shading->attachments = TF_COLOR0;
    shading->color0_format.tex_width = info->w;
@@ -210,6 +256,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 
    rc1 = rc_create();
    list_push(rc1->stages, g_buffer);
+   list_push(rc1->stages, skybox);
    list_push(rc1->stages, shading);
    list_push(rc1->stages, bypass);
 
