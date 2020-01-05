@@ -151,56 +151,71 @@ void rs_build_tex(render_stage_t* rs)
    if(!rs->fbo)
       GL_CALL(glGenFramebuffers(1, &rs->fbo));
 
+   size_t count = 0;
+   GLenum attachments[10];
    if(rs->attachments & TF_COLOR0 && !rs->color0_tex)
    {
       rs->color0_tex = rs_setup_tex(GL_COLOR_ATTACHMENT0, rs->color0_format, rs->fbo, "color0");
       rs_check_sizes(rs, rs->color0_format);
+      attachments[count++] = GL_COLOR_ATTACHMENT0;
    }
 
    if(rs->attachments & TF_COLOR1 && !rs->color1_tex)
    {
       rs->color1_tex =rs_setup_tex(GL_COLOR_ATTACHMENT1, rs->color1_format, rs->fbo, "color1");
       rs_check_sizes(rs, rs->color1_format);
+      attachments[count++] = GL_COLOR_ATTACHMENT1;
    }
 
    if(rs->attachments & TF_COLOR2 && !rs->color2_tex)
    {
       rs->color2_tex =rs_setup_tex(GL_COLOR_ATTACHMENT2, rs->color2_format, rs->fbo, "color2");
       rs_check_sizes(rs, rs->color2_format);
+      attachments[count++] = GL_COLOR_ATTACHMENT2;
    }
 
    if(rs->attachments & TF_COLOR3 && !rs->color3_tex)
    {
       rs->color3_tex =rs_setup_tex(GL_COLOR_ATTACHMENT3, rs->color3_format, rs->fbo, "color3");
       rs_check_sizes(rs, rs->color3_format);
+      attachments[count++] = GL_COLOR_ATTACHMENT3;
    }
 
    if(rs->attachments & TF_COLOR4 && !rs->color4_tex)
    {
       rs->color4_tex =rs_setup_tex(GL_COLOR_ATTACHMENT4, rs->color4_format, rs->fbo, "color4");
       rs_check_sizes(rs, rs->color4_format);
+      attachments[count++] = GL_COLOR_ATTACHMENT4;
    }
 
    if(rs->attachments & TF_COLOR5 && !rs->color5_tex)
    {
       rs->color5_tex =rs_setup_tex(GL_COLOR_ATTACHMENT5, rs->color5_format, rs->fbo, "color5");
       rs_check_sizes(rs, rs->color5_format);
+      attachments[count++] = GL_COLOR_ATTACHMENT5;
    }
 
    if(rs->attachments & TF_DEPTH && !rs->depth_tex)
    {
       rs->depth_tex = rs_setup_tex(GL_DEPTH_ATTACHMENT, rs->depth_format, rs->fbo, "depth");
       rs_check_sizes(rs, rs->depth_format);
+      attachments[count++] = GL_DEPTH_ATTACHMENT;
    }
 
    if(rs->attachments & TF_STENCIL && !rs->stencil_tex)
    {
       rs->stencil_tex = rs_setup_tex(GL_DEPTH_ATTACHMENT, rs->stencil_format, rs->fbo, "stencil");
       rs_check_sizes(rs, rs->stencil_format);
+      attachments[count++] = GL_DEPTH_ATTACHMENT;
    }
 
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
-   unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-   GL_PCALL(glDrawBuffers(3, attachments));
+   if(count > 1)
+      GL_PCALL(glDrawBuffers(count - 1, attachments));
+
+   GLenum error;
+   if ((error = glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE)
+      RS_ERROR("glCheckFramebufferStatus returned \"%i\"", error);
+
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }

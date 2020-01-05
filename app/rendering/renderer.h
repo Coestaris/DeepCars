@@ -5,7 +5,7 @@
 #ifndef DEEPCARS_RENDERER_H
 #define DEEPCARS_RENDERER_H
 
-#include "../lib/graphics/rendering/render_chain.h"
+#include "../../lib/graphics/rendering/render_chain.h"
 
 void switch_stages(void);
 void free_stages(void);

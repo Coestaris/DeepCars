@@ -6,10 +6,11 @@
 #pragma implementation "renderer.h"
 #endif
 #include "renderer.h"
-#include "win_defaults.h"
-#include "../lib/resources/rmanager.h"
-#include "../lib/scene.h"
-#include "../lib/scm.h"
+#include "../win_defaults.h"
+#include "../../lib/resources/rmanager.h"
+#include "../../lib/scene.h"
+#include "../../lib/scm.h"
+#include "ssao.h"
 
 render_chain_t* rc1;
 render_chain_t* rc2;
@@ -20,10 +21,48 @@ typedef struct _geometry_shader_data {
 
 } geometry_shader_data_t;
 
-int state = 0;
+texture_t* noise_texure;
+vec4* ssao_kernel;
+
+texture_t* texture_to_draw;
+int state = -1;
 void switch_stages()
 {
-   state = (state + 1) % 4;
+   render_stage_t* g_buffer_stage = rc1->stages->collection[0];
+   render_stage_t* ssao_stage = rc1->stages->collection[1];
+   render_stage_t* ssao_blur_stage = rc1->stages->collection[2];
+ //render_stage_t* skybox_stage = rc1->stages->collection[3];
+   render_stage_t* shading_stage = rc1->stages->collection[4];
+
+   state = (state + 1) % 6;
+   switch(state)
+   {
+      default:
+      case 0:
+         texture_to_draw = shading_stage->color0_tex; // result
+         puts("0. Result image");
+         break;
+      case 1:
+         texture_to_draw = g_buffer_stage->color0_tex; //positions
+         puts("1. Positions");
+         break;
+      case 2:
+         texture_to_draw = g_buffer_stage->color1_tex; //normals
+         puts("2. Normals");
+         break;
+      case 3:
+         texture_to_draw = g_buffer_stage->color2_tex; //albedo_spec
+         puts("3. Albedo spec");
+         break;
+      case 4:
+         texture_to_draw = ssao_stage->color0_tex; //ssao
+         puts("4. SSAO");
+         break;
+      case 5:
+         texture_to_draw = ssao_blur_stage->color0_tex; //ssao blurred
+         puts("5. Blurred SSAO");
+         break;
+   }
 }
 
 // G BUFFER ROUTINES
@@ -59,6 +98,40 @@ void setup_object_g_buffer(render_stage_t* stage, object_t* object, mat4 model_m
 
    sh_nset_mat4(stage->shader, "model", model_mat);
 }
+
+// SSAO ROUTINES
+void bind_ssao(render_stage_t* stage)
+{
+   GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT));
+
+   render_stage_t* g_buffer_stage = rc1->stages->collection[0];
+   sh_nset_int(stage->shader, "gPosition", 0);
+   sh_nset_int(stage->shader, "gNormal", 1);
+   sh_nset_int(stage->shader, "texNoise", 2);
+
+   t_bind(g_buffer_stage->color0_tex, 0);
+   t_bind(g_buffer_stage->color1_tex, 1);
+   t_bind(noise_texure, 2);
+
+   sh_nset_mat4(stage->shader, "projection", stage->proj);
+   for (size_t i = 0; i < 64; i++)
+   {
+      char buffer[50];
+      snprintf(buffer, 50, "samples[%li]", i);
+      sh_nset_vec3(stage->shader, buffer, ssao_kernel[i]);
+   }
+}
+
+void unbind_ssao(render_stage_t* stage) { }
+
+// SSAO BLUR ROUTINES
+void bind_ssao_blur(render_stage_t* stage)
+{
+   sh_nset_int(stage->shader, "ssaoInput", 0);
+   t_bind(stage->prev_stage->color0_tex, 0);
+}
+
+void unbind_ssao_blur(render_stage_t* stage) { }
 
 // SKYBOX ROUTINES
 void bind_skybox(render_stage_t* stage)
@@ -101,6 +174,7 @@ void draw_skybox(render_stage_t* stage)
 // SHADING ROUTINES
 void bind_shading(render_stage_t* stage)
 {
+   render_stage_t* g_buffer_stage = rc1->stages->collection[0];
    geometry_shader_data_t* data = stage->data;
    list_t* lights = scm_get_current()->lights;
 
@@ -110,9 +184,9 @@ void bind_shading(render_stage_t* stage)
 
    sh_nset_vec3(stage->shader, "viewPos", data->camera->position);
 
-   t_bind(stage->prev_stage->prev_stage->color0_tex, 0);
-   t_bind(stage->prev_stage->prev_stage->color1_tex, 1);
-   t_bind(stage->prev_stage->prev_stage->color2_tex, 2);
+   t_bind(g_buffer_stage->color0_tex, 0);
+   t_bind(g_buffer_stage->color1_tex, 1);
+   t_bind(g_buffer_stage->color2_tex, 2);
 
    for (size_t i = 0; i < lights->count; i++)
    {
@@ -151,23 +225,7 @@ void unbind_shading(render_stage_t* stage)
 void bind_bypass(render_stage_t* stage)
 {
    sh_nset_int(stage->shader, "tex", 0);
-   texture_t* t = NULL;
-   switch(state)
-   {
-      case 0:
-         t = stage->prev_stage->color0_tex;
-         break;
-      case 1:
-         t = stage->prev_stage->prev_stage->prev_stage->color0_tex;
-         break;
-      case 2:
-         t = stage->prev_stage->prev_stage->prev_stage->color1_tex;
-         break;
-      default:
-         t = stage->prev_stage->prev_stage->prev_stage->color2_tex;
-         break;
-   }
-   t_bind(t, 0);
+   t_bind(texture_to_draw, 0);
 }
 
 void unbind_bypass(render_stage_t* stage)
@@ -176,7 +234,12 @@ void unbind_bypass(render_stage_t* stage)
 
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 {
+   noise_texure = generate_noise(4);
+   ssao_kernel = generate_kernel(64);
+
    shader_t* g_buffer_shader = s_getn_shader("g_buffer");
+   shader_t* ssao_shader = s_getn_shader("ssao");
+   shader_t* ssao_blur_shader = s_getn_shader("ssao_blur");
    shader_t* skybox_shader = s_getn_shader("skybox");
    shader_t* shading_shader = s_getn_shader("shading");
    shader_t* gamma_shader = s_getn_shader("gamma");
@@ -190,6 +253,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer->color0_format.tex_int_format = GL_RGB16F;
    g_buffer->color0_format.tex_mag_filter = GL_NEAREST;
    g_buffer->color0_format.tex_min_filter = GL_NEAREST;
+   g_buffer->color0_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
+   g_buffer->color0_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
    // Normals buffer
    g_buffer->color1_format.tex_width = win->w;
    g_buffer->color1_format.tex_height = win->h;
@@ -197,6 +262,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer->color1_format.tex_int_format = GL_RGB16F;
    g_buffer->color1_format.tex_mag_filter = GL_NEAREST;
    g_buffer->color1_format.tex_min_filter = GL_NEAREST;
+   g_buffer->color1_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
+   g_buffer->color1_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
    // Color + Specular buffer
    g_buffer->color2_format.tex_width = win->w;
    g_buffer->color2_format.tex_height = win->h;
@@ -204,7 +271,9 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer->color2_format.tex_int_format = GL_RGBA;
    g_buffer->color2_format.tex_mag_filter = GL_NEAREST;
    g_buffer->color2_format.tex_min_filter = GL_NEAREST;
-   // Depth comontent
+   g_buffer->color2_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
+   g_buffer->color2_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
+   // Depth component
    g_buffer->depth_format.tex_width = win->w;
    g_buffer->depth_format.tex_height = win->h;
    g_buffer->depth_format.tex_format = GL_DEPTH_COMPONENT;
@@ -220,6 +289,27 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    geometry_shader_data_t* g_buffer_data = (g_buffer->data = malloc(sizeof(geometry_shader_data_t)));
    g_buffer_data->camera = camera;
    g_buffer_data->buffmat = cmat4();
+
+   render_stage_t* ssao = rs_create(RM_FRAMEBUFFER, ssao_shader);
+   ssao->attachments = TF_COLOR0;
+   ssao->color0_format.tex_width = info->w;
+   ssao->color0_format.tex_height = info->h;
+   ssao->color0_format.tex_format = GL_RGB;
+   ssao->color0_format.tex_int_format = GL_RED;
+   ssao->bind_func = bind_ssao;
+   ssao->unbind_func = unbind_ssao;
+   ssao->vao = rc_get_quad_vao();
+   mat4_cpy(ssao->proj, proj);
+
+   render_stage_t* ssao_blur = rs_create(RM_FRAMEBUFFER, ssao_blur_shader);
+   ssao_blur->attachments = TF_COLOR0;
+   ssao_blur->color0_format.tex_width = info->w;
+   ssao_blur->color0_format.tex_height = info->h;
+   ssao_blur->color0_format.tex_format = GL_RGB;
+   ssao_blur->color0_format.tex_int_format = GL_RED;
+   ssao_blur->bind_func = bind_ssao_blur;
+   ssao_blur->unbind_func = unbind_ssao_blur;
+   ssao_blur->vao = rc_get_quad_vao();
 
    render_stage_t* skybox = rs_create(RM_CUSTOM, skybox_shader);
    skybox->width = info->w;
@@ -256,6 +346,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 
    rc1 = rc_create();
    list_push(rc1->stages, g_buffer);
+   list_push(rc1->stages, ssao);
+   list_push(rc1->stages, ssao_blur);
    list_push(rc1->stages, skybox);
    list_push(rc1->stages, shading);
    list_push(rc1->stages, bypass);

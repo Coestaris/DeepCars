@@ -1,50 +1,48 @@
 {
     "shaders" : 
     [
-        { "vertex" : "g_buffer.vsh", "fragment" :  "g_buffer.fsh", "name":  "g_buffer" },
-        { "vertex" : "skybox.vsh", "fragment" :  "skybox.fsh", "name":  "skybox" },
-        { "vertex" : "shading.vsh", "fragment" :  "shading.fsh", "name":  "shading" },
-        { "vertex" : "gamma.vsh", "fragment" :  "gamma.fsh", "name":  "gamma" }
+        { "vertex" : "g_buffer.vsh", "fragment" :  "g_buffer.fsh",  "name":  "g_buffer"  },
+        { "vertex" : "bypass.vsh",   "fragment" :  "ssao.fsh",      "name":  "ssao"      },
+        { "vertex" : "bypass.vsh",   "fragment" :  "ssao_blur.fsh", "name":  "ssao_blur" },
+        { "vertex" : "skybox.vsh",   "fragment" :  "skybox.fsh",    "name":  "skybox"    },
+        { "vertex" : "shading.vsh",  "fragment" :  "shading.fsh",   "name":  "shading"   },
+        { "vertex" : "bypass.vsh",   "fragment" :  "gamma.fsh",     "name":  "gamma"     }
     ],
 
     "textures" : 
     [
         { "fn" : "box_diff.png", "name" : "box_diff" },
         { "fn" : "box_spec.png", "name" : "box_spec" },
-        { "fn" : "tex2.png", "name" : "tex2" },
-        { "fn" : "tex3.png", "name" : "tex3" },
-        { "fn" : "grass.png", "name" : "grass" }
+        { "fn" : "tex2.png",     "name" : "tex2"     },
+        { "fn" : "tex3.png",     "name" : "tex3"     },
+        { "fn" : "grass.png",    "name" : "grass"    }
     ],
 
     "cubemaps": 
     [
         { 
             "fns" : [
-                "skybox/right.jpg",
-                "skybox/left.jpg",
-                "skybox/top.jpg",
-                "skybox/bottom.jpg",
-                "skybox/front.jpg",
-                "skybox/back.jpg"
+                "skybox/right.jpg",  "skybox/left.jpg",  "skybox/top.jpg",
+                "skybox/bottom.jpg", "skybox/front.jpg", "skybox/back.jpg"
             ],
-            "name" : "skybox",
-            "wrapping": "clamp_to_edge",
-            "min_filter": "linear",
-            "mag_filter": "linear",
-            "index" : 10
+            "name"       : "skybox",
+            "wrapping"   : "clamp_to_edge",
+            "min_filter" : "linear",
+            "mag_filter" : "linear",
+            "index"      : 10
         }
     ],
 
     "models": 
     [
-        { "fn" : "cube.obj", "name" : "cube" },
-        { "fn" : "teapot.obj", "name" : "cube" },
-        { "fn" : "torus.obj", "name" : "torus" }
+        { "fn" : "cube.obj",   "name" : "cube"  },
+        { "fn" : "teapot.obj", "name" : "cube"  },
+        { "fn" : "torus.obj",  "name" : "torus" }
     ],
 
     "materials":
     [
-        { "fn": "grass.json", "name": "grass" },
+        { "fn": "grass.json",   "name": "grass"   },
         { "fn": "default.json", "name": "default" }
     ]
 }

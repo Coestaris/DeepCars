@@ -3,7 +3,7 @@
 //
 
 #include "obj_camera_control.h"
-#include "../renderer.h"
+#include "../rendering/renderer.h"
 
 float dx;
 float dy;

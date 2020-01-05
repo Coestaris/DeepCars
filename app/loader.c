@@ -12,7 +12,7 @@
 #include "objects/obj_camera_control.h"
 #include "../lib/resources/pack.h"
 #include "../lib/graphics/rendering/render_chain.h"
-#include "renderer.h"
+#include "rendering/renderer.h"
 #include "../lib/resources/rmanager.h"
 
 win_info_t*    win;
@@ -60,6 +60,7 @@ void app_init_graphics(void)
    rc_create_perspective(win, proj_mat, 65.f, 0.1f, 200);
 
    rc_set_current(get_chain(win, camera, proj_mat));
+   switch_stages();
 }
 
 void app_run(void)
