@@ -23,6 +23,17 @@ typedef struct _geometry_shader_data {
 
 texture_t* noise_texure;
 vec4* ssao_kernel;
+texture_t* ssao_texture;
+int ssao_state = 0;
+
+void switch_ssao(void)
+{
+   render_stage_t* ssao_blur_stage = rc1->stages->collection[2];
+
+   if(ssao_state) ssao_texture = rm_getn(TEXTURE, "__generated_mt_default_amb_1.0_1.0_1.0");
+   else ssao_texture = ssao_blur_stage->color0_tex;
+   ssao_state = !ssao_state;
+}
 
 texture_t* texture_to_draw;
 int state = -1;
@@ -114,7 +125,7 @@ void bind_ssao(render_stage_t* stage)
    t_bind(noise_texure, 2);
 
    sh_nset_mat4(stage->shader, "projection", stage->proj);
-   for (size_t i = 0; i < 64; i++)
+   for (size_t i = 0; i < KERNEL_SIZE; i++)
    {
       char buffer[50];
       snprintf(buffer, 50, "samples[%li]", i);
@@ -194,7 +205,7 @@ void bind_shading(render_stage_t* stage)
    t_bind(g_buffer_stage->color0_tex, 0);
    t_bind(g_buffer_stage->color1_tex, 1);
    t_bind(g_buffer_stage->color2_tex, 2);
-   t_bind(ssao_stage->color0_tex, 3);
+   t_bind(ssao_texture, 3);
 
    for (size_t i = 0; i < lights->count; i++)
    {
@@ -243,7 +254,7 @@ void unbind_bypass(render_stage_t* stage)
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 {
    noise_texure = generate_noise(4);
-   ssao_kernel = generate_kernel(64);
+   ssao_kernel = generate_kernel(KERNEL_SIZE);
 
    shader_t* g_buffer_shader = s_getn_shader("g_buffer");
    shader_t* ssao_shader = s_getn_shader("ssao");

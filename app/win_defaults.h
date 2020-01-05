@@ -11,6 +11,7 @@
 #define RESOURCE_PACK_FILE "resources.bin"
 
 #define NR_LIGHTS 8
+#define KERNEL_SIZE 64
 
 #define WIN_WIDTH  1200
 #define WIN_HEIGHT 800

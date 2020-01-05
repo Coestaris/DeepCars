@@ -16,6 +16,7 @@ float camera_yaw        = M_PI / 2;
 float lastdx            = 0;
 float lastdy            = 0;
 bool  last_cntr         = false;
+bool  last_1         = false;
 
 void camera_update_func(object_t* this)
 {
@@ -61,7 +62,14 @@ void camera_update_func(object_t* this)
 
    // back
    if (u_get_key_state(116) == KEY_PRESSED)
-      vec4_addv(scene->light->position, camera_dir_cpy);
+      //vec4_addv(scene->light->position, camera_dir_cpy);
+   {
+      if(!last_1)
+      {
+         switch_ssao();
+         last_1 = 1;
+      }
+   } else last_1 = 0;
 
    //up
    if (u_get_key_state(65) == KEY_PRESSED)

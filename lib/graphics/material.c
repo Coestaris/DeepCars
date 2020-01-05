@@ -83,7 +83,7 @@ texture_t* mt_to_texture(material_t* material, const char* field, vec4 color)
    if(cached) return cached;
 
    char* name = malloc(50);
-   snprintf(name, 50, "__generated_mt_%s_%s_%.1f_%.1f_%.1f_",
+   snprintf(name, 50, "__generated_mt_%s_%s_%.1f_%.1f_%.1f",
          material->name, field, color[0], color[1], color[2]);
    texture_t* t = t_create(name);
 

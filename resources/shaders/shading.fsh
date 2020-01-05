@@ -40,7 +40,7 @@ void main()
     else
     {
         // then calculate lighting as usual
-        vec3 ambient = vec3(0.3 * Diffuse * AmbientOcclusion);
+        vec3 ambient = vec3(0.2 * Diffuse * AmbientOcclusion);
         vec3 lighting  = ambient;
 
         vec3 viewDir  = normalize(vec3(view * vec4(viewPos, 0)) - FragPos);
@@ -67,6 +67,6 @@ void main()
                 lighting += diffuse + specular;
             }
         }
-        FragColor = vec4(lighting, 1.0);
+        FragColor = vec4(lighting, 1.0) * (AmbientOcclusion * 2);
     }
 }
