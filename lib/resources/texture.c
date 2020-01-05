@@ -69,11 +69,13 @@ char* t_get_pretty_signature(texture_t* t)
 {
    char* buffer = malloc(sizeof(char) * 100);
 
-   snprintf(buffer, 100, "%s %s \"%s\" [%ix%i](%li mipmap%s)",
+   snprintf(buffer, 100, "%s %s \"%s\" [%ix%i] (%li mipmap%s%s)",
          t->mipmaps <= 1 ? "" : "DDS",
          t->type == GL_TEXTURE_2D ? "texture" : "cubemap",
-         t->name, t->width, t->height, t->mipmaps,
-         t->mipmaps > 1 ? "s" : "");
+         t->name, t->width, t->height,
+         t->mipmaps,
+         t->mipmaps > 1 ? "s" : "",
+         t->type == GL_TEXTURE_2D ? "" : " per face");
 
    return buffer;
 

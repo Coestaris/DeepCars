@@ -75,7 +75,7 @@ void gr_init()
    //GL_CALL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE))
 }
 
-void gr_render_vao(GLuint vao)
+inline void gr_render_vao(GLuint vao)
 {
    GL_PCALL(glBindVertexArray(vao));
    //GL_PCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
@@ -139,12 +139,12 @@ inline mat4 gr_transform(vec3f_t pos, vec3f_t scale, vec3f_t rot)
    return model_mat;
 }
 
-void gr_render_object(object_t* obj)
+inline void gr_render_object(object_t* obj)
 {
    gr_draw_model(obj->draw_info->model);
 }
 
-void gr_bind(render_stage_t* stage)
+inline void gr_bind(render_stage_t* stage)
 {
    GL_PCALL(glViewport(0, 0, stage->width, stage->height))
    if(stage->render_mode != RM_BYPASS && stage->render_mode != RM_CUSTOM)
@@ -153,7 +153,7 @@ void gr_bind(render_stage_t* stage)
    }
 }
 
-void gr_unbind(render_stage_t* stage)
+inline void gr_unbind(render_stage_t* stage)
 {
    if(stage->render_mode != RM_BYPASS && stage->render_mode != RM_CUSTOM)
    {

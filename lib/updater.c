@@ -74,7 +74,6 @@ void u_close(void)
 // Looping through all objects and draws it
 void u_draw_func(void)
 {
-   //glEnable(GL_DEPTH_TEST);
    render_chain_t* chain = rc_get_current();
    list_t* stages = chain->stages;
 
@@ -98,8 +97,6 @@ void u_draw_func(void)
                gr_render_object(obj);
             }
          }
-         //glDisable(GL_DEPTH_TEST);
-
       }
       else if(stage->render_mode == RM_BYPASS || stage->render_mode == RM_FRAMEBUFFER)
       {

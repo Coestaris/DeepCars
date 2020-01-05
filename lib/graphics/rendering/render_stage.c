@@ -96,7 +96,7 @@ void rs_free(render_stage_t* rs)
    free(rs);
 }
 
-texture_t* rs_setup_tex(GLenum attachment, attachment_options_t options, GLuint fbo)
+texture_t* rs_setup_tex(GLenum attachment, attachment_options_t options, GLuint fbo, const char* target)
 {
    GLuint id;
    GL_CALL(glGenTextures(1, &id));
@@ -118,7 +118,7 @@ texture_t* rs_setup_tex(GLenum attachment, attachment_options_t options, GLuint 
    GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 
    char* name = malloc(30);
-   snprintf(name, 30, "__generated_fb%i_%i", fbo, attachment);
+   snprintf(name, 30, "__generated_fb%i_%s", fbo, target);
    texture_t* t = t_create(name);
    t->type = GL_TEXTURE_2D;
    t->height = options.tex_height;
@@ -153,49 +153,49 @@ void rs_build_tex(render_stage_t* rs)
 
    if(rs->attachments & TF_COLOR0 && !rs->color0_tex)
    {
-      rs->color0_tex = rs_setup_tex(GL_COLOR_ATTACHMENT0, rs->color0_format, rs->fbo);
+      rs->color0_tex = rs_setup_tex(GL_COLOR_ATTACHMENT0, rs->color0_format, rs->fbo, "color0");
       rs_check_sizes(rs, rs->color0_format);
    }
 
    if(rs->attachments & TF_COLOR1 && !rs->color1_tex)
    {
-      rs->color1_tex =rs_setup_tex(GL_COLOR_ATTACHMENT1, rs->color1_format, rs->fbo);
+      rs->color1_tex =rs_setup_tex(GL_COLOR_ATTACHMENT1, rs->color1_format, rs->fbo, "color1");
       rs_check_sizes(rs, rs->color1_format);
    }
 
    if(rs->attachments & TF_COLOR2 && !rs->color2_tex)
    {
-      rs->color2_tex =rs_setup_tex(GL_COLOR_ATTACHMENT2, rs->color2_format, rs->fbo);
+      rs->color2_tex =rs_setup_tex(GL_COLOR_ATTACHMENT2, rs->color2_format, rs->fbo, "color2");
       rs_check_sizes(rs, rs->color2_format);
    }
 
    if(rs->attachments & TF_COLOR3 && !rs->color3_tex)
    {
-      rs->color3_tex =rs_setup_tex(GL_COLOR_ATTACHMENT3, rs->color3_format, rs->fbo);
+      rs->color3_tex =rs_setup_tex(GL_COLOR_ATTACHMENT3, rs->color3_format, rs->fbo, "color3");
       rs_check_sizes(rs, rs->color3_format);
    }
 
    if(rs->attachments & TF_COLOR4 && !rs->color4_tex)
    {
-      rs->color4_tex =rs_setup_tex(GL_COLOR_ATTACHMENT4, rs->color4_format, rs->fbo);
+      rs->color4_tex =rs_setup_tex(GL_COLOR_ATTACHMENT4, rs->color4_format, rs->fbo, "color4");
       rs_check_sizes(rs, rs->color4_format);
    }
 
    if(rs->attachments & TF_COLOR5 && !rs->color5_tex)
    {
-      rs->color5_tex =rs_setup_tex(GL_COLOR_ATTACHMENT5, rs->color5_format, rs->fbo);
+      rs->color5_tex =rs_setup_tex(GL_COLOR_ATTACHMENT5, rs->color5_format, rs->fbo, "color5");
       rs_check_sizes(rs, rs->color5_format);
    }
 
    if(rs->attachments & TF_DEPTH && !rs->depth_tex)
    {
-      rs->depth_tex = rs_setup_tex(GL_DEPTH_ATTACHMENT, rs->depth_format, rs->fbo);
+      rs->depth_tex = rs_setup_tex(GL_DEPTH_ATTACHMENT, rs->depth_format, rs->fbo, "depth");
       rs_check_sizes(rs, rs->depth_format);
    }
 
    if(rs->attachments & TF_STENCIL && !rs->stencil_tex)
    {
-      rs->stencil_tex = rs_setup_tex(GL_DEPTH_ATTACHMENT, rs->stencil_format, rs->fbo);
+      rs->stencil_tex = rs_setup_tex(GL_DEPTH_ATTACHMENT, rs->stencil_format, rs->fbo, "stencil");
       rs_check_sizes(rs, rs->stencil_format);
    }
 

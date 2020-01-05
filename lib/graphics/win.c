@@ -324,7 +324,7 @@ void w_destroy(win_info_t* w)
 //
 // w_swap_buffers()
 //
-void w_swap_buffers(win_info_t* w)
+inline void w_swap_buffers(win_info_t* w)
 {
    GL_PCALL(glXSwapBuffers(w->display, w->win))
    GL_PCALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT))
