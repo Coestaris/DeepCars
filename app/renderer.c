@@ -36,13 +36,13 @@ void bind_bypass(render_stage_t* stage)
          t = stage->prev_stage->color0_tex;
          break;
       case 1:
-         t = stage->prev_stage->color1_tex;
+         t = stage->prev_stage->prev_stage->color0_tex;
          break;
       case 2:
-         t = stage->prev_stage->color2_tex;
+         t = stage->prev_stage->prev_stage->color1_tex;
          break;
       default:
-         t = stage->prev_stage->depth_tex;
+         t = stage->prev_stage->prev_stage->color2_tex;
          break;
    }
    t_bind(t, 0);
@@ -87,17 +87,6 @@ void setup_object_g_buffer(render_stage_t* stage, object_t* object, mat4 model_m
 
 void bind_shading(render_stage_t* stage)
 {
-
-}
-
-void unbind_shading(render_stage_t* stage)
-{
-/*
- * uniform sampler2D gPosition;
-uniform sampler2D gNormal;
-uniform sampler2D gAlbedoSpec;
-
- */
    geometry_shader_data_t* data = stage->data;
    list_t* lights = scm_get_current()->lights;
 
@@ -123,8 +112,8 @@ uniform sampler2D gAlbedoSpec;
       sh_nset_vec3(stage->shader, buffer, lt->color);
 
       const float constant = 1.0f; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
-      const float linear = 0.7f;
-      const float quadratic = 1.8f;
+      const float linear = 0.045f;
+      const float quadratic = 0.0075f;
 
       snprintf(buffer, 255, "lights[%li].Linear", i);
       sh_nset_float(stage->shader, buffer, linear);
@@ -139,6 +128,18 @@ uniform sampler2D gAlbedoSpec;
       sh_nset_float(stage->shader, buffer, radius);
    }
 }
+
+void unbind_shading(render_stage_t* stage)
+{
+/*
+ * uniform sampler2D gPosition;
+uniform sampler2D gNormal;
+uniform sampler2D gAlbedoSpec;
+
+ */
+
+}
+
 
 
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
@@ -187,9 +188,12 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer_data->camera = camera;
    g_buffer_data->buffmat = cmat4();
 
-   render_stage_t* shading = rs_create(RM_BYPASS, shading_shader);
-   shading->width = info->w;
-   shading->height = info->h;
+   render_stage_t* shading = rs_create(RM_FRAMEBUFFER, shading_shader);
+   shading->attachments = TF_COLOR0;
+   shading->color0_format.tex_width = info->w;
+   shading->color0_format.tex_height = info->h;
+   shading->color0_format.tex_format = GL_RGB;
+   shading->color0_format.tex_int_format = GL_RGB16F;
    shading->bind_func = bind_shading;
    shading->unbind_func = unbind_shading;
    shading->vao = rc_get_quad_vao();

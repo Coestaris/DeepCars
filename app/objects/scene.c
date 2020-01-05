@@ -57,9 +57,9 @@ void setup_light(scene_t* scene)
       light_t* lt = l_create();
 
       // calculate slightly random offsets
-      float xPos = ((float)(rand() % 100) / 100.0f) * 6.0f - 3.0f;
-      float yPos = ((float)(rand() % 100) / 100.0f) * 6.0f - 4.0f;
-      float zPos = ((float)(rand() % 100) / 100.0f) * 6.0f - 3.0f;
+      float xPos = ((float)(rand() % 100) / 100.0f) * 60.0f - 30.0f;
+      float yPos = ((float)(rand() % 100) / 100.0f) * 5.0f - 2.5f;
+      float zPos = ((float)(rand() % 100) / 100.0f) * 60.0f - 30.0f;
       vec4_fill(lt->position, xPos, yPos, zPos, 0);
 
       float rColor = ((float)(rand() % 100) / 200.0f) + 0.5f; // between 0.5 and 1.0

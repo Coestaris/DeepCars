@@ -2,6 +2,7 @@
     "shaders" : 
     [
         { "vertex" : "g_buffer.vsh", "fragment" :  "g_buffer.fsh", "name":  "g_buffer" },
+        { "vertex" : "shading.vsh", "fragment" :  "shading.fsh", "name":  "shading" },
         { "vertex" : "gamma.vsh", "fragment" :  "gamma.fsh", "name":  "gamma" }
     ],
 

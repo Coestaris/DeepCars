@@ -2,5 +2,6 @@
     "mode": 2,
     "ambient": [0.1, 0.1, 0.1],
     "map_diffuse": "box_diff",
+    "specular" : [0, 0, 0],
     "shininess": 256
 }
