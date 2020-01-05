@@ -6,6 +6,7 @@
 #pragma implementation "ssao.h"
 #endif
 #include "ssao.h"
+#include "../../lib/resources/rmanager.h"
 
 texture_t* generate_noise(size_t n)
 {
@@ -30,12 +31,13 @@ texture_t* generate_noise(size_t n)
    GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
    GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
-   texture_t* t = t_create("__generated_noise");
+   texture_t* t = t_create(strdup("__generated_noise"));
    t->texID = noise_texture;
    t->mipmaps = 1;
    t->width = n;
    t->height = n;
    t->type = GL_TEXTURE_2D;
+   rm_push(TEXTURE, t, -1);
 
    free(floats);
 

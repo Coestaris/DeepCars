@@ -102,7 +102,7 @@ void setup_object_g_buffer(render_stage_t* stage, object_t* object, mat4 model_m
 // SSAO ROUTINES
 void bind_ssao(render_stage_t* stage)
 {
-   GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT));
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    render_stage_t* g_buffer_stage = rc1->stages->collection[0];
    sh_nset_int(stage->shader, "gPosition", 0);
@@ -160,7 +160,8 @@ void unbind_skybox(render_stage_t* stage)
 
 void draw_skybox(render_stage_t* stage)
 {
-   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, stage->prev_stage->fbo));
+   render_stage_t* g_buffer_stage = rc1->stages->collection[0];
+   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, g_buffer_stage->fbo));
    {
       GL_PCALL(glDepthFunc(GL_LEQUAL));
       GL_PCALL(glBindVertexArray(stage->vao));
@@ -175,18 +176,25 @@ void draw_skybox(render_stage_t* stage)
 void bind_shading(render_stage_t* stage)
 {
    render_stage_t* g_buffer_stage = rc1->stages->collection[0];
+   render_stage_t* ssao_stage = rc1->stages->collection[1];
+
    geometry_shader_data_t* data = stage->data;
    list_t* lights = scm_get_current()->lights;
+   c_to_mat(data->buffmat, data->camera);
 
    sh_nset_int(stage->shader, "gPosition", 0);
    sh_nset_int(stage->shader, "gNormal", 1);
    sh_nset_int(stage->shader, "gAlbedoSpec", 2);
+   sh_nset_int(stage->shader, "ssao", 3);
 
    sh_nset_vec3(stage->shader, "viewPos", data->camera->position);
+   //mat4_print(data->buffmat);
+   sh_nset_mat4(stage->shader, "view", data->buffmat);
 
    t_bind(g_buffer_stage->color0_tex, 0);
    t_bind(g_buffer_stage->color1_tex, 1);
    t_bind(g_buffer_stage->color2_tex, 2);
+   t_bind(ssao_stage->color0_tex, 3);
 
    for (size_t i = 0; i < lights->count; i++)
    {
@@ -291,11 +299,20 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer_data->buffmat = cmat4();
 
    render_stage_t* ssao = rs_create(RM_FRAMEBUFFER, ssao_shader);
-   ssao->attachments = TF_COLOR0;
-   ssao->color0_format.tex_width = info->w;
-   ssao->color0_format.tex_height = info->h;
+   ssao->attachments = TF_COLOR0 | TF_DEPTH;
+   //color
+   ssao->color0_format.tex_width = win->w;
+   ssao->color0_format.tex_height = win->h;
    ssao->color0_format.tex_format = GL_RGB;
    ssao->color0_format.tex_int_format = GL_RED;
+   //depth
+   ssao->depth_format.tex_width = win->w;
+   ssao->depth_format.tex_height = win->h;
+   ssao->depth_format.tex_format = GL_DEPTH_COMPONENT;
+   ssao->depth_format.tex_int_format = GL_DEPTH_COMPONENT;
+   ssao->depth_format.tex_mag_filter = GL_NEAREST;
+   ssao->depth_format.tex_min_filter = GL_NEAREST;
+
    ssao->bind_func = bind_ssao;
    ssao->unbind_func = unbind_ssao;
    ssao->vao = rc_get_quad_vao();

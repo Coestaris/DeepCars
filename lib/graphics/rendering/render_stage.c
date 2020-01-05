@@ -210,7 +210,7 @@ void rs_build_tex(render_stage_t* rs)
    }
 
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
-   if(count > 1)
+   if(count > 2)
       GL_PCALL(glDrawBuffers(count - 1, attachments));
 
    GLenum error;
