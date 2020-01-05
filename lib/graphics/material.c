@@ -64,6 +64,7 @@ texture_t* mt_get_from_cache(vec4 color)
          return node->texture;
       }
    }
+   return NULL;
 }
 
 void mt_cache(texture_t* tex, vec4 color)
@@ -73,6 +74,7 @@ void mt_cache(texture_t* tex, vec4 color)
    node->color[1] = color[1];
    node->color[2] = color[2];
    node->texture = tex;
+   list_push(cache, node);
 }
 
 texture_t* mt_to_texture(material_t* material, const char* field, vec4 color)

@@ -47,8 +47,8 @@ void setup_light(scene_t* scene)
    float near_plane = 1.0f, far_plane = 100.0f;
    mat4_ortho(scene->light->light_proj, near_plane, far_plane, 50, 50);
 
-   scene->light->light_camera = c_create(scene->light->position, camera->up);
+   scene->light->light_camera = c_create(vec4_ccpy(scene->light->position), vec4_ccpy(camera->up));
    scene->light->light_camera->use_target = true;
    scene->light->light_camera->target = cvec4(-16, 0, -4, 0);
-
+   list_push(scene->lights, scene->light);
 }

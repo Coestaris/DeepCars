@@ -136,7 +136,7 @@ void bind_depth(render_stage_t* stage)
 
    GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT));
 
-   scene->light->light_camera->position = scene->light->position;
+   vec4_cpy(scene->light->light_camera->position, scene->light->position);
    c_to_mat(scene->light->light_view, scene->light->light_camera);
    mat4_cpy(scene->light->light_space, scene->light->light_proj);
    mat4_mulm(scene->light->light_space, scene->light->light_view);
@@ -241,7 +241,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 
 void free_stages(void)
 {
-   rs_free(rc1->stages->collection[0]); // depth
+/*   rs_free(rc1->stages->collection[0]); // depth
    rs_free(rc1->stages->collection[1]); // geometry
    rs_free(rc1->stages->collection[2]); // skybox
    rs_free(rc1->stages->collection[3]); // bypass
@@ -249,5 +249,5 @@ void free_stages(void)
    rs_free(rc2->stages->collection[1]); // depth_bypass
 
    rc_free(rc1, false);
-   rc_free(rc2, false);
+   rc_free(rc2, false);*/
 }
