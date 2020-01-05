@@ -14,6 +14,7 @@ light_t* l_create()
 {
    light_t* lt = malloc(sizeof(light_t));
    lt->color = cvec4(1,1,1,1);
+   lt->position = cvec4(0,0,0,1);
 
    lt->light_proj = cmat4();
    lt->light_view = cmat4();

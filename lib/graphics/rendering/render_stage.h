@@ -9,7 +9,7 @@
 #define DEEPCARS_RENDER_STAGE_H
 
 #include "../../object.h"
-#include "../../shaders/shader.h"
+#include "../../resources/shader.h"
 
 typedef enum _render_mode {
    RM_CUSTOM,
@@ -56,9 +56,9 @@ typedef struct _render_stage {
    render_mode_t render_mode;
    shader_t* shader;
 
-   void (*setup_obj_shader)(struct _render_stage* this, object_t* render_obj, mat4 model_mat);
-   void (*bind_shader)(struct _render_stage* this);
-   void (*unbind_shader)(struct _render_stage* this);
+   void (*setup_obj_func)(struct _render_stage* this, object_t* render_obj, mat4 model_mat);
+   void (*bind_func)(struct _render_stage* this);
+   void (*unbind_func)(struct _render_stage* this);
    void (*custom_draw_func)(struct _render_stage* this);
 
    void* data;

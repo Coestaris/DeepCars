@@ -17,8 +17,8 @@
 #include <string.h>
 #include <zlib.h>
 #include "../../oil/crc32.h"
-#include "../shaders/shader.h"
-#include "../shaders/shm.h"
+#include "shader.h"
+#include "shm.h"
 #include "model.h"
 #include "rmanager.h"
 

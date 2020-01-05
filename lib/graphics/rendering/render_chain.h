@@ -10,8 +10,8 @@
 #include "render_stage.h"
 #include "../../structs.h"
 #include "../../object.h"
-#include "../../shaders/shader.h"
-#include "../../shaders/shm.h"
+#include "../../resources/shader.h"
+#include "../../resources/shm.h"
 #include "../win.h"
 
 typedef struct _render_chain {

@@ -66,6 +66,18 @@ void s_init()
 }
 
 //
+// s_getn_shader
+//
+shader_t* s_getn_shader(const char* name)
+{
+   for (size_t i = 0; i < nodes->count; i++)
+      if (!strcmp(((shm_node_t*)nodes->collection[i])->shader->name, name))
+         return ((shm_node_t*)nodes->collection[i])->shader;
+
+   S_ERROR("Unable to find shader with name \"%s\"", name)
+}
+
+//
 // s_get_shader
 //
 shader_t* s_get_shader(int id)
@@ -74,7 +86,7 @@ shader_t* s_get_shader(int id)
       if (((shm_node_t*)nodes->collection[i])->id == id)
          return ((shm_node_t*)nodes->collection[i])->shader;
 
-   return NULL;
+   S_ERROR("Unable to find shader with id \"%i\"", id)
 }
 
 //

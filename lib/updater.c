@@ -8,7 +8,7 @@
 #include "updater.h"
 
 #include "graphics/rendering/graphics.h"
-#include "shaders/shader.h"
+#include "resources/shader.h"
 #include "scene.h"
 #include "scm.h"
 #include "graphics/rendering/render_chain.h"
@@ -83,7 +83,7 @@ void u_draw_func(void)
       render_stage_t* stage = (render_stage_t*)stages->collection[i];
       gr_bind(stage);
       sh_use(stage->shader);
-      stage->bind_shader(stage);
+      stage->bind_func(stage);
 
       if(stage->render_mode == RM_GEOMETRY)
       {
@@ -94,7 +94,7 @@ void u_draw_func(void)
             if(obj->draw_info->drawable)
             {
                gr_transform(obj->position, obj->scale, obj->rotation);
-               stage->setup_obj_shader(stage, obj, model_mat);
+               stage->setup_obj_func(stage, obj, model_mat);
                gr_render_object(obj);
             }
          }
@@ -111,7 +111,7 @@ void u_draw_func(void)
          stage->custom_draw_func(stage);
       }
 
-      stage->unbind_shader(stage);
+      stage->unbind_func(stage);
       gr_unbind(stage);
       sh_use(NULL);
    }

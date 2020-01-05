@@ -11,8 +11,8 @@
 
 #include "../gmath.h"
 #include "../../resources/model.h"
-#include "../../shaders/shader.h"
-#include "../../shaders/shm.h"
+#include "../../resources/shader.h"
+#include "../../resources/shm.h"
 #include "../../object.h"
 #include "render_stage.h"
 

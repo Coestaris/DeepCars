@@ -24,4 +24,7 @@ void s_free(bool free_shaders);
 // Returns shader with specified id
 shader_t* s_get_shader(int id);
 
+// Returns shader with specified name
+shader_t* s_getn_shader(const char* name);
+
 #endif //DEEPCARS_SHM_H

@@ -49,9 +49,9 @@ render_stage_t* rs_create(render_mode_t render_mode, shader_t* shader)
    rs->shader = shader;
    rs->render_mode = render_mode;
 
-   rs->bind_shader      = NULL;
-   rs->setup_obj_shader = NULL;
-   rs->unbind_shader    = NULL;
+   rs->bind_func      = NULL;
+   rs->setup_obj_func = NULL;
+   rs->unbind_func    = NULL;
    rs->data             = NULL;
 
    rs->attachments = 0;
@@ -198,4 +198,9 @@ void rs_build_tex(render_stage_t* rs)
       rs->stencil_tex = rs_setup_tex(GL_DEPTH_ATTACHMENT, rs->stencil_format, rs->fbo);
       rs_check_sizes(rs, rs->stencil_format);
    }
+
+   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
+   unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+   GL_PCALL(glDrawBuffers(3, attachments));
+   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }
