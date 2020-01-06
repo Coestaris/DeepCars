@@ -273,7 +273,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer->color0_format.tex_mag_filter = GL_NEAREST;
    g_buffer->color0_format.tex_min_filter = GL_NEAREST;
    g_buffer->color0_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
-   g_buffer->color0_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
+   g_buffer->color0_format.tex_wrapping_s = GL_CLAMP_TO_EDGE;
    // Normals buffer
    g_buffer->color1_format.tex_width = win->w;
    g_buffer->color1_format.tex_height = win->h;
@@ -282,7 +282,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer->color1_format.tex_mag_filter = GL_NEAREST;
    g_buffer->color1_format.tex_min_filter = GL_NEAREST;
    g_buffer->color1_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
-   g_buffer->color1_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
+   g_buffer->color1_format.tex_wrapping_s = GL_CLAMP_TO_EDGE;
    // Color + Specular buffer
    g_buffer->color2_format.tex_width = win->w;
    g_buffer->color2_format.tex_height = win->h;
@@ -291,7 +291,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer->color2_format.tex_mag_filter = GL_NEAREST;
    g_buffer->color2_format.tex_min_filter = GL_NEAREST;
    g_buffer->color2_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
-   g_buffer->color2_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
+   g_buffer->color2_format.tex_wrapping_s = GL_CLAMP_TO_EDGE;
    // Depth component
    g_buffer->depth_format.tex_width = win->w;
    g_buffer->depth_format.tex_height = win->h;
@@ -299,6 +299,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer->depth_format.tex_int_format = GL_DEPTH_COMPONENT;
    g_buffer->depth_format.tex_mag_filter = GL_NEAREST;
    g_buffer->depth_format.tex_min_filter = GL_NEAREST;
+   g_buffer->depth_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
+   g_buffer->depth_format.tex_wrapping_s = GL_CLAMP_TO_EDGE;
 
    mat4_cpy(g_buffer->proj, proj);
    mat4_identity(g_buffer->view);
@@ -310,19 +312,14 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer_data->buffmat = cmat4();
 
    render_stage_t* ssao = rs_create(RM_FRAMEBUFFER, ssao_shader);
-   ssao->attachments = TF_COLOR0 | TF_DEPTH;
+   ssao->attachments = TF_COLOR0;
    //color
    ssao->color0_format.tex_width = win->w;
    ssao->color0_format.tex_height = win->h;
    ssao->color0_format.tex_format = GL_RGB;
    ssao->color0_format.tex_int_format = GL_RED;
-   //depth
-   ssao->depth_format.tex_width = win->w;
-   ssao->depth_format.tex_height = win->h;
-   ssao->depth_format.tex_format = GL_DEPTH_COMPONENT;
-   ssao->depth_format.tex_int_format = GL_DEPTH_COMPONENT;
-   ssao->depth_format.tex_mag_filter = GL_NEAREST;
-   ssao->depth_format.tex_min_filter = GL_NEAREST;
+   ssao->color0_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
+   ssao->color0_format.tex_wrapping_s = GL_CLAMP_TO_EDGE;
 
    ssao->bind_func = bind_ssao;
    ssao->unbind_func = unbind_ssao;
@@ -335,6 +332,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    ssao_blur->color0_format.tex_height = info->h;
    ssao_blur->color0_format.tex_format = GL_RGB;
    ssao_blur->color0_format.tex_int_format = GL_RED;
+
    ssao_blur->bind_func = bind_ssao_blur;
    ssao_blur->unbind_func = unbind_ssao_blur;
    ssao_blur->vao = rc_get_quad_vao();

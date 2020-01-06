@@ -53,5 +53,6 @@ void main()
     }
 
     occlusion = 1.0 - (occlusion / kernelSize);
+    //FragColor = pow(occlusion, 4);
     FragColor = occlusion;
 }
