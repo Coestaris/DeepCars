@@ -56,6 +56,8 @@ typedef struct _render_stage {
    render_mode_t render_mode;
    shader_t* shader;
 
+   bool skip;
+
    void (*setup_obj_func)(struct _render_stage* this, object_t* render_obj, mat4 model_mat);
    void (*bind_func)(struct _render_stage* this);
    void (*unbind_func)(struct _render_stage* this);

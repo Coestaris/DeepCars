@@ -38,37 +38,55 @@ void setup_objects(scene_t* scene)
    list_push(scene->startup_objects, create_camera_control());
 }
 
-void setup_light(scene_t* scene)
+void setup_shadow_light(scene_t* scene)
 {
-   scene->shadow_light = l_create();
-   scene->shadow_light->position = cvec4(0, 20, 0, 0);
-   vec4_fill(scene->shadow_light->color, 0.4, 0.4, 0.4, 0);
-   scene->shadow_light->light_proj = cmat4();
+   const float near_plane = 1.0f;
+   const float far_plane = 100.0f;
+   const float r = 50;
 
-   float near_plane = 1.0f, far_plane = 100.0f;
-   mat4_ortho(scene->shadow_light->light_proj, near_plane, far_plane, 50, 50);
+   shadow_light_t* shadow_light = l_sh_create(cvec4(0, 20, 0, 0), vec4_ccpy(camera->up));
+   mat4_ortho(shadow_light->light_proj, near_plane, far_plane, r, r);
+   shadow_light->light_camera->use_target = true;
+   shadow_light->light_camera->target = cvec4(-16, 0, -4, 0);
+   shadow_light->brightness = 0.75f;
+   scene->shadow_light = shadow_light;
+}
 
-   scene->shadow_light->light_camera = c_create(vec4_ccpy(scene->shadow_light->position), vec4_ccpy(camera->up));
-   scene->shadow_light->light_camera->use_target = true;
-   scene->shadow_light->light_camera->target = cvec4(-16, 0, -4, 0);
-   scene->shadow_light->light_view = cmat4();
-   scene->shadow_light->light_space = cmat4();
+void setup_lights(scene_t* scene)
+{
+   const float angle = M_PI * 2 / NR_LIGHTS;
+   const float radius = 50;
+
+   const float linear = 0.022f;
+   const float linear_rand = 0.0f;
+   const float quadratic = 0.0019f;
+   const float quadratic_rand = 0.0f;
 
    for (size_t i = 0; i < NR_LIGHTS; i++)
    {
       light_t* lt = l_create();
 
-      // calculate slightly random offsets
-      float xPos = ((float)(rand() % 100) / 100.0f) * 60.0f - 30.0f;
-      float yPos = ((float)(rand() % 100) / 100.0f) * 5.0f + .5f;
-      float zPos = ((float)(rand() % 100) / 100.0f) * 60.0f - 30.0f;
-      vec4_fill(lt->position, xPos, yPos, zPos, 0);
+      float x_pos = sinf(angle * i) * radius;
+      float y_pos = 10;
+      float z_pos = cosf(angle * i) * radius;
+      vec4_fill(lt->position, x_pos, y_pos, z_pos, 0);
 
-      float rColor = ((float)(rand() % 100) / 200.0f) + 0.5f; // between 0.5 and 1.0
-      float gColor = ((float)(rand() % 100) / 200.0f) + 0.5f; // between 0.5 and 1.0
-      float bColor = ((float)(rand() % 100) / 200.0f) + 0.5f; // between 0.5 and 1.0
-      vec4_fill(lt->color, rColor, gColor, bColor, 0);
+      float r_color = (float)drand48() * 0.5f + 0.5f;
+      float g_color = (float)drand48() * 0.5f + 0.5f;
+      float b_color = (float)drand48() * 0.5f + 0.5f;
+      vec4_fill(lt->color, r_color, g_color, b_color, 0);
 
+      lt->constant = 1.0f;
+      lt->linear = linear + (float)drand48() * linear_rand;
+      lt->quadratic = quadratic + (float)drand48() * quadratic_rand;
+
+      l_calc_radius(lt);
       list_push(scene->lights, lt);
    }
+}
+
+void setup_light(scene_t* scene)
+{
+   setup_shadow_light(scene);
+   setup_lights(scene);
 }

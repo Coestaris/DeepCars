@@ -16,22 +16,47 @@ light_t* l_create()
    lt->color = cvec4(1,1,1,1);
    lt->position = cvec4(0,0,0,1);
 
-   lt->light_proj = NULL;
-   lt->light_view = NULL;
-   lt->light_space = NULL;
-   lt->light_camera = NULL;
-
    return lt;
 }
 
 void l_free(light_t* light)
+{
+   vec4_free(light->color);
+   vec4_free(light->position);
+   free(light);
+}
+
+shadow_light_t* l_sh_create(vec4 position, vec4 up)
+{
+   shadow_light_t* lt = malloc(sizeof(shadow_light_t));
+   lt->update = true;
+   lt->light_proj = cmat4();
+   lt->light_view = cmat4();
+   lt->light_space = cmat4();
+   lt->light_camera = c_create(vec4_ccpy(position), up);
+
+   lt->position = position;
+   lt->direction = cvec4(0,0,0,0);
+}
+
+void l_sh_free(shadow_light_t* light)
 {
    if(light->light_view) mat4_free(light->light_view);
    if(light->light_proj) mat4_free(light->light_proj);
    if(light->light_space) mat4_free(light->light_space);
    if(light->light_camera) c_free(light->light_camera);
 
-   vec4_free(light->color);
    vec4_free(light->position);
+   vec4_free(light->direction);
    free(light);
+}
+
+void l_calc_radius(light_t* light)
+{
+   float max_brightness = fmaxf(fmaxf(light->color[0], light->color[1]), light->color[2]);
+   light->radius = (-light->linear
+                    + sqrtf(light->linear * light->linear -
+                           4 * light->quadratic *
+                           (light->constant - (256.0f / 5.0f) * max_brightness)))
+                  / (2.0f * light->quadratic);
 }

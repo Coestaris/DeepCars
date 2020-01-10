@@ -201,9 +201,10 @@ void draw_skybox(render_stage_t* stage)
 void bind_shadowmap(render_stage_t* stage)
 {
    scene_t* scene = scm_get_current();
+   shadow_light_t* shadow_light = scene->shadow_light;
+   if(!shadow_light->update) return;
 
    GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
-   light_t* shadow_light = scene->shadow_light;
 
    vec4_cpy(shadow_light->light_camera->position, shadow_light->position);
    c_to_mat(shadow_light->light_view, shadow_light->light_camera);
@@ -212,6 +213,8 @@ void bind_shadowmap(render_stage_t* stage)
 
    sh_nset_mat4(stage->shader, "lightSpaceMatrix", shadow_light->light_space);
    GL_PCALL(glCullFace(GL_FRONT));
+
+   shadow_light->update = false;
 }
 
 void unbind_shadowmap(render_stage_t* stage)
@@ -276,21 +279,15 @@ void bind_shading(render_stage_t* stage)
       snprintf(buffer, 255, "lights[%li].Color", i);
       sh_nset_vec3(stage->shader, buffer, lt->color);
 
-      const float constant = 1.0f; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
-      const float linear = 0.005f;
-      const float quadratic = 0.02f;
 
       snprintf(buffer, 255, "lights[%li].Linear", i);
-      sh_nset_float(stage->shader, buffer, linear);
+      sh_nset_float(stage->shader, buffer, lt->linear);
 
       snprintf(buffer, 255, "lights[%li].Quadratic", i);
-      sh_nset_float(stage->shader, buffer, quadratic);
-
-      const float max_brightness = fmaxf(fmaxf(lt->color[0], lt->color[1]), lt->color[2]);
-      float radius = (-linear + sqrtf(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * max_brightness))) / (2.0f * quadratic);
+      sh_nset_float(stage->shader, buffer, lt->quadratic);
 
       snprintf(buffer, 255, "lights[%li].Radius", i);
-      sh_nset_float(stage->shader, buffer, radius);
+      sh_nset_float(stage->shader, buffer, lt->radius);
    }
 }
 

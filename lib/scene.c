@@ -17,6 +17,7 @@ scene_t* sc_create(uint32_t id)
 {
    scene_t* scene = malloc(sizeof(scene_t));
    scene->id = id;
+   scene->shadow_light = NULL;
    scene->lights = list_create(20);
    scene->startup_objects = list_create(20);
 
@@ -28,6 +29,7 @@ scene_t* sc_create(uint32_t id)
 //
 void sc_free(scene_t* scene)
 {
+   if(scene->shadow_light) l_sh_free(scene->shadow_light);
    for (size_t i = 0; i < scene->lights->count; i++)
       l_free((light_t*) scene->lights->collection[i]);
 

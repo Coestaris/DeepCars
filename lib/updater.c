@@ -80,6 +80,8 @@ void u_draw_func(void)
    for(size_t i = 0; i < stages->count; i++)
    {
       render_stage_t* stage = (render_stage_t*)stages->collection[i];
+      if(stage->skip) continue;
+
       gr_bind(stage);
       sh_use(stage->shader);
       stage->bind_func(stage);

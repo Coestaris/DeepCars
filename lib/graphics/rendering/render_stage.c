@@ -52,7 +52,8 @@ render_stage_t* rs_create(render_mode_t render_mode, shader_t* shader)
    rs->bind_func      = NULL;
    rs->setup_obj_func = NULL;
    rs->unbind_func    = NULL;
-   rs->data             = NULL;
+   rs->data           = NULL;
+   rs->skip           = false;
 
    rs->attachments = 0;
    rs_set_color_options(&rs->color0_format);

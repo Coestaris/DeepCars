@@ -25,7 +25,7 @@ typedef struct _scene
 
    texture_t* skybox;
 
-   light_t* shadow_light;
+   shadow_light_t* shadow_light;
 
 } scene_t;
 
