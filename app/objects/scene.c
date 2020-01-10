@@ -40,25 +40,24 @@ void setup_objects(scene_t* scene)
 
 void setup_light(scene_t* scene)
 {
-/*   scene->light = l_create();
-   scene->light->position = cvec4(0, 20, 0, 0);
-   vec4_fill(scene->light->color, 0.4, 0.4, 0.4, 0);
+/*   scene->shadow_light = l_create();
+   scene->shadow_light->position = cvec4(0, 20, 0, 0);
+   vec4_fill(scene->shadow_light->color, 0.4, 0.4, 0.4, 0);
 
    float near_plane = 1.0f, far_plane = 100.0f;
-   mat4_ortho(scene->light->light_proj, near_plane, far_plane, 50, 50);
+   mat4_ortho(scene->shadow_light->light_proj, near_plane, far_plane, 50, 50);
 
-   scene->light->light_camera = c_create(vec4_ccpy(scene->light->position), vec4_ccpy(camera->up));
-   scene->light->light_camera->use_target = true;
-   scene->light->light_camera->target = cvec4(-16, 0, -4, 0);
-   list_push(scene->lights, scene->light);*/
-
+   scene->shadow_light->light_camera = c_create(vec4_ccpy(scene->shadow_light->position), vec4_ccpy(camera->up));
+   scene->shadow_light->light_camera->use_target = true;
+   scene->shadow_light->light_camera->target = cvec4(-16, 0, -4, 0);
+   list_push(scene->lights, scene->shadow_light);*/
    for (size_t i = 0; i < NR_LIGHTS; i++)
    {
       light_t* lt = l_create();
 
       // calculate slightly random offsets
       float xPos = ((float)(rand() % 100) / 100.0f) * 60.0f - 30.0f;
-      float yPos = ((float)(rand() % 100) / 100.0f) * 5.0f - 2.5f;
+      float yPos = ((float)(rand() % 100) / 100.0f) * 5.0f + .5f;
       float zPos = ((float)(rand() % 100) / 100.0f) * 60.0f - 30.0f;
       vec4_fill(lt->position, xPos, yPos, zPos, 0);
 
@@ -69,5 +68,4 @@ void setup_light(scene_t* scene)
 
       list_push(scene->lights, lt);
    }
-
 }

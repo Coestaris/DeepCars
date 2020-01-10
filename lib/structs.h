@@ -11,7 +11,7 @@
 
 // Output debug information
 #define VERBOSE true
-#define DEBUG_LEVEL 2 // 2 - glCall, glPCall. 1 - glCall
+#define DEBUG_LEVEL 1 // 2 - glCall, glPCall. 1 - glCall
 
 
 #if DEBUG_LEVEL == 2
@@ -22,7 +22,7 @@
 #elif DEBUG_LEVEL == 1
 
    #define GL_CALL(expr) { expr; gl_check(#expr, __LINE__, __FILE__); }
-   #define GL_PCALL(expr) expr
+   #define GL_PCALL(expr) {expr;}
 
 #else
 

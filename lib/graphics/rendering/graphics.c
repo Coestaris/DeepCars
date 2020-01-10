@@ -34,7 +34,7 @@ vec4 COLOR_PURPLE;
 
 void gr_fill(vec4 color)
 {
-   GL_PCALL(glClearColor(color[0], color[1], color[2], color[3]))
+   GL_PCALL(glClearColor(color[0], color[1], color[2], color[3]));
 }
 
 mat4 proj_mat;

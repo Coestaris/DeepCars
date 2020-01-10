@@ -21,6 +21,7 @@ typedef struct _geometry_shader_data {
 
 } geometry_shader_data_t;
 
+vec4 buff_vec;
 texture_t* noise_texure;
 vec4* ssao_kernel;
 texture_t* ssao_texture;
@@ -55,7 +56,7 @@ void switch_stages()
          break;
       case 1:
          texture_to_draw = g_buffer_stage->color0_tex; //positions
-         puts("1. Positions");
+         puts("1. View Positions");
          break;
       case 2:
          texture_to_draw = g_buffer_stage->color1_tex; //normals
@@ -66,10 +67,14 @@ void switch_stages()
          puts("3. Albedo spec");
          break;
       case 4:
+         texture_to_draw = g_buffer_stage->color3_tex; //positions
+         puts("3. Positions");
+         break;
+      case 5:
          texture_to_draw = ssao_stage->color0_tex; //ssao
          puts("4. SSAO");
          break;
-      case 5:
+      case 6:
          texture_to_draw = ssao_blur_stage->color0_tex; //ssao blurred
          puts("5. Blurred SSAO");
          break;
@@ -86,8 +91,8 @@ void bind_g_buffer(render_stage_t* stage)
    c_to_mat(data->buffmat, data->camera);
 
    //scene_t* scene = scm_get_current();
-   //mat4_cpy(scene->light->light_space, scene->light->light_proj);
-   //mat4_mulm(scene->light->light_space, scene->light->light_view);
+   //mat4_cpy(scene->shadow_light->light_space, scene->shadow_light->light_proj);
+   //mat4_mulm(scene->shadow_light->light_space, scene->shadow_light->light_view);
 
    sh_nset_mat4(stage->shader, "projection", stage->proj);
    sh_nset_mat4(stage->shader, "view", data->buffmat);
@@ -125,6 +130,11 @@ void bind_ssao(render_stage_t* stage)
    t_bind(noise_texure, 2);
 
    sh_nset_mat4(stage->shader, "projection", stage->proj);
+
+   //geometry_shader_data_t* data = stage->data;
+   //c_to_mat(data->buffmat, data->camera);
+
+   //sh_nset_mat4(stage->shader, "view", stage->view);
    for (size_t i = 0; i < KERNEL_SIZE; i++)
    {
       char buffer[50];
@@ -189,23 +199,26 @@ void bind_shading(render_stage_t* stage)
    render_stage_t* g_buffer_stage = rc1->stages->collection[0];
    render_stage_t* ssao_stage = rc1->stages->collection[1];
 
-   geometry_shader_data_t* data = stage->data;
    list_t* lights = scm_get_current()->lights;
+   geometry_shader_data_t* data = stage->data;
    c_to_mat(data->buffmat, data->camera);
 
-   sh_nset_int(stage->shader, "gPosition", 0);
+   sh_nset_int(stage->shader, "gViewPosition", 0);
    sh_nset_int(stage->shader, "gNormal", 1);
    sh_nset_int(stage->shader, "gAlbedoSpec", 2);
    sh_nset_int(stage->shader, "ssao", 3);
+   sh_nset_int(stage->shader, "gPosition", 4);
 
    sh_nset_vec3(stage->shader, "viewPos", data->camera->position);
    //mat4_print(data->buffmat);
    sh_nset_mat4(stage->shader, "view", data->buffmat);
+   sh_nset_mat4(stage->shader, "proj", stage->proj);
 
    t_bind(g_buffer_stage->color0_tex, 0);
    t_bind(g_buffer_stage->color1_tex, 1);
    t_bind(g_buffer_stage->color2_tex, 2);
    t_bind(ssao_texture, 3);
+   t_bind(g_buffer_stage->color3_tex, 4);
 
    for (size_t i = 0; i < lights->count; i++)
    {
@@ -213,14 +226,15 @@ void bind_shading(render_stage_t* stage)
 
       char buffer[255];
       snprintf(buffer, 255, "lights[%li].Position", i);
+
       sh_nset_vec3(stage->shader, buffer, lt->position);
 
       snprintf(buffer, 255, "lights[%li].Color", i);
       sh_nset_vec3(stage->shader, buffer, lt->color);
 
       const float constant = 1.0f; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
-      const float linear = 0.045f;
-      const float quadratic = 0.0075f;
+      const float linear = 0.005f;
+      const float quadratic = 0.02f;
 
       snprintf(buffer, 255, "lights[%li].Linear", i);
       sh_nset_float(stage->shader, buffer, linear);
@@ -253,6 +267,7 @@ void unbind_bypass(render_stage_t* stage)
 
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 {
+   buff_vec = cvec4(0,0,0,0);
    noise_texure = generate_noise(4);
    ssao_kernel = generate_kernel(KERNEL_SIZE);
 
@@ -264,8 +279,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shader_t* gamma_shader = s_getn_shader("gamma");
 
    render_stage_t* g_buffer = rs_create(RM_GEOMETRY, g_buffer_shader);
-   g_buffer->attachments = TF_COLOR0 | TF_COLOR1 | TF_COLOR2 | TF_DEPTH;
-   // Position buffer
+   g_buffer->attachments = TF_COLOR0 | TF_COLOR1 | TF_COLOR2 | TF_COLOR3 | TF_DEPTH;
+   // View Position buffer
    g_buffer->color0_format.tex_width = win->w;
    g_buffer->color0_format.tex_height = win->h;
    g_buffer->color0_format.tex_format = GL_RGB;
@@ -292,6 +307,15 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer->color2_format.tex_min_filter = GL_NEAREST;
    g_buffer->color2_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
    g_buffer->color2_format.tex_wrapping_s = GL_CLAMP_TO_EDGE;
+   // Position
+   g_buffer->color3_format.tex_width = win->w;
+   g_buffer->color3_format.tex_height = win->h;
+   g_buffer->color3_format.tex_format = GL_RGB;
+   g_buffer->color3_format.tex_int_format = GL_RGB16F;
+   g_buffer->color3_format.tex_mag_filter = GL_NEAREST;
+   g_buffer->color3_format.tex_min_filter = GL_NEAREST;
+   g_buffer->color3_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
+   g_buffer->color3_format.tex_wrapping_s = GL_CLAMP_TO_EDGE;
    // Depth component
    g_buffer->depth_format.tex_width = win->w;
    g_buffer->depth_format.tex_height = win->h;
@@ -320,11 +344,13 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    ssao->color0_format.tex_int_format = GL_RED;
    ssao->color0_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
    ssao->color0_format.tex_wrapping_s = GL_CLAMP_TO_EDGE;
-
    ssao->bind_func = bind_ssao;
    ssao->unbind_func = unbind_ssao;
    ssao->vao = rc_get_quad_vao();
    mat4_cpy(ssao->proj, proj);
+   geometry_shader_data_t* ssao_data = (ssao->data = malloc(sizeof(geometry_shader_data_t)));
+   ssao_data->buffmat = cmat4();
+   ssao_data->camera = camera;
 
    render_stage_t* ssao_blur = rs_create(RM_FRAMEBUFFER, ssao_blur_shader);
    ssao_blur->attachments = TF_COLOR0;
@@ -359,6 +385,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shading->bind_func = bind_shading;
    shading->unbind_func = unbind_shading;
    shading->vao = rc_get_quad_vao();
+   mat4_cpy(shading->proj, proj);
    geometry_shader_data_t* shading_data = (shading->data = malloc(sizeof(geometry_shader_data_t)));
    shading_data->camera = camera;
    shading_data->buffmat = cmat4();
