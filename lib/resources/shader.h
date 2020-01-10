@@ -26,9 +26,6 @@ typedef struct _shader
    // OpenGL program ID
    GLint prog_id;
 
-   // Precalculated uniform locations
-   GLint* uniform_locations;
-
    // Flag field that contains programs of the shaders
    //    0x1 - has vertex program
    //    0x2 - has fragment program

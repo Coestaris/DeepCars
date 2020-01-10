@@ -209,7 +209,6 @@ shader_t* sh_create(char* name)
    shader_t* sh = malloc(sizeof(shader_t));
    sh->prog_id = 0;
    sh->name = name;
-   sh->uniform_locations = NULL;
    sh->programs = 0;
    return sh;
 }
@@ -221,9 +220,6 @@ void sh_free(shader_t* sh)
 {
    SH_LOG("Freed shader \"%s\"", sh->name);
    GL_CALL(glDeleteProgram(sh->prog_id))
-
-   if (sh->uniform_locations)
-      free(sh->uniform_locations);
 
    free(sh->name);
    free(sh);
@@ -364,9 +360,5 @@ void sh_info(shader_t* sh)
       SH_LOG("[sh_info]: Uniform %d:[type: %u, name: \"%s\"]", i, type, name);
    }
 
-   SH_ERROR("[sh_info]: Uniform Locations: ",0);
-   for(i = 0; i < 5; i++)
-      SH_LOG("%i", sh->uniform_locations[i]);
    SH_LOG("",0);
-
 }

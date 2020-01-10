@@ -50,19 +50,33 @@ void camera_update_func(object_t* this)
    // shadow_light move
    // left
    if (u_get_key_state(113) == KEY_PRESSED)
+   {
       vec4_subv(scene->shadow_light->position, camera_cross_cpy);
+      update_shadow_light();
+   }
 
    // right
    if (u_get_key_state(114) == KEY_PRESSED)
+   {
       vec4_addv(scene->shadow_light->position, camera_cross_cpy);
+      update_shadow_light();
+   }
 
    // forward
    if (u_get_key_state(111) == KEY_PRESSED)
+   {
       vec4_subv(scene->shadow_light->position, camera_dir_cpy);
+      update_shadow_light();
+   }
 
    // back
    if (u_get_key_state(116) == KEY_PRESSED)
-      //vec4_addv(scene->shadow_light->position, camera_dir_cpy);
+   {
+      vec4_addv(scene->shadow_light->position, camera_dir_cpy);
+      update_shadow_light();
+   }
+
+   if (u_get_key_state(62) == KEY_PRESSED)
    {
       if(!last_1)
       {

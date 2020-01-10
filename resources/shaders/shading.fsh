@@ -24,7 +24,7 @@ struct ShadowLight {
 
 const int NR_LIGHTS = 15;
 
-uniform sampler2D gViewPosition;
+//uniform sampler2D gViewPosition;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;

@@ -48,15 +48,6 @@ void s_push(shader_t* shader, int id)
    list_push(nodes, node);
 }
 
-// Sets precalculated uniform location end checks it to be valid
-void s_set_uniform_location(size_t index, shader_t* sh, const char* uniform_name)
-{
-   if((sh->uniform_locations[index] = glGetUniformLocation(sh->prog_id, uniform_name)) == -1)
-   {
-      S_ERROR("Unable to get uniform location of \"%s\" from shader %s", uniform_name, sh->name);
-   }
-}
-
 //
 // s_init
 //

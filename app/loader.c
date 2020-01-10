@@ -61,11 +61,17 @@ void app_init_graphics(void)
 
    rc_set_current(get_chain(win, camera, proj_mat));
    switch_stages();
+   switch_ssao();
+
 }
 
 void app_run(void)
 {
    scm_load_scene(SCENEID_MENU, true);
+
+   update_lights();
+   update_shadow_light();
+
    u_start_loop(win);
 }
 

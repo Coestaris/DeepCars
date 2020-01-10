@@ -6,14 +6,13 @@
 #pragma implementation "renderer.h"
 #endif
 #include "renderer.h"
+
 #include "../win_defaults.h"
 #include "../../lib/resources/rmanager.h"
 #include "../../lib/scene.h"
 #include "../../lib/scm.h"
 #include "ssao.h"
-
-render_chain_t* rc1;
-render_chain_t* rc2;
+#include "shader_setup.h"
 
 typedef struct _geometry_shader_data {
    camera_t* camera;
@@ -21,31 +20,95 @@ typedef struct _geometry_shader_data {
 
 } geometry_shader_data_t;
 
-vec4 buff_vec;
+#define STAGE_G_BUFFER 0
+#define STAGE_SSAO 1
+#define STAGE_SSAO_BLUR 2
+#define STAGE_SKYBOX 3
+#define STAGE_SHADOWMAP 4
+#define STAGE_SHADING 5
+#define STAGE_BYPASS 6
+
+render_chain_t* rc;
+
+//ssao
 texture_t* noise_texure;
 vec4* ssao_kernel;
 texture_t* ssao_texture;
+texture_t* ssao_dummy_texture;
+
+//stages
+texture_t* texture_to_draw;
 int ssao_state = 0;
+int state = -1;
 
-void switch_ssao(void)
+mat4 view;
+
+inline void update_shadow_light(void)
 {
-   render_stage_t* ssao_blur_stage = rc1->stages->collection[2];
+   render_stage_t* shadow_map_stage = rc->stages->collection[STAGE_SHADOWMAP];
+   render_stage_t* shading_stage = rc->stages->collection[STAGE_SHADING];
+   shadow_map_stage->skip = false;
 
-   if(ssao_state) ssao_texture = rm_getn(TEXTURE, "__generated_mt_default_amb_1.0_1.0_1.0");
-   else ssao_texture = ssao_blur_stage->color0_tex;
+   scene_t* scene = scm_get_current();
+
+   vec4_cpy(scene->shadow_light->light_camera->direction, scene->shadow_light->light_camera->target);
+   vec4_subv(scene->shadow_light->light_camera->direction, scene->shadow_light->position);
+
+   shader_t* shading_shader = shading_stage->shader;
+   sh_use(shading_shader);
+   sh_set_vec3(UNIFORM_SHADING.shadow_light_position, scene->shadow_light->position);
+   sh_set_vec3(UNIFORM_SHADING.shadow_light_direction, scene->shadow_light->light_camera->direction);
+   sh_set_mat4(UNIFORM_SHADING.shadow_light_lightspace, scene->shadow_light->light_space);
+   sh_set_float(UNIFORM_SHADING.shadow_light_bright, .7f);
+   sh_use(NULL);
+}
+
+inline void update_lights(void)
+{
+   render_stage_t* shading_stage = rc->stages->collection[STAGE_SHADING];
+   list_t* lights = scm_get_current()->lights;
+
+   shader_t* shading_shader = shading_stage->shader;
+   sh_use(shading_shader);
+
+   for (size_t i = 0; i < lights->count; i++)
+   {
+      light_t* lt = lights->collection[i];
+      sh_set_vec3(UNIFORM_SHADING.lights_position[i], lt->position);
+      sh_set_vec3(UNIFORM_SHADING.lights_color[i], lt->color);
+      sh_set_float(UNIFORM_SHADING.lights_linear[i], lt->linear);
+      sh_set_float(UNIFORM_SHADING.lights_quadratic[i], lt->quadratic);
+      sh_set_float(UNIFORM_SHADING.lights_radius[i], lt->radius);
+   }
+
+   sh_use(NULL);
+}
+
+inline void switch_ssao(void)
+{
+   render_stage_t* ssao_blur_stage = rc->stages->collection[STAGE_SSAO_BLUR];
+   if(ssao_state)
+   {
+      ssao_texture = ssao_dummy_texture;
+      APP_LOG("SSAO off",0);
+   }
+   else
+   {
+      ssao_texture = ssao_blur_stage->color0_tex;
+      APP_LOG("SSAO on",0);
+   }
+
    ssao_state = !ssao_state;
 }
 
-texture_t* texture_to_draw;
-int state = -1;
-void switch_stages()
+inline void switch_stages(void)
 {
-   render_stage_t* g_buffer_stage = rc1->stages->collection[0];
-   render_stage_t* ssao_stage = rc1->stages->collection[1];
-   render_stage_t* ssao_blur_stage = rc1->stages->collection[2];
- //render_stage_t* skybox_stage = rc1->stages->collection[3];
-   render_stage_t* shadowmap_stage = rc1->stages->collection[4];
-   render_stage_t* shading_stage = rc1->stages->collection[5];
+   render_stage_t* g_buffer_stage = rc->stages->collection[STAGE_G_BUFFER];
+   render_stage_t* ssao_stage = rc->stages->collection[STAGE_SSAO];
+   render_stage_t* ssao_blur_stage = rc->stages->collection[STAGE_SSAO_BLUR];
+   render_stage_t* skybox_stage = rc->stages->collection[STAGE_SKYBOX];
+   render_stage_t* shadowmap_stage = rc->stages->collection[STAGE_SHADOWMAP];
+   render_stage_t* shading_stage = rc->stages->collection[STAGE_SHADING];
 
    state = (state + 1) % 8;
    switch(state)
@@ -53,35 +116,35 @@ void switch_stages()
       default:
       case 0:
          texture_to_draw = shading_stage->color0_tex; // result
-         puts("0. Result image");
+         APP_LOG("0. Result image",0);
          break;
       case 1:
          texture_to_draw = g_buffer_stage->color0_tex; //positions
-         puts("1. View Positions");
+         APP_LOG("1. View Positions",0);
          break;
       case 2:
          texture_to_draw = g_buffer_stage->color1_tex; //normals
-         puts("2. Normals");
+         APP_LOG("2. Normals",0);
          break;
       case 3:
          texture_to_draw = g_buffer_stage->color2_tex; //albedo_spec
-         puts("3. Albedo spec");
+         APP_LOG("3. Albedo spec",0);
          break;
       case 4:
          texture_to_draw = g_buffer_stage->color3_tex; //positions
-         puts("3. Positions");
+         APP_LOG("3. Positions",0);
          break;
       case 5:
          texture_to_draw = ssao_stage->color0_tex; //ssao
-         puts("5. SSAO");
+         APP_LOG("5. SSAO",0);
          break;
       case 6:
          texture_to_draw = ssao_blur_stage->color0_tex; //ssao blurred
-         puts("6. Blurred SSAO");
+         APP_LOG("6. Blurred SSAO",0);
          break;
       case 7:
          texture_to_draw = shadowmap_stage->depth_tex; //shadowmap
-         puts("7. Shadowmap");
+         APP_LOG("7. Shadowmap",0);
          break;
    }
 }
@@ -93,17 +156,8 @@ void bind_g_buffer(render_stage_t* stage)
    GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
 
    geometry_shader_data_t* data = (geometry_shader_data_t*)stage->data;
-   c_to_mat(data->buffmat, data->camera);
-
-   //scene_t* scene = scm_get_current();
-   //mat4_cpy(scene->shadow_light->light_space, scene->shadow_light->light_proj);
-   //mat4_mulm(scene->shadow_light->light_space, scene->shadow_light->light_view);
-
-   sh_nset_mat4(stage->shader, "projection", stage->proj);
-   sh_nset_mat4(stage->shader, "view", data->buffmat);
-
-   sh_nset_int(stage->shader, "texture_diffuse", 0);
-   sh_nset_int(stage->shader, "texture_specular", 1);
+   c_to_mat(view, data->camera);
+   sh_set_mat4(UNIFORM_GBUFF.view, view);
 }
 
 void unbind_g_buffer(render_stage_t* stage)
@@ -112,40 +166,20 @@ void unbind_g_buffer(render_stage_t* stage)
 
 void setup_object_g_buffer(render_stage_t* stage, object_t* object, mat4 model_mat)
 {
-   t_bind(object->draw_info->material->map_diffuse, 0);
-   t_bind(object->draw_info->material->map_specular, 1);
-   //t_bind(object->draw_info->material->map_ambient, 3);
-   //sh_nset_float(stage->shader, "shininess", object->draw_info->material->shininess);
-
-   sh_nset_mat4(stage->shader, "model", model_mat);
+   t_bind(object->draw_info->material->map_diffuse, UNIFORM_GBUFF.diffuse_tex);
+   t_bind(object->draw_info->material->map_specular, UNIFORM_GBUFF.spec_tex);
+   sh_set_mat4(UNIFORM_GBUFF.model, model_mat);
 }
 
 // SSAO ROUTINES
 void bind_ssao(render_stage_t* stage)
 {
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   GL_PCALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-   render_stage_t* g_buffer_stage = rc1->stages->collection[0];
-   sh_nset_int(stage->shader, "gPosition", 0);
-   sh_nset_int(stage->shader, "gNormal", 1);
-   sh_nset_int(stage->shader, "texNoise", 2);
-
-   t_bind(g_buffer_stage->color0_tex, 0);
-   t_bind(g_buffer_stage->color1_tex, 1);
-   t_bind(noise_texure, 2);
-
-   sh_nset_mat4(stage->shader, "projection", stage->proj);
-
-   //geometry_shader_data_t* data = stage->data;
-   //c_to_mat(data->buffmat, data->camera);
-
-   //sh_nset_mat4(stage->shader, "view", stage->view);
-   for (size_t i = 0; i < KERNEL_SIZE; i++)
-   {
-      char buffer[50];
-      snprintf(buffer, 50, "samples[%li]", i);
-      sh_nset_vec3(stage->shader, buffer, ssao_kernel[i]);
-   }
+   render_stage_t* g_buffer_stage = rc->stages->collection[STAGE_G_BUFFER];
+   t_bind(g_buffer_stage->color0_tex, UNIFORM_SSAO.pos_tex);
+   t_bind(g_buffer_stage->color1_tex, UNIFORM_SSAO.norm_tex);
+   t_bind(noise_texure, UNIFORM_SSAO.noise_tex);
 }
 
 void unbind_ssao(render_stage_t* stage) { }
@@ -153,8 +187,7 @@ void unbind_ssao(render_stage_t* stage) { }
 // SSAO BLUR ROUTINES
 void bind_ssao_blur(render_stage_t* stage)
 {
-   sh_nset_int(stage->shader, "ssaoInput", 0);
-   t_bind(stage->prev_stage->color0_tex, 0);
+   t_bind(stage->prev_stage->color0_tex, UNIFORM_SSAO_BLUR.tex);
 }
 
 void unbind_ssao_blur(render_stage_t* stage) { }
@@ -162,21 +195,17 @@ void unbind_ssao_blur(render_stage_t* stage) { }
 // SKYBOX ROUTINES
 void bind_skybox(render_stage_t* stage)
 {
-   geometry_shader_data_t* data = (geometry_shader_data_t*)stage->data;
-   c_to_mat(data->buffmat, data->camera);
-
    scene_t* scene = scm_get_current();
+   geometry_shader_data_t* data = (geometry_shader_data_t*)stage->data;
+   mat4_cpy(data->buffmat, view);
 
    data->buffmat[3] = 0;
    data->buffmat[7] = 0;
    data->buffmat[11] = 0;
    data->buffmat[15] = 0;
 
-   sh_nset_mat4(stage->shader, "view", data->buffmat);
-   sh_nset_mat4(stage->shader, "projection", stage->proj);
-   sh_nset_int(stage->shader, "skybox", 0);
-
-   t_bind(scene->skybox, 0);
+   sh_set_mat4(UNIFORM_SKYBOX.view, data->buffmat);
+   t_bind(scene->skybox, UNIFORM_SKYBOX.skybox_tex);
 }
 
 void unbind_skybox(render_stage_t* stage)
@@ -186,7 +215,7 @@ void unbind_skybox(render_stage_t* stage)
 
 void draw_skybox(render_stage_t* stage)
 {
-   render_stage_t* g_buffer_stage = rc1->stages->collection[0];
+   render_stage_t* g_buffer_stage = rc->stages->collection[STAGE_G_BUFFER];
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, g_buffer_stage->fbo));
    {
       GL_PCALL(glDepthFunc(GL_LEQUAL));
@@ -198,11 +227,11 @@ void draw_skybox(render_stage_t* stage)
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }
 
+// SHADOWMAP ROUTINES
 void bind_shadowmap(render_stage_t* stage)
 {
    scene_t* scene = scm_get_current();
    shadow_light_t* shadow_light = scene->shadow_light;
-   if(!shadow_light->update) return;
 
    GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
 
@@ -211,10 +240,10 @@ void bind_shadowmap(render_stage_t* stage)
    mat4_cpy(shadow_light->light_space, shadow_light->light_proj);
    mat4_mulm(shadow_light->light_space, shadow_light->light_view);
 
-   sh_nset_mat4(stage->shader, "lightSpaceMatrix", shadow_light->light_space);
+   sh_set_mat4(UNIFORM_SHADOWMAP.light_space, shadow_light->light_space);
    GL_PCALL(glCullFace(GL_FRONT));
 
-   shadow_light->update = false;
+   stage->skip = true;
 }
 
 void unbind_shadowmap(render_stage_t* stage)
@@ -224,101 +253,53 @@ void unbind_shadowmap(render_stage_t* stage)
 
 void setup_object_shadowmap(render_stage_t* stage, object_t* object, mat4 model_mat)
 {
-   sh_nset_mat4(stage->shader, "model", model_mat);
+   sh_set_mat4(UNIFORM_SHADOWMAP.model, model_mat);
 }
 
 // SHADING ROUTINES
 void bind_shading(render_stage_t* stage)
 {
-   render_stage_t* g_buffer_stage = rc1->stages->collection[0];
-   render_stage_t* ssao_stage = rc1->stages->collection[1];
-   render_stage_t* shadowmap_stage = rc1->stages->collection[4];
+   render_stage_t* g_buffer_stage = rc->stages->collection[STAGE_G_BUFFER];
+   render_stage_t* shadowmap_stage = rc->stages->collection[STAGE_SHADOWMAP];
 
    scene_t* scene = scm_get_current();
-   list_t* lights = scene->lights;
    geometry_shader_data_t* data = stage->data;
-   c_to_mat(data->buffmat, data->camera);
 
-   sh_nset_int(stage->shader, "gViewPosition", 0);
-   sh_nset_int(stage->shader, "gNormal", 1);
-   sh_nset_int(stage->shader, "gAlbedoSpec", 2);
-   sh_nset_int(stage->shader, "ssao", 3);
-   sh_nset_int(stage->shader, "gPosition", 4);
+   sh_set_vec3(UNIFORM_SHADING.view_pos, data->camera->position);
+   sh_set_mat4(UNIFORM_SHADING.view, view);
 
-   sh_nset_vec3(stage->shader, "viewPos", data->camera->position);
-
-   vec4_cpy(scene->shadow_light->light_camera->direction, scene->shadow_light->light_camera->target);
-   vec4_subv(scene->shadow_light->light_camera->direction, scene->shadow_light->position);
-
-   sh_nset_vec3(stage->shader, "shadowLight.Position", scene->shadow_light->position);
-   sh_nset_vec3(stage->shader, "shadowLight.Direction", scene->shadow_light->light_camera->direction);
-   sh_nset_mat4(stage->shader, "shadowLight.lightSpaceMatrix", scene->shadow_light->light_space);
-   sh_nset_int(stage->shader, "shadowLight.shadowMap", 5);
-   sh_nset_float(stage->shader, "shadowLight.Brightness", .7f);
-
-   //mat4_print(data->buffmat);
-   sh_nset_mat4(stage->shader, "view", data->buffmat);
-   sh_nset_mat4(stage->shader, "proj", stage->proj);
-
-   t_bind(g_buffer_stage->color0_tex, 0);
-   t_bind(g_buffer_stage->color1_tex, 1);
-   t_bind(g_buffer_stage->color2_tex, 2);
-   t_bind(ssao_texture, 3);
-   t_bind(g_buffer_stage->color3_tex, 4);
-   t_bind(shadowmap_stage->depth_tex, 5);
-
-   for (size_t i = 0; i < lights->count; i++)
-   {
-      light_t* lt = lights->collection[i];
-
-      char buffer[255];
-      snprintf(buffer, 255, "lights[%li].Position", i);
-
-      sh_nset_vec3(stage->shader, buffer, lt->position);
-
-      snprintf(buffer, 255, "lights[%li].Color", i);
-      sh_nset_vec3(stage->shader, buffer, lt->color);
-
-
-      snprintf(buffer, 255, "lights[%li].Linear", i);
-      sh_nset_float(stage->shader, buffer, lt->linear);
-
-      snprintf(buffer, 255, "lights[%li].Quadratic", i);
-      sh_nset_float(stage->shader, buffer, lt->quadratic);
-
-      snprintf(buffer, 255, "lights[%li].Radius", i);
-      sh_nset_float(stage->shader, buffer, lt->radius);
-   }
+   //t_bind(g_buffer_stage->color0_tex, uniform);
+   t_bind(g_buffer_stage->color1_tex, UNIFORM_SHADING.norm_tex);
+   t_bind(g_buffer_stage->color2_tex, UNIFORM_SHADING.albedoSpec_tex);
+   t_bind(ssao_texture, UNIFORM_SHADING.ssao_tex);
+   t_bind(g_buffer_stage->color3_tex, UNIFORM_SHADING.pos_tex);
+   t_bind(shadowmap_stage->depth_tex, UNIFORM_SHADING.shadow_light_shadowmap_tex);
 }
 
-void unbind_shading(render_stage_t* stage)
-{
-}
+void unbind_shading(render_stage_t* stage) { }
 
 // GAMMA / BYPASS ROUTINES
 void bind_bypass(render_stage_t* stage)
 {
-   sh_nset_int(stage->shader, "tex", 0);
-   t_bind(texture_to_draw, 0);
+   t_bind(texture_to_draw, UNIFORM_GAMMA.tex);
 }
 
-void unbind_bypass(render_stage_t* stage)
-{
-}
+void unbind_bypass(render_stage_t* stage) { }
 
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 {
-   buff_vec = cvec4(0,0,0,0);
    noise_texure = generate_noise(4);
    ssao_kernel = generate_kernel(KERNEL_SIZE);
+   ssao_dummy_texture = mt_create_colored_tex(COLOR_WHITE);
+   view = cmat4();
 
-   shader_t* g_buffer_shader = s_getn_shader("g_buffer");
-   shader_t* ssao_shader = s_getn_shader("ssao");
-   shader_t* ssao_blur_shader = s_getn_shader("ssao_blur");
-   shader_t* skybox_shader = s_getn_shader("skybox");
-   shader_t* shading_shader = s_getn_shader("shading");
-   shader_t* shadowmap_shader = s_getn_shader("shadowmap");
-   shader_t* gamma_shader = s_getn_shader("gamma");
+   shader_t* g_buffer_shader = setup_g_buffer(proj);
+   shader_t* ssao_shader = setup_ssao(ssao_kernel, proj);
+   shader_t* ssao_blur_shader = setup_ssao_blur();
+   shader_t* skybox_shader = setup_skybox(proj);
+   shader_t* shadowmap_shader = setup_shadowmap();
+   shader_t* shading_shader = setup_shading();
+   shader_t* gamma_shader = setup_gamma();
 
    render_stage_t* g_buffer = rs_create(RM_GEOMETRY, g_buffer_shader);
    g_buffer->attachments = TF_COLOR0 | TF_COLOR1 | TF_COLOR2 | TF_COLOR3 | TF_DEPTH;
@@ -390,9 +371,6 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    ssao->unbind_func = unbind_ssao;
    ssao->vao = rc_get_quad_vao();
    mat4_cpy(ssao->proj, proj);
-   geometry_shader_data_t* ssao_data = (ssao->data = malloc(sizeof(geometry_shader_data_t)));
-   ssao_data->buffmat = cmat4();
-   ssao_data->camera = camera;
 
    render_stage_t* ssao_blur = rs_create(RM_FRAMEBUFFER, ssao_blur_shader);
    ssao_blur->attachments = TF_COLOR0;
@@ -418,19 +396,6 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    skybox_data->buffmat = cmat4();
    skybox_data->camera = camera;
 
-   render_stage_t* shading = rs_create(RM_FRAMEBUFFER, shading_shader);
-   shading->attachments = TF_COLOR0;
-   shading->color0_format.tex_width = info->w;
-   shading->color0_format.tex_height = info->h;
-   shading->color0_format.tex_format = GL_RGB;
-   shading->color0_format.tex_int_format = GL_RGB16F;
-   shading->bind_func = bind_shading;
-   shading->unbind_func = unbind_shading;
-   shading->vao = rc_get_quad_vao();
-   mat4_cpy(shading->proj, proj);
-   geometry_shader_data_t* shading_data = (shading->data = malloc(sizeof(geometry_shader_data_t)));
-   shading_data->camera = camera;
-   shading_data->buffmat = cmat4();
 
    render_stage_t* shadowmap = rs_create(RM_GEOMETRY, shadowmap_shader);
    shadowmap->attachments = TF_DEPTH;
@@ -447,6 +412,22 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shadowmap->setup_obj_func = setup_object_shadowmap;
    shadowmap->unbind_func = unbind_shadowmap;
 
+
+   render_stage_t* shading = rs_create(RM_FRAMEBUFFER, shading_shader);
+   shading->attachments = TF_COLOR0;
+   shading->color0_format.tex_width = info->w;
+   shading->color0_format.tex_height = info->h;
+   shading->color0_format.tex_format = GL_RGB;
+   shading->color0_format.tex_int_format = GL_RGB16F;
+   shading->bind_func = bind_shading;
+   shading->unbind_func = unbind_shading;
+   shading->vao = rc_get_quad_vao();
+   mat4_cpy(shading->proj, proj);
+   geometry_shader_data_t* shading_data = (shading->data = malloc(sizeof(geometry_shader_data_t)));
+   shading_data->camera = camera;
+   shading_data->buffmat = cmat4();
+
+
    render_stage_t* bypass = rs_create(RM_BYPASS, gamma_shader);
    bypass->width = info->w;
    bypass->height = info->h;
@@ -454,21 +435,49 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    bypass->unbind_func = unbind_bypass;
    bypass->vao = rc_get_quad_vao();
 
-   rc1 = rc_create();
-   list_push(rc1->stages, g_buffer);
-   list_push(rc1->stages, ssao);
-   list_push(rc1->stages, ssao_blur);
-   list_push(rc1->stages, skybox);
-   list_push(rc1->stages, shadowmap);
-   list_push(rc1->stages, shading);
-   list_push(rc1->stages, bypass);
+   rc = rc_create();
+   list_push(rc->stages, g_buffer);
+   list_push(rc->stages, ssao);
+   list_push(rc->stages, ssao_blur);
+   list_push(rc->stages, skybox);
+   list_push(rc->stages, shadowmap);
+   list_push(rc->stages, shading);
+   list_push(rc->stages, bypass);
 
-   rc_build(rc1);
+   rc_build(rc);
    GL_PCALL(glEnable(GL_DEPTH_TEST));
-   return rc1;
+   return rc;
+}
+
+void free_geometry_shader_data(render_chain_t* render_chain, size_t index)
+{
+   geometry_shader_data_t* gsd = ((render_stage_t*)render_chain->stages->collection[index])->data;
+   mat4_free(gsd->buffmat);
 }
 
 void free_stages(void)
 {
+   free_geometry_shader_data(rc, STAGE_G_BUFFER);
+   rs_free(rc->stages->collection[STAGE_G_BUFFER]);
 
+   rs_free(rc->stages->collection[STAGE_SSAO]);
+   rs_free(rc->stages->collection[STAGE_SSAO_BLUR]);
+
+   free_geometry_shader_data(rc, STAGE_SKYBOX);
+   rs_free(rc->stages->collection[STAGE_SKYBOX]);
+
+   rs_free(rc->stages->collection[STAGE_SHADOWMAP]);
+
+   free_geometry_shader_data(rc, STAGE_SHADING);
+   rs_free(rc->stages->collection[STAGE_SHADING]);
+
+   rs_free(rc->stages->collection[STAGE_BYPASS]);
+
+   rc_free(rc, false);
+
+   mat4_free(view);
+
+   for(size_t i = 0; i < KERNEL_SIZE; i++)
+      vec4_free(ssao_kernel[i]);
+   free(ssao_kernel);
 }

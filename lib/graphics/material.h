@@ -51,5 +51,6 @@ void mt_fin(void);
 material_t* mt_create(char* name, uint8_t mode);
 void mt_free(material_t* material);
 void mt_build(material_t* material);
+texture_t* mt_create_colored_tex(vec4 color);
 
 #endif //DEEPCARS_MATERIAL_H

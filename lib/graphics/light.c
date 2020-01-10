@@ -29,7 +29,6 @@ void l_free(light_t* light)
 shadow_light_t* l_sh_create(vec4 position, vec4 up)
 {
    shadow_light_t* lt = malloc(sizeof(shadow_light_t));
-   lt->update = true;
    lt->light_proj = cmat4();
    lt->light_view = cmat4();
    lt->light_space = cmat4();

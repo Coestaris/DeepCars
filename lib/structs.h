@@ -11,7 +11,7 @@
 
 // Output debug information
 #define VERBOSE true
-#define DEBUG_LEVEL 1 // 2 - glCall, glPCall. 1 - glCall
+#define DEBUG_LEVEL 2 // 2 - glCall, glPCall. 1 - glCall
 
 
 #if DEBUG_LEVEL == 2
@@ -33,8 +33,8 @@
 
 #if VERBOSE == true
 
-   #define DC_LOG(prefix, format, ...) _log(prefix, format, __VA_ARGS__);
-   #define DC_ERROR(prefix, format, ...) _error(prefix, __FILE__, __LINE__, format, __VA_ARGS__);
+   #define DC_LOG(prefix, format, ...) {_log(prefix, format, __VA_ARGS__);}
+   #define DC_ERROR(prefix, format, ...) {_error(prefix, __FILE__, __LINE__, format, __VA_ARGS__);}
 
    void _log(const char* prefix, const char* format, ...);
    void _error(const char* prefix, const char* file, size_t line, const char* format, ...);

@@ -23,8 +23,6 @@ typedef struct _light
 
 typedef struct _shadow_light {
 
-   bool update;
-
    vec4 position;
    vec4 direction;
 

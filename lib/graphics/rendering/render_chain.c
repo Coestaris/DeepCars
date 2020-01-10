@@ -25,6 +25,7 @@ void rc_free(render_chain_t* rc, bool free_stages)
          rs_free(rc->stages->collection[i]);
    }
    if(rc->data) free(rc->data);
+   list_free(rc->stages);
    free(rc);
 }
 

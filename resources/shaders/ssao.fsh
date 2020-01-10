@@ -4,9 +4,9 @@ out float FragColor;
 in vec2 TexCoord;
 
 // parameters (you'd probably want to use them as uniforms to more easily tweak the effect)
-#define kernelSize 64
+#define kernelSize 32
 #define radius  4
-#define bias 0.035
+#define bias 0.015
 
 // tile noise texture over screen based on screen dimensions divided by noise size
 const vec2 noiseScale = vec2(1200.0/4.0, 800.0/4.0);

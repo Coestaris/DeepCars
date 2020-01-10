@@ -77,14 +77,14 @@ void mt_cache(texture_t* tex, vec4 color)
    list_push(cache, node);
 }
 
-texture_t* mt_to_texture(material_t* material, const char* field, vec4 color)
+texture_t* mt_to_texture(char* mat_name, const char* field, vec4 color)
 {
    texture_t* cached = mt_get_from_cache(color);
    if(cached) return cached;
 
    char* name = malloc(50);
    snprintf(name, 50, "__generated_mt_%s_%s_%.1f_%.1f_%.1f",
-         material->name, field, color[0], color[1], color[2]);
+            mat_name, field, color[0], color[1], color[2]);
    texture_t* t = t_create(name);
 
    GLuint id;
@@ -94,7 +94,6 @@ texture_t* mt_to_texture(material_t* material, const char* field, vec4 color)
    const uint8_t w = 1;
    const uint8_t h = 1;
    float data[3] = {color[0], color[1], color[2]};
-
 
    GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
    GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
@@ -117,6 +116,11 @@ texture_t* mt_to_texture(material_t* material, const char* field, vec4 color)
    return t;
 }
 
+texture_t* mt_create_colored_tex(vec4 color)
+{
+   return mt_to_texture("colored_tex", "_", color);
+}
+
 void mt_build(material_t* material)
 {
    if(material->mode != MT_DEFAULT_NO_AMBIENT &&
@@ -124,7 +128,7 @@ void mt_build(material_t* material)
      material->mode != MT_ILLUM_NO_SHADOWS)
    {
      if(!material->map_ambient)
-        material->map_ambient = mt_to_texture(material, "amb", material->ambient);
+        material->map_ambient = mt_to_texture(material->name, "amb", material->ambient);
    }
 
    if(material->mode != MT_DEFAULT_NO_SPECULAR &&
@@ -132,14 +136,14 @@ void mt_build(material_t* material)
       material->mode != MT_ILLUM_NO_SHADOWS)
    {
       if(!material->map_specular)
-         material->map_specular = mt_to_texture(material, "spec", material->specular);
+         material->map_specular = mt_to_texture(material->name, "spec", material->specular);
    }
 
    if(!material->map_diffuse)
-      material->map_diffuse = mt_to_texture(material, "diff", material->diffuse);
+      material->map_diffuse = mt_to_texture(material->name, "diff", material->diffuse);
 
    if(!material->map_transparent)
-      material->map_transparent = mt_to_texture(material, "trans", material->transparent);
+      material->map_transparent = mt_to_texture(material->name, "trans", material->transparent);
 }
 
 void mt_init(void)
