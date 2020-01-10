@@ -44,9 +44,10 @@ void switch_stages()
    render_stage_t* ssao_stage = rc1->stages->collection[1];
    render_stage_t* ssao_blur_stage = rc1->stages->collection[2];
  //render_stage_t* skybox_stage = rc1->stages->collection[3];
-   render_stage_t* shading_stage = rc1->stages->collection[4];
+   render_stage_t* shadowmap_stage = rc1->stages->collection[4];
+   render_stage_t* shading_stage = rc1->stages->collection[5];
 
-   state = (state + 1) % 6;
+   state = (state + 1) % 8;
    switch(state)
    {
       default:
@@ -72,11 +73,15 @@ void switch_stages()
          break;
       case 5:
          texture_to_draw = ssao_stage->color0_tex; //ssao
-         puts("4. SSAO");
+         puts("5. SSAO");
          break;
       case 6:
          texture_to_draw = ssao_blur_stage->color0_tex; //ssao blurred
-         puts("5. Blurred SSAO");
+         puts("6. Blurred SSAO");
+         break;
+      case 7:
+         texture_to_draw = shadowmap_stage->depth_tex; //shadowmap
+         puts("7. Shadowmap");
          break;
    }
 }
@@ -193,13 +198,41 @@ void draw_skybox(render_stage_t* stage)
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }
 
+void bind_shadowmap(render_stage_t* stage)
+{
+   scene_t* scene = scm_get_current();
+
+   GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
+   light_t* shadow_light = scene->shadow_light;
+
+   vec4_cpy(shadow_light->light_camera->position, shadow_light->position);
+   c_to_mat(shadow_light->light_view, shadow_light->light_camera);
+   mat4_cpy(shadow_light->light_space, shadow_light->light_proj);
+   mat4_mulm(shadow_light->light_space, shadow_light->light_view);
+
+   sh_nset_mat4(stage->shader, "lightSpaceMatrix", shadow_light->light_space);
+   GL_PCALL(glCullFace(GL_FRONT));
+}
+
+void unbind_shadowmap(render_stage_t* stage)
+{
+   GL_PCALL(glCullFace(GL_BACK));
+}
+
+void setup_object_shadowmap(render_stage_t* stage, object_t* object, mat4 model_mat)
+{
+   sh_nset_mat4(stage->shader, "model", model_mat);
+}
+
 // SHADING ROUTINES
 void bind_shading(render_stage_t* stage)
 {
    render_stage_t* g_buffer_stage = rc1->stages->collection[0];
    render_stage_t* ssao_stage = rc1->stages->collection[1];
+   render_stage_t* shadowmap_stage = rc1->stages->collection[4];
 
-   list_t* lights = scm_get_current()->lights;
+   scene_t* scene = scm_get_current();
+   list_t* lights = scene->lights;
    geometry_shader_data_t* data = stage->data;
    c_to_mat(data->buffmat, data->camera);
 
@@ -210,6 +243,16 @@ void bind_shading(render_stage_t* stage)
    sh_nset_int(stage->shader, "gPosition", 4);
 
    sh_nset_vec3(stage->shader, "viewPos", data->camera->position);
+
+   vec4_cpy(scene->shadow_light->light_camera->direction, scene->shadow_light->light_camera->target);
+   vec4_subv(scene->shadow_light->light_camera->direction, scene->shadow_light->position);
+
+   sh_nset_vec3(stage->shader, "shadowLight.Position", scene->shadow_light->position);
+   sh_nset_vec3(stage->shader, "shadowLight.Direction", scene->shadow_light->light_camera->direction);
+   sh_nset_mat4(stage->shader, "shadowLight.lightSpaceMatrix", scene->shadow_light->light_space);
+   sh_nset_int(stage->shader, "shadowLight.shadowMap", 5);
+   sh_nset_float(stage->shader, "shadowLight.Brightness", .7f);
+
    //mat4_print(data->buffmat);
    sh_nset_mat4(stage->shader, "view", data->buffmat);
    sh_nset_mat4(stage->shader, "proj", stage->proj);
@@ -219,6 +262,7 @@ void bind_shading(render_stage_t* stage)
    t_bind(g_buffer_stage->color2_tex, 2);
    t_bind(ssao_texture, 3);
    t_bind(g_buffer_stage->color3_tex, 4);
+   t_bind(shadowmap_stage->depth_tex, 5);
 
    for (size_t i = 0; i < lights->count; i++)
    {
@@ -276,6 +320,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shader_t* ssao_blur_shader = s_getn_shader("ssao_blur");
    shader_t* skybox_shader = s_getn_shader("skybox");
    shader_t* shading_shader = s_getn_shader("shading");
+   shader_t* shadowmap_shader = s_getn_shader("shadowmap");
    shader_t* gamma_shader = s_getn_shader("gamma");
 
    render_stage_t* g_buffer = rs_create(RM_GEOMETRY, g_buffer_shader);
@@ -390,6 +435,21 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shading_data->camera = camera;
    shading_data->buffmat = cmat4();
 
+   render_stage_t* shadowmap = rs_create(RM_GEOMETRY, shadowmap_shader);
+   shadowmap->attachments = TF_DEPTH;
+   //depth
+   shadowmap->depth_format.tex_height = 2048;
+   shadowmap->depth_format.tex_width = 2048;
+   shadowmap->depth_format.tex_wrapping_t = GL_CLAMP_TO_BORDER;
+   shadowmap->depth_format.tex_wrapping_s = GL_CLAMP_TO_BORDER;
+   shadowmap->depth_format.tex_border_color[0] = 1;
+   shadowmap->depth_format.tex_border_color[1] = 1;
+   shadowmap->depth_format.tex_border_color[2] = 1;
+
+   shadowmap->bind_func = bind_shadowmap;
+   shadowmap->setup_obj_func = setup_object_shadowmap;
+   shadowmap->unbind_func = unbind_shadowmap;
+
    render_stage_t* bypass = rs_create(RM_BYPASS, gamma_shader);
    bypass->width = info->w;
    bypass->height = info->h;
@@ -402,6 +462,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    list_push(rc1->stages, ssao);
    list_push(rc1->stages, ssao_blur);
    list_push(rc1->stages, skybox);
+   list_push(rc1->stages, shadowmap);
    list_push(rc1->stages, shading);
    list_push(rc1->stages, bypass);
 

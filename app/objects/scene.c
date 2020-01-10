@@ -40,9 +40,10 @@ void setup_objects(scene_t* scene)
 
 void setup_light(scene_t* scene)
 {
-/*   scene->shadow_light = l_create();
+   scene->shadow_light = l_create();
    scene->shadow_light->position = cvec4(0, 20, 0, 0);
    vec4_fill(scene->shadow_light->color, 0.4, 0.4, 0.4, 0);
+   scene->shadow_light->light_proj = cmat4();
 
    float near_plane = 1.0f, far_plane = 100.0f;
    mat4_ortho(scene->shadow_light->light_proj, near_plane, far_plane, 50, 50);
@@ -50,7 +51,9 @@ void setup_light(scene_t* scene)
    scene->shadow_light->light_camera = c_create(vec4_ccpy(scene->shadow_light->position), vec4_ccpy(camera->up));
    scene->shadow_light->light_camera->use_target = true;
    scene->shadow_light->light_camera->target = cvec4(-16, 0, -4, 0);
-   list_push(scene->lights, scene->shadow_light);*/
+   scene->shadow_light->light_view = cmat4();
+   scene->shadow_light->light_space = cmat4();
+
    for (size_t i = 0; i < NR_LIGHTS; i++)
    {
       light_t* lt = l_create();

@@ -64,8 +64,6 @@ class shader_packer:
             if "index" in shader:
                 index = shader["index"]
 
-            print(index)
-
             chunk = []
             chunk += cm.int32tobytes(index)            
             chunk += cm.int32tobytes(len(shader["name"]))            
