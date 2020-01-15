@@ -45,5 +45,11 @@
     [
         { "fn": "grass.json",   "name": "grass"   },
         { "fn": "default.json", "name": "default" }
+    ],
+
+    "fonts":
+    [
+         { "fn" : "IbarraRealNova-Regular.ttf", "name" : "default" }
     ]
+
 }

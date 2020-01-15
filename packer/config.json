@@ -1,5 +1,6 @@
 {
     "models_dir" : "models/",
+    "fonts_dir" : "fonts/",
     "shaders_dir" : "shaders/",
     "textures_dir" : "textures/",
     "cubemaps_dir" : "textures/",
@@ -29,5 +30,5 @@
     "material_default_map_specular" : "",
     "material_default_transparent" : 0,
     "material_default_map_transparent" : "",
-    "material_default_map_normal" : "",
+    "material_default_map_normal" : ""
 }

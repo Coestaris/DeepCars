@@ -8,6 +8,7 @@ import src.modelPacker as mp
 import src.shaderPacker as sp
 import src.texturePacker as tp
 import src.materialPacker as mtp
+import src.fontPacker as fp
 
 # 5 bytes: magic bytes
 # 4 bytes: chunks count 
@@ -18,15 +19,6 @@ import src.materialPacker as mtp
 #   n bytes: chunk data
 
 if __name__ == "__main__":
-    packers = [ 
-        mp.get_packer(), 
-        sp.get_packer(), 
-        tp.get_texture_packer(),
-        tp.get_cubemap_packer(),
-        mp.get_packer(),
-        mtp.get_packer()
-    ]
-
     if "clear" in argv:
         for file in glob(cm.CACHE_DIR + "*"):
             unlink(file)
@@ -36,14 +28,42 @@ if __name__ == "__main__":
 
         if path.isfile(cm.CACHE_FILE):
             unlink(cm.CACHE_FILE)
+        exit(0)
 
+    out_file = ""
+    in_dir = ""
+
+    for arg in argv:
+        if arg.startswith("--out_file="):
+            out_file = arg.split("=")[1]
+        elif arg.startswith("--in_dir="):
+            in_dir = arg.split("=")[1]
+
+    if out_file == "":
+        print("You must specify output file by --out_file=filename")
         exit(1)
+
+    if in_dir == "":
+        print("You must specify input directory by --in_dir=dirname")
+        exit(1)
+
+    cm.set_dir(in_dir)
+
+    packers = [ 
+        mp.get_packer(), 
+        sp.get_packer(), 
+        tp.get_texture_packer(),
+        tp.get_cubemap_packer(),
+        mp.get_packer(),
+        mtp.get_packer(),
+        fp.get_packer()
+    ]
 
     chunks = []
     for packer in packers:
         chunks += packer.proceed()
 
-    with open(cm.PATH_PREFIX + cm.config["output_file"], mode="wb") as file:
+    with open(out_file, mode="wb") as file:
         file.write(cm.MAGIC_BYTES)
         file.write(bytes(cm.int32tobytes(len(chunks))))
         for chunk in chunks:

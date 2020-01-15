@@ -13,6 +13,7 @@ SHADER_CHUNK_TYPE = 1
 TEXTURE_CHUNK_TYPE = 2
 CUBEMAP_CHUNK_TYPE = 3
 MATERIAL_CHUNK_TYPE = 4
+FONT_CHUNK_TYPE = 5
 
 CACHE_FILE = "_cache.json"
 CACHE_DIR = "_cache/"
@@ -23,7 +24,7 @@ def loadJSON(name):
         return json.load(json_file)
 
 config = loadJSON("config.json")
-index = loadJSON("index.json")
+index : dict
 
 cache = {}
 if os.path.isfile(CACHE_FILE):
@@ -33,6 +34,12 @@ if not os.path.isdir(CACHE_DIR):
     os.mkdir(CACHE_DIR)
 
 cached_files = [f.split('/')[1] for f in glob(CACHE_DIR + "*")]
+
+def set_dir(dir):
+    global PATH_PREFIX, index
+    PATH_PREFIX = dir
+
+    index = loadJSON(PATH_PREFIX + "index.json")
 
 def get_id(dir, dict):
     str_id = dir + dict.__str__()

@@ -60,6 +60,14 @@ class material_packer:
     def proceed(self):
         chunks = []
         for i, material in enumerate(self.materials):
+
+            files = [material["fn"]]
+            id = cm.get_id(self.path, material)
+            if cm.is_file_cached(id, self.path, files):
+                chunks.append(cm.get_cached_chunk(id))
+                print("[{}/{}]: Material \"{}\" already cached".format(i + 1, len(self.materials), material["name"]))
+                continue
+
             print("[{0}/{1}]: Packing material \"{2}\"".format(
                 i + 1, len(self.materials), material["name"]))
 
@@ -140,6 +148,7 @@ class material_packer:
             chunk += map_normal.encode("utf-8")
 
             chunk = cm.create_chunk(chunk, cm.MATERIAL_CHUNK_TYPE)
+            cm.cache_chunk(id, chunk)
             chunks.append(chunk)
 
         return chunks
