@@ -52,6 +52,9 @@ list_t*     mouse_listeners;
 list_t*     mousemove_listeners;
 list_t*     update_listeners;
 
+#ifdef OUTPUT_RENDER_TIME
+size_t render_time_counter = 0;
+#endif
 
 // Get current millisecond of global time
 double_t u_get_millis(void)
@@ -80,11 +83,16 @@ void u_draw_func(void)
    for(size_t i = 0; i < stages->count; i++)
    {
       render_stage_t* stage = (render_stage_t*)stages->collection[i];
+
       if(stage->skip) continue;
 
       gr_bind(stage);
       sh_use(stage->shader);
       stage->bind_func(stage);
+
+#ifdef MEASURE_RENDER_TIME
+      double start_time = u_get_millis();
+#endif
 
       if(stage->render_mode == RM_GEOMETRY)
       {
@@ -110,9 +118,16 @@ void u_draw_func(void)
          stage->custom_draw_func(stage);
       }
 
+#ifdef MEASURE_RENDER_TIME
+      stage->render_time =
+            (MEASURE_RENDER_SMOOTH * (u_get_millis() - start_time)) +
+            (1.0 - MEASURE_RENDER_SMOOTH) * stage->render_time;
+#endif
+
       stage->unbind_func(stage);
       gr_unbind(stage);
       sh_use(NULL);
+
    }
 
    w_swap_buffers(default_win);
@@ -285,6 +300,18 @@ void u_measure_time(void)
       elapsed = 0;
 
       U_LOG("FPS: %lf. Objects: %li", fps, objects->count);
+
+#ifdef OUTPUT_RENDER_TIME
+      if(render_time_counter++ % OUTPUT_RENDER_TIME == 0)
+      {
+         render_chain_t* chain = rc_get_current();
+         for(size_t i = 0; i < chain->stages->count; i++)
+         {
+            render_stage_t* stage = chain->stages->collection[i];
+            U_LOG("%s: %lf ms", stage->name, (double_t)stage->render_time);
+         }
+      }
+#endif
    }
 }
 

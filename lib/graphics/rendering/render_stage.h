@@ -8,6 +8,10 @@
 #ifndef DEEPCARS_RENDER_STAGE_H
 #define DEEPCARS_RENDER_STAGE_H
 
+#define MEASURE_RENDER_TIME
+#define MEASURE_RENDER_SMOOTH 0.9
+#define OUTPUT_RENDER_TIME 5
+
 #include "../../object.h"
 #include "../../resources/shader.h"
 
@@ -98,11 +102,17 @@ typedef struct _render_stage {
 
    GLuint vao;
 
+#ifdef MEASURE_RENDER_TIME
+   double render_time;
+#endif
+
+   const char* name;
+
    struct _render_stage* prev_stage;
 
 } render_stage_t;
 
-render_stage_t* rs_create(render_mode_t render_mode, shader_t* shader);
+render_stage_t* rs_create(const char* name, render_mode_t render_mode, shader_t* shader);
 
 void rs_free(render_stage_t* rs);
 

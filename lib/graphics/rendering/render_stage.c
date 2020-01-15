@@ -43,11 +43,12 @@ void rs_set_depth_options(attachment_options_t* ao)
    ao->tex_border_color[3] = 0;
 }
 
-render_stage_t* rs_create(render_mode_t render_mode, shader_t* shader)
+render_stage_t* rs_create(const char* name, render_mode_t render_mode, shader_t* shader)
 {
    render_stage_t* rs = malloc(sizeof(render_stage_t));
    rs->shader = shader;
    rs->render_mode = render_mode;
+   rs->name = name;
 
    rs->bind_func      = NULL;
    rs->setup_obj_func = NULL;
@@ -82,6 +83,10 @@ render_stage_t* rs_create(render_mode_t render_mode, shader_t* shader)
 
    rs->proj = cmat4();
    rs->view = cmat4();
+
+#ifdef MEASURE_RENDER_TIME
+   rs->render_time = 0;
+#endif
 
    return rs;
 }

@@ -301,7 +301,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shader_t* shading_shader = setup_shading();
    shader_t* gamma_shader = setup_gamma();
 
-   render_stage_t* g_buffer = rs_create(RM_GEOMETRY, g_buffer_shader);
+   render_stage_t* g_buffer = rs_create("gbuffer", RM_GEOMETRY, g_buffer_shader);
    g_buffer->attachments = TF_COLOR0 | TF_COLOR1 | TF_COLOR2 | TF_COLOR3 | TF_DEPTH;
    // View Position buffer
    g_buffer->color0_format.tex_width = win->w;
@@ -358,7 +358,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer_data->camera = camera;
    g_buffer_data->buffmat = cmat4();
 
-   render_stage_t* ssao = rs_create(RM_FRAMEBUFFER, ssao_shader);
+   render_stage_t* ssao = rs_create("ssao", RM_FRAMEBUFFER, ssao_shader);
    ssao->attachments = TF_COLOR0;
    //color
    ssao->color0_format.tex_width = win->w;
@@ -372,7 +372,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    ssao->vao = rc_get_quad_vao();
    mat4_cpy(ssao->proj, proj);
 
-   render_stage_t* ssao_blur = rs_create(RM_FRAMEBUFFER, ssao_blur_shader);
+   render_stage_t* ssao_blur = rs_create("ssao_blur", RM_FRAMEBUFFER, ssao_blur_shader);
    ssao_blur->attachments = TF_COLOR0;
    ssao_blur->color0_format.tex_width = info->w;
    ssao_blur->color0_format.tex_height = info->h;
@@ -383,7 +383,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    ssao_blur->unbind_func = unbind_ssao_blur;
    ssao_blur->vao = rc_get_quad_vao();
 
-   render_stage_t* skybox = rs_create(RM_CUSTOM, skybox_shader);
+   render_stage_t* skybox = rs_create("skybox", RM_CUSTOM, skybox_shader);
    skybox->width = info->w;
    skybox->height = info->h;
    skybox->bind_func = bind_skybox;
@@ -397,7 +397,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    skybox_data->camera = camera;
 
 
-   render_stage_t* shadowmap = rs_create(RM_GEOMETRY, shadowmap_shader);
+   render_stage_t* shadowmap = rs_create("shadow_map", RM_GEOMETRY, shadowmap_shader);
    shadowmap->attachments = TF_DEPTH;
    //depth
    shadowmap->depth_format.tex_height = 2048;
@@ -413,7 +413,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shadowmap->unbind_func = unbind_shadowmap;
 
 
-   render_stage_t* shading = rs_create(RM_FRAMEBUFFER, shading_shader);
+   render_stage_t* shading = rs_create("shading", RM_FRAMEBUFFER, shading_shader);
    shading->attachments = TF_COLOR0;
    shading->color0_format.tex_width = info->w;
    shading->color0_format.tex_height = info->h;
@@ -428,7 +428,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shading_data->buffmat = cmat4();
 
 
-   render_stage_t* bypass = rs_create(RM_BYPASS, gamma_shader);
+   render_stage_t* bypass = rs_create("bypass", RM_BYPASS, gamma_shader);
    bypass->width = info->w;
    bypass->height = info->h;
    bypass->bind_func = bind_bypass;
