@@ -10,7 +10,6 @@
 #define C_LOG(format, ...) DC_LOG("camera.c", format, __VA_ARGS__)
 #define C_ERROR(format, ...) DC_ERROR("camera.c", format, __VA_ARGS__)
 
-
 //
 // c_create()
 //

@@ -8,6 +8,6 @@ cmake-build-debug/
 
 lib/shaders/shaders/
 
-resources/_cache\.json
+_cache\.json
 
-resources/_cache/
+_cache/

@@ -1,0 +1,2 @@
+fontbm is used in accordance with the license specified by the project developer.
+Project repo: https://github.com/vladimirgamalyan/fontbm

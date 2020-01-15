@@ -30,7 +30,4 @@
     "material_default_transparent" : 0,
     "material_default_map_transparent" : "",
     "material_default_map_normal" : "",
-
-
-    "output_file" : "../cmake-build-debug/resources.bin"
 }
