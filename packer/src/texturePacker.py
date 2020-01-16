@@ -62,7 +62,7 @@ class cubemap_packer:
             files = cubemap["fns"]
             id = cm.get_id(self.path, cubemap)
             if cm.is_file_cached(id, self.path, files):
-                chunks.append(cm.get_cached_chunk(id))
+                chunks += cm.get_cached_chunk(id)
                 print("[{}/{}]: Cubemap \"{}\" already cached".format(i + 1, len(self.cubemaps), cubemap["name"]))
                 continue
                 
@@ -132,11 +132,11 @@ class cubemap_packer:
                 os.remove(tmp)
                 
             chunk = cm.create_chunk(chunk, cm.CUBEMAP_CHUNK_TYPE)
-            chunks.append(chunk)
+            chunks += chunk
 
             cm.cache_chunk(id, chunk)
 
-        return chunks
+        return (chunks, len(self.cubemaps))
 
 class texture_packer:
     def __init__(self, path, textures, config):
@@ -156,7 +156,7 @@ class texture_packer:
             files = [texture["fn"]]
             id = cm.get_id(self.path, texture)
             if cm.is_file_cached(id, self.path, files):
-                chunks.append(cm.get_cached_chunk(id))
+                chunks += cm.get_cached_chunk(id)
                 print("[{}/{}]: Texture \"{}\" already cached".format(i + 1, len(self.textures), texture["name"]))
                 continue
 
@@ -180,56 +180,67 @@ class texture_packer:
             if "compression" in texture:
                 compress = texture["compression"]
 
-
-            if compress == "dds_no":
-                compress == "no"
-
-            if compress == "png":
-                tmp = 'tmp.png'
-            else:
-                tmp = 'tmp.dds'
-
-            imsize = ()
-            with image.Image(filename=self.path + texture["fn"]) as img:
-                imsize = img.size
-                if compress != "png":
-                    img.compression = compress
-
-                img.save(filename=tmp)
-
-            print("[{}/{}]: Packing texture \"{}\" ({}x{}) as {}".format(i + 1, len(self.textures), texture["name"], 
-                imsize[0], imsize[1], compress.upper()))
-
             index = i
             if "index" in texture:
                 index = texture["index"]
 
-            chunk = []
-            with open(tmp, mode='rb') as file:
-                chunk += cm.int32tobytes(index)
-                chunk += cm.int8tobytes(1)
-                chunk += cm.int16tobytes(len(texture["name"]))
-                chunk += texture["name"].encode("utf-8")
-                chunk += cm.int32tobytes(imsize[0])
-                chunk += cm.int32tobytes(imsize[1])
-                chunk += cm.int8tobytes(compression_dict[compress])
-                chunk += cm.int8tobytes(texture_wrapping_dict[wrapping])
-                chunk += cm.int8tobytes(min_dict[min])
-                chunk += cm.int8tobytes(mag_dict[mag])
-                chunk += cm.int8tobytes(flip)
-                
-                b = file.read()
-                chunk += cm.int32tobytes(len(b))
-                chunk += b
+            if compress == "dds_no":
+                compress == "no"
 
-            os.remove(tmp)
-            
-            chunk = cm.create_chunk(chunk, cm.TEXTURE_CHUNK_TYPE)
-            chunks.append(chunk)
+            name = texture["name"]
+            full_path = self.path + texture["fn"]
+
+
+            imsize = (0,0) #todo: ?
+            print("[{}/{}]: Packing texture \"{}\" ({}x{}) as {}".format(i + 1, len(self.textures), texture["name"], 
+                imsize[0], imsize[1], compress.upper()))
+
+            chunk = self.create_chunk(wrapping, min, mag, flip, compress, full_path, index, name)
+            chunks += chunk
 
             cm.cache_chunk(id, chunk)
 
-        return chunks
+        return (chunks, len(self.textures))
+
+    @staticmethod
+    def create_chunk(wrapping, min, mag, flip, compress, full_path, index, name):
+
+        if compress == "png":
+            tmp = 'tmp.png'
+        else:
+            tmp = 'tmp.dds'
+
+        imsize = ()
+        with image.Image(filename=full_path) as img:
+            imsize = img.size
+            if compress != "png":
+                img.compression = compress
+
+            img.save(filename=tmp)
+
+        chunk = []
+        with open(tmp, mode='rb') as file:
+            chunk += cm.int32tobytes(index)
+            chunk += cm.int8tobytes(1)
+            chunk += cm.int16tobytes(len(name))
+            chunk += name.encode("utf-8")
+            chunk += cm.int32tobytes(imsize[0])
+            chunk += cm.int32tobytes(imsize[1])
+            chunk += cm.int8tobytes(compression_dict[compress])
+            chunk += cm.int8tobytes(texture_wrapping_dict[wrapping])
+            chunk += cm.int8tobytes(min_dict[min])
+            chunk += cm.int8tobytes(mag_dict[mag])
+            chunk += cm.int8tobytes(flip)
+            
+            b = file.read()
+            chunk += cm.int32tobytes(len(b))
+            chunk += b
+
+        os.remove(tmp)
+        chunk = cm.create_chunk(chunk, cm.TEXTURE_CHUNK_TYPE)
+
+        return chunk
+
 
 def get_texture_packer():
     return texture_packer(

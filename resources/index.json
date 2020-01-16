@@ -7,7 +7,8 @@
         { "vertex" : "skybox.vsh",    "fragment" : "skybox.fsh",    "name":  "skybox"    },
         { "vertex" : "shadowmap.vsh", "fragment" : "shadowmap.fsh", "name":  "shadowmap" },
         { "vertex" : "shading.vsh",   "fragment" : "shading.fsh",   "name":  "shading"   },
-        { "vertex" : "bypass.vsh",    "fragment" : "gamma.fsh",     "name":  "gamma"     }
+        { "vertex" : "bypass.vsh",    "fragment" : "gamma.fsh",     "name":  "gamma"     },
+        { "vertex" : "font.vsh",      "fragment" : "font.fsh",      "name":  "font"      }
     ],
 
     "textures" : 
@@ -49,7 +50,7 @@
 
     "fonts":
     [
-         { "fn" : "IbarraRealNova-Regular.ttf", "name" : "default" }
+         { "fn" : "IbarraRealNova-Regular.ttf", "name" : "default", "shader" : "font" }
     ]
 
 }

@@ -30,5 +30,9 @@
     "material_default_map_specular" : "",
     "material_default_transparent" : 0,
     "material_default_map_transparent" : "",
-    "material_default_map_normal" : ""
+    "material_default_map_normal" : "",
+
+    "font_default_min_filter" : "linear",
+    "font_default_mag_filter" : "linear",
+    "font_default_compression" : "dxt5"
 }

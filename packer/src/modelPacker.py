@@ -31,7 +31,7 @@ class model_packer:
             files = [model["fn"]]
             id = cm.get_id(self.path, model)
             if cm.is_file_cached(id, self.path, files):
-                chunks.append(cm.get_cached_chunk(id))
+                chunks += cm.get_cached_chunk(id)
                 print("[{}/{}]: Model \"{}\" already cached".format(i + 1, len(self.models), model["name"]))
                 continue
 
@@ -90,11 +90,11 @@ class model_packer:
                 chunk += data.encode("utf-8")
 
             chunk = cm.create_chunk(chunk, cm.MODEL_CHUNK_TYPE)
-            chunks.append(chunk)
+            chunks += chunk
 
             cm.cache_chunk(id, chunk)
 
-        return chunks
+        return (chunks, len(self.models))
 
 def get_packer():
     return model_packer(

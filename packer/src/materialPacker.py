@@ -64,7 +64,7 @@ class material_packer:
             files = [material["fn"]]
             id = cm.get_id(self.path, material)
             if cm.is_file_cached(id, self.path, files):
-                chunks.append(cm.get_cached_chunk(id))
+                chunks += cm.get_cached_chunk(id)
                 print("[{}/{}]: Material \"{}\" already cached".format(i + 1, len(self.materials), material["name"]))
                 continue
 
@@ -149,9 +149,9 @@ class material_packer:
 
             chunk = cm.create_chunk(chunk, cm.MATERIAL_CHUNK_TYPE)
             cm.cache_chunk(id, chunk)
-            chunks.append(chunk)
+            chunks += chunk
 
-        return chunks
+        return (chunks, len(self.materials))
 
 def get_packer():
     return material_packer(

@@ -59,14 +59,16 @@ if __name__ == "__main__":
         fp.get_packer()
     ]
 
+    len = 0
     chunks = []
     for packer in packers:
-        chunks += packer.proceed()
+        chunk, count = packer.proceed()
+        chunks += chunk
+        len += count
 
     with open(out_file, mode="wb") as file:
         file.write(cm.MAGIC_BYTES)
-        file.write(bytes(cm.int32tobytes(len(chunks))))
-        for chunk in chunks:
-            file.write(bytes(chunk))
+        file.write(bytes(cm.int32tobytes(len)))
+        file.write(bytes(chunks))
 
     cm.write_cache()

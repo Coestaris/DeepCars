@@ -29,7 +29,7 @@ class shader_packer:
 
             id = cm.get_id(self.path, shader)
             if cm.is_file_cached(id, self.path, files):
-                chunks.append(cm.get_cached_chunk(id))
+                chunks += cm.get_cached_chunk(id)
                 print("[{}/{}]: Shader \"{}\" already cached".format(i + 1, len(self.shaders), shader["name"]))
                 continue
 
@@ -83,10 +83,10 @@ class shader_packer:
                     chunk += list.encode("utf-8")
 
             chunk = cm.create_chunk(chunk, cm.SHADER_CHUNK_TYPE)
-            chunks.append(chunk)
+            chunks += chunk
             cm.cache_chunk(id, chunk)
 
-        return chunks
+        return (chunks, len(self.shaders))
 
 def get_packer():
     return shader_packer(

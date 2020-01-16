@@ -6,7 +6,7 @@ AI learns to drive a car using the NeuroEvolution algorithm.
 ```bash
 git clone --recurse-submodules https://github.com/Coestaris/DeepCars
 cd DeepCars
-sudo apt install mesa-utils libx11-dev libxi-dev
+sudo apt install mesa-utils libx11-dev libxi-dev imagemagick-6.q16
 sudo apt install make cmake # If needed
 ```
 To build

@@ -452,6 +452,28 @@ void p_handler_material(uint8_t* data, size_t length)
    free(normal);
 }
 
+void p_handler_font(uint8_t* data, size_t length)
+{
+   size_t      count = 0;
+
+   uint32_t    id       = 0;
+   uint16_t    name_len = 0;
+   uint32_t    info_len = 0;
+   uint32_t    tex_id   = 0;
+
+   READ_BUFF(id, sizeof(id));
+   READ_BUFF(name_len, sizeof(name_len));
+   char* name = malloc(name_len + 1);
+   READ_BUFF(*name, name_len);
+   name[name_len] = '\0';
+
+   READ_BUFF(info_len, sizeof(info_len));
+   uint8_t* info = malloc(sizeof(uint8_t) * info_len);
+   READ_BUFF(data, info_len);
+
+   READ_BUFF(id, sizeof(id));
+}
+
 // Array of supported chunks
 struct _pack_chunk supported_chunks[] = {
    {0, p_handler_model },
@@ -459,6 +481,7 @@ struct _pack_chunk supported_chunks[] = {
    {2, p_handler_texture },
    {3, p_handler_texture },
    {4, p_handler_material },
+   {5, p_handler_font },
 };
 
 const size_t supported_chunks_count = sizeof(supported_chunks) / sizeof(struct _pack_chunk);
