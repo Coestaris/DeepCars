@@ -11,7 +11,8 @@
 typedef enum _resource_type {
    TEXTURE,
    MODEL,
-   MATERIAL
+   MATERIAL,
+   FONT
 
 } resource_type_t;
 
@@ -23,6 +24,6 @@ void* rm_getn(resource_type_t type, const char* name);
 
 void rm_push(resource_type_t type, void* data, uint32_t id);
 
-void rm_free(bool free_tex, bool free_model, bool free_mat);
+void rm_free(bool free_tex, bool free_model, bool free_mat, bool free_font);
 
 #endif //DEEPCARS_RMANAGER_H

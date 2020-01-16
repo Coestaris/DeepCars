@@ -18,14 +18,13 @@ FONTBM_OUTPUT = "fontbm_out"
 FONTBM_ARG = "--font-file {0} \
               --output {1} --padding-up 45 --padding-down 45 --padding-right 45 \
               --padding-left 45 --font-size 400 --color 0,0,0 --background-color 255,255,255 \
-              --texture-width 4000 --texture-height 4000 --data-format bin"
+              --texture-width 4096 --texture-height 4096 --data-format bin"
 
 IMAGE_MAGIC_ARG = "/usr/bin/convert {0} -filter Jinc \\( +clone -negate -morphology Distance Euclidean \
                    -level 50%,-50% \\) -morphology Distance Euclidean -compose Plus -composite \
                    -level 43%,57% -resize 12.5% {0}"
 
 FONT_WRAPPING = "clamp_to_edge"
-FONT_COMPRESSION = "dxt5"
 
 class shader_packer:
     def __init__(self, path, fonts, config, default_font_compression, default_font_min, default_font_mag):
@@ -103,10 +102,10 @@ class shader_packer:
 
             chunk = cm.create_chunk(chunk, cm.FONT_CHUNK_TYPE)
      
-            chunks += chunk
             chunks += tex
+            chunks += chunk
 
-            cm.cache_chunk(id, chunk + tex)
+            cm.cache_chunk(id, tex + chunk)
 
         return (chunks, len(self.fonts) * 2)
 

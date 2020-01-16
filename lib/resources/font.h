@@ -7,6 +7,8 @@
 
 #include "shader.h"
 
+#define FONT_SCALE 8.0f
+
 typedef struct _charinfo {
    float tex_coord[8];
    float offset[2];
@@ -29,6 +31,7 @@ typedef struct _font {
 
 } font_t;
 
-font_t* f_create(char* name, texture_t* t, )
+font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info, size_t infolen);
+void f_free(font_t* font);
 
 #endif //DEEPCARS_FONT_H

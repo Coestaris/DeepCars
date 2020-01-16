@@ -21,6 +21,7 @@
 #include "shm.h"
 #include "model.h"
 #include "rmanager.h"
+#include "font.h"
 
 // Reads as many bytes as the specified parameter occupies.
 // If reading failed, an error will be thrown
@@ -460,6 +461,7 @@ void p_handler_font(uint8_t* data, size_t length)
    uint16_t    name_len = 0;
    uint32_t    info_len = 0;
    uint32_t    tex_id   = 0;
+   uint16_t    shader_len = 0;
 
    READ_BUFF(id, sizeof(id));
    READ_BUFF(name_len, sizeof(name_len));
@@ -469,9 +471,16 @@ void p_handler_font(uint8_t* data, size_t length)
 
    READ_BUFF(info_len, sizeof(info_len));
    uint8_t* info = malloc(sizeof(uint8_t) * info_len);
-   READ_BUFF(data, info_len);
+   READ_BUFF(*info, info_len);
 
    READ_BUFF(id, sizeof(id));
+
+   READ_BUFF(shader_len, sizeof(shader_len));
+   char* shader_name = malloc(shader_len + 1);
+   READ_BUFF(*shader_name, shader_len);
+   shader_name[shader_len] = '\0';
+
+   font_t* f = f_create(name, rm_get(TEXTURE, id), s_getn_shader(shader_name), info, info_len);
 }
 
 // Array of supported chunks

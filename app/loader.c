@@ -88,7 +88,7 @@ void app_fin()
 
    free_stages();
 
-   rm_free(true, true, true);
+   rm_free(true, true, true, true);
    s_free(true);
 
    w_destroy(win);
