@@ -10,10 +10,13 @@
 #define FONT_SCALE 8.0f
 
 typedef struct _charinfo {
-   float tex_coord[8];
-   float offset[2];
+   int id;
 
-   float width;
+   float tex_coord[8];
+
+   float yoffset;
+   float xoffset;
+   float xadvance;
 
 } charinfo_t;
 

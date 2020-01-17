@@ -13,6 +13,7 @@
 #include "../../lib/scm.h"
 #include "ssao.h"
 #include "shader_setup.h"
+#include "../../lib/resources/font.h"
 
 typedef struct _geometry_shader_data {
    camera_t* camera;
@@ -286,6 +287,22 @@ void bind_bypass(render_stage_t* stage)
 
 void unbind_bypass(render_stage_t* stage) { }
 
+//FONT ROUTINES
+void bind_font(render_stage_t* stage)
+{
+
+}
+
+void unbind_font(render_stage_t* stage)
+{
+
+}
+
+void draw_font(render_stage_t* stage)
+{
+   font_t*
+}
+
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 {
    noise_texure = generate_noise(4);
@@ -299,6 +316,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shader_t* skybox_shader = setup_skybox(proj);
    shader_t* shadowmap_shader = setup_shadowmap();
    shader_t* shading_shader = setup_shading();
+   shader_t* font_shader = s_getn_shader("font"); //setup_font();
    shader_t* gamma_shader = setup_gamma();
 
    render_stage_t* g_buffer = rs_create("gbuffer", RM_GEOMETRY, g_buffer_shader);
@@ -435,6 +453,13 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    bypass->unbind_func = unbind_bypass;
    bypass->vao = rc_get_quad_vao();
 
+   render_stage_t* font = rs_create("font", RM_CUSTOM, font_shader);
+   bypass->width = info->w;
+   bypass->height = info->h;
+   bypass->bind_func = bind_font;
+   bypass->unbind_func = unbind_font;
+   bypass->custom_draw_func = draw_font;
+
    rc = rc_create();
    list_push(rc->stages, g_buffer);
    list_push(rc->stages, ssao);
@@ -443,6 +468,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    list_push(rc->stages, shadowmap);
    list_push(rc->stages, shading);
    list_push(rc->stages, bypass);
+   list_push(rc->stages, font);
 
    rc_build(rc);
    GL_PCALL(glEnable(GL_DEPTH_TEST));

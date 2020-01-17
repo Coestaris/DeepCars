@@ -47,7 +47,8 @@ font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info
       F_ERROR("Expected block with id 1 (info)",0);
 
    size_t info_size = read32(&info);
-   info += info_size; // skip info block
+   // skip info block
+   info += info_size;
 
    block_id = read8(&info);
    if(block_id != 2)
@@ -55,26 +56,73 @@ font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info
    size_t common_size = read32(&info);
    f->line_height = read16(&info) / FONT_SCALE;
    f->base = read16(&info) / FONT_SCALE;
-   info += 4; //skip scales
+   //skip scales
+   info += 4;
    size_t pages = read16(&info);
-   info += 5; //skip other useless common data
+   //skip other useless common data
+   info += 5;
    if(pages != 1)
       F_ERROR("Using more than 1 page is not supported",0);
 
    block_id = read8(&info);
    if(block_id != 3)
       F_ERROR("Expected block with id 3 (pages)",0);
-   size_t pages_size = (read8(&info) - 48) * 10 + (read8(&info) - 48); //given values are in ascii...
-   info += pages_size; //skip pages info
+   //given values are in ascii...
+   size_t pages_size = (read8(&info) - 48) * 10 + (read8(&info) - 48);
+   //skip pages info
+   info += pages_size;
 
    block_id = read8(&info);
    if(block_id != 4)
       F_ERROR("Expected block with id 4 (chars)",0);
+   //given values are in ascii...
    size_t chars_len = (read8(&info) - 48) * 1000 +
                       (read8(&info) - 48) * 100  +
                       (read8(&info) - 48) * 10   +
-                      (read8(&info) - 48) * 1; //given values are in ascii...
+                      (read8(&info) - 48) * 1;
 
+   f->chars = chars_len / 20; //size of structure
+   for(size_t i = 0; i < f->chars; i++)
+   {
+      uint32_t id = read32(&info);
+      if(id > 256)
+         F_ERROR("Unsupported char",0);
+
+      uint16_t x = read16(&info);
+      uint16_t y = read16(&info);
+
+      uint16_t widht = read16(&info);
+      uint16_t height = read16(&info);
+
+      int16_t xoffset = read16(&info);
+      int16_t yoffset = read16(&info);
+
+      uint16_t xadvance = read16(&info);
+
+      f->infos[id].id = id;
+      f->infos[id].xoffset = (float)xoffset / FONT_SCALE;
+      f->infos[id].yoffset = (float)yoffset / FONT_SCALE;
+      f->infos[id].xadvance = (float)xadvance / FONT_SCALE;
+
+      float x1 = (float)x / FONT_SCALE;
+      float y1 = (float)y / FONT_SCALE;
+      float x2 = (float)(x + widht) / FONT_SCALE;
+      float y2 = (float)(y + height) / FONT_SCALE;
+      f->infos[id].tex_coord[0] = x1 / (float)f->texture->width;  //top left
+      f->infos[id].tex_coord[1] = y1 / (float)f->texture->height;
+
+      f->infos[id].tex_coord[2] = x2 / (float)f->texture->width; // top right
+      f->infos[id].tex_coord[3] = y1 / (float)f->texture->height;
+
+      f->infos[id].tex_coord[4] = x2 / (float)f->texture->width; // bottom right
+      f->infos[id].tex_coord[5] = y2 / (float)f->texture->height;
+
+      f->infos[id].tex_coord[6] = x1 / (float)f->texture->width; // bottom left
+      f->infos[id].tex_coord[7] = y2 / (float)f->texture->height;
+
+      //skip page and channel
+      info += 2;
+   }
 }
 
 void f_free(font_t* font)
