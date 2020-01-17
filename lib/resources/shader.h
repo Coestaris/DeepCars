@@ -5,6 +5,9 @@
 #ifndef DEEPCARS_SHADER_H
 #define DEEPCARS_SHADER_H
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCInconsistentNamingInspection"
+
 #define GL_GLEXT_PROTOTYPES
 
 #include <X11/Xlib.h>
@@ -55,6 +58,8 @@ void sh_free(shader_t* sh);
 void sh_set_int(GLint location, int value);
 void sh_set_float(GLint location, float value);
 void sh_set_mat4(GLint location, mat4 value);
+void sh_set_vec2v(GLint location, float a, float b);
+void sh_set_vec2(GLint location, vec4 v);
 void sh_set_vec3v(GLint location, float a, float b, float c);
 void sh_set_vec3(GLint location, vec4 v);
 void sh_set_vec4v(GLint location, float a, float b, float c, float d);
@@ -66,6 +71,8 @@ void sh_set_vec4(GLint location, vec4 v);
 void sh_nset_int(shader_t* sh, const char* name, int value);
 void sh_nset_float(shader_t* sh, const char* name, float value);
 void sh_nset_mat4(shader_t* sh, const char* name, mat4 value);
+void sh_nset_vec2v(shader_t* sh, const char* name, float a, float b);
+void sh_nset_vec2(shader_t* sh, const char* name, vec4 v);
 void sh_nset_vec3v(shader_t* sh, const char* name, float a, float b, float c);
 void sh_nset_vec3(shader_t* sh, const char* name, vec4 v);
 void sh_nset_vec4v(shader_t* sh, const char* name, float a, float b, float c, float d);
@@ -76,5 +83,7 @@ void sh_use(shader_t* sh);
 
 // Print some info about shader
 void sh_info(shader_t* sh);
+
+#pragma clang diagnostic pop
 
 #endif //DEEPCARS_SHADER_H

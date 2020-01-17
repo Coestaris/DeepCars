@@ -82,6 +82,9 @@ font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info
                       (read8(&info) - 48) * 1;
 
    f->chars = chars_len / 20; //size of structure
+   for(size_t i = 0; i < sizeof(f->infos) / sizeof(f->infos[0]); i++)
+      f->infos[i].id = -1;
+
    for(size_t i = 0; i < f->chars; i++)
    {
       uint32_t id = read32(&info);
@@ -100,6 +103,8 @@ font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info
       uint16_t xadvance = read16(&info);
 
       f->infos[id].id = id;
+      f->infos[id].width = widht;
+      f->infos[id].height = height;
       f->infos[id].xoffset = (float)xoffset / FONT_SCALE;
       f->infos[id].yoffset = (float)yoffset / FONT_SCALE;
       f->infos[id].xadvance = (float)xadvance / FONT_SCALE;
@@ -123,6 +128,8 @@ font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info
       //skip page and channel
       info += 2;
    }
+
+   return f;
 }
 
 void f_free(font_t* font)

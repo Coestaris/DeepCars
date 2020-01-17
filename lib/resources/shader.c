@@ -2,6 +2,8 @@
 // Created by maxim on 3/6/19.
 //
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCInconsistentNamingInspection"
 #ifdef __GNUC__
 #pragma implementation "shader.h"
 #endif
@@ -249,6 +251,16 @@ inline void sh_set_mat4(GLint location, mat4 value)
    GL_PCALL(glUniformMatrix4fv(location, 1, true, value));
 }
 
+inline void sh_set_vec2v(GLint location, float a, float b)
+{
+   GL_PCALL(glUniform2f(location, a, b));
+}
+
+inline void sh_set_vec2(GLint location, vec4 v)
+{
+   sh_set_vec2v(location, v[0], v[1]);
+}
+
 inline void sh_set_vec3v(GLint location, float a, float b, float c)
 {
    GL_PCALL(glUniform3f(location, a, b, c));
@@ -295,6 +307,21 @@ inline void sh_nset_mat4(shader_t* sh, const char* name, mat4 value)
 #endif
    sh_set_mat4(location, value);
 }
+
+inline void sh_nset_vec2v(shader_t* sh, const char* name, float a, float b)
+{
+   GLuint location = glGetUniformLocation(sh->prog_id, name);
+#if DEBUG_LEVEL == 2
+   assert(location != -1);
+#endif
+   sh_set_vec2v(location, a, b);
+}
+
+inline void sh_nset_vec2(shader_t* sh, const char* name, vec4 v)
+{
+   sh_nset_vec2v(sh, name, v[0], v[1]);
+}
+
 
 inline void sh_nset_vec3v(shader_t* sh, const char* name, float a, float b, float c)
 {
@@ -362,3 +389,4 @@ void sh_info(shader_t* sh)
 
    SH_LOG("",0);
 }
+#pragma clang diagnostic pop

@@ -143,3 +143,29 @@ shader_t* setup_gamma(void)
 
    return sh;
 }
+
+shader_t* setup_font(mat4 font_ortho)
+{
+   shader_t* sh = s_getn_shader("font");
+
+   UNIFORM_FONT.vertices[0] = get_loc(sh, "vertices[0]");
+   UNIFORM_FONT.vertices[1] = get_loc(sh, "vertices[1]");
+   UNIFORM_FONT.vertices[2] = get_loc(sh, "vertices[2]");
+   UNIFORM_FONT.vertices[3] = get_loc(sh, "vertices[3]");
+
+   UNIFORM_FONT.texCoords[0] = get_loc(sh, "texCoords[0]");
+   UNIFORM_FONT.texCoords[1] = get_loc(sh, "texCoords[1]");
+   UNIFORM_FONT.texCoords[2] = get_loc(sh, "texCoords[2]");
+   UNIFORM_FONT.texCoords[3] = get_loc(sh, "texCoords[3]");
+
+   UNIFORM_FONT.color = get_loc(sh, "color");
+   UNIFORM_FONT.params = get_loc(sh, "params");
+   UNIFORM_FONT.borderColor = get_loc(sh, "borderColor");
+
+   sh_use(sh);
+   sh_nset_int(sh, "tex", UNIFORM_FONT.tex = 0);
+   sh_nset_mat4(sh, "proj", font_ortho);
+   sh_use(NULL);
+
+   return sh;
+}

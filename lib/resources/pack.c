@@ -481,6 +481,10 @@ void p_handler_font(uint8_t* data, size_t length)
    shader_name[shader_len] = '\0';
 
    font_t* f = f_create(name, rm_get(TEXTURE, id), s_getn_shader(shader_name), info, info_len);
+   rm_push(FONT, f, id);
+
+   free(shader_name);
+   free(info);
 }
 
 // Array of supported chunks

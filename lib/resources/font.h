@@ -14,6 +14,9 @@ typedef struct _charinfo {
 
    float tex_coord[8];
 
+   float width;
+   float height;
+
    float yoffset;
    float xoffset;
    float xadvance;

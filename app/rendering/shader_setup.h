@@ -70,6 +70,18 @@ struct {
 
 } UNIFORM_GAMMA;
 
+struct {
+   GLint vertices[4];
+   GLint texCoords[4];
+
+   GLint tex;
+
+   GLint color;
+   GLint params;
+   GLint borderColor;
+
+} UNIFORM_FONT;
+
 shader_t* setup_g_buffer(mat4 proj);
 shader_t* setup_ssao(vec4* kernel, mat4 proj);
 shader_t* setup_ssao_blur(void);
@@ -77,6 +89,7 @@ shader_t* setup_skybox(mat4 proj);
 shader_t* setup_shadowmap(void);
 shader_t* setup_shading(void);
 shader_t* setup_gamma(void);
+shader_t* setup_font(mat4 font_ortho);
 
 #pragma clang diagnostic pop
 

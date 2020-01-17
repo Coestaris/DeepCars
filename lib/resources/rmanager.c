@@ -113,7 +113,7 @@ void* rm_getn(resource_type_t type, const char* name)
             }
          break;
       case FONT:
-         for(size_t i = 0; i < materials->count; i++)
+         for(size_t i = 0; i < fonts->count; i++)
             if(!strcmp(((struct _font_node*)fonts->collection[i])->font->name, name)) {
                return (((struct _font_node*)fonts->collection[i])->font);
             }
@@ -164,7 +164,7 @@ void rm_push(resource_type_t type, void* data, uint32_t id)
       case FONT:
       {
          struct _font_node* node = malloc(sizeof(struct _font_node));
-         if(id == -1) node->id = materials->count;
+         if(id == -1) node->id = fonts->count;
          else node->id = id;
          node->id = id;
          node->font = data;

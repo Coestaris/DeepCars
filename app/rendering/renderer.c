@@ -43,6 +43,7 @@ int ssao_state = 0;
 int state = -1;
 
 mat4 view;
+mat4 font_proj;
 
 inline void update_shadow_light(void)
 {
@@ -300,7 +301,37 @@ void unbind_font(render_stage_t* stage)
 
 void draw_font(render_stage_t* stage)
 {
-   font_t*
+   font_t* f = rm_getn(FONT, "default");
+   const char* string = "Hello world";
+   float scale = 1;
+   vec2f_t cursor = vec2f(100, 100);
+   vec4 color = COLOR_WHITE;
+   vec4 border_color = COLOR_BLUE;
+
+   for(size_t i = 0; i < strlen(string); i++)
+   {
+      charinfo_t* ci = &f->infos[i];
+      float x1 = cursor.x + (ci->xoffset) * scale;
+      float y1 = cursor.x + (ci->xoffset) * scale;
+      float x2 = cursor.y + (ci->yoffset + ci->width) * scale;
+      float y2 = cursor.y + (ci->yoffset + ci->height) * scale;
+
+      sh_set_vec2v(UNIFORM_FONT.vertices[0], x1, y1);
+      sh_set_vec2v(UNIFORM_FONT.vertices[1], x2, y1);
+      sh_set_vec2v(UNIFORM_FONT.vertices[2], x2, y2);
+      sh_set_vec2v(UNIFORM_FONT.vertices[3], x1, y1);
+
+      sh_set_vec2v(UNIFORM_FONT.texCoords[0], ci->tex_coord[0], ci->tex_coord[1]);
+      sh_set_vec2v(UNIFORM_FONT.texCoords[1], ci->tex_coord[2], ci->tex_coord[3]);
+      sh_set_vec2v(UNIFORM_FONT.texCoords[2], ci->tex_coord[4], ci->tex_coord[5]);
+      sh_set_vec2v(UNIFORM_FONT.texCoords[3], ci->tex_coord[6], ci->tex_coord[7]);
+
+      sh_set_vec4(UNIFORM_FONT.color, color);
+      sh_set_vec3(UNIFORM_FONT.borderColor, border_color);
+      sh_set_vec4v(UNIFORM_FONT.params, 1,1,1,1);
+
+      GL_PCALL(glDrawArrays(GL_TRIANGLES, 0, 1));
+   }
 }
 
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
@@ -310,13 +341,16 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    ssao_dummy_texture = mt_create_colored_tex(COLOR_WHITE);
    view = cmat4();
 
+   font_proj = cmat4();
+   mat4_ortho(font_proj, 1, -1, info->w, info->h);
+
    shader_t* g_buffer_shader = setup_g_buffer(proj);
    shader_t* ssao_shader = setup_ssao(ssao_kernel, proj);
    shader_t* ssao_blur_shader = setup_ssao_blur();
    shader_t* skybox_shader = setup_skybox(proj);
    shader_t* shadowmap_shader = setup_shadowmap();
    shader_t* shading_shader = setup_shading();
-   shader_t* font_shader = s_getn_shader("font"); //setup_font();
+   shader_t* font_shader = setup_font(font_proj);
    shader_t* gamma_shader = setup_gamma();
 
    render_stage_t* g_buffer = rs_create("gbuffer", RM_GEOMETRY, g_buffer_shader);
@@ -454,11 +488,11 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    bypass->vao = rc_get_quad_vao();
 
    render_stage_t* font = rs_create("font", RM_CUSTOM, font_shader);
-   bypass->width = info->w;
-   bypass->height = info->h;
-   bypass->bind_func = bind_font;
-   bypass->unbind_func = unbind_font;
-   bypass->custom_draw_func = draw_font;
+   font->width = info->w;
+   font->height = info->h;
+   font->bind_func = bind_font;
+   font->unbind_func = unbind_font;
+   font->custom_draw_func = draw_font;
 
    rc = rc_create();
    list_push(rc->stages, g_buffer);
@@ -502,6 +536,7 @@ void free_stages(void)
    rc_free(rc, false);
 
    mat4_free(view);
+   mat4_free(font_proj);
 
    for(size_t i = 0; i < KERNEL_SIZE; i++)
       vec4_free(ssao_kernel[i]);
