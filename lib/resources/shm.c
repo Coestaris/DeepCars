@@ -53,7 +53,7 @@ void s_push(shader_t* shader, int id)
 //
 void s_init()
 {
-   nodes = list_create(10);
+   nodes = list_create();
 }
 
 //

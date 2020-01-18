@@ -9,6 +9,7 @@
 #include <GL/gl.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <memory.h>
 
 #include "structs.h"
 
@@ -107,14 +108,20 @@ inline vec3f_t vec3f(double_t x, double_t y, double_t z)
 //
 // list_push
 //
-void list_push(list_t* list, void* object)
+inline void list_push(list_t* list, void* object)
 {
    // current collection if full increase its size in 1.5 times
    if (list->count > list->max_size - 1)
    {
-      size_t newLen = (int) ((float) list->max_size * 1.5f);
-      list->collection = realloc(list->collection, sizeof(void*) * newLen);
-      list->max_size = newLen;
+      if (list->max_size == LIST_BOOTSTRAP_SIZE) {
+         void** new_collection = malloc(sizeof(void*) * ++list->max_size);
+         memcpy(new_collection, list->collection, list->count);
+         list->collection = new_collection;
+      } else {
+         size_t newLen = (int) ((float) list->max_size * 1.5f);
+         list->collection = realloc(list->collection, sizeof(void*) * newLen);
+         list->max_size = newLen;
+      }
    }
    list->collection[list->count++] = object;
 }
@@ -134,7 +141,9 @@ void list_free_elements(list_t* list)
 //
 void list_free(list_t* list)
 {
-   free(list->collection);
+   if (list->collection != list->bootstrap) {
+      free(list->collection);
+   }
    free(list);
 }
 
@@ -149,11 +158,11 @@ void list_remove(list_t* list, void* object)
 //
 // list_create
 //
-list_t* list_create(int maxCount)
+list_t* list_create()
 {
    list_t* list = malloc(sizeof(list_t));
    list->count = 0;
-   list->max_size = maxCount;
-   list->collection = malloc(sizeof(void*) * maxCount);
+   list->max_size = LIST_BOOTSTRAP_SIZE;
+   list->collection = list->bootstrap;
    return list;
 }

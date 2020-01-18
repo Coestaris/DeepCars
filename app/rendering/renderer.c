@@ -301,7 +301,7 @@ void unbind_font(render_stage_t* stage)
 
 void draw_font(render_stage_t* stage)
 {
-   font_t* f = rm_getn(FONT, "default");
+/*   font_t* f = rm_getn(FONT, "default");
    const char* string = "Hello world";
    float scale = 1;
    vec2f_t cursor = vec2f(100, 100);
@@ -331,7 +331,7 @@ void draw_font(render_stage_t* stage)
       sh_set_vec4v(UNIFORM_FONT.params, 1,1,1,1);
 
       GL_PCALL(glDrawArrays(GL_TRIANGLES, 0, 1));
-   }
+   }*/
 }
 
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)

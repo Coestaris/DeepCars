@@ -46,10 +46,10 @@ list_t*  fonts;
 //
 void rm_init(void)
 {
-   textures = list_create(10);
-   models = list_create(10);
-   materials = list_create(10);
-   fonts = list_create(10);
+   textures = list_create();
+   models = list_create();
+   materials = list_create();
+   fonts = list_create();
 }
 
 //

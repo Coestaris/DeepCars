@@ -12,6 +12,7 @@
 // Output debug information
 #define VERBOSE true
 #define DEBUG_LEVEL 2 // 2 - glCall, glPCall. 1 - glCall
+#define LIST_BOOTSTRAP_SIZE 32
 
 
 #if DEBUG_LEVEL == 2
@@ -74,6 +75,8 @@ typedef struct _list
    size_t count;
    // Actual size of allocated pointer
    size_t max_size;
+   // Bootstrap optimization
+   void* bootstrap[LIST_BOOTSTRAP_SIZE];
    // Pointer to a data storing memory
    void** collection;
 
@@ -95,7 +98,7 @@ void list_free_elements(list_t* list);
 void list_free(list_t* list);
 
 // list_t constructor
-list_t* list_create(int maxCount);
+list_t* list_create();
 
 //
 // Vector methods
