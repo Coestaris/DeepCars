@@ -33,7 +33,7 @@ render_chain_t* rc_create()
 {
    render_chain_t* this = malloc(sizeof(render_chain_t));
    this->data = NULL;
-   this->stages = list_create(10);
+   this->stages = list_create();
    return this;
 }
 

@@ -18,8 +18,8 @@ scene_t* sc_create(uint32_t id)
    scene_t* scene = malloc(sizeof(scene_t));
    scene->id = id;
    scene->shadow_light = NULL;
-   scene->lights = list_create(20);
-   scene->startup_objects = list_create(20);
+   scene->lights = list_create();
+   scene->startup_objects = list_create();
 
    return scene;
 }

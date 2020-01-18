@@ -148,7 +148,7 @@ void mt_build(material_t* material)
 
 void mt_init(void)
 {
-   cache = list_create(10);
+   cache = list_create();
 }
 
 void mt_fin(void)

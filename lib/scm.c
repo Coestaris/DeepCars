@@ -27,7 +27,7 @@ scene_t* scm_get_current(void)
 //
 void scm_init()
 {
-   scenes = list_create(10);
+   scenes = list_create();
 }
 
 //

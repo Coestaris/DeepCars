@@ -36,6 +36,7 @@ shadow_light_t* l_sh_create(vec4 position, vec4 up)
 
    lt->position = position;
    lt->direction = cvec4(0,0,0,0);
+   return lt;
 }
 
 void l_sh_free(shadow_light_t* light)

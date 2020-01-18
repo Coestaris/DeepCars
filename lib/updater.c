@@ -320,11 +320,11 @@ void u_measure_time(void)
 //
 void u_init(void)
 {
-   objects = list_create(OBJECT_COUNT_START);
-   key_listeners = list_create(OBJECT_COUNT_START);
-   mouse_listeners = list_create(OBJECT_COUNT_START);
-   mousemove_listeners = list_create(OBJECT_COUNT_START);
-   update_listeners = list_create(OBJECT_COUNT_START);
+   objects = list_create();
+   key_listeners = list_create();
+   mouse_listeners = list_create();
+   mousemove_listeners = list_create();
+   update_listeners = list_create();
 }
 
 //
