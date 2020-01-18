@@ -71,9 +71,6 @@ struct {
 } UNIFORM_GAMMA;
 
 struct {
-   GLint vertices[4];
-   GLint texCoords[4];
-
    GLint tex;
 
    GLint color;

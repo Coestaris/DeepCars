@@ -291,58 +291,128 @@ void unbind_bypass(render_stage_t* stage) { }
 //FONT ROUTINES
 void bind_font(render_stage_t* stage)
 {
-
+   glEnable(GL_BLEND);
+   glDisable(GL_DEPTH_TEST);
+   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void unbind_font(render_stage_t* stage)
 {
-
+   glDisable(GL_BLEND);
+   glEnable(GL_DEPTH_TEST);
 }
 
+GLuint vao, vbo, ebo;
 void draw_font(render_stage_t* stage)
 {
-/*   font_t* f = rm_getn(FONT, "default");
-   const char* string = "Hello world";
-   float scale = 1;
-   vec2f_t cursor = vec2f(100, 100);
-   vec4 color = COLOR_WHITE;
-   vec4 border_color = COLOR_BLUE;
+   font_t* f = rm_getn(FONT, "default");
+   const char* string =
+         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, \n"
+         "sed do eiusmod tempor incididunt ut labore et dolore magna\n"
+         "aliqua. Ut enim ad minim veniam, quis nostrud exercitation\n"
+         "ullamco laboris nisi ut aliquip ex ea commodo consequat. \n"
+         "Duis aute irure dolor in reprehenderit in voluptate velit\n"
+         "esse cillum dolore eu fugiat nulla pariatur Excepteur sint\n"
+         "occaecat cupidatat non proident, sunt in culpa qui officia\n"
+         "deserunt mollit anim id est laborum.";
+
+   float scale = 0.95f;
+   vec2f_t cursor = vec2f(10, 10);
+   float start_x = cursor.x;
+   //vec4 border_color = COLOR_BLUE;
+
+   sh_set_vec4(UNIFORM_FONT.color, COLOR_WHITE);
+   //sh_set_vec3(UNIFORM_FONT.borderColor, border_color);
+   sh_set_vec2v(UNIFORM_FONT.params, 0.5f, 9.0f);
+   t_bind(f->texture, UNIFORM_FONT.tex);
+
+   GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+   GL_PCALL(glBindVertexArray(vao));
+
 
    for(size_t i = 0; i < strlen(string); i++)
    {
-      charinfo_t* ci = &f->infos[i];
-      float x1 = cursor.x + (ci->xoffset) * scale;
-      float y1 = cursor.x + (ci->xoffset) * scale;
-      float x2 = cursor.y + (ci->yoffset + ci->width) * scale;
-      float y2 = cursor.y + (ci->yoffset + ci->height) * scale;
+      charinfo_t* ci = &f->infos[string[i]];
+      if(string[i] == '\n')
+      {
+         cursor.y += f->base * scale;
+         cursor.x = start_x;
+         continue;
+      }
 
-      sh_set_vec2v(UNIFORM_FONT.vertices[0], x1, y1);
-      sh_set_vec2v(UNIFORM_FONT.vertices[1], x2, y1);
-      sh_set_vec2v(UNIFORM_FONT.vertices[2], x2, y2);
-      sh_set_vec2v(UNIFORM_FONT.vertices[3], x1, y1);
+      assert(ci->id != -1);
 
-      sh_set_vec2v(UNIFORM_FONT.texCoords[0], ci->tex_coord[0], ci->tex_coord[1]);
-      sh_set_vec2v(UNIFORM_FONT.texCoords[1], ci->tex_coord[2], ci->tex_coord[3]);
-      sh_set_vec2v(UNIFORM_FONT.texCoords[2], ci->tex_coord[4], ci->tex_coord[5]);
-      sh_set_vec2v(UNIFORM_FONT.texCoords[3], ci->tex_coord[6], ci->tex_coord[7]);
+      float x1 = scale * (float)(cursor.x + ci->xoffset);
+      float y1 = scale * (float)(cursor.y + ci->yoffset);
+      float x2 = scale * (float)(cursor.x + ci->xoffset + ci->width);
+      float y2 = scale * (float)(cursor.y + ci->yoffset + ci->height);
+/*     float x1 = 0;
+     float x2 = 100;
+     float y1 = 0;
+     float y2 = 100;*/
 
-      sh_set_vec4(UNIFORM_FONT.color, color);
-      sh_set_vec3(UNIFORM_FONT.borderColor, border_color);
-      sh_set_vec4v(UNIFORM_FONT.params, 1,1,1,1);
+/*
+ *          1.0f,  1.0f, 0.0f,    1.0f, 1.0f,
+           1.0f, -1.0f, 0.0f,    1.0f, 0.0f,
+           -1.0f, -1.0f, 0.0f,   0.0f, 0.0f,
+           -1.0f,  1.0f, 0.0f,   0.0f, 1.0f
+ */
+      float values[] = {
+            x2 - (float)win->w / 2.0f, (float)win->h / 2.0f - y2, 0, ci->tex_coord[0], ci->tex_coord[1],
+            x2 - (float)win->w / 2.0f, (float)win->h / 2.0f - y1, 0, ci->tex_coord[2], ci->tex_coord[3],
+            x1 - (float)win->w / 2.0f, (float)win->h / 2.0f - y1, 0, ci->tex_coord[4], ci->tex_coord[5],
+            x1 - (float)win->w / 2.0f, (float)win->h / 2.0f - y2, 0, ci->tex_coord[6], ci->tex_coord[7],
+      };
 
-      GL_PCALL(glDrawArrays(GL_TRIANGLES, 0, 1));
-   }*/
+      GL_PCALL(glBufferData(GL_ARRAY_BUFFER, sizeof(values), values, GL_DYNAMIC_DRAW));
+      GL_PCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+
+      cursor.x += scale * ci->xadvance;
+   }
+
+   GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+   GL_PCALL(glBindVertexArray(0));
+
+   //sh_use(NULL);
 }
 
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 {
+
    noise_texure = generate_noise(4);
    ssao_kernel = generate_kernel(KERNEL_SIZE);
    ssao_dummy_texture = mt_create_colored_tex(COLOR_WHITE);
    view = cmat4();
 
    font_proj = cmat4();
-   mat4_ortho(font_proj, 1, -1, info->w, info->h);
+   mat4_ortho(font_proj, -1, 1, info->w, info->h);
+
+   GLuint indices[] = {
+         0, 1, 3,
+         1, 2, 3
+   };
+
+   GL_CALL(glGenVertexArrays(1, &vao));
+   GL_CALL(glGenBuffers(1, &vbo));
+   GL_CALL(glGenBuffers(1, &ebo));
+   GL_CALL(glBindVertexArray(vao));
+
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+   GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * 5, NULL, GL_STATIC_DRAW));
+
+   GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
+   GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));
+
+   GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0));
+   GL_CALL(glEnableVertexAttribArray(0));
+
+   GL_CALL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))));
+   GL_CALL(glEnableVertexAttribArray(1));
+
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+
+   GL_CALL(glBindVertexArray(0));
+   GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
    shader_t* g_buffer_shader = setup_g_buffer(proj);
    shader_t* ssao_shader = setup_ssao(ssao_kernel, proj);

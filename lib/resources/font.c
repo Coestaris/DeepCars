@@ -103,8 +103,8 @@ font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info
       uint16_t xadvance = read16(&info);
 
       f->infos[id].id = id;
-      f->infos[id].width = widht;
-      f->infos[id].height = height;
+      f->infos[id].width = (float)widht / FONT_SCALE;
+      f->infos[id].height = (float)height / FONT_SCALE;
       f->infos[id].xoffset = (float)xoffset / FONT_SCALE;
       f->infos[id].yoffset = (float)yoffset / FONT_SCALE;
       f->infos[id].xadvance = (float)xadvance / FONT_SCALE;
@@ -113,14 +113,14 @@ font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info
       float y1 = (float)y / FONT_SCALE;
       float x2 = (float)(x + widht) / FONT_SCALE;
       float y2 = (float)(y + height) / FONT_SCALE;
-      f->infos[id].tex_coord[0] = x1 / (float)f->texture->width;  //top left
-      f->infos[id].tex_coord[1] = y1 / (float)f->texture->height;
+      f->infos[id].tex_coord[0] = x2 / (float)f->texture->width;  //top left
+      f->infos[id].tex_coord[1] = y2 / (float)f->texture->height;
 
       f->infos[id].tex_coord[2] = x2 / (float)f->texture->width; // top right
       f->infos[id].tex_coord[3] = y1 / (float)f->texture->height;
 
-      f->infos[id].tex_coord[4] = x2 / (float)f->texture->width; // bottom right
-      f->infos[id].tex_coord[5] = y2 / (float)f->texture->height;
+      f->infos[id].tex_coord[4] = x1 / (float)f->texture->width; // bottom right
+      f->infos[id].tex_coord[5] = y1 / (float)f->texture->height;
 
       f->infos[id].tex_coord[6] = x1 / (float)f->texture->width; // bottom left
       f->infos[id].tex_coord[7] = y2 / (float)f->texture->height;

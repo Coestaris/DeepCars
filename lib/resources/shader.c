@@ -284,7 +284,7 @@ inline void sh_set_vec4(GLint location, vec4 v)
 inline void sh_nset_int(shader_t* sh, const char* name, int value)
 {
    GLuint location = glGetUniformLocation(sh->prog_id, name);
-#if DEBUG_LEVEL == 2
+#if DEBUG_LEVEL == 3
    assert(location != -1);
 #endif
    sh_set_int(location, value);
@@ -293,7 +293,7 @@ inline void sh_nset_int(shader_t* sh, const char* name, int value)
 inline void sh_nset_float(shader_t* sh, const char* name, float value)
 {
    GLuint location = glGetUniformLocation(sh->prog_id, name);
-#if DEBUG_LEVEL == 2
+#if DEBUG_LEVEL == 3
    assert(location != -1);
 #endif
    sh_set_float(location, value);
@@ -302,7 +302,7 @@ inline void sh_nset_float(shader_t* sh, const char* name, float value)
 inline void sh_nset_mat4(shader_t* sh, const char* name, mat4 value)
 {
    GLuint location = glGetUniformLocation(sh->prog_id, name);
-#if DEBUG_LEVEL == 2
+#if DEBUG_LEVEL == 3
    assert(location != -1);
 #endif
    sh_set_mat4(location, value);
@@ -311,7 +311,7 @@ inline void sh_nset_mat4(shader_t* sh, const char* name, mat4 value)
 inline void sh_nset_vec2v(shader_t* sh, const char* name, float a, float b)
 {
    GLuint location = glGetUniformLocation(sh->prog_id, name);
-#if DEBUG_LEVEL == 2
+#if DEBUG_LEVEL == 3
    assert(location != -1);
 #endif
    sh_set_vec2v(location, a, b);
@@ -326,7 +326,7 @@ inline void sh_nset_vec2(shader_t* sh, const char* name, vec4 v)
 inline void sh_nset_vec3v(shader_t* sh, const char* name, float a, float b, float c)
 {
    GLuint location = glGetUniformLocation(sh->prog_id, name);
-#if DEBUG_LEVEL == 2
+#if DEBUG_LEVEL == 3
    assert(location != -1);
 #endif
    sh_set_vec3v(location, a, b, c);
@@ -340,7 +340,7 @@ inline void sh_nset_vec3(shader_t* sh, const char* name, vec4 v)
 inline void sh_nset_vec4v(shader_t* sh, const char* name, float a, float b, float c, float d)
 {
    GLuint location = glGetUniformLocation(sh->prog_id, name);
-#if DEBUG_LEVEL == 2
+#if DEBUG_LEVEL == 3
    assert(location != -1);
 #endif
    sh_set_vec4v(location, a, b, c, d);

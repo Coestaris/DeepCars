@@ -60,8 +60,7 @@ void app_init_graphics(void)
    rc_create_perspective(win, proj_mat, 65.f, 0.1f, 200);
 
    rc_set_current(get_chain(win, camera, proj_mat));
-   switch_stages();
-   switch_ssao();
+
 
 }
 
@@ -69,6 +68,8 @@ void app_run(void)
 {
    scm_load_scene(SCENEID_MENU, true);
 
+   switch_stages();
+   switch_ssao();
    update_lights();
    update_shadow_light();
 
