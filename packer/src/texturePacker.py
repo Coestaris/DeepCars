@@ -44,6 +44,31 @@ mag_dict = {
     "nearest" : 1,
 }
 
+def check_wrap(inp):
+    return cm.def_string_comp(inp) and inp in texture_wrapping_dict
+
+def check_min(inp):
+    return cm.def_string_comp(inp) and inp in min_dict
+
+def check_mag(inp):
+    return cm.def_string_comp(inp) and inp in mag_dict
+
+def check_flip(inp):
+    return cm.def_int_comp(inp) and inp > 0 and inp < 4
+
+def check_comp(inp):
+    return cm.def_string_comp(inp) and inp in compression_dict
+
+def check_fns(inp):
+    if not type(inp) is list:
+        return False
+
+    for file in inp:
+        if not cm.def_string_comp(file):
+            return False
+            
+    return True
+
 class cubemap_packer:
     def __init__(self, path, cubemaps, config):
         self.path = path
@@ -59,9 +84,23 @@ class cubemap_packer:
         chunks = []
         for i, cubemap in enumerate(self.cubemaps):
 
+            cm.check_dict(i, "cubemap", cubemap, 
+            {
+                "name": (cm.def_string_comp, True),
+                "fns": (check_fns, True),
+             
+                "wrapping": (check_wrap, False),
+                "min_filter": (check_min, False),
+                "mag_filter": (check_mag, False),
+                "flip": (check_flip, False),
+                "compression": (check_comp, False),
+
+                "index": (cm.def_int_comp, False),
+            })
+
             files = cubemap["fns"]
             id = cm.get_id(self.path, cubemap)
-            if cm.is_file_cached(id, self.path, files):
+            if cm.is_file_cached("cubemap", i, id, self.path, files):
                 chunks += cm.get_cached_chunk(id)
                 print("[{}/{}]: Cubemap \"{}\" already cached".format(i + 1, len(self.cubemaps), cubemap["name"]))
                 continue
@@ -85,7 +124,6 @@ class cubemap_packer:
             compress = self.default_compression
             if "compression" in cubemap:
                 compress = cubemap["compression"]
-
 
             if compress == "dds_no":
                 compress == "no"
@@ -153,9 +191,23 @@ class texture_packer:
         chunks = []
         for i, texture in enumerate(self.textures):
 
+            cm.check_dict(i, "texture", texture, 
+            {
+                "name": (cm.def_string_comp, True),
+                "fn": (cm.def_string_comp, True),
+             
+                "wrapping": (check_wrap, False),
+                "min_filter": (check_min, False),
+                "mag_filter": (check_mag, False),
+                "flip": (check_flip, False),
+                "compression": (check_comp, False),
+
+                "index": (cm.def_int_comp, False),
+            })
+
             files = [texture["fn"]]
             id = cm.get_id(self.path, texture)
-            if cm.is_file_cached(id, self.path, files):
+            if cm.is_file_cached("texture", i, id, self.path, files):
                 chunks += cm.get_cached_chunk(id)
                 print("[{}/{}]: Texture \"{}\" already cached".format(i + 1, len(self.textures), texture["name"]))
                 continue

@@ -28,9 +28,23 @@ class model_packer:
         chunks = []
         for i, model in enumerate(self.models):
 
+            cm.check_dict(i, "model", model, 
+            {
+                "name": (cm.def_string_comp, True),
+                "fn": (cm.def_string_comp, True),
+
+                "normalize_x": (cm.def_bool_comp, False),
+                "normalize_y": (cm.def_bool_comp, False),
+                "normalize_z": (cm.def_bool_comp, False),
+                "normalize_scale": (cm.def_bool_comp, False),
+                "compression": (cm.def_bool_comp, False),
+
+                "index": (cm.def_int_comp, False),
+            })
+
             files = [model["fn"]]
             id = cm.get_id(self.path, model)
-            if cm.is_file_cached(id, self.path, files):
+            if cm.is_file_cached("model", i, id, self.path, files):
                 chunks += cm.get_cached_chunk(id)
                 print("[{}/{}]: Model \"{}\" already cached".format(i + 1, len(self.models), model["name"]))
                 continue

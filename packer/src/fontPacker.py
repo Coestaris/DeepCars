@@ -41,9 +41,22 @@ class shader_packer:
 
         for i, font in enumerate(self.fonts):
 
+            cm.check_dict(i, "font", font, 
+            {
+                "name": (cm.def_string_comp, True),
+                "fn": (cm.def_string_comp, True),
+                "shader": (cm.def_string_comp, True),
+                
+                "min_filter": (tp.check_min, False),
+                "mag_filter": (tp.check_mag, False),
+                "compression": (tp.check_comp, False),
+
+                "index": (cm.def_int_comp, False),
+            })
+
             files = [font["fn"]]
             id = cm.get_id(self.path, font)
-            if cm.is_file_cached(id, self.path, files):
+            if cm.is_file_cached("font", i, id, self.path, files):
                 chunks += cm.get_cached_chunk(id)
                 print("[{}/{}]: Font \"{}\" already cached".format(i + 1, len(self.fonts), font["name"]))
                 continue
@@ -65,12 +78,12 @@ class shader_packer:
             name = font["name"]
 
             min = self.default_font_min
-            if "min" in font:
-                min = font["min"]
+            if "min_filter" in font:
+                min = font["min_filter"]
 
             mag = self.default_font_mag
-            if "mag" in font:
-                mag = font["mag"]
+            if "mag_filter" in font:
+                mag = font["mag_filter"]
 
             compression = self.default_font_compression
             if "compression" in font:

@@ -20,8 +20,12 @@ CACHE_DIR = "_cache/"
 MAGIC_BYTES = "DPACK".encode("utf-8")
 
 def loadJSON(name):
-    with open(name) as json_file:
-        return json.load(json_file)
+    try:
+        with open(name) as json_file:
+            return json.load(json_file)
+    except json.decoder.JSONDecodeError as inst:
+        print("Couldn't parse json \"{0}\": {1} at line #{2}".format(name, inst.msg, inst.lineno))
+        exit(1)
 
 config = loadJSON("config.json")
 index = None
@@ -35,6 +39,33 @@ if not os.path.isdir(CACHE_DIR):
 
 cached_files = [f.split('/')[1] for f in glob(CACHE_DIR + "*")]
 
+def def_string_comp(inp):
+    return type(inp) is str
+
+def def_bool_comp(inp):
+    return type(inp) is bool
+
+def def_int_comp(inp):
+    return type(inp) is int
+
+def check_dict(i, name, dict, allowed):
+    for key, value in dict.items():
+        if key in allowed:
+            func, req = allowed[key]
+            if not func(value):
+                print("{0} #{1}: Wrong data format of key \"{2}\"".format(name, i, key))
+                exit(1)
+        else:
+            print("{0} #{1}: Invalid key \"{2}\"".format(name, i, key))
+            exit(1)
+        pass
+
+    for key,value in allowed.items():
+        func, req = value
+        if req and not key in dict:
+            print("{0} #{1}: Missing required key \"{2}\"".format(name, i, key))
+            exit(1)
+
 def set_dir(dir):
     global PATH_PREFIX, index
     PATH_PREFIX = dir
@@ -46,7 +77,12 @@ def get_id(dir, dict):
     return hashlib.sha1(str_id.encode("utf-8")).hexdigest()
 
 
-def is_file_cached(id, dir, files):
+def is_file_cached(name, i, id, dir, files):
+    for file in files:
+        if not os.path.isfile(dir + file):
+            print("{0} #{1}: Couldn't open file \"{2}\"".format(name, i, dir + file))
+            exit(1)
+    
     if id in cached_files:
         for file in files:
             time = os.path.getmtime(dir + file) 

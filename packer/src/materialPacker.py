@@ -35,6 +35,19 @@ from zlib import compress
 # 3 - illum
 # 4 - illum (no shadows)
 
+def check_mode(inp):
+    return cm.def_int_comp(inp) and inp >= 0 and inp <= 4
+
+def check_vector(inp):
+    if not type(inp) is list:
+        return False
+
+    for v in inp:
+        if not cm.def_int_comp(v):
+            return False
+
+    return True
+
 class material_packer:
     def __init__(self, path, materials, config):
         self.path = path
@@ -61,9 +74,16 @@ class material_packer:
         chunks = []
         for i, material in enumerate(self.materials):
 
+            cm.check_dict(i, "material", material, 
+            {
+                "name": (cm.def_string_comp, True),
+                "fn": (cm.def_string_comp, True),
+                "index": (cm.def_int_comp, False),
+            })
+
             files = [material["fn"]]
             id = cm.get_id(self.path, material)
-            if cm.is_file_cached(id, self.path, files):
+            if cm.is_file_cached("material", i, id, self.path, files):
                 chunks += cm.get_cached_chunk(id)
                 print("[{}/{}]: Material \"{}\" already cached".format(i + 1, len(self.materials), material["name"]))
                 continue
@@ -73,6 +93,21 @@ class material_packer:
 
             mat_json = cm.loadJSON(self.path + material["fn"]) 
             
+            cm.check_dict(i, "mat_json", mat_json, 
+            {
+                "mode": (check_mode, False),
+                "ambient": (check_vector, False),
+                "map_ambient": (cm.def_string_comp, False),
+                "diffuse": (check_vector, False),
+                "map_diffuse": (cm.def_string_comp, False),
+                "shininess": (cm.def_int_comp, False),
+                "specular": (check_vector, False),
+                "map_specular": (cm.def_string_comp, False),
+                "transparent": (cm.def_int_comp, False),
+                "map_transparent": (cm.def_string_comp, False),
+                "map_normal": (cm.def_string_comp, False),
+            })
+
             mode = self.default_mode
             if "mode" in mat_json:
                 mode = mat_json["mode"]
@@ -118,8 +153,8 @@ class material_packer:
                 map_normal = mat_json["map_normal"]
 
             index = i
-            if "index" in mat_json:
-                index = mat_json["index"]
+            if "index" in material:
+                index = material["index"]
 
             chunk = []
             chunk += cm.int32tobytes(index)

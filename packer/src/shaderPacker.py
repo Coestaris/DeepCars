@@ -22,13 +22,23 @@ class shader_packer:
         chunks = []
         for i, shader in enumerate(self.shaders):
 
+            cm.check_dict(i, "shader", shader, 
+            {
+                "name": (cm.def_string_comp, True),
+                "vertex": (cm.def_string_comp, False),
+                "fragment": (cm.def_string_comp, False),
+                "geometry": (cm.def_string_comp, False),
+                "compression": (cm.def_bool_comp, False),
+                "index": (cm.def_int_comp, False),
+            })
+
             files = []
             if "vertex" in shader: files.append(shader["vertex"])
             if "fragment" in shader: files.append(shader["fragment"])
             if "geometry" in shader: files.append(shader["geometry"])
 
             id = cm.get_id(self.path, shader)
-            if cm.is_file_cached(id, self.path, files):
+            if cm.is_file_cached("shader", i, id, self.path, files):
                 chunks += cm.get_cached_chunk(id)
                 print("[{}/{}]: Shader \"{}\" already cached".format(i + 1, len(self.shaders), shader["name"]))
                 continue
