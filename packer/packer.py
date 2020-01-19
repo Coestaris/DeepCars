@@ -47,6 +47,25 @@ if __name__ == "__main__":
         print("You must specify input directory by --in_dir=dirname")
         exit(1)
 
+    index_path = in_dir + "index.json"
+    if not path.isfile(index_path):
+        print("Couldn't open index file \"{0}\"".format(index_path))
+        exit(1)
+    
+    id = "__pack"
+    if id in cm.cache:
+        time = path.getmtime(index_path) 
+        last_time = cm.cache[id]
+
+        if last_time >= time:
+            #write from cache
+            print("\"{0}\" already cached. Writing from cache".format(out_file))
+            with open(out_file, mode="wb") as out_f:
+                with open(cm.CACHE_DIR + id, mode="rb") as in_f:
+                    data = in_f.read()
+                    out_f.write(data)
+                    exit(0)
+ 
     cm.set_dir(in_dir)
 
     packers = [ 
@@ -70,5 +89,14 @@ if __name__ == "__main__":
         file.write(cm.MAGIC_BYTES)
         file.write(bytes(cm.int32tobytes(len)))
         file.write(bytes(chunks))
+
+    print("Caching \"{0}\"".format(out_file))
+    with open(out_file, mode="rb") as in_f:
+        with open(cm.CACHE_DIR + id, mode="wb") as out_f:
+            data = in_f.read()
+            out_f.write(data)
+
+    time = path.getmtime(index_path) 
+    cm.cache.update( {id : time} )
 
     cm.write_cache()

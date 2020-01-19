@@ -76,7 +76,6 @@ def get_id(dir, dict):
     str_id = dir + dict.__str__()
     return hashlib.sha1(str_id.encode("utf-8")).hexdigest()
 
-
 def is_file_cached(name, i, id, dir, files):
     for file in files:
         if not os.path.isfile(dir + file):
