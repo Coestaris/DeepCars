@@ -24,7 +24,7 @@ def loadJSON(name):
         return json.load(json_file)
 
 config = loadJSON("config.json")
-index : dict
+index = None
 
 cache = {}
 if os.path.isfile(CACHE_FILE):

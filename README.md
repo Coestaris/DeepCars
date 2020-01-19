@@ -9,7 +9,17 @@ cd DeepCars
 sudo apt install mesa-utils libx11-dev libxi-dev imagemagick-6.q16
 sudo apt install make cmake # If needed
 ```
-To build
+
+You need to pack resources before running the application:
+```bash
+sudo apt install python3 # If needed
+cd packer
+python3 -m pip install -r requirements.txt # Setup python requirements
+python3 packer.py --out_file=<path to folder>/resources.bin --in_dir=../resources/
+```
+The resource file must be in the same folder as the application executable
+
+To build:
 ```bash
 cmake CMakeLists.txt 
 make all
