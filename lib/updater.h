@@ -52,12 +52,18 @@ void u_push_object(object_t* object);
 uint64_t u_get_frames(void);
 
 // Get current mouse position
-vec2f_t u_get_mouse_pos();
+vec2f_t u_get_mouse_pos(void);
+
+// Get current frames per second
+double_t u_get_fps(void);
 
 // Get state of specified keyboard key
 int u_get_key_state(int key);
 
 // Get state of mouse button
 int u_get_mouse_state(int mouse);
+
+// Get list of all objects
+list_t* u_get_objects(void);
 
 #endif //DEEPCARS_UPDATER_H

@@ -7,6 +7,7 @@
 #include "obj_dummy.h"
 #include "obj_camera_control.h"
 #include "../win_defaults.h"
+#include "obj_info_draw.h"
 
 void setup_objects(scene_t* scene)
 {
@@ -36,6 +37,7 @@ void setup_objects(scene_t* scene)
                                    rm_get(MODEL, MODELID_TEAPOT)));
 
    list_push(scene->startup_objects, create_camera_control());
+   list_push(scene->startup_objects, create_info_drawer());
 }
 
 void setup_shadow_light(scene_t* scene)

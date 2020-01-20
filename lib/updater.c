@@ -315,6 +315,11 @@ void u_measure_time(void)
    }
 }
 
+list_t* u_get_objects(void)
+{
+   return objects;
+}
+
 //
 // u_init
 //
@@ -365,6 +370,11 @@ void u_start_loop(win_info_t* info)
       u_event_handler(event);
    }
 
+}
+
+double_t u_get_fps()
+{
+   return fps;
 }
 
 //

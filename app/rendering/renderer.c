@@ -45,6 +45,26 @@ int state = -1;
 mat4 view;
 mat4 font_proj;
 
+char _buff[100];
+char* get_ssao_stage_string()
+{
+   if(state == 0)
+      snprintf(_buff, sizeof(_buff), "Default view, SSAO %s",
+            ssao_state ? "on" : "off");
+   else
+   {
+      snprintf(_buff, sizeof(_buff),
+            state == 1 ? "Local positions view" :
+            state == 2 ? "Local normals view" :
+            state == 3 ? "Colors view" :
+            state == 4 ? "World position view" :
+            state == 5 ? "SSAO view" :
+            state == 6 ? "Blurred SSAO view" :
+            "ShadowMap view");
+   }
+   return _buff;
+}
+
 inline void update_shadow_light(void)
 {
    render_stage_t* shadow_map_stage = rc->stages->collection[STAGE_SHADOWMAP];
@@ -92,12 +112,10 @@ inline void switch_ssao(void)
    if(ssao_state)
    {
       ssao_texture = ssao_dummy_texture;
-      APP_LOG("SSAO off",0);
    }
    else
    {
       ssao_texture = ssao_blur_stage->color0_tex;
-      APP_LOG("SSAO on",0);
    }
 
    ssao_state = !ssao_state;
@@ -118,35 +136,27 @@ inline void switch_stages(void)
       default:
       case 0:
          texture_to_draw = shading_stage->color0_tex; // result
-         APP_LOG("0. Result image",0);
          break;
       case 1:
          texture_to_draw = g_buffer_stage->color0_tex; //positions
-         APP_LOG("1. View Positions",0);
          break;
       case 2:
          texture_to_draw = g_buffer_stage->color1_tex; //normals
-         APP_LOG("2. Normals",0);
          break;
       case 3:
          texture_to_draw = g_buffer_stage->color2_tex; //albedo_spec
-         APP_LOG("3. Albedo spec",0);
          break;
       case 4:
          texture_to_draw = g_buffer_stage->color3_tex; //positions
-         APP_LOG("3. Positions",0);
          break;
       case 5:
          texture_to_draw = ssao_stage->color0_tex; //ssao
-         APP_LOG("5. SSAO",0);
          break;
       case 6:
          texture_to_draw = ssao_blur_stage->color0_tex; //ssao blurred
-         APP_LOG("6. Blurred SSAO",0);
          break;
       case 7:
          texture_to_draw = shadowmap_stage->depth_tex; //shadowmap
-         APP_LOG("7. Shadowmap",0);
          break;
    }
 }
@@ -302,83 +312,43 @@ void unbind_font(render_stage_t* stage)
    glEnable(GL_DEPTH_TEST);
 }
 
-GLuint vao, vbo, ebo;
-void draw_font(render_stage_t* stage)
+struct _font_data {
+   vec4 color;
+   vec4 border_color;
+   float color_off;
+   float color_k;
+};
+
+font_t* default_font;
+int count;
+struct _font_data fd[10];
+
+void draw_default_string(uint8_t depth, vec2f_t pos, vec2f_t scale, float a, float b, vec4 color, char* str)
 {
-   font_t* f = rm_getn(FONT, "default");
-   const char* string =
-         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, \n"
-         "sed do eiusmod tempor incididunt ut labore et dolore magna\n"
-         "aliqua. Ut enim ad minim veniam, quis nostrud exercitation\n"
-         "ullamco laboris nisi ut aliquip ex ea commodo consequat. \n"
-         "Duis aute irure dolor in reprehenderit in voluptate velit\n"
-         "esse cillum dolore eu fugiat nulla pariatur Excepteur sint\n"
-         "occaecat cupidatat non proident, sunt in culpa qui officia\n"
-         "deserunt mollit anim id est laborum.";
+   fd[count].color = color;
+   fd[count].color_off = a;
+   fd[count].color_k = b;
+   gr_pq_push_string(depth, default_font, pos, scale, str, true, &fd[count]);
 
-   float scale = 0.95f;
-   vec2f_t cursor = vec2f(10, 10);
-   float start_x = cursor.x;
-   //vec4 border_color = COLOR_BLUE;
-
-   sh_set_vec4(UNIFORM_FONT.color, COLOR_WHITE);
-   //sh_set_vec3(UNIFORM_FONT.borderColor, border_color);
-   sh_set_vec2v(UNIFORM_FONT.params, 0.5f, 9.0f);
-   t_bind(f->texture, UNIFORM_FONT.tex);
-
-   GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-   GL_PCALL(glBindVertexArray(vao));
-
-
-   for(size_t i = 0; i < strlen(string); i++)
-   {
-      charinfo_t* ci = &f->infos[string[i]];
-      if(string[i] == '\n')
-      {
-         cursor.y += f->base * scale;
-         cursor.x = start_x;
-         continue;
-      }
-
-      assert(ci->id != -1);
-
-      float x1 = scale * (float)(cursor.x + ci->xoffset);
-      float y1 = scale * (float)(cursor.y + ci->yoffset);
-      float x2 = scale * (float)(cursor.x + ci->xoffset + ci->width);
-      float y2 = scale * (float)(cursor.y + ci->yoffset + ci->height);
-/*     float x1 = 0;
-     float x2 = 100;
-     float y1 = 0;
-     float y2 = 100;*/
-
-/*
- *          1.0f,  1.0f, 0.0f,    1.0f, 1.0f,
-           1.0f, -1.0f, 0.0f,    1.0f, 0.0f,
-           -1.0f, -1.0f, 0.0f,   0.0f, 0.0f,
-           -1.0f,  1.0f, 0.0f,   0.0f, 1.0f
- */
-      float values[] = {
-            x2 - (float)win->w / 2.0f, (float)win->h / 2.0f - y2, 0, ci->tex_coord[0], ci->tex_coord[1],
-            x2 - (float)win->w / 2.0f, (float)win->h / 2.0f - y1, 0, ci->tex_coord[2], ci->tex_coord[3],
-            x1 - (float)win->w / 2.0f, (float)win->h / 2.0f - y1, 0, ci->tex_coord[4], ci->tex_coord[5],
-            x1 - (float)win->w / 2.0f, (float)win->h / 2.0f - y2, 0, ci->tex_coord[6], ci->tex_coord[7],
-      };
-
-      GL_PCALL(glBufferData(GL_ARRAY_BUFFER, sizeof(values), values, GL_DYNAMIC_DRAW));
-      GL_PCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
-
-      cursor.x += scale * ci->xadvance;
-   }
-
-   GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-   GL_PCALL(glBindVertexArray(0));
-
-   //sh_use(NULL);
+   count++;
 }
 
+void draw_font(render_stage_t* stage)
+{
+   gr_pq_flush();
+   count = 0;
+}
+
+void bind_default_font(font_t* font, void* data)
+{
+   struct _font_data fd = *(struct _font_data*)data;
+   sh_set_vec4(UNIFORM_FONT.color, fd.color);
+   //sh_set_vec3(UNIFORM_FONT.borderColor, border_color);
+   sh_set_vec2v(UNIFORM_FONT.params, fd.color_off, fd.color_k);
+   t_bind(font->texture, UNIFORM_FONT.tex);
+}
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 {
-
    noise_texure = generate_noise(4);
    ssao_kernel = generate_kernel(KERNEL_SIZE);
    ssao_dummy_texture = mt_create_colored_tex(COLOR_WHITE);
@@ -386,33 +356,9 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 
    font_proj = cmat4();
    mat4_ortho(font_proj, -1, 1, info->w, info->h);
-
-   GLuint indices[] = {
-         0, 1, 3,
-         1, 2, 3
-   };
-
-   GL_CALL(glGenVertexArrays(1, &vao));
-   GL_CALL(glGenBuffers(1, &vbo));
-   GL_CALL(glGenBuffers(1, &ebo));
-   GL_CALL(glBindVertexArray(vao));
-
-   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-   GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * 5, NULL, GL_STATIC_DRAW));
-
-   GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
-   GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));
-
-   GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0));
-   GL_CALL(glEnableVertexAttribArray(0));
-
-   GL_CALL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))));
-   GL_CALL(glEnableVertexAttribArray(1));
-
-   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-
-   GL_CALL(glBindVertexArray(0));
-   GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+   default_font = rm_getn(FONT, "default");
+   default_font->bind_func = bind_default_font;
+   default_font->win = win;
 
    shader_t* g_buffer_shader = setup_g_buffer(proj);
    shader_t* ssao_shader = setup_ssao(ssao_kernel, proj);
@@ -557,12 +503,12 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    bypass->unbind_func = unbind_bypass;
    bypass->vao = rc_get_quad_vao();
 
-   render_stage_t* font = rs_create("font", RM_CUSTOM, font_shader);
-   font->width = info->w;
-   font->height = info->h;
-   font->bind_func = bind_font;
-   font->unbind_func = unbind_font;
-   font->custom_draw_func = draw_font;
+   render_stage_t* primitive = rs_create("primitive", RM_CUSTOM, NULL);
+   primitive->width = info->w;
+   primitive->height = info->h;
+   primitive->bind_func = bind_font;
+   primitive->unbind_func = unbind_font;
+   primitive->custom_draw_func = draw_font;
 
    rc = rc_create();
    list_push(rc->stages, g_buffer);
@@ -572,7 +518,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    list_push(rc->stages, shadowmap);
    list_push(rc->stages, shading);
    list_push(rc->stages, bypass);
-   list_push(rc->stages, font);
+   list_push(rc->stages, primitive);
 
    rc_build(rc);
    GL_PCALL(glEnable(GL_DEPTH_TEST));

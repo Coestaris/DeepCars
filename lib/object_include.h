@@ -13,4 +13,10 @@
 #include "updater.h"
 #include "scm.h"
 
+#include "resources/texture.h"
+#include "resources/font.h"
+#include "resources/model.h"
+
+#include "graphics/rendering/graphics.h"
+
 #endif //DEEPCARS_OBJECT_INCLUDE_H

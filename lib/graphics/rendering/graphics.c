@@ -11,6 +11,7 @@
 #define GR_ERROR(format, ...) DC_ERROR("graphics.c", format, __VA_ARGS__)
 
 #include "../light.h"
+#include "../../resources/font.h"
 
 // for current scene
 #include "../../scm.h"
@@ -32,11 +33,6 @@ vec4 COLOR_NAVY;
 vec4 COLOR_FUCHSIA;
 vec4 COLOR_PURPLE;
 
-void gr_fill(vec4 color)
-{
-   GL_PCALL(glClearColor(color[0], color[1], color[2], color[3]));
-}
-
 mat4 proj_mat;
 mat4 view_mat;
 mat4 model_mat;
@@ -44,6 +40,30 @@ mat4 model_mat;
 mat4 x_rot_mat;
 mat4 y_rot_mat;
 mat4 z_rot_mat;
+
+struct {
+
+   uint8_t mode;
+
+   texture_t* tex;
+   vec2f_t center;
+   float angle;
+   bool bind_shader;
+
+   font_t* font;
+   char* string;
+
+   vec2f_t position;
+   vec2f_t scale;
+   void* data;
+} queue[MAX_DEPTH][MAX_QUEUE_COUNT];
+
+size_t queue_length[MAX_DEPTH];
+
+inline void gr_fill(vec4 color)
+{
+   GL_PCALL(glClearColor(color[0], color[1], color[2], color[3]));
+}
 
 void gr_init()
 {
@@ -72,7 +92,8 @@ void gr_init()
    y_rot_mat = cmat4();
    z_rot_mat = cmat4();
 
-   //GL_CALL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE))
+   memset(queue, 0, sizeof(queue));
+   memset(queue_length, 0, sizeof(queue_length));
 }
 
 inline void gr_render_vao(GLuint vao)
@@ -158,5 +179,120 @@ inline void gr_unbind(render_stage_t* stage)
    if(stage->render_mode != RM_BYPASS && stage->render_mode != RM_CUSTOM)
    {
       GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+   }
+}
+
+void gr_draw_string(font_t* f, vec2f_t position, vec2f_t scale, char* string, bool bind_shader, void* data)
+{
+   float start_x = position.x;
+
+   if(bind_shader)
+      sh_use(f->shader);
+
+   f->bind_func(f, data);
+
+   const float half_w = (float)f->win->w / 2.0f;
+   const float half_h = (float)f->win->h / 2.0f;
+
+   GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, f->vbo));
+   GL_PCALL(glBindVertexArray(f->vao));
+
+   for(size_t i = 0; i < strlen(string); i++)
+   {
+      charinfo_t* ci = &f->infos[string[i]];
+      if(string[i] == '\n')
+      {
+         position.y += f->base * scale.y;
+         position.x = start_x;
+         continue;
+      }
+
+      assert(ci->id != -1);
+
+      float x1 = (float)position.x + (float)scale.x * (ci->xoffset);
+      float y1 = (float)position.y + (float)scale.y * (ci->yoffset);
+      float x2 = (float)position.x + (float)scale.x * (ci->xoffset + ci->width);
+      float y2 = (float)position.y + (float)scale.y * (ci->yoffset + ci->height);
+
+      float values[] = {
+            x2 - half_w, half_h - y2, 0, ci->tex_coord[0], ci->tex_coord[1],
+            x2 - half_w, half_h - y1, 0, ci->tex_coord[2], ci->tex_coord[3],
+            x1 - half_w, half_h - y1, 0, ci->tex_coord[4], ci->tex_coord[5],
+            x1 - half_w, half_h - y2, 0, ci->tex_coord[6], ci->tex_coord[7],
+      };
+
+      GL_PCALL(glBufferData(GL_ARRAY_BUFFER, sizeof(values), values, GL_DYNAMIC_DRAW));
+      GL_PCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+
+      position.x += scale.x * ci->xadvance;
+   }
+
+   GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+   GL_PCALL(glBindVertexArray(0));
+
+   if(bind_shader)
+      sh_use(NULL);
+}
+
+inline void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2f_t position,
+                       vec2f_t scale, vec2f_t center, float angle, bool bind_shader, void* data)
+{
+   assert(depth < MAX_DEPTH);
+   assert(queue_length[depth] < MAX_QUEUE_COUNT);
+
+   size_t index = queue_length[depth];
+   queue[depth][index].mode = 0;
+   queue[depth][index].tex = texture;
+   queue[depth][index].position = position;
+   queue[depth][index].scale = scale;
+   queue[depth][index].center = center;
+   queue[depth][index].angle = angle;
+   queue[depth][index].bind_shader = bind_shader;
+   queue[depth][index].data = data;
+
+   queue_length[depth]++;
+}
+
+inline void gr_pq_push_string(uint8_t depth, font_t* f, vec2f_t position,
+                       vec2f_t scale, char* string, bool bind_shader, void* data)
+{
+   assert(depth < MAX_DEPTH);
+   assert(queue_length[depth] < MAX_QUEUE_COUNT);
+
+   size_t index = queue_length[depth];
+   queue[depth][index].mode = 1;
+   queue[depth][index].font = f;
+   queue[depth][index].position = position;
+   queue[depth][index].scale = scale;
+   queue[depth][index].string = string;
+   queue[depth][index].bind_shader = bind_shader;
+   queue[depth][index].data = data;
+
+   queue_length[depth]++;
+}
+
+
+void gr_pq_flush(void)
+{
+   for(size_t d = 0; d < MAX_DEPTH; d++)
+   {
+      for(size_t i = 0; i < queue_length[d]; i++)
+      {
+         switch(queue[d][i].mode)
+         {
+            case 1:
+               gr_draw_string(
+                     queue[d][i].font,
+                     queue[d][i].position,
+                     queue[d][i].scale,
+                     queue[d][i].string,
+                     queue[d][i].bind_shader,
+                     queue[d][i].data);
+               break;
+            default:
+               break;
+         }
+      }
+      queue_length[d] = 0;
    }
 }

@@ -91,12 +91,14 @@ if __name__ == "__main__":
         file.write(bytes(chunks))
 
     print("Caching \"{0}\"".format(out_file))
-    with open(out_file, mode="rb") as in_f:
-        with open(cm.CACHE_DIR + id, mode="wb") as out_f:
-            data = in_f.read()
-            out_f.write(data)
+    #with open(out_file, mode="rb") as in_f:
+    #    with open(cm.CACHE_DIR + id, mode="wb") as out_f:
+    #        data = in_f.read()
+    #        out_f.write(data)
+    
 
     time = path.getmtime(index_path) 
     cm.cache.update( {id : time} )
+    
 
     cm.write_cache()

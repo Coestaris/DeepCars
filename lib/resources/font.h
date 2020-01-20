@@ -6,6 +6,7 @@
 #define DEEPCARS_FONT_H
 
 #include "shader.h"
+#include "../graphics/win.h"
 
 #define FONT_SCALE 8.0f
 
@@ -26,6 +27,8 @@ typedef struct _charinfo {
 typedef struct _font {
    char* name;
 
+   void (*bind_func)(struct _font* font, void* data);
+
    shader_t* shader;
    texture_t* texture;
 
@@ -33,7 +36,11 @@ typedef struct _font {
    float line_height;
    float base;
 
+   win_info_t* win;
    charinfo_t infos[256];
+
+   GLuint vao;
+   GLuint vbo;
 
 } font_t;
 

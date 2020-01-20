@@ -164,5 +164,8 @@ list_t* list_create()
    list->count = 0;
    list->max_size = LIST_BOOTSTRAP_SIZE;
    list->collection = list->bootstrap;
+
+   memset(list->bootstrap, 0, sizeof(list->bootstrap));
+
    return list;
 }
