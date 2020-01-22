@@ -9,6 +9,7 @@ import src.shaderPacker as sp
 import src.texturePacker as tp
 import src.materialPacker as mtp
 import src.fontPacker as fp
+from shutil import copyfile
 
 # 5 bytes: magic bytes
 # 4 bytes: chunks count 
@@ -60,11 +61,8 @@ if __name__ == "__main__":
         if last_time >= time:
             #write from cache
             print("\"{0}\" already cached. Writing from cache".format(out_file))
-            with open(out_file, mode="wb") as out_f:
-                with open(cm.CACHE_DIR + id, mode="rb") as in_f:
-                    data = in_f.read()
-                    out_f.write(data)
-                    exit(0)
+            copyfile(cm.CACHE_DIR + id, out_file)
+            exit(0)
  
     cm.set_dir(in_dir)
 
@@ -91,14 +89,10 @@ if __name__ == "__main__":
         file.write(bytes(chunks))
 
     print("Caching \"{0}\"".format(out_file))
-    #with open(out_file, mode="rb") as in_f:
-    #    with open(cm.CACHE_DIR + id, mode="wb") as out_f:
-    #        data = in_f.read()
-    #        out_f.write(data)
-    
+
+    copyfile(out_file, cm.CACHE_DIR + id)
 
     time = path.getmtime(index_path) 
     cm.cache.update( {id : time} )
-    
 
     cm.write_cache()
