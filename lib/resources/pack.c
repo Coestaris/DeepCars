@@ -480,7 +480,10 @@ void p_handler_font(uint8_t* data, size_t length)
    READ_BUFF(*shader_name, shader_len);
    shader_name[shader_len] = '\0';
 
-   font_t* f = f_create(name, rm_get(TEXTURE, id), s_getn_shader(shader_name), info, info_len);
+   char tex_name[50];
+   snprintf(tex_name, 50, "___font_tex_%s", name);
+
+   font_t* f = f_create(name, rm_getn(TEXTURE, tex_name), s_getn_shader(shader_name), info, info_len);
    rm_push(FONT, f, id);
 
    free(shader_name);

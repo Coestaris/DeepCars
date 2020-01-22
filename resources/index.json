@@ -50,6 +50,7 @@
 
     "fonts":
     [
-         { "fn" : "IbarraRealNova-Regular.ttf", "name" : "default", "shader" : "font" }
+        { "fn" : "IbarraRealNova-Regular.ttf", "name" : "default", "shader" : "font" },
+        { "fn" : "FreeMonospaced.ttf", "name" : "monospace", "shader" : "font" }
     ]
 }

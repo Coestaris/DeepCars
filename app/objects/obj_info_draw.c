@@ -7,10 +7,12 @@
 #endif
 #include "obj_info_draw.h"
 #include "../rendering/renderer.h"
+#include "../rendering/text_rendering.h"
 #include <stdlib.h>
 
 char buff[10][50];
 float last_fps;
+font_data_t font_data;
 
 void update_drawer(object_t* this)
 {
@@ -26,19 +28,30 @@ void update_drawer(object_t* this)
       for(size_t i = 0; i < chain->stages->count; i++)
       {
          render_stage_t* stage = chain->stages->collection[i];
-         snprintf(buff[i + 1], sizeof(buff[i + 1]), "%i. %s: %f ms",
+         snprintf(buff[i + 1], sizeof(buff[i + 1]), "%i. %s: %.3f ms",
                   (int)i, stage->name, stage->render_time);
       }
    }
    last_fps = fps;
 
    for(size_t i = 0; i < chain->stages->count + 1; i++)
-      draw_default_string(0, vec2f(0,24 * i), vec2f(.5,.5),
-            0.5, 9, COLOR_WHITE, buff[i]);
+      draw_monospace_string(0, &font_data,
+            vec2f(0,24 * i), vec2f(0.6, 0.6),
+            buff[i]);
 }
 
 object_t* create_info_drawer()
 {
+   font_data.color = COLOR_WHITE;
+   font_data.color_off = 0.1f;
+   font_data.color_k = 9.0f;
+   //font_data.color[3] = 1;
+
+   font_data.border_color = COLOR_BLACK;
+   font_data.back_off = 0.5f;
+   font_data.back_k = 4.5f;
+   font_data.border_color[3] = 1;
+
    object_t* this = o_create();
    this->draw_info->drawable = false;
    this->update_func = update_drawer;

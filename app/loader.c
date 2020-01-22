@@ -14,6 +14,7 @@
 #include "../lib/graphics/rendering/render_chain.h"
 #include "rendering/renderer.h"
 #include "../lib/resources/rmanager.h"
+#include "rendering/text_rendering.h"
 
 win_info_t*    win;
 mat4           view;
@@ -72,6 +73,7 @@ void app_run(void)
    switch_ssao();
    update_lights();
    update_shadow_light();
+   init_fonts(win);
 
    u_start_loop(win);
 }

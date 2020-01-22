@@ -62,7 +62,7 @@ if __name__ == "__main__":
             #write from cache
             print("\"{0}\" already cached. Writing from cache".format(out_file))
             copyfile(cm.CACHE_DIR + id, out_file)
-            exit(0)
+            #exit(0)
  
     cm.set_dir(in_dir)
 

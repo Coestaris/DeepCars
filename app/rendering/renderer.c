@@ -43,7 +43,6 @@ int ssao_state = 0;
 int state = -1;
 
 mat4 view;
-mat4 font_proj;
 
 char _buff[100];
 char* get_ssao_stage_string()
@@ -312,41 +311,11 @@ void unbind_font(render_stage_t* stage)
    glEnable(GL_DEPTH_TEST);
 }
 
-struct _font_data {
-   vec4 color;
-   vec4 border_color;
-   float color_off;
-   float color_k;
-};
-
-font_t* default_font;
-int count;
-struct _font_data fd[10];
-
-void draw_default_string(uint8_t depth, vec2f_t pos, vec2f_t scale, float a, float b, vec4 color, char* str)
-{
-   fd[count].color = color;
-   fd[count].color_off = a;
-   fd[count].color_k = b;
-   gr_pq_push_string(depth, default_font, pos, scale, str, true, &fd[count]);
-
-   count++;
-}
-
 void draw_font(render_stage_t* stage)
 {
    gr_pq_flush();
-   count = 0;
 }
 
-void bind_default_font(font_t* font, void* data)
-{
-   struct _font_data fd = *(struct _font_data*)data;
-   sh_set_vec4(UNIFORM_FONT.color, fd.color);
-   //sh_set_vec3(UNIFORM_FONT.borderColor, border_color);
-   sh_set_vec2v(UNIFORM_FONT.params, fd.color_off, fd.color_k);
-   t_bind(font->texture, UNIFORM_FONT.tex);
-}
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 {
    noise_texure = generate_noise(4);
@@ -354,19 +323,12 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    ssao_dummy_texture = mt_create_colored_tex(COLOR_WHITE);
    view = cmat4();
 
-   font_proj = cmat4();
-   mat4_ortho(font_proj, -1, 1, info->w, info->h);
-   default_font = rm_getn(FONT, "default");
-   default_font->bind_func = bind_default_font;
-   default_font->win = win;
-
    shader_t* g_buffer_shader = setup_g_buffer(proj);
    shader_t* ssao_shader = setup_ssao(ssao_kernel, proj);
    shader_t* ssao_blur_shader = setup_ssao_blur();
    shader_t* skybox_shader = setup_skybox(proj);
    shader_t* shadowmap_shader = setup_shadowmap();
    shader_t* shading_shader = setup_shading();
-   shader_t* font_shader = setup_font(font_proj);
    shader_t* gamma_shader = setup_gamma();
 
    render_stage_t* g_buffer = rs_create("gbuffer", RM_GEOMETRY, g_buffer_shader);
@@ -552,7 +514,6 @@ void free_stages(void)
    rc_free(rc, false);
 
    mat4_free(view);
-   mat4_free(font_proj);
 
    for(size_t i = 0; i < KERNEL_SIZE; i++)
       vec4_free(ssao_kernel[i]);
