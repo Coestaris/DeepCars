@@ -8,6 +8,7 @@
 #include "obj_camera_control.h"
 #include "../win_defaults.h"
 #include "obj_info_draw.h"
+#include "../rendering/renderer.h"
 
 void setup_objects(scene_t* scene)
 {
@@ -63,22 +64,18 @@ void setup_objects(scene_t* scene)
 
 void setup_shadow_light(scene_t* scene)
 {
-   const float near_plane = -10.0f;
+   const float near_plane = 0.01f;
    const float far_plane = 200.0f;
-   const float r = 2048 / 10.0f;
-   const float t = 2048 / 10.0f;
+   const float r = 1024 / 4.0f;
+   const float t = 1024 / 4.0f;
 
-   shadow_light_t* shadow_light = l_sh_create(cvec4(0, 20, 0, 0), vec4_ccpy(camera->up));
+   shadow_light_t* shadow_light = l_sh_create(cvec4(0, 0, 0, 0), vec4_ccpy(camera->up));
    mat4_ortho(shadow_light->light_proj, near_plane, far_plane, r, t);
    shadow_light->light_camera->use_target = true;
-   shadow_light->light_camera->target = cvec4(-16, 0, -4, 0);
-
+   shadow_light->light_camera->target = cvec4(0, 0, 0, 0);
    scene->shadow_light = shadow_light;
-   vec4_cpy(scene->shadow_light->light_camera->direction, scene->shadow_light->light_camera->target);
-   vec4_subv(scene->shadow_light->light_camera->direction, scene->shadow_light->position);
-   vec4_norm(shadow_light->light_camera->direction);
 
-   shadow_light->brightness = 0.75f;
+   shadow_light->brightness = 1.0f;
 }
 
 void setup_lights(scene_t* scene)

@@ -71,9 +71,16 @@ inline void update_shadow_light(void)
    shadow_map_stage->skip = false;
 
    scene_t* scene = scm_get_current();
+   vec4_cpy(scene->shadow_light->light_camera->position, scene->shadow_light->position);
+
+   c_to_mat(scene->shadow_light->light_view, scene->shadow_light->light_camera);
 
    vec4_cpy(scene->shadow_light->light_camera->direction, scene->shadow_light->light_camera->target);
    vec4_subv(scene->shadow_light->light_camera->direction, scene->shadow_light->position);
+   vec4_norm(scene->shadow_light->light_camera->direction);
+
+   mat4_cpy(scene->shadow_light->light_space, scene->shadow_light->light_proj);
+   mat4_mulm(scene->shadow_light->light_space, scene->shadow_light->light_view);
 
    shader_t* shading_shader = shading_stage->shader;
    sh_use(shading_shader);
@@ -247,13 +254,8 @@ void bind_shadowmap(render_stage_t* stage)
 
    GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
 
-   vec4_cpy(shadow_light->light_camera->position, shadow_light->position);
-
-   c_to_mat(shadow_light->light_view, shadow_light->light_camera);
-   mat4_cpy(shadow_light->light_space, shadow_light->light_proj);
-   mat4_mulm(shadow_light->light_space, shadow_light->light_view);
-
    sh_set_mat4(UNIFORM_SHADOWMAP.light_space, shadow_light->light_space);
+
    GL_PCALL(glCullFace(GL_FRONT));
 
    stage->skip = true;
@@ -432,8 +434,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    render_stage_t* shadowmap = rs_create("shadow_map", RM_GEOMETRY, shadowmap_shader);
    shadowmap->attachments = TF_DEPTH;
    //depth
-   shadowmap->depth_format.tex_height = 2048;
-   shadowmap->depth_format.tex_width = 2048;
+   shadowmap->depth_format.tex_width = 4096;
+   shadowmap->depth_format.tex_height = 4096;
    shadowmap->depth_format.tex_wrapping_t = GL_CLAMP_TO_BORDER;
    shadowmap->depth_format.tex_wrapping_s = GL_CLAMP_TO_BORDER;
    shadowmap->depth_format.tex_border_color[0] = 1;

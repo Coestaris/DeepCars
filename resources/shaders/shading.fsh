@@ -22,7 +22,7 @@ struct ShadowLight {
     sampler2D shadowMap;
 };
 
-const int NR_LIGHTS = 15;
+const int NR_LIGHTS = 1;
 
 //uniform sampler2D gViewPosition;
 uniform sampler2D gPosition;
@@ -54,15 +54,15 @@ vec3 ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 frag_pos, vec3 
     // PCF
     float shadow = 0.0;
     vec2 texelSize = 1.0 / textureSize(shadowLight.shadowMap, 0);
-    for(int x = -1; x <= 1; ++x)
+    for(int x = -2; x <= 2; ++x)
     {
-        for(int y = -1; y <= 1; ++y)
+        for(int y = -2; y <= 2; ++y)
         {
             float pcfDepth = texture(shadowLight.shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
             shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;
         }
     }
-    shadow /= 9.0;
+    shadow /= 25;
 
     // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
     if(projCoords.z > 1.0)
@@ -109,7 +109,7 @@ void main()
             float Specular = texture(gAlbedoSpec, TexCoords).a;
             Normal = vec3(inverse(view) * vec4(Normal, 0));
 
-            lighting  *= Diffuse * 0.1;// hard-coded ambient component
+            lighting *= 0.25;// hard-coded ambient component
             vec3 viewDir  = normalize(viewPos - FragPos);
             for (int i = 0; i < NR_LIGHTS; ++i)
             {

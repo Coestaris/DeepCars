@@ -16,10 +16,16 @@ float camera_yaw        = M_PI / 2;
 float lastdx            = 0;
 float lastdy            = 0;
 bool  last_cntr         = false;
-bool  last_1         = false;
+bool  last_shift         = false;
+vec4 player_start;
 
 void camera_update_func(object_t* this)
 {
+   uint64_t frame = u_get_frames();
+
+   if(frame == 1)
+      vec4_cpy(player_start, camera->position);
+
    scene_t* scene = scm_get_current();
    camera_pitch = dy;
    camera_yaw = dx + (float)(M_PI / 2.0);
@@ -47,43 +53,14 @@ void camera_update_func(object_t* this)
    if (u_get_key_state(39) == KEY_PRESSED)
       vec4_addv(camera->position, camera_dir_cpy);
 
-   // shadow_light move
-   // left
-   if (u_get_key_state(113) == KEY_PRESSED)
-   {
-      vec4_subv(scene->shadow_light->position, camera_cross_cpy);
-      update_shadow_light();
-   }
-
-   // right
-   if (u_get_key_state(114) == KEY_PRESSED)
-   {
-      vec4_addv(scene->shadow_light->position, camera_cross_cpy);
-      update_shadow_light();
-   }
-
-   // forward
-   if (u_get_key_state(111) == KEY_PRESSED)
-   {
-      vec4_subv(scene->shadow_light->position, camera_dir_cpy);
-      update_shadow_light();
-   }
-
-   // back
-   if (u_get_key_state(116) == KEY_PRESSED)
-   {
-      vec4_addv(scene->shadow_light->position, camera_dir_cpy);
-      update_shadow_light();
-   }
-
    if (u_get_key_state(62) == KEY_PRESSED)
    {
-      if(!last_1)
+      if(!last_shift)
       {
          switch_ssao();
-         last_1 = 1;
+         last_shift = 1;
       }
-   } else last_1 = 0;
+   } else last_shift = 0;
 
    //up
    if (u_get_key_state(65) == KEY_PRESSED)
@@ -103,7 +80,26 @@ void camera_update_func(object_t* this)
    }
    else last_cntr = false;
 
-   //scene->shadow_light->position
+
+   if(frame % 15 == 0)
+   {
+      const float diffX = camera->position[0] - player_start[0];
+      const float diffY = camera->position[1] - player_start[1];
+      const float diffZ = camera->position[2] - player_start[2];
+
+      const float lt_off_x = -17.359648f;
+      const float lt_off_y = 50.372597f;
+      const float lt_off_z = 6;
+
+      scene->shadow_light->light_camera->target[0] = diffX;
+      //scene->shadow_light->light_camera->target[1] = 0;
+      scene->shadow_light->light_camera->target[2] = diffZ;
+
+      scene->shadow_light->position[0] = diffX + lt_off_x;
+      scene->shadow_light->position[1] = lt_off_y;
+      scene->shadow_light->position[2] = diffZ + lt_off_z;
+      update_shadow_light();
+   }
 }
 
 void camera_key_event_func(object_t* this, uint32_t key, uint32_t state)
@@ -156,5 +152,6 @@ object_t* create_camera_control()
 
    camera_dir_cpy = cvec4(0, 0, 0, 0);
    camera_cross_cpy = cvec4(0, 0, 0, 0);
+   player_start = cvec4(0, 0, 0, 0);
    return this;
 }

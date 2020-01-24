@@ -219,7 +219,7 @@ inline void vec4_cross(vec4 a, vec4 b)
 //
 float_t vec4_len(vec4 v)
 {
-   return sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
+   return sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
 }
 
 //

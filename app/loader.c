@@ -3,13 +3,10 @@
 //
 
 #include "loader.h"
-#include "../lib/graphics/win.h"
 #include "../lib/graphics/rendering/graphics.h"
 #include "../lib/updater.h"
 #include "../lib/scm.h"
-#include "objects/obj_dummy.h"
 #include "win_defaults.h"
-#include "objects/obj_camera_control.h"
 #include "../lib/resources/pack.h"
 #include "../lib/graphics/rendering/render_chain.h"
 #include "rendering/renderer.h"
@@ -73,6 +70,7 @@ void app_run(void)
    switch_ssao();
    update_lights();
    update_shadow_light();
+
    init_fonts(win);
 
    u_start_loop(win);

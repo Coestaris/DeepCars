@@ -35,7 +35,7 @@ shadow_light_t* l_sh_create(vec4 position, vec4 up)
    lt->light_camera = c_create(vec4_ccpy(position), up);
 
    lt->position = position;
-   lt->direction = cvec4(0,0,0,0);
+   //lt->direction = cvec4(0,0,0,0);
    return lt;
 }
 
@@ -47,7 +47,7 @@ void l_sh_free(shadow_light_t* light)
    if(light->light_camera) c_free(light->light_camera);
 
    vec4_free(light->position);
-   vec4_free(light->direction);
+   //vec4_free(light->direction);
    free(light);
 }
 

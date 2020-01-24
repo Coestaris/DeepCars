@@ -24,7 +24,6 @@ typedef struct _light
 typedef struct _shadow_light {
 
    vec4 position;
-   vec4 direction;
 
    float brightness;
 
