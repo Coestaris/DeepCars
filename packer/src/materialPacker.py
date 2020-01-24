@@ -43,8 +43,11 @@ def check_vector(inp):
         return False
 
     for v in inp:
-        if not cm.def_int_comp(v):
+        if not cm.def_int_comp(v) and (v < 0 or v > 1):
             return False
+
+    if len(inp) != 3:
+        return False
 
     return True
 

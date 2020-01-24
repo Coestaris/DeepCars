@@ -11,7 +11,7 @@
 
 void setup_objects(scene_t* scene)
 {
-   model_t* plane = m_create_plane(30, 30, true);
+   model_t* plane = m_create_plane(50, 50, true);
    m_normalize(plane, true, true, true, true);
    m_build(plane);
 
@@ -84,7 +84,7 @@ void setup_shadow_light(scene_t* scene)
 void setup_lights(scene_t* scene)
 {
    const float angle = M_PI * 2 / NR_LIGHTS;
-   const float radius = 50;
+   const float radius = 70;
 
    const float linear = 0.022f;
    const float linear_rand = 0.0f;

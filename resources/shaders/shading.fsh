@@ -90,41 +90,51 @@ void main()
     }
     else
     {
-        Light light = lights[0];
+        float dist_to_frag = length(viewPos - FragPos);
+        float AmbientOcclusion = 0;
+        vec3 lighting = Diffuse;
 
-        vec3 Normal = texture(gNormal, TexCoords).rgb;
-        float Specular = texture(gAlbedoSpec, TexCoords).a;
-        float AmbientOcclusion = texture(ssao, TexCoords).r;
-
-        Normal = vec3(inverse(view) * vec4(Normal,0));
-
-        vec3 lighting  = Diffuse * 0.1;// hard-coded ambient component
-        vec3 viewDir  = normalize(viewPos - FragPos);
-        for (int i = 0; i < NR_LIGHTS; ++i)
+        if(dist_to_frag > 150)
         {
-            float distance = length(lights[i].Position - FragPos);
-            if (distance < lights[i].Radius)
+            float k = max(1 - (dist_to_frag - 120.0f) / 120.0f, 0);
+            float ssao = texture(ssao, TexCoords).r;
+            AmbientOcclusion = mix(ssao, 1, 1-k);
+        }
+        else
+            AmbientOcclusion = texture(ssao, TexCoords).r;
+
+        if(dist_to_frag < 500)
+        {
+            vec3 Normal = texture(gNormal, TexCoords).rgb;
+            float Specular = texture(gAlbedoSpec, TexCoords).a;
+            Normal = vec3(inverse(view) * vec4(Normal, 0));
+
+            lighting  *= Diffuse * 0.1;// hard-coded ambient component
+            vec3 viewDir  = normalize(viewPos - FragPos);
+            for (int i = 0; i < NR_LIGHTS; ++i)
             {
-                // diffuse
-                vec3 lightDir = normalize(lights[i].Position - FragPos);
-                vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * lights[i].Color;
-                // specular
-                vec3 halfwayDir = normalize(lightDir + viewDir);
-                float spec = pow(max(dot(Normal, halfwayDir), 0.0), 16.0);
-                vec3 specular = lights[i].Color * spec * Specular;
-                // attenuation
-                float attenuation = 1.0 / (1.0 + lights[i].Linear * distance + lights[i].Quadratic * distance * distance);
-                diffuse *= attenuation;
-                specular *= attenuation;
-                lighting += diffuse + specular;
+                float distance = length(lights[i].Position - FragPos);
+                if (distance < lights[i].Radius)
+                {
+                    // diffuse
+                    vec3 lightDir = normalize(lights[i].Position - FragPos);
+                    vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * lights[i].Color;
+                    // specular
+                    vec3 halfwayDir = normalize(lightDir + viewDir);
+                    float spec = pow(max(dot(Normal, halfwayDir), 0.0), 16.0);
+                    vec3 specular = lights[i].Color * spec * Specular;
+                    // attenuation
+                    float attenuation = 1.0 / (1.0 + lights[i].Linear * distance + lights[i].Quadratic * distance * distance);
+                    diffuse *= attenuation;
+                    specular *= attenuation;
+                    lighting += diffuse + specular;
+                }
             }
+            //lighting += calculateDirectional();
+            lighting += ShadowCalculation(shadowLight.lightSpaceMatrix * vec4(FragPos, 1.0), Normal, FragPos,
+            Diffuse, Specular, viewDir);
         }
 
-        //lighting += calculateDirectional();
-
-        lighting += ShadowCalculation(shadowLight.lightSpaceMatrix * vec4(FragPos, 1.0), Normal, FragPos,
-            Diffuse, Specular, viewDir);
-
-        FragColor = vec4(lighting, 1.0) * pow(AmbientOcclusion, 1.25);
+        FragColor = vec4(lighting, 1.0) * pow(AmbientOcclusion, 1.5);
     }
 }

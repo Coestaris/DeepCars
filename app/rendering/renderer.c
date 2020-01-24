@@ -188,6 +188,7 @@ void bind_ssao(render_stage_t* stage)
    //GL_PCALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
    render_stage_t* g_buffer_stage = rc->stages->collection[STAGE_G_BUFFER];
+
    t_bind(g_buffer_stage->color0_tex, UNIFORM_SSAO.pos_tex);
    t_bind(g_buffer_stage->color1_tex, UNIFORM_SSAO.norm_tex);
    t_bind(noise_texure, UNIFORM_SSAO.noise_tex);

@@ -15,7 +15,7 @@ GLint get_loc(shader_t* sh, const char* name)
    GLint location = glGetUniformLocation(sh->prog_id, name);
    if(location == -1)
    {
-      //APP_ERROR("glGetUniformLocation of \"%s\" in shader \"%s\" returned -1", name, sh->name);
+      APP_ERROR("glGetUniformLocation of \"%s\" in shader \"%s\" returned -1", name, sh->name);
    }
    else return location;
 }

@@ -24,8 +24,8 @@
     [
         { 
             "fns" : [
-                "skybox/right.jpg",  "skybox/left.jpg",  "skybox/top.jpg",
-                "skybox/bottom.jpg", "skybox/front.jpg", "skybox/back.jpg"
+                "skybox/side.png",  "skybox/side.png",  "skybox/top.png",
+                "skybox/bottom.png", "skybox/side.png", "skybox/side.png"
             ],
             "name"       : "skybox",
             "wrapping"   : "clamp_to_edge",

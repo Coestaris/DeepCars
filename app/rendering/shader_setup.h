@@ -23,6 +23,7 @@ struct {
    GLint pos_tex;
    GLint norm_tex;
    GLint noise_tex;
+
 } UNIFORM_SSAO;
 
 struct {
