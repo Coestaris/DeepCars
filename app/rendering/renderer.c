@@ -80,7 +80,7 @@ inline void update_shadow_light(void)
    sh_set_vec3(UNIFORM_SHADING.shadow_light_position, scene->shadow_light->position);
    sh_set_vec3(UNIFORM_SHADING.shadow_light_direction, scene->shadow_light->light_camera->direction);
    sh_set_mat4(UNIFORM_SHADING.shadow_light_lightspace, scene->shadow_light->light_space);
-   sh_set_float(UNIFORM_SHADING.shadow_light_bright, .7f);
+   sh_set_float(UNIFORM_SHADING.shadow_light_bright,  scene->shadow_light->brightness);
    sh_use(NULL);
 }
 
@@ -247,6 +247,7 @@ void bind_shadowmap(render_stage_t* stage)
    GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
 
    vec4_cpy(shadow_light->light_camera->position, shadow_light->position);
+
    c_to_mat(shadow_light->light_view, shadow_light->light_camera);
    mat4_cpy(shadow_light->light_space, shadow_light->light_proj);
    mat4_mulm(shadow_light->light_space, shadow_light->light_view);

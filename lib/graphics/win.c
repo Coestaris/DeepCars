@@ -94,20 +94,20 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
 
    // Get a matching FB config
    static int visual_attribs[] =
-           {
-                   GLX_X_RENDERABLE, True,
-                   GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
-                   GLX_RENDER_TYPE, GLX_RGBA_BIT,
-                   GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
-                   GLX_RED_SIZE, 8,
-                   GLX_GREEN_SIZE, 8,
-                   GLX_BLUE_SIZE, 8,
-                   GLX_ALPHA_SIZE, 8,
-                   GLX_DEPTH_SIZE, 24,
-                   GLX_STENCIL_SIZE, 8,
-                   GLX_DOUBLEBUFFER, True,
-                   None
-           };
+   {
+          GLX_X_RENDERABLE, True,
+          GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
+          GLX_RENDER_TYPE, GLX_RGBA_BIT,
+          GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
+          GLX_RED_SIZE, 8,
+          GLX_GREEN_SIZE, 8,
+          GLX_BLUE_SIZE, 8,
+          GLX_ALPHA_SIZE, 8,
+          GLX_DEPTH_SIZE, 24,
+          GLX_STENCIL_SIZE, 8,
+          GLX_DOUBLEBUFFER, True,
+          None
+   };
 
    if (verbose)
       W_LOG("Checking GLX version",0);
@@ -134,7 +134,7 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
 
    // Pick the FB config/visual with the most samples per pixel
    if (verbose)
-      W_LOG("[win.c]: Getting XVisualInfos",0);
+      W_LOG("Getting XVisualInfos",0);
    int best_fbc_index = -1, worst_fbc_index = -1, best_num_samp = -1, worst_num_samp = 999;
 
    for (size_t i = 0; i < fbcount; i++)
@@ -313,6 +313,7 @@ void w_destroy(win_info_t* w)
 {
    glXMakeCurrent(w->display, 0, 0);
    glXDestroyContext(w->display, w->context);
+   W_LOG("Context destroyed",0);
 
    XDestroyWindow(w->display, w->win);
    XFreeColormap(w->display, w->color_map);

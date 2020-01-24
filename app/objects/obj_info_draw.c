@@ -13,6 +13,7 @@
 char buff[10][50];
 float last_fps;
 font_data_t font_data;
+font_data_t sec_font_data;
 
 void update_drawer(object_t* this)
 {
@@ -35,8 +36,8 @@ void update_drawer(object_t* this)
    last_fps = fps;
 
    for(size_t i = 0; i < chain->stages->count + 1; i++)
-      draw_monospace_string(0, &font_data,
-            vec2f(0,24 * i), vec2f(0.6, 0.6),
+      draw_monospace_string(0, i == 0 ? &font_data : &sec_font_data,
+            vec2f(0,16 * i + (i != 0 ? 15 : 0)), i == 0 ? vec2f(0.5, 0.5) : vec2f(0.3, 0.3),
             buff[i]);
 }
 
@@ -50,7 +51,16 @@ object_t* create_info_drawer()
    font_data.border_color = COLOR_BLACK;
    font_data.back_off = 0.5f;
    font_data.back_k = 4.5f;
-   font_data.border_color[3] = 1;
+   //font_data.border_color[3] = 1;
+
+   sec_font_data.color = COLOR_WHITE;
+   sec_font_data.color_off = 0.1f;
+   sec_font_data.color_k = 9.0f;
+
+   sec_font_data.border_color = COLOR_BLACK;
+   sec_font_data.back_off = 0.5f;
+   sec_font_data.back_k = 4.5f;
+   //sec_font_data.border_color[3] = 1;
 
    object_t* this = o_create();
    this->draw_info->drawable = false;

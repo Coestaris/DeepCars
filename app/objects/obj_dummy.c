@@ -16,6 +16,7 @@ object_t* create_textured_dummy(vec3f_t pos, float size, material_t* material, m
    this->scale = vec3f(size, size, size);
 
    this->draw_info->drawable = true;
+   this->draw_info->shadows = true;
    this->draw_info->model = model;
    this->draw_info->material = material;
    return this;

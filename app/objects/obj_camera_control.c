@@ -102,6 +102,8 @@ void camera_update_func(object_t* this)
       }
    }
    else last_cntr = false;
+
+   //scene->shadow_light->position
 }
 
 void camera_key_event_func(object_t* this, uint32_t key, uint32_t state)

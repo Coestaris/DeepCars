@@ -38,8 +38,9 @@
     "models": 
     [
         { "fn" : "cube.obj",   "name" : "cube"  },
-        { "fn" : "teapot.obj", "name" : "cube"  },
-        { "fn" : "torus.obj",  "name" : "torus" }
+        { "fn" : "teapot.obj", "name" : "teapot"  },
+        { "fn" : "torus.obj",  "name" : "torus" },
+        { "fn" : "column.obj",  "name" : "column" }
     ],
 
     "materials":

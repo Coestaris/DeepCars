@@ -15,26 +15,47 @@ void setup_objects(scene_t* scene)
    m_normalize(plane, true, true, true, true);
    m_build(plane);
 
-   rm_push(MODEL, plane, MODELID_PLANE);
+   rm_push(MODEL, plane, -1);
 
    list_push(scene->startup_objects,
              create_textured_dummy(vec3f(-500, 0, -500), 1000,
                                    rm_getn(MATERIAL, "grass"),
-                                   rm_get(MODEL, MODELID_PLANE)));
+                                   plane));
 
    list_push(scene->startup_objects,
-             create_textured_dummy(vec3f(-16, 0, -4), 10,
+             create_textured_dummy(vec3f(0,0,0), 10,
                                    rm_getn(MATERIAL, "default"),
-                                   rm_get(MODEL, MODELID_CUBE)));
+                                   rm_getn(MODEL, "cube")));
 
    list_push(scene->startup_objects,
-             create_textured_dummy(vec3f(-4, 0, -16), 10,
+             create_textured_dummy(vec3f(0, 0, -16), 10,
                                    rm_getn(MATERIAL, "default"),
-                                   rm_get(MODEL, MODELID_TORUS)));
+                                   rm_getn(MODEL, "torus")));
+
    list_push(scene->startup_objects,
-             create_textured_dummy(vec3f(-16, 0, -16), 10,
+             create_textured_dummy(vec3f(0, 0, 16), 10,
                                    rm_getn(MATERIAL, "default"),
-                                   rm_get(MODEL, MODELID_TEAPOT)));
+                                   rm_getn(MODEL, "torus")));
+
+   list_push(scene->startup_objects,
+             create_textured_dummy(vec3f(-16, 0, 0), 10,
+                                   rm_getn(MATERIAL, "default"),
+                                   rm_getn(MODEL, "teapot")));
+
+   list_push(scene->startup_objects,
+             create_textured_dummy(vec3f(16, 0, 0), 10,
+                                   rm_getn(MATERIAL, "default"),
+                                   rm_getn(MODEL, "teapot")));
+
+   const int count = 20;
+   const float step = 2.0f * M_PI / count;
+   for(int i = 0; i < count; i++)
+      list_push(scene->startup_objects,
+                create_textured_dummy(
+                      vec3f(cosf(i * step) * 60.0f, 0, sinf(i * step) * 60.0f),
+                      30,
+                      rm_getn(MATERIAL, "default"),
+                      rm_getn(MODEL, "column")));
 
    list_push(scene->startup_objects, create_camera_control());
    list_push(scene->startup_objects, create_info_drawer());
@@ -42,16 +63,22 @@ void setup_objects(scene_t* scene)
 
 void setup_shadow_light(scene_t* scene)
 {
-   const float near_plane = 1.0f;
-   const float far_plane = 100.0f;
-   const float r = 50;
+   const float near_plane = -10.0f;
+   const float far_plane = 200.0f;
+   const float r = 2048 / 10.0f;
+   const float t = 2048 / 10.0f;
 
    shadow_light_t* shadow_light = l_sh_create(cvec4(0, 20, 0, 0), vec4_ccpy(camera->up));
-   mat4_ortho(shadow_light->light_proj, near_plane, far_plane, r, r);
+   mat4_ortho(shadow_light->light_proj, near_plane, far_plane, r, t);
    shadow_light->light_camera->use_target = true;
    shadow_light->light_camera->target = cvec4(-16, 0, -4, 0);
-   shadow_light->brightness = 0.75f;
+
    scene->shadow_light = shadow_light;
+   vec4_cpy(scene->shadow_light->light_camera->direction, scene->shadow_light->light_camera->target);
+   vec4_subv(scene->shadow_light->light_camera->direction, scene->shadow_light->position);
+   vec4_norm(shadow_light->light_camera->direction);
+
+   shadow_light->brightness = 0.75f;
 }
 
 void setup_lights(scene_t* scene)

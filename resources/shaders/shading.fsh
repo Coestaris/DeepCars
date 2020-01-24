@@ -126,6 +126,5 @@ void main()
             Diffuse, Specular, viewDir);
 
         FragColor = vec4(lighting, 1.0) * pow(AmbientOcclusion, 1);
-        //FragColor = vec4(Normal,0);
     }
 }

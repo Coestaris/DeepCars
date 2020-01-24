@@ -66,7 +66,6 @@ vec4* generate_kernel(size_t n)
 
       scale = lerp(0.1f, 1.0f, scale * scale);
       vec4_mulf(sample, scale);
-      printf("%.2f %.2f %.2f\n", sample[0], sample[1], sample[2]);
       vectors[i] = sample;
    }
 

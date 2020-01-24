@@ -53,18 +53,20 @@ void sh_compile_s(shader_t* sh,
       sh->programs |= 0x4u;
    }
 
+   char info_log[1024];
    if (vertex_source)
    {
       GL_CALL(glShaderSource(vertex_shader, 1, (const GLchar**)&vertex_source, &vertex_len))
       GL_CALL(glCompileShader(vertex_shader));
       GL_CALL(glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &test_val));
-      if (test_val == GL_FALSE)
-      {
-         char info_log[1024];
-         GL_CALL(glGetShaderInfoLog(vertex_shader, 1024, NULL, info_log));
-         SH_ERROR("The vertex shader of \"%s\" failed to compile with the following error:\n%s",
+      GL_CALL(glGetShaderInfoLog(vertex_shader, sizeof(info_log), NULL, info_log));
+
+      if(strlen(info_log))
+         SH_LOG("The vertex shader of \"%s\" compiled with the following messages:\n%s",
                 sh->name, info_log);
-      }
+
+      if (test_val == GL_FALSE)
+      SH_ERROR("Unable to compile vertex shader...",0);
    }
 
    if (geometry_source)
@@ -72,13 +74,14 @@ void sh_compile_s(shader_t* sh,
       GL_CALL(glShaderSource(geometry_shader, 1, (const GLchar**)&geometry_source, &geometry_len))
       GL_CALL(glCompileShader(geometry_shader));
       GL_CALL(glGetShaderiv(geometry_shader, GL_COMPILE_STATUS, &test_val));
-      if (test_val == GL_FALSE)
-      {
-         char info_log[1024];
-         GL_CALL(glGetShaderInfoLog(geometry_shader, 1024, NULL, info_log));
-         SH_ERROR("The fragment shader of \"%s\" failed to compile with the following error:\n%s",
+      GL_CALL(glGetShaderInfoLog(geometry_shader, sizeof(info_log), NULL, info_log));
+
+      if(strlen(info_log))
+         SH_LOG("The geometry shader of \"%s\" compiled with the following messages:\n%s",
                 sh->name, info_log);
-      }
+
+      if (test_val == GL_FALSE)
+         SH_ERROR("Unable to compile geometry shader...",0);
    }
 
    if(fragment_source)
@@ -86,14 +89,14 @@ void sh_compile_s(shader_t* sh,
       GL_CALL(glShaderSource(fragment_shader, 1, (const GLchar**)&fragment_source, &fragment_len))
       GL_CALL(glCompileShader(fragment_shader));
       GL_CALL(glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &test_val))
-      if (test_val == GL_FALSE)
-      {
-         char info_log[1024];
-         GL_CALL(glGetShaderInfoLog(fragment_shader, 1024, NULL, info_log));
-         SH_ERROR("The fragment shader of \"%s\" failed to compile with the following error:\n%s",
-                sh->name, info_log);
-      }
+      GL_CALL(glGetShaderInfoLog(fragment_shader, sizeof(info_log), NULL, info_log));
 
+      if(strlen(info_log))
+         SH_LOG("The fragment shader of \"%s\" compiled with the following messages:\n%s",
+                sh->name, info_log);
+
+      if (test_val == GL_FALSE)
+         SH_ERROR("Unable to compile fragment shader...",0);
    }
    sh->prog_id = glCreateProgram();
    if(!sh->prog_id)
@@ -111,13 +114,14 @@ void sh_compile_s(shader_t* sh,
    GL_CALL(glLinkProgram(sh->prog_id));
 
    GL_CALL(glGetProgramiv(sh->prog_id, GL_LINK_STATUS, &test_val));
-   if (test_val == GL_FALSE)
-   {
-      char info_log[1024];
-      GL_CALL(glGetProgramInfoLog(sh->prog_id, 1024, NULL, info_log));
-      SH_ERROR("The shader \"%s\" failed to link with the following errors:\n%s",
+   GL_CALL(glGetProgramInfoLog(sh->prog_id, sizeof(info_log), NULL, info_log));
+
+   if(strlen(info_log))
+      SH_LOG("The shader \"%s\" linked with the following messages:\n%s",
              sh->name, info_log);
-   }
+
+   if (test_val == GL_FALSE)
+      SH_ERROR("Unable to link program...",0);
 
    if(vertex_source)
       GL_CALL(glDeleteShader(vertex_shader));
