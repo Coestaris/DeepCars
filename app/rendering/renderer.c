@@ -185,7 +185,7 @@ void setup_object_g_buffer(render_stage_t* stage, object_t* object, mat4 model_m
 // SSAO ROUTINES
 void bind_ssao(render_stage_t* stage)
 {
-   GL_PCALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+   //GL_PCALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
    render_stage_t* g_buffer_stage = rc->stages->collection[STAGE_G_BUFFER];
    t_bind(g_buffer_stage->color0_tex, UNIFORM_SSAO.pos_tex);
@@ -392,8 +392,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    render_stage_t* ssao = rs_create("ssao", RM_FRAMEBUFFER, ssao_shader);
    ssao->attachments = TF_COLOR0;
    //color
-   ssao->color0_format.tex_width = win->w;
-   ssao->color0_format.tex_height = win->h;
+   ssao->color0_format.tex_width = (float)info->w / 2.0f;
+   ssao->color0_format.tex_height = (float)info->h / 2.0f;
    ssao->color0_format.tex_format = GL_RGB;
    ssao->color0_format.tex_int_format = GL_RED;
    ssao->color0_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
@@ -405,8 +405,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 
    render_stage_t* ssao_blur = rs_create("ssao_blur", RM_FRAMEBUFFER, ssao_blur_shader);
    ssao_blur->attachments = TF_COLOR0;
-   ssao_blur->color0_format.tex_width = info->w;
-   ssao_blur->color0_format.tex_height = info->h;
+   ssao_blur->color0_format.tex_width = (float)info->w / 2.0f;
+   ssao_blur->color0_format.tex_height = (float)info->h / 2.0f;
    ssao_blur->color0_format.tex_format = GL_RGB;
    ssao_blur->color0_format.tex_int_format = GL_RED;
 
@@ -415,8 +415,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    ssao_blur->vao = rc_get_quad_vao();
 
    render_stage_t* skybox = rs_create("skybox", RM_CUSTOM, skybox_shader);
-   skybox->width = info->w;
-   skybox->height = info->h;
+   skybox->width = (float)info->w;
+   skybox->height = (float)info->h;
    skybox->bind_func = bind_skybox;
    skybox->unbind_func = unbind_skybox;
    skybox->custom_draw_func = draw_skybox;

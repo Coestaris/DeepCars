@@ -125,6 +125,6 @@ void main()
         lighting += ShadowCalculation(shadowLight.lightSpaceMatrix * vec4(FragPos, 1.0), Normal, FragPos,
             Diffuse, Specular, viewDir);
 
-        FragColor = vec4(lighting, 1.0) * pow(AmbientOcclusion, 1);
+        FragColor = vec4(lighting, 1.0) * pow(AmbientOcclusion, 1.25);
     }
 }
