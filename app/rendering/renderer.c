@@ -14,20 +14,14 @@
 #include "ssao.h"
 #include "shader_setup.h"
 #include "../../lib/resources/font.h"
+#include "vfx.h"
+#include "text_rendering.h"
 
 typedef struct _geometry_shader_data {
    camera_t* camera;
    mat4 buffmat;
 
 } geometry_shader_data_t;
-
-#define STAGE_G_BUFFER 0
-#define STAGE_SSAO 1
-#define STAGE_SSAO_BLUR 2
-#define STAGE_SKYBOX 3
-#define STAGE_SHADOWMAP 4
-#define STAGE_SHADING 5
-#define STAGE_BYPASS 6
 
 render_chain_t* rc;
 
@@ -302,26 +296,52 @@ void bind_bypass(render_stage_t* stage)
 void unbind_bypass(render_stage_t* stage) { }
 
 //FONT ROUTINES
-void bind_font(render_stage_t* stage)
+void bind_primitive(render_stage_t* stage)
 {
    glEnable(GL_BLEND);
    glDisable(GL_DEPTH_TEST);
    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void unbind_font(render_stage_t* stage)
+void unbind_primitive(render_stage_t* stage)
 {
    glDisable(GL_BLEND);
    glEnable(GL_DEPTH_TEST);
 }
 
-void draw_font(render_stage_t* stage)
+list_t* blurred_regions;
+shader_t* br_shader;
+void draw_primitives(render_stage_t* stage)
 {
+   render_stage_t* rs = rc->stages->collection[STAGE_SHADING];
+
+   sh_use(br_shader);
+
+   for(size_t i = 0; i < blurred_regions->count; i++)
+   {
+      blurred_region_t* br = blurred_regions->collection[i];
+
+      GL_PCALL(glBindVertexArray(br->vao));
+      sh_set_int(UNIFORM_BR.grayscale, br->gray_scale);
+      t_bind(br->back_tex, UNIFORM_BR.back_tex);
+      t_bind(br->tex, UNIFORM_BR.tex);
+
+      GL_PCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+   }
+   GL_PCALL(glBindVertexArray(0));
+   sh_use(NULL);
+
+
    gr_pq_flush();
 }
 
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 {
+   blurred_regions = list_create();
+
+   primitive_proj = cmat4();
+   mat4_ortho(primitive_proj, -1, 1, info->w, info->h);
+
    noise_texure = generate_noise(4);
    ssao_kernel = generate_kernel(KERNEL_SIZE);
    ssao_dummy_texture = mt_create_colored_tex(COLOR_WHITE);
@@ -334,6 +354,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shader_t* shadowmap_shader = setup_shadowmap();
    shader_t* shading_shader = setup_shading();
    shader_t* gamma_shader = setup_gamma();
+   br_shader = setup_br(primitive_proj, 19, 11);
 
    render_stage_t* g_buffer = rs_create("gbuffer", RM_GEOMETRY, g_buffer_shader);
    g_buffer->attachments = TF_COLOR0 | TF_COLOR1 | TF_COLOR2 | TF_COLOR3 | TF_DEPTH;
@@ -472,9 +493,9 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    render_stage_t* primitive = rs_create("primitive", RM_CUSTOM, NULL);
    primitive->width = info->w;
    primitive->height = info->h;
-   primitive->bind_func = bind_font;
-   primitive->unbind_func = unbind_font;
-   primitive->custom_draw_func = draw_font;
+   primitive->bind_func = bind_primitive;
+   primitive->unbind_func = unbind_primitive;
+   primitive->custom_draw_func = draw_primitives;
 
    rc = rc_create();
    list_push(rc->stages, g_buffer);

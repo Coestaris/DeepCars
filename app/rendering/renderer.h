@@ -7,6 +7,18 @@
 
 #include "../../lib/graphics/rendering/render_chain.h"
 
+#define STAGE_G_BUFFER 0
+#define STAGE_SSAO 1
+#define STAGE_SSAO_BLUR 2
+#define STAGE_SKYBOX 3
+#define STAGE_SHADOWMAP 4
+#define STAGE_SHADING 5
+#define STAGE_BYPASS 6
+#define STAGE_PRIMITIVE 7
+
+extern render_chain_t* rc;
+extern list_t* blurred_regions;
+
 char* get_ssao_stage_string();
 
 void switch_stages(void);

@@ -9,6 +9,7 @@
 #include "../win_defaults.h"
 #include "obj_info_draw.h"
 #include "../rendering/renderer.h"
+#include "menu/obj_menu_drawer.h"
 
 void setup_objects(scene_t* scene)
 {
@@ -59,6 +60,7 @@ void setup_objects(scene_t* scene)
                       rm_getn(MODEL, "column")));
 
    list_push(scene->startup_objects, create_camera_control());
+   list_push(scene->startup_objects, create_menu_drawer());
    list_push(scene->startup_objects, create_info_drawer());
 }
 

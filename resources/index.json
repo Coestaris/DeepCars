@@ -1,14 +1,15 @@
 {
     "shaders" : 
     [
-        { "vertex" : "g_buffer.vsh",  "fragment" : "g_buffer.fsh",  "name":  "g_buffer"  },
-        { "vertex" : "bypass.vsh",    "fragment" : "ssao.fsh",      "name":  "ssao"      },
-        { "vertex" : "bypass.vsh",    "fragment" : "ssao_blur.fsh", "name":  "ssao_blur" },
-        { "vertex" : "skybox.vsh",    "fragment" : "skybox.fsh",    "name":  "skybox"    },
-        { "vertex" : "shadowmap.vsh", "fragment" : "shadowmap.fsh", "name":  "shadowmap" },
-        { "vertex" : "shading.vsh",   "fragment" : "shading.fsh",   "name":  "shading"   },
-        { "vertex" : "bypass.vsh",    "fragment" : "gamma.fsh",     "name":  "gamma"     },
-        { "vertex" : "font.vsh",      "fragment" : "font.fsh",      "name":  "font"      }
+        { "vertex" : "g_buffer.vsh",          "fragment" : "g_buffer.fsh",         "name":  "g_buffer"  },
+        { "vertex" : "2d_shaders/bypass.vsh", "fragment" : "ssao.fsh",             "name":  "ssao"      },
+        { "vertex" : "2d_shaders/bypass.vsh", "fragment" : "ssao_blur.fsh",        "name":  "ssao_blur" },
+        { "vertex" : "skybox.vsh",            "fragment" : "skybox.fsh",           "name":  "skybox"    },
+        { "vertex" : "shadowmap.vsh",         "fragment" : "shadowmap.fsh",        "name":  "shadowmap" },
+        { "vertex" : "shading.vsh",           "fragment" : "shading.fsh",          "name":  "shading"   },
+        { "vertex" : "2d_shaders/bypass.vsh", "fragment" : "gamma.fsh",            "name":  "gamma"     },
+        { "vertex" : "2d_shaders/font.vsh",   "fragment" : "2d_shaders/font.fsh",  "name":  "font"      },
+        { "vertex" : "2d_shaders/blurred_region.vsh",   "fragment" : "2d_shaders/blurred_region.fsh",  "name":  "blurred_region" }
     ],
 
     "textures" : 
@@ -17,7 +18,11 @@
         { "fn" : "box_spec.png", "name" : "box_spec" },
         { "fn" : "tex2.png",     "name" : "tex2"     },
         { "fn" : "tex3.png",     "name" : "tex3"     },
-        { "fn" : "grass.png",    "name" : "grass"    }
+        { "fn" : "grass.png",    "name" : "grass"    },
+        { "fn" : "menu/btn_run_editor.png",    "name" : "btn_run_editor" },
+        { "fn" : "menu/btn_about.png",    "name" : "btn_about" },
+        { "fn" : "menu/btn_exit.png",    "name" : "btn_exit" },
+        { "fn" : "menu/logo.png",    "name" : "logo" }
     ],
 
     "cubemaps": 

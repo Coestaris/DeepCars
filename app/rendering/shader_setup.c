@@ -9,6 +9,7 @@
 
 #include "../../lib/resources/shm.h"
 #include "../win_defaults.h"
+#include "vfx.h"
 
 GLint get_loc(shader_t* sh, const char* name)
 {
@@ -144,7 +145,7 @@ shader_t* setup_gamma(void)
    return sh;
 }
 
-shader_t* setup_font(mat4 font_ortho)
+shader_t* setup_font(mat4 primitive_proj)
 {
    shader_t* sh = s_getn_shader("font");
 
@@ -154,7 +155,35 @@ shader_t* setup_font(mat4 font_ortho)
 
    sh_use(sh);
    sh_nset_int(sh, "tex", UNIFORM_FONT.tex = 0);
-   sh_nset_mat4(sh, "proj", font_ortho);
+   sh_nset_mat4(sh, "proj", primitive_proj);
+   sh_use(NULL);
+
+   return sh;
+}
+
+shader_t* setup_br(mat4 primitive_proj, float sigma, size_t kernel_len)
+{
+   shader_t* sh = s_getn_shader("blurred_region");
+
+   UNIFORM_BR.grayscale = get_loc(sh, "grayscale");
+
+   size_t k_size;
+   float z;
+   float* kernel = create_gaussian_kernel(sigma, &z, &k_size, kernel_len);
+
+   sh_use(sh);
+   sh_nset_int(sh, "kSize", k_size);
+   sh_nset_float(sh, "z", z);
+   for(size_t i = 0; i < kernel_len; i++)
+   {
+      char buff[20];
+      snprintf(buff, sizeof(buff), "kernel[%li]", i);
+      sh_nset_float(sh, buff, kernel[i]);
+   }
+
+   sh_nset_int(sh, "tex", UNIFORM_BR.tex = 0);
+   sh_nset_int(sh, "backTex", UNIFORM_BR.back_tex = 1);
+   sh_nset_mat4(sh, "proj", primitive_proj);
    sh_use(NULL);
 
    return sh;

@@ -58,8 +58,6 @@ void app_init_graphics(void)
    rc_create_perspective(win, proj_mat, 65.f, 0.1f, 500);
 
    rc_set_current(get_chain(win, camera, proj_mat));
-
-
 }
 
 void app_run(void)

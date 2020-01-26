@@ -141,16 +141,16 @@ font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info
    GL_CALL(glBindVertexArray(f->vao));
 
    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, f->vbo));
-   GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * 5, NULL, GL_STATIC_DRAW));
+   GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * 5, NULL, GL_DYNAMIC_DRAW));
 
    GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
    GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));
 
-   GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0));
    GL_CALL(glEnableVertexAttribArray(0));
+   GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0));
 
-   GL_CALL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))));
    GL_CALL(glEnableVertexAttribArray(1));
+   GL_CALL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))));
 
    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 

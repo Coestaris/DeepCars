@@ -14,7 +14,7 @@
 
 font_t* default_font;
 font_t* monospace_font;
-mat4 font_proj;
+mat4 primitive_proj;
 
 void bind_default_font(font_t* font, void* data)
 {
@@ -39,10 +39,7 @@ void draw_monospace_string(uint8_t depth, font_data_t* data, vec2f_t pos, vec2f_
 
 void init_fonts(win_info_t* info)
 {
-   font_proj = cmat4();
-   mat4_ortho(font_proj, -1, 1, info->w, info->h);
-
-   shader_t* font_shader = setup_font(font_proj);
+   shader_t* font_shader = setup_font(primitive_proj);
    default_font = rm_getn(FONT, "default");
    default_font->bind_func = bind_default_font;
    default_font->win = win;

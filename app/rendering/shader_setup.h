@@ -80,6 +80,14 @@ struct {
 
 } UNIFORM_FONT;
 
+struct {
+   GLint tex;
+   GLint back_tex;
+
+   GLint grayscale;
+
+} UNIFORM_BR;
+
 shader_t* setup_g_buffer(mat4 proj);
 shader_t* setup_ssao(vec4* kernel, mat4 proj);
 shader_t* setup_ssao_blur(void);
@@ -87,7 +95,8 @@ shader_t* setup_skybox(mat4 proj);
 shader_t* setup_shadowmap(void);
 shader_t* setup_shading(void);
 shader_t* setup_gamma(void);
-shader_t* setup_font(mat4 font_ortho);
+shader_t* setup_font(mat4 primitive_proj);
+shader_t* setup_br(mat4 primitive_proj, float sigma, size_t kernel_len);
 
 #pragma clang diagnostic pop
 

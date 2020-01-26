@@ -9,6 +9,7 @@
 #include "../../lib/graphics/gmath.h"
 #include "../../lib/structs.h"
 #include "../../lib/graphics/win.h"
+extern mat4 primitive_proj;
 
 typedef struct _font_data {
    vec4 color;
