@@ -41,7 +41,7 @@ mat4 x_rot_mat;
 mat4 y_rot_mat;
 mat4 z_rot_mat;
 
-struct {
+struct queue_item {
 
    uint8_t mode;
 
@@ -65,6 +65,8 @@ inline void gr_fill(vec4 color)
    GL_PCALL(glClearColor(color[0], color[1], color[2], color[3]));
 }
 
+shader_t* sprite_shader;
+GLuint vao;
 void gr_init()
 {
    COLOR_WHITE = cvec4(1, 1, 1, 0);
@@ -94,6 +96,33 @@ void gr_init()
 
    memset(queue, 0, sizeof(queue));
    memset(queue_length, 0, sizeof(queue_length));
+
+   sprite_shader = s_getn_shader("sprite");
+
+   // Configure VAO/VBO
+   GLuint vbo;
+   GLfloat vertices[] = {
+         // Pos      // Tex
+         0.0f, 1.0f, 0.0f, 1.0f,
+         1.0f, 0.0f, 1.0f, 0.0f,
+         0.0f, 0.0f, 0.0f, 0.0f,
+
+         0.0f, 1.0f, 0.0f, 1.0f,
+         1.0f, 1.0f, 1.0f, 1.0f,
+         1.0f, 0.0f, 1.0f, 0.0f
+   };
+
+   glGenVertexArrays(1, &vao);
+   glGenBuffers(1, &vbo);
+
+   glBindBuffer(GL_ARRAY_BUFFER, vbo);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+   glBindVertexArray(vao);
+   glEnableVertexAttribArray(0);
+   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindVertexArray(0);
 }
 
 inline void gr_render_vao(GLuint vao)
@@ -278,16 +307,26 @@ void gr_pq_flush(void)
    {
       for(size_t i = 0; i < queue_length[d]; i++)
       {
-         switch(queue[d][i].mode)
+         struct queue_item qi = queue[d][i];
+         switch(qi.mode)
          {
+            case 0:
+               gr_draw_sprite(
+                     qi.tex,
+                     qi.position,
+                     qi.scale,
+                     qi.center,
+                     qi.angle,
+                     qi.bind_shader);
+               break;
             case 1:
                gr_draw_string(
-                     queue[d][i].font,
-                     queue[d][i].position,
-                     queue[d][i].scale,
-                     queue[d][i].string,
-                     queue[d][i].bind_shader,
-                     queue[d][i].data);
+                     qi.font,
+                     qi.position,
+                     qi.scale,
+                     qi.string,
+                     qi.bind_shader,
+                     qi.data);
                break;
             default:
                break;
@@ -295,4 +334,26 @@ void gr_pq_flush(void)
       }
       queue_length[d] = 0;
    }
+}
+
+void gr_draw_sprite(texture_t* texture, vec2f_t position, vec2f_t scale, vec2f_t center, float angle,
+                    bool bind_shader)
+{
+   if(bind_shader)
+      sh_use(sprite_shader);
+
+   mat4_identity(model_mat);
+   mat4_translate(model_mat, position.x - default_win->w / 2.0f, default_win->h / 2.0f - position.y, 0);
+   mat4_scale(model_mat, texture->width * scale.x, -texture->height * scale.y, 1);
+
+   sh_nset_mat4(sprite_shader, "model", model_mat);
+
+   t_bind(texture, 0);
+
+   glBindVertexArray(vao);
+   glDrawArrays(GL_TRIANGLES, 0, 6);
+   glBindVertexArray(0);
+
+   if(bind_shader)
+      sh_use(NULL);
 }

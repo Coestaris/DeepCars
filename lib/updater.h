@@ -30,6 +30,8 @@
 // Period of measuring FPS
 #define FPS_AV_COUNTER 1000.0
 
+extern win_info_t* default_win;
+
 // End application loop
 void u_close(void);
 

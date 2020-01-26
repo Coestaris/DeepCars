@@ -43,21 +43,21 @@ void update_drawer(object_t* this)
 
 object_t* create_info_drawer()
 {
-   font_data.color = COLOR_WHITE;
+   font_data.color = COLOR_BLACK;
    font_data.color_off = 0.1f;
    font_data.color_k = 9.0f;
    //font_data.color[3] = 1;
 
-   font_data.border_color = COLOR_BLACK;
+   font_data.border_color = COLOR_WHITE;
    font_data.back_off = 0.5f;
    font_data.back_k = 4.5f;
    //font_data.border_color[3] = 1;
 
-   sec_font_data.color = COLOR_WHITE;
+   sec_font_data.color = COLOR_BLACK;
    sec_font_data.color_off = 0.1f;
    sec_font_data.color_k = 9.0f;
 
-   sec_font_data.border_color = COLOR_BLACK;
+   sec_font_data.border_color = COLOR_WHITE;
    sec_font_data.back_off = 0.5f;
    sec_font_data.back_k = 4.5f;
    //sec_font_data.border_color[3] = 1;

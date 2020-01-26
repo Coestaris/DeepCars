@@ -9,7 +9,8 @@
         { "vertex" : "shading.vsh",           "fragment" : "shading.fsh",          "name":  "shading"   },
         { "vertex" : "2d_shaders/bypass.vsh", "fragment" : "gamma.fsh",            "name":  "gamma"     },
         { "vertex" : "2d_shaders/font.vsh",   "fragment" : "2d_shaders/font.fsh",  "name":  "font"      },
-        { "vertex" : "2d_shaders/blurred_region.vsh",   "fragment" : "2d_shaders/blurred_region.fsh",  "name":  "blurred_region" }
+        { "vertex" : "2d_shaders/blurred_region.vsh",   "fragment" : "2d_shaders/blurred_region.fsh",  "name":  "blurred_region" },
+        { "vertex" : "2d_shaders/sprite.vsh",   "fragment" : "2d_shaders/sprite.fsh",  "name":  "sprite" }
     ],
 
     "textures" : 

@@ -15,8 +15,6 @@ float camera_pitch      = 0;
 float camera_yaw        = M_PI / 2;
 float lastdx            = 0;
 float lastdy            = 0;
-bool  last_cntr         = false;
-bool  last_shift         = false;
 vec4 player_start;
 
 void camera_update_func(object_t* this)
@@ -26,7 +24,6 @@ void camera_update_func(object_t* this)
    if(frame == 1)
       vec4_cpy(player_start, camera->position);
 
-   scene_t* scene = scm_get_current();
    camera_pitch = dy;
    camera_yaw = dx + (float)(M_PI / 2.0);
    c_rotate(camera, camera_pitch, camera_yaw);
@@ -53,15 +50,6 @@ void camera_update_func(object_t* this)
    if (u_get_key_state(39) == KEY_PRESSED)
       vec4_addv(camera->position, camera_dir_cpy);
 
-   if (u_get_key_state(62) == KEY_PRESSED)
-   {
-      if(!last_shift)
-      {
-         switch_ssao();
-         last_shift = 1;
-      }
-   } else last_shift = 0;
-
    //up
    if (u_get_key_state(65) == KEY_PRESSED)
       camera->position[1] += 0.2f;
@@ -70,19 +58,9 @@ void camera_update_func(object_t* this)
    if (u_get_key_state(50) == KEY_PRESSED)
       camera->position[1] -= 0.2f;
 
-   if (u_get_key_state(105) == KEY_PRESSED)
-   {
-      if(!last_cntr)
-      {
-         switch_stages();
-         last_cntr = true;
-      }
-   }
-   else last_cntr = false;
-
-
    if(frame % 15 == 0)
    {
+      scene_t* scene = scm_get_current();
       const float diffX = camera->position[0] - player_start[0];
       const float diffY = camera->position[1] - player_start[1];
       const float diffZ = camera->position[2] - player_start[2];
@@ -100,12 +78,6 @@ void camera_update_func(object_t* this)
       scene->shadow_light->position[2] = diffZ + lt_off_z;
       update_shadow_light();
    }
-}
-
-void camera_key_event_func(object_t* this, uint32_t key, uint32_t state)
-{
-   if (key == 9) //esc
-      u_close();
 }
 
 void camera_mouse_event_func(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
@@ -145,7 +117,6 @@ object_t* create_camera_control()
 {
    object_t* this = o_create();
    this->update_func = camera_update_func;
-   this->key_event_func = camera_key_event_func;
    this->mouse_event_func = camera_mouse_event_func;
    this->mousemove_event_func = camera_mouse_move_event_func;
    this->destroy_func = camera_destroy_func;

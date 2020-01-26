@@ -22,7 +22,7 @@ struct ShadowLight {
     sampler2D shadowMap;
 };
 
-const int NR_LIGHTS = 1;
+const int NR_LIGHTS = 30;
 
 //uniform sampler2D gViewPosition;
 uniform sampler2D gPosition;
@@ -109,7 +109,7 @@ void main()
             float Specular = texture(gAlbedoSpec, TexCoords).a;
             Normal = vec3(inverse(view) * vec4(Normal, 0));
 
-            lighting *= 0.25;// hard-coded ambient component
+            lighting *= 0.5;// hard-coded ambient component
             vec3 viewDir  = normalize(viewPos - FragPos);
             for (int i = 0; i < NR_LIGHTS; ++i)
             {

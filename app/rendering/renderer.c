@@ -331,7 +331,6 @@ void draw_primitives(render_stage_t* stage)
    GL_PCALL(glBindVertexArray(0));
    sh_use(NULL);
 
-
    gr_pq_flush();
 }
 
@@ -355,6 +354,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shader_t* shading_shader = setup_shading();
    shader_t* gamma_shader = setup_gamma();
    br_shader = setup_br(primitive_proj, 19, 11);
+   setup_sprite(primitive_proj);
 
    render_stage_t* g_buffer = rs_create("gbuffer", RM_GEOMETRY, g_buffer_shader);
    g_buffer->attachments = TF_COLOR0 | TF_COLOR1 | TF_COLOR2 | TF_COLOR3 | TF_DEPTH;

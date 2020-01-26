@@ -28,6 +28,8 @@ void gr_free(void);
 mat4 gr_transform(vec3f_t pos, vec3f_t scale, vec3f_t rot);
 
 void gr_draw_string(font_t* f, vec2f_t position, vec2f_t scale, char* string, bool bind_shader, void* data);
+void gr_draw_sprite(texture_t* texture, vec2f_t position,
+                    vec2f_t scale, vec2f_t center, float angle, bool bind_shader);
 void gr_render_object(object_t* obj);
 void gr_render_vao(GLuint vao);
 void gr_bind(render_stage_t* stage);

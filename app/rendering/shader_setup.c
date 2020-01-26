@@ -188,3 +188,17 @@ shader_t* setup_br(mat4 primitive_proj, float sigma, size_t kernel_len)
 
    return sh;
 }
+
+shader_t* setup_sprite(mat4 primitive_proj)
+{
+   shader_t* sh = s_getn_shader("sprite");
+
+   UNIFORM_SPRITE.model = get_loc(sh, "model");
+
+   sh_use(sh);
+   sh_nset_mat4(sh, "projection", primitive_proj);
+   sh_nset_int(sh, "image", 0);
+   sh_use(NULL);
+
+   return sh;
+}

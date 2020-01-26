@@ -11,11 +11,11 @@
 
 // Output debug information
 #define VERBOSE true
-#define DEBUG_LEVEL 2 // 2 - glCall, glPCall. 1 - glCall
+#define DEBUG_LEVEL 3 // 2 - glCall, glPCall. 1 - glCall
 #define LIST_BOOTSTRAP_SIZE 32
 
 
-#if DEBUG_LEVEL == 2
+#if DEBUG_LEVEL >= 2
 
    #define GL_CALL(expr) { expr; gl_check(#expr, __LINE__, __FILE__); }
    #define GL_PCALL(expr) { expr; gl_check(#expr, __LINE__, __FILE__); }

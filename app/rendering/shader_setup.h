@@ -88,6 +88,12 @@ struct {
 
 } UNIFORM_BR;
 
+struct {
+   GLint tex;
+   GLint model;
+
+} UNIFORM_SPRITE;
+
 shader_t* setup_g_buffer(mat4 proj);
 shader_t* setup_ssao(vec4* kernel, mat4 proj);
 shader_t* setup_ssao_blur(void);
@@ -97,6 +103,7 @@ shader_t* setup_shading(void);
 shader_t* setup_gamma(void);
 shader_t* setup_font(mat4 primitive_proj);
 shader_t* setup_br(mat4 primitive_proj, float sigma, size_t kernel_len);
+shader_t* setup_sprite(mat4 primitive_proj);
 
 #pragma clang diagnostic pop
 

@@ -52,7 +52,7 @@ void app_init_graphics(void)
    gr_init();
 
    camera = c_create(
-         cvec4(0, 5, 15, 0),
+         cvec4(0, 45, 100, 0),
          cvec4(0, 1, 0, 0));
 
    rc_create_perspective(win, proj_mat, 65.f, 0.1f, 500);

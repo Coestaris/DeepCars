@@ -10,6 +10,8 @@
 #include "obj_info_draw.h"
 #include "../rendering/renderer.h"
 #include "menu/obj_menu_drawer.h"
+#include "menu/obj_menu_camera_mover.h"
+#include "obj_default_bind_handler.h"
 
 void setup_objects(scene_t* scene)
 {
@@ -59,7 +61,9 @@ void setup_objects(scene_t* scene)
                       rm_getn(MATERIAL, "default"),
                       rm_getn(MODEL, "column")));
 
-   list_push(scene->startup_objects, create_camera_control());
+   list_push(scene->startup_objects, create_default_bind_handler());
+   list_push(scene->startup_objects, create_menu_camera_mover());
+   //list_push(scene->startup_objects, create_camera_control());
    list_push(scene->startup_objects, create_menu_drawer());
    list_push(scene->startup_objects, create_info_drawer());
 }
@@ -85,9 +89,9 @@ void setup_lights(scene_t* scene)
    const float angle = M_PI * 2 / NR_LIGHTS;
    const float radius = 70;
 
-   const float linear = 0.022f;
+   const float linear = 0.12f;
    const float linear_rand = 0.0f;
-   const float quadratic = 0.0019f;
+   const float quadratic = 0.011f;
    const float quadratic_rand = 0.0f;
 
    for (size_t i = 0; i < NR_LIGHTS; i++)
