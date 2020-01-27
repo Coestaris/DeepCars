@@ -320,6 +320,8 @@ void draw_primitives(render_stage_t* stage)
    for(size_t i = 0; i < blurred_regions->count; i++)
    {
       blurred_region_t* br = blurred_regions->collection[i];
+      if(!br->visible)
+         continue;
 
       GL_PCALL(glBindVertexArray(br->vao));
       if(br->gray_color)

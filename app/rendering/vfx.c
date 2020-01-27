@@ -15,6 +15,7 @@ blurred_region_t* create_br(win_info_t* info, vec2f_t pos, vec2f_t size, uint8_t
    br->w = size.x;
    br->h = size.y;
 
+   br->visible = true;
    br->tex = NULL;
    br->back_tex = NULL;
    br->gray_color = NULL;

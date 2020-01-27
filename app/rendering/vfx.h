@@ -8,6 +8,9 @@
 #include "../../lib/object_include.h"
 
 typedef struct _blurred_region {
+
+   bool visible;
+
    float x, y;
    float w, h;
    uint8_t grayscale;

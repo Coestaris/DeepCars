@@ -9,21 +9,24 @@
         { "vertex" : "shading.vsh",           "fragment" : "shading.fsh",          "name":  "shading"   },
         { "vertex" : "2d_shaders/bypass.vsh", "fragment" : "gamma.fsh",            "name":  "gamma"     },
         { "vertex" : "2d_shaders/font.vsh",   "fragment" : "2d_shaders/font.fsh",  "name":  "font"      },
-        { "vertex" : "2d_shaders/blurred_region.vsh",   "fragment" : "2d_shaders/blurred_region.fsh",  "name":  "blurred_region" },
-        { "vertex" : "2d_shaders/sprite.vsh",   "fragment" : "2d_shaders/sprite.fsh",  "name":  "sprite" }
+        { "vertex" : "2d_shaders/blurred_region.vsh", "fragment" : "2d_shaders/blurred_region.fsh", "name": "blurred_region" },
+        { "vertex" : "2d_shaders/sprite.vsh",         "fragment" : "2d_shaders/sprite.fsh",         "name": "sprite" }
     ],
 
     "textures" : 
     [
-        { "fn" : "box_diff.png", "name" : "box_diff" },
-        { "fn" : "box_spec.png", "name" : "box_spec" },
-        { "fn" : "tex2.png",     "name" : "tex2"     },
-        { "fn" : "tex3.png",     "name" : "tex3"     },
-        { "fn" : "grass.png",    "name" : "grass"    },
-        { "fn" : "menu/btn_run_editor.png",    "name" : "btn_run_editor" },
-        { "fn" : "menu/btn_about.png",    "name" : "btn_about" },
-        { "fn" : "menu/btn_exit.png",    "name" : "btn_exit" },
-        { "fn" : "menu/logo.png",    "name" : "logo" }
+        { "fn" : "box_diff.png",            "name" : "box_diff" },
+        { "fn" : "box_spec.png",            "name" : "box_spec" },
+        { "fn" : "tex2.png",                "name" : "tex2"     },
+        { "fn" : "tex3.png",                "name" : "tex3"     },
+        { "fn" : "grass.png",               "name" : "grass"    },
+        { "fn" : "menu/btn_run_editor.png", "name" : "btn_run_editor" },
+        { "fn" : "menu/btn_about.png",      "name" : "btn_about" },
+        { "fn" : "menu/btn_exit.png",       "name" : "btn_exit" },
+        { "fn" : "menu/logo.png",           "name" : "logo" },
+        { "fn" : "menu/about_logo.png",     "name" : "about_logo" },
+        { "fn" : "menu/btn_back.png",       "name" : "btn_back" },
+        { "fn" : "menu/about.png",          "name" : "about" }
     ],
 
     "cubemaps": 
