@@ -47,6 +47,7 @@ typedef struct _attachment_options {
    GLenum tex_mag_filter;
    GLenum tex_wrapping_s;
    GLenum tex_wrapping_t;
+   GLenum tex_target;
 
    float tex_border_color[4];
 

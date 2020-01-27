@@ -103,7 +103,7 @@ void main()
         else
             AmbientOcclusion = texture(ssao, TexCoords).r;
 
-        if(dist_to_frag < 500)
+        if(dist_to_frag < 800)
         {
             vec3 Normal = texture(gNormal, TexCoords).rgb;
             float Specular = texture(gAlbedoSpec, TexCoords).a;

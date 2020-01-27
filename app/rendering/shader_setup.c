@@ -166,6 +166,7 @@ shader_t* setup_br(mat4 primitive_proj, float sigma, size_t kernel_len)
    shader_t* sh = s_getn_shader("blurred_region");
 
    UNIFORM_BR.grayscale = get_loc(sh, "grayscale");
+   UNIFORM_BR.gray_color = get_loc(sh, "grayscale_color");
 
    size_t k_size;
    float z;

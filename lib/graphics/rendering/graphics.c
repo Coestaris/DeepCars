@@ -270,14 +270,15 @@ inline void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2f_t positio
    assert(queue_length[depth] < MAX_QUEUE_COUNT);
 
    size_t index = queue_length[depth];
-   queue[depth][index].mode = 0;
-   queue[depth][index].tex = texture;
-   queue[depth][index].position = position;
-   queue[depth][index].scale = scale;
-   queue[depth][index].center = center;
-   queue[depth][index].angle = angle;
-   queue[depth][index].bind_shader = bind_shader;
-   queue[depth][index].data = data;
+   struct queue_item* qi = &queue[depth][index];
+   qi->mode = 0;
+   qi->tex = texture;
+   qi->position = position;
+   qi->scale = scale;
+   qi->center = center;
+   qi->angle = angle;
+   qi->bind_shader = bind_shader;
+   qi->data = data;
 
    queue_length[depth]++;
 }
@@ -289,13 +290,14 @@ inline void gr_pq_push_string(uint8_t depth, font_t* f, vec2f_t position,
    assert(queue_length[depth] < MAX_QUEUE_COUNT);
 
    size_t index = queue_length[depth];
-   queue[depth][index].mode = 1;
-   queue[depth][index].font = f;
-   queue[depth][index].position = position;
-   queue[depth][index].scale = scale;
-   queue[depth][index].string = string;
-   queue[depth][index].bind_shader = bind_shader;
-   queue[depth][index].data = data;
+   struct queue_item* qi = &queue[depth][index];
+   qi->mode = 1;
+   qi->font = f;
+   qi->position = position;
+   qi->scale = scale;
+   qi->string = string;
+   qi->bind_shader = bind_shader;
+   qi->data = data;
 
    queue_length[depth]++;
 }
@@ -307,26 +309,26 @@ void gr_pq_flush(void)
    {
       for(size_t i = 0; i < queue_length[d]; i++)
       {
-         struct queue_item qi = queue[d][i];
-         switch(qi.mode)
+         struct queue_item* qi = &queue[d][i];
+         switch(qi->mode)
          {
             case 0:
                gr_draw_sprite(
-                     qi.tex,
-                     qi.position,
-                     qi.scale,
-                     qi.center,
-                     qi.angle,
-                     qi.bind_shader);
+                     qi->tex,
+                     qi->position,
+                     qi->scale,
+                     qi->center,
+                     qi->angle,
+                     qi->bind_shader);
                break;
             case 1:
                gr_draw_string(
-                     qi.font,
-                     qi.position,
-                     qi.scale,
-                     qi.string,
-                     qi.bind_shader,
-                     qi.data);
+                     qi->font,
+                     qi->position,
+                     qi->scale,
+                     qi->string,
+                     qi->bind_shader,
+                     qi->data);
                break;
             default:
                break;

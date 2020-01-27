@@ -85,6 +85,7 @@ struct {
    GLint back_tex;
 
    GLint grayscale;
+   GLint gray_color;
 
 } UNIFORM_BR;
 

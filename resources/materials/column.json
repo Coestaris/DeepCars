@@ -1,0 +1,7 @@
+{
+    "mode": 2,
+    "diffuse" : [0.4,0.4,0.4],
+    "specular" : [1, 1, 1],
+    "shininess": 256,
+    "ambient": [1,1,1]
+} 

@@ -22,7 +22,7 @@ void setup_objects(scene_t* scene)
    rm_push(MODEL, plane, -1);
 
    list_push(scene->startup_objects,
-             create_textured_dummy(vec3f(-500, 0, -500), 1000,
+             create_textured_dummy(vec3f(-1000, 0, -1000), 2000,
                                    rm_getn(MATERIAL, "grass"),
                                    plane));
 
@@ -54,13 +54,16 @@ void setup_objects(scene_t* scene)
    const int count = 20;
    const float step = 2.0f * M_PI / count;
    for(int i = 0; i < count; i++)
-      list_push(scene->startup_objects,
-                create_textured_dummy(
-                      vec3f(cosf(i * step) * 60.0f, 0, sinf(i * step) * 60.0f),
-                      30,
-                      rm_getn(MATERIAL, "default"),
-                      rm_getn(MODEL, "column")));
+   {
+      object_t* obj =   create_textured_dummy(
+            vec3f(cosf(i * step) * 70.0f, 0, sinf(i * step) * 70.0f),
+            30,
+            rm_getn(MATERIAL, "column"),
+            rm_getn(MODEL, "column"));
+      obj->rotation.y = i * step + M_PI / 2;
 
+      list_push(scene->startup_objects, obj);
+   }
    list_push(scene->startup_objects, create_default_bind_handler());
    list_push(scene->startup_objects, create_menu_camera_mover());
    //list_push(scene->startup_objects, create_camera_control());
@@ -91,7 +94,7 @@ void setup_lights(scene_t* scene)
 
    const float linear = 0.12f;
    const float linear_rand = 0.0f;
-   const float quadratic = 0.011f;
+   const float quadratic = 0.019f;
    const float quadratic_rand = 0.0f;
 
    for (size_t i = 0; i < NR_LIGHTS; i++)

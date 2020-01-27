@@ -29,8 +29,8 @@ void update_menu_camera_mover(object_t* this)
       update_shadow_light();
    }
 
-   camera->position[0] = 95 * sinf(time / 1000.0f);
-   camera->position[2] = 95 * cosf(time / 1000.0f);
+   camera->position[0] = 102 * sinf(time / 1000.0f);
+   camera->position[2] = 102 * cosf(time / 1000.0f);
 
    vec4_cpy(camera->direction, camera->position);
   // vec4_mulf(camera->direction, -1);

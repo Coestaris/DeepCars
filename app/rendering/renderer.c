@@ -322,7 +322,9 @@ void draw_primitives(render_stage_t* stage)
       blurred_region_t* br = blurred_regions->collection[i];
 
       GL_PCALL(glBindVertexArray(br->vao));
-      sh_set_int(UNIFORM_BR.grayscale, br->gray_scale);
+      if(br->gray_color)
+         sh_set_vec3(UNIFORM_BR.gray_color, br->gray_color);
+      sh_set_int(UNIFORM_BR.grayscale, br->grayscale);
       t_bind(br->back_tex, UNIFORM_BR.back_tex);
       t_bind(br->tex, UNIFORM_BR.tex);
 
@@ -345,6 +347,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    ssao_kernel = generate_kernel(KERNEL_SIZE);
    ssao_dummy_texture = mt_create_colored_tex(COLOR_WHITE);
    view = cmat4();
+   int msaa = 2;
 
    shader_t* g_buffer_shader = setup_g_buffer(proj);
    shader_t* ssao_shader = setup_ssao(ssao_kernel, proj);
@@ -380,11 +383,12 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer->color2_format.tex_width = win->w;
    g_buffer->color2_format.tex_height = win->h;
    g_buffer->color2_format.tex_format = GL_RGBA;
-   g_buffer->color2_format.tex_int_format = GL_RGBA;
+   g_buffer->color2_format.tex_int_format = GL_RGBA16F;
    g_buffer->color2_format.tex_mag_filter = GL_NEAREST;
    g_buffer->color2_format.tex_min_filter = GL_NEAREST;
    g_buffer->color2_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
    g_buffer->color2_format.tex_wrapping_s = GL_CLAMP_TO_EDGE;
+   g_buffer->color2_format.tex_target = GL_TEXTURE_2D;
    // Position
    g_buffer->color3_format.tex_width = win->w;
    g_buffer->color3_format.tex_height = win->h;
@@ -535,6 +539,8 @@ void free_stages(void)
    rs_free(rc->stages->collection[STAGE_SHADING]);
 
    rs_free(rc->stages->collection[STAGE_BYPASS]);
+
+   rs_free(rc->stages->collection[STAGE_PRIMITIVE]);
 
    rc_free(rc, false);
 

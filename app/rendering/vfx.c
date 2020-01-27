@@ -17,13 +17,14 @@ blurred_region_t* create_br(win_info_t* info, vec2f_t pos, vec2f_t size, uint8_t
 
    br->tex = NULL;
    br->back_tex = NULL;
+   br->gray_color = NULL;
 
    GLuint indices[] = {
          0, 1, 3,
          1, 2, 3
    };
 
-   br->gray_scale = grayscale;
+   br->grayscale = grayscale;
 
    float x1 = br->x;
    float y1 = br->y;

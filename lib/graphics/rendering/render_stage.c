@@ -25,6 +25,7 @@ void rs_set_color_options(attachment_options_t* ao)
    ao->tex_border_color[1] = 0;
    ao->tex_border_color[2] = 0;
    ao->tex_border_color[3] = 0;
+   ao->tex_target = GL_TEXTURE_2D;
 }
 
 void rs_set_depth_options(attachment_options_t* ao)
@@ -41,6 +42,7 @@ void rs_set_depth_options(attachment_options_t* ao)
    ao->tex_border_color[1] = 0;
    ao->tex_border_color[2] = 0;
    ao->tex_border_color[3] = 0;
+   ao->tex_target = GL_TEXTURE_2D;
 }
 
 render_stage_t* rs_create(const char* name, render_mode_t render_mode, shader_t* shader)
@@ -106,21 +108,28 @@ texture_t* rs_setup_tex(GLenum attachment, attachment_options_t options, GLuint 
 {
    GLuint id;
    GL_CALL(glGenTextures(1, &id));
-   GL_CALL(glBindTexture(GL_TEXTURE_2D, id));
-   GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, options.tex_int_format,
-                        options.tex_width, options.tex_height, 0, options.tex_format, GL_FLOAT, NULL));
+   GL_CALL(glBindTexture(options.tex_target, id));
+   if(options.tex_target == GL_TEXTURE_2D_MULTISAMPLE)
+   {
+      GL_CALL(glTexImage2DMultisample(options.tex_target, 4, options.tex_int_format,
+         options.tex_width, options.tex_height, GL_TRUE));
+   }
+   else
+   {
+      GL_CALL(glTexImage2D(options.tex_target, 0, options.tex_int_format,
+                           options.tex_width, options.tex_height, 0, options.tex_format, GL_FLOAT, NULL));
 
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, options.tex_min_filter));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, options.tex_mag_filter));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, options.tex_wrapping_s));
-   GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, options.tex_wrapping_t));
+      GL_CALL(glTexParameteri(options.tex_target, GL_TEXTURE_MIN_FILTER, options.tex_min_filter));
+      GL_CALL(glTexParameteri(options.tex_target, GL_TEXTURE_MAG_FILTER, options.tex_mag_filter));
+      GL_CALL(glTexParameteri(options.tex_target, GL_TEXTURE_WRAP_S, options.tex_wrapping_s));
+      GL_CALL(glTexParameteri(options.tex_target, GL_TEXTURE_WRAP_T, options.tex_wrapping_t));
+      GL_CALL(glTexParameterfv(options.tex_target, GL_TEXTURE_BORDER_COLOR, options.tex_border_color));
+   }
 
-   GL_CALL(glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, options.tex_border_color));
-
-   GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+   GL_CALL(glBindTexture(options.tex_target, 0));
 
    GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, fbo));
-   GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, id, 0));
+   GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, options.tex_target, id, 0));
    GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 
    char* name = malloc(30);

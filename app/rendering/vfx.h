@@ -10,7 +10,8 @@
 typedef struct _blurred_region {
    float x, y;
    float w, h;
-   uint8_t gray_scale;
+   uint8_t grayscale;
+   vec4 gray_color;
 
    texture_t* tex;
    texture_t* back_tex;

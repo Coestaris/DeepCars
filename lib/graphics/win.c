@@ -106,6 +106,8 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
           GLX_DEPTH_SIZE, 24,
           GLX_STENCIL_SIZE, 8,
           GLX_DOUBLEBUFFER, True,
+          GLX_SAMPLE_BUFFERS  , 1,            // <-- MSAA
+          GLX_SAMPLES         , 4,            // <-- MSAA
           None
    };
 
@@ -303,6 +305,7 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
    glXMakeCurrent(info->display, info->win, ctx);
 
    GL_CALL(glEnable(GL_DEPTH_TEST));
+   GL_CALL(glEnable(GL_MULTISAMPLE));
    return info;
 }
 

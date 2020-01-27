@@ -32,7 +32,7 @@ void draw_default_string(uint8_t depth, font_data_t* data, vec2f_t pos, vec2f_t 
    gr_pq_push_string(depth, default_font, pos, scale, str, true, data);
 }
 
-void draw_monospace_string(uint8_t depth, font_data_t* data, vec2f_t pos, vec2f_t scale, char* str)
+inline void draw_monospace_string(uint8_t depth, font_data_t* data, vec2f_t pos, vec2f_t scale, char* str)
 {
    gr_pq_push_string(depth, monospace_font, pos, scale, str, true, data);
 }

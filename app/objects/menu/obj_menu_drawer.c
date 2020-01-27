@@ -11,16 +11,48 @@
 #include "../../../lib/resources/rmanager.h"
 #include "../../rendering/renderer.h"
 
+bool about;
 blurred_region_t* btn_run_br;
 blurred_region_t* btn_about_br;
 blurred_region_t* btn_exit_br;
 texture_t* logo_texture;
 
+vec4 selected_color;
+vec4 default_color;
+
+bool in_rec(blurred_region_t* br, vec2f_t pos)
+{
+   return
+      pos.x > br->x && pos.x < br->x + br->w &&
+      pos.y > br->y && pos.y < br->y + br->h;
+}
+
 void update_menu_drawer(object_t* this)
 {
+   vec2f_t mouse = u_get_mouse_pos();
+
+   btn_run_br->gray_color = in_rec(btn_run_br, mouse) ? selected_color : default_color;
+   btn_about_br->gray_color = in_rec(btn_about_br, mouse) ? selected_color : default_color;
+   btn_exit_br->gray_color = in_rec(btn_exit_br, mouse) ? selected_color : default_color;
+
    gr_pq_push_sprite(0, logo_texture,
          vec2f(((float)win->w - (float)logo_texture->width) / 2.0f, 75),
          vec2f(1,1), vec2f(0, 0), 0, true, NULL);
+}
+
+void mouse_menu_drawer(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
+{
+   if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT)
+   {
+      vec2f_t pos = vec2f(x, y);
+      if(in_rec(btn_run_br, pos)) {
+         puts("RUN");
+      } else if(in_rec(btn_about_br, pos)) {
+         puts("ABOUT");
+      } else if(in_rec(btn_exit_br, pos)) {
+         u_close();
+      }
+   }
 }
 
 object_t* create_menu_drawer()
@@ -50,6 +82,10 @@ object_t* create_menu_drawer()
    list_push(blurred_regions, btn_exit_br);
 
    this->update_func = update_menu_drawer;
+   this->mouse_event_func = mouse_menu_drawer;
+
+   selected_color = cvec4(0.5, 0.55, 0.5, 1);
+   default_color = cvec4(0.3, 0.3, 0.3, 1);
 
    return this;
 }
