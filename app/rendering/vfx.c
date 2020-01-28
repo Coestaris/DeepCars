@@ -7,7 +7,7 @@
 #endif
 #include "vfx.h"
 
-blurred_region_t* create_br(win_info_t* info, vec2f_t pos, vec2f_t size, uint8_t grayscale, vec2f_t back_tex_size)
+blurred_region_t* create_br(win_info_t* info, vec2f_t pos, vec2f_t size, vec2f_t back_tex_size)
 {
    blurred_region_t* br = malloc(sizeof(blurred_region_t));
    br->x = pos.x;
@@ -25,7 +25,7 @@ blurred_region_t* create_br(win_info_t* info, vec2f_t pos, vec2f_t size, uint8_t
          1, 2, 3
    };
 
-   br->grayscale = grayscale;
+   br->transparency = 1;
 
    float x1 = br->x;
    float y1 = br->y;

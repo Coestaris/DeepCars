@@ -165,7 +165,7 @@ shader_t* setup_br(mat4 primitive_proj, float sigma, size_t kernel_len)
 {
    shader_t* sh = s_getn_shader("blurred_region");
 
-   UNIFORM_BR.grayscale = get_loc(sh, "grayscale");
+   UNIFORM_BR.transparency = get_loc(sh, "transparency");
    UNIFORM_BR.gray_color = get_loc(sh, "grayscale_color");
 
    size_t k_size;
@@ -195,6 +195,7 @@ shader_t* setup_sprite(mat4 primitive_proj)
    shader_t* sh = s_getn_shader("sprite");
 
    UNIFORM_SPRITE.model = get_loc(sh, "model");
+   UNIFORM_SPRITE.transparency = get_loc(sh, "transparency");
 
    sh_use(sh);
    sh_nset_mat4(sh, "projection", primitive_proj);

@@ -319,7 +319,8 @@ void gr_pq_flush(void)
                      qi->scale,
                      qi->center,
                      qi->angle,
-                     qi->bind_shader);
+                     qi->bind_shader,
+                     qi->data);
                break;
             case 1:
                gr_draw_string(
@@ -339,16 +340,19 @@ void gr_pq_flush(void)
 }
 
 void gr_draw_sprite(texture_t* texture, vec2f_t position, vec2f_t scale, vec2f_t center, float angle,
-                    bool bind_shader)
+                    bool bind_shader, void* data)
 {
    if(bind_shader)
       sh_use(sprite_shader);
+
+   float trans = *(float*)data;
 
    mat4_identity(model_mat);
    mat4_translate(model_mat, position.x - default_win->w / 2.0f, default_win->h / 2.0f - position.y, 0);
    mat4_scale(model_mat, texture->width * scale.x, -texture->height * scale.y, 1);
 
    sh_nset_mat4(sprite_shader, "model", model_mat);
+   sh_nset_float(sprite_shader, "transparency", trans);
 
    t_bind(texture, 0);
 

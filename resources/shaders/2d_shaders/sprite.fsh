@@ -3,8 +3,12 @@ in vec2 TexCoords;
 out vec4 color;
 
 uniform sampler2D image;
+uniform float transparency;
 
 void main()
 {
-    color = texture(image, TexCoords);
+    vec4 c = texture(image, TexCoords);
+    c.a *= 1 - transparency;
+
+    color = c;
 }

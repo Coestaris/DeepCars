@@ -84,7 +84,7 @@ struct {
    GLint tex;
    GLint back_tex;
 
-   GLint grayscale;
+   GLint transparency;
    GLint gray_color;
 
 } UNIFORM_BR;
@@ -92,6 +92,7 @@ struct {
 struct {
    GLint tex;
    GLint model;
+   GLint transparency;
 
 } UNIFORM_SPRITE;
 

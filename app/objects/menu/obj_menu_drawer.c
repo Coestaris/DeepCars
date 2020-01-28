@@ -33,9 +33,24 @@ bool in_rec(blurred_region_t* br, vec2f_t pos)
       pos.y > br->y && pos.y < br->y + br->h;
 }
 
+bool changing_trans;
+float p = 1;
+float t = 1;
+
+float sprite_transparency;
+
 void update_menu_drawer(object_t* this)
 {
    vec2f_t mouse = u_get_mouse_pos();
+
+   if((!about && ((!changing_trans) || (changing_trans && t != 0))) || (about && changing_trans && p > 0))
+      gr_pq_push_sprite(0, logo_texture,
+            vec2f(((float)win->w - (float)logo_texture->width) / 2.0f, 75),
+            vec2f(1,1), vec2f(0, 0), 0, true, &sprite_transparency);
+   else
+      gr_pq_push_sprite(0, about_logo_texture,
+                        vec2f(((float)win->w - (float)about_logo_texture->width) / 2.0f, 75),
+                        vec2f(1,1), vec2f(0, 0), 0, true, &sprite_transparency);
 
    if(!about)
    {
@@ -43,17 +58,59 @@ void update_menu_drawer(object_t* this)
       btn_about_br->gray_color = in_rec(btn_about_br, mouse) ? selected_color : default_color;
       btn_exit_br->gray_color = in_rec(btn_exit_br, mouse) ? selected_color : default_color;
 
-      gr_pq_push_sprite(0, logo_texture,
-            vec2f(((float)win->w - (float)logo_texture->width) / 2.0f, 75),
-            vec2f(1,1), vec2f(0, 0), 0, true, NULL);
    }
    else
    {
       btn_back_br->gray_color = in_rec(btn_back_br, mouse) ? selected_color : default_color;
+   }
 
-      gr_pq_push_sprite(0, about_logo_texture,
-                        vec2f(((float)win->w - (float)about_logo_texture->width) / 2.0f, 75),
-                        vec2f(1,1), vec2f(0, 0), 0, true, NULL);
+   if(changing_trans)
+   {
+      if((p -= 0.025f) < 0)
+      {
+         sprite_transparency = 1 - t;
+         if(about)
+         {
+            btn_run_br->visible = false;
+            btn_about_br->visible = false;
+            btn_exit_br->visible = false;
+
+            btn_back_br->visible = true;
+            about_page->visible = true;
+            btn_back_br->transparency = t;
+            about_page->transparency = t;
+         }
+         else
+         {
+            btn_back_br->visible = false;
+            about_page->visible = false;
+
+            btn_run_br->visible = true;
+            btn_about_br->visible = true;
+            btn_exit_br->visible = true;
+            btn_run_br->transparency = t;
+            btn_about_br->transparency = t;
+            btn_exit_br->transparency = t;
+         }
+
+         if((t += 0.025f) > 1)
+            changing_trans = false;
+      }
+      else
+      {
+         sprite_transparency = 1 - p;
+         if(about)
+         {
+            btn_run_br->transparency = p;
+            btn_about_br->transparency = p;
+            btn_exit_br->transparency = p;
+         }
+         else
+         {
+            btn_back_br->transparency = p;
+            about_page->transparency = p;
+         }
+      }
    }
 }
 
@@ -71,12 +128,10 @@ void mouse_menu_drawer(object_t* this, uint32_t x, uint32_t y, uint32_t state, u
          else if (in_rec(btn_about_br, pos))
          {
             about = true;
-            btn_run_br->visible = false;
-            btn_about_br->visible = false;
-            btn_exit_br->visible = false;
+            changing_trans = true;
+            p = 1;
+            t = 0;
 
-            btn_back_br->visible = true;
-            about_page->visible = true;
             update_camera(20, 40);
          }
          else if (in_rec(btn_exit_br, pos))
@@ -89,12 +144,9 @@ void mouse_menu_drawer(object_t* this, uint32_t x, uint32_t y, uint32_t state, u
          if(in_rec(btn_back_br, pos))
          {
             about = false;
-            btn_run_br->visible = true;
-            btn_about_br->visible = true;
-            btn_exit_br->visible = true;
-
-            btn_back_br->visible = false;
-            about_page->visible = false;
+            changing_trans = true;
+            p = 1;
+            t = 0;
             update_camera(default_camera_y, default_camera_r);
          }
       }
@@ -111,28 +163,28 @@ object_t* create_menu_drawer()
    default_color = cvec4(0.3, 0.3, 0.3, 1);
 
    btn_run_br = create_br(win, vec2f(419, 250),
-         vec2f(359, 91), 1, vec2f(win->w, win->h));
+         vec2f(359, 91), vec2f(win->w, win->h));
    btn_run_br->tex = rm_getn(TEXTURE, "btn_run_editor");
    btn_run_br->back_tex = rs->color0_tex;
 
    btn_about_br = create_br(win, vec2f(419, 391),
-         vec2f(359, 91), 1, vec2f(win->w, win->h));
+         vec2f(359, 91), vec2f(win->w, win->h));
    btn_about_br->tex = rm_getn(TEXTURE, "btn_about");
    btn_about_br->back_tex = rs->color0_tex;
 
    btn_exit_br = create_br(win, vec2f(419, 530),
-         vec2f(359, 91), 1, vec2f(win->w, win->h));
+         vec2f(359, 91), vec2f(win->w, win->h));
    btn_exit_br->tex = rm_getn(TEXTURE, "btn_exit");
    btn_exit_br->back_tex = rs->color0_tex;
 
    btn_back_br = create_br(win, vec2f(419, 640),
-                           vec2f(359, 91), 1, vec2f(win->w, win->h));
+                           vec2f(359, 91), vec2f(win->w, win->h));
    btn_back_br->tex = rm_getn(TEXTURE, "btn_back");
    btn_back_br->back_tex = rs->color0_tex;
    btn_back_br->visible = false;
 
    about_page = create_br(win, vec2f(266, 173),
-                           vec2f(673, 449), 1, vec2f(win->w, win->h));
+                           vec2f(673, 449), vec2f(win->w, win->h));
    about_page->tex = rm_getn(TEXTURE, "about");
    about_page->back_tex = rs->color0_tex;
    about_page->gray_color = default_color;
@@ -154,5 +206,3 @@ object_t* create_menu_drawer()
 
    return this;
 }
-
-

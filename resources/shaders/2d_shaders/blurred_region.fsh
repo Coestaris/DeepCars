@@ -11,8 +11,9 @@ uniform int kSize;
 uniform float kernel[32];
 uniform float z;
 
-uniform int grayscale;
 uniform vec3 grayscale_color;
+
+uniform float transparency;
 
 void main(void)
 {
@@ -25,12 +26,12 @@ void main(void)
             vec2 offset = vec2(float(i), float(j)) * texelSize;
             result +=
                 kernel[kSize + j] *
-                kernel[kSize + i] *texture(backTex, BackTexCoord + offset).rgb;
+                kernel[kSize + i] * texture(backTex, BackTexCoord + offset).rgb;
         }
     result /= (z * z);
-    if(grayscale == 1)
-        result = vec3(result.r * 0.3 + result.g * 0.59 + result.b * 0.11) * grayscale_color;
+
+    result = vec3(result.r * 0.3 + result.g * 0.59 + result.b * 0.11) * grayscale_color;
 
     vec4 tex_color = texture(tex, TexCoord);
-    FragColor = vec4(mix(tex_color.rgb, result, 1-tex_color.a), 1);
+    FragColor = mix(texture(backTex, BackTexCoord), vec4(mix(tex_color.rgb, result, 1-tex_color.a), 1), transparency);
 }

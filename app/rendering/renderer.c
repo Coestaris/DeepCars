@@ -326,7 +326,7 @@ void draw_primitives(render_stage_t* stage)
       GL_PCALL(glBindVertexArray(br->vao));
       if(br->gray_color)
          sh_set_vec3(UNIFORM_BR.gray_color, br->gray_color);
-      sh_set_int(UNIFORM_BR.grayscale, br->grayscale);
+      sh_set_float(UNIFORM_BR.transparency, br->transparency);
       t_bind(br->back_tex, UNIFORM_BR.back_tex);
       t_bind(br->tex, UNIFORM_BR.tex);
 
@@ -358,7 +358,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shader_t* shadowmap_shader = setup_shadowmap();
    shader_t* shading_shader = setup_shading();
    shader_t* gamma_shader = setup_gamma();
-   br_shader = setup_br(primitive_proj, 19, 11);
+   br_shader = setup_br(primitive_proj, 27, 11);
    setup_sprite(primitive_proj);
 
    render_stage_t* g_buffer = rs_create("gbuffer", RM_GEOMETRY, g_buffer_shader);

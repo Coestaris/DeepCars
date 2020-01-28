@@ -58,7 +58,7 @@ void update_menu_camera_mover(object_t* this)
 {
    if(updating_camera)
    {
-      float f = smootherstep(0, 1, x += 0.007);
+      float f = smootherstep(0, 1, x += 0.007f);
       camera_y = f * 100 * x_to_y + old_y;
       camera_radius = f * 100 * x_to_r + old_r;
 
