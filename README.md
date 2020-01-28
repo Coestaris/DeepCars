@@ -9,6 +9,13 @@ cd DeepCars
 sudo apt install mesa-utils libx11-dev libxi-dev imagemagick-6.q16
 sudo apt install make cmake # If needed
 ```
+Also you need to install [Chipmunk2D](https://github.com/slembcke/Chipmunk2D) by following it's instalation instructions.
+
+To build:
+```bash
+cmake CMakeLists.txt 
+make all
+```
 
 You need to pack resources before running the application:
 ```bash
@@ -19,11 +26,6 @@ python3 packer.py --out_file=<path to folder>/resources.bin --in_dir=../resource
 ```
 The resource file must be in the same folder as the application executable
 
-To build:
-```bash
-cmake CMakeLists.txt 
-make all
-```
 
 ## License
 
@@ -34,3 +36,4 @@ The project also bundles third party software under its own licenses:
  - libX11 - [X11 license](http://www.xfree86.org/3.3.6/COPYRIGHT2.html)
  - OIL - [MIT license](https://github.com/Coestaris/oil/blob/master/LICENSE)
  - fontbm - [MIT license](https://github.com/vladimirgamalyan/fontbm/blob/master/LICENSE)
+ - Chipmunk2D - [MIT license](https://github.com/slembcke/Chipmunk2D/blob/master/LICENSE.txt)
