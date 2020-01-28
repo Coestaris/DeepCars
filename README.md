@@ -9,9 +9,16 @@ cd DeepCars
 sudo apt install mesa-utils libx11-dev libxi-dev imagemagick-6.q16
 sudo apt install make cmake # If needed
 ```
-Also you need to install [Chipmunk2D](https://github.com/slembcke/Chipmunk2D) by following it's instalation instructions.
+Also you need to install [Chipmunk2D](https://github.com/slembcke/Chipmunk2D) by following it's instalation instructions like:
+```
+git clone https://github.com/slembcke/Chipmunk2D
+cd Chipmunk2D
+cmake CMakeLists.txt 
+make 
+sudo make install
+```
 
-To build:
+To build project:
 ```bash
 cmake CMakeLists.txt 
 make all
