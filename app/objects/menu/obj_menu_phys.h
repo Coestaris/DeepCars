@@ -7,7 +7,7 @@
 
 #include "../../../lib/object_include.h"
 
-#define SPHERES_COUNT 20
+#define SPHERES_COUNT 30
 #define SPHERE_RADIUS 5
 #define CAR_SIZE 15
 

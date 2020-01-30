@@ -114,9 +114,13 @@ inline void list_push(list_t* list, void* object)
    if (list->count > list->max_size - 1)
    {
       if (list->max_size == LIST_BOOTSTRAP_SIZE) {
-         void** new_collection = malloc(sizeof(void*) * ++list->max_size);
-         memcpy(new_collection, list->collection, list->count);
+         size_t newLen = (int) ((float) list->max_size * 1.5f);
+
+         void** new_collection = malloc(sizeof(void*) * newLen);
+         memcpy(new_collection, list->bootstrap, list->count * sizeof(void*));
          list->collection = new_collection;
+         list->max_size = newLen;
+
       } else {
          size_t newLen = (int) ((float) list->max_size * 1.5f);
          list->collection = realloc(list->collection, sizeof(void*) * newLen);

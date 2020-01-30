@@ -59,7 +59,13 @@ void setup_objects(scene_t* scene)
              rm_getn(MATERIAL, "column"),
              rm_getn(MODEL, "ring")));
 
-   list_push(scene->startup_objects, create_textured_dummy(vec3f(0,0,6), 60,
+   object_t* rng = NULL;
+   list_push(scene->startup_objects, rng = create_textured_dummy(vec3f(0,0,0), 26,
+                                                           rm_getn(MATERIAL, "column"),
+                                                           rm_getn(MODEL, "ring")));
+   rng->scale.y = 300;
+
+   list_push(scene->startup_objects, create_textured_dummy(vec3f(-1.2,0,1.2), 60,
                                                            rm_getn(MATERIAL, "column"),
                                                            rm_getn(MODEL, "lenin")));
 

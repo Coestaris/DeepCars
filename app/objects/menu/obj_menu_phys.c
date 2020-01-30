@@ -31,12 +31,12 @@ void move(cpBody* car, cpVect dest)
    cpVect mouseDelta = cpvsub(dest, cpBodyGetPosition(car));
    cpFloat turn = cpvtoangle(cpvunrotate(cpBodyGetRotation(car), mouseDelta));
 
-   if(cpvnear(dest, cpBodyGetPosition(car), 30.0)){
+   if(cpvnear(dest, cpBodyGetPosition(car), 0.0)){
       //cpBodySetVelocity(car1, cpvzero); // stop
    } else {
       cpFloat direction = (cpvdot(mouseDelta, cpBodyGetRotation(car)) > 0.0 ? 1.0 : -1.0);
       cpVect v = cpvrotate(cpBodyGetRotation(car), cpv(30.0f*direction, 0.0f));
-      v = cpvmult(v, 30);
+      v = cpvmult(v, drand48() * 20 + 20);
 
       cpBodyApplyForceAtWorldPoint(car, v,  pos);
    }
@@ -111,20 +111,40 @@ object_t* create_menu_phys(void)
       cpShapeSetFriction(shape, 1.0f);
    }
 
+   bound_r = 13;
+   for(int i = 0; i < 100; i++)
+   {
+      float angle = diff * (float)i;
+      float x1 = bound_r * sinf(angle);
+      float x2 = bound_r * sinf(angle + diff);
+      float y1 = bound_r * cosf(angle);
+      float y2 = bound_r * cosf(angle + diff);
+
+      cpShape* shape = cpSpaceAddShape(space, cpSegmentShapeNew(cpSpaceGetStaticBody(space),
+                                                                cpv(x1, y1), cpv(x2, y2), 0.0f));
+
+      cpShapeSetElasticity(shape, 1.0f);
+      cpShapeSetFriction(shape, 1.0f);
+   }
+
    //creating spheres
    for(int i = 0; i < SPHERES_COUNT; i++)
    {
       cpFloat mass = 1;
       cpFloat moment = cpMomentForCircle(mass, 0, SPHERE_RADIUS, cpvzero);
       cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
-      cpBodySetPosition(ballBody, cpv(drand48() * 100 - 50,drand48() * 100 - 50));
+
+      float xoff = rand() % 2 ? drand48() * 20 + 20 : -(drand48() * 20 + 20);
+      float yoff = rand() % 2 ? drand48() * 20 + 20 : -(drand48() * 20 + 20);
+
+      cpBodySetPosition(ballBody, cpv(xoff,yoff));
       cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, SPHERE_RADIUS / 2.0, cpvzero));
       cpShapeSetFriction(ballShape, 0.4);
       spheres[i] = ballBody;
    }
 
-   car1 = createCar(cpv(5, 5));
-   car2 = createCar(cpv(-5, -5));
+   car1 = createCar(cpv(25, 25));
+   car2 = createCar(cpv(-25, -25));
 
    object_t* this = o_create();
    this->update_func = update_menu_phys;
