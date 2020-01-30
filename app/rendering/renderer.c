@@ -252,7 +252,7 @@ void bind_shadowmap(render_stage_t* stage)
 
    GL_PCALL(glCullFace(GL_FRONT));
 
-   stage->skip = true;
+   //stage->skip = true;
 }
 
 void unbind_shadowmap(render_stage_t* stage)
@@ -461,8 +461,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    render_stage_t* shadowmap = rs_create("shadow_map", RM_GEOMETRY, shadowmap_shader);
    shadowmap->attachments = TF_DEPTH;
    //depth
-   shadowmap->depth_format.tex_width = 4096;
-   shadowmap->depth_format.tex_height = 4096;
+   shadowmap->depth_format.tex_width = 2048;
+   shadowmap->depth_format.tex_height = 2048;
    shadowmap->depth_format.tex_wrapping_t = GL_CLAMP_TO_BORDER;
    shadowmap->depth_format.tex_wrapping_s = GL_CLAMP_TO_BORDER;
    shadowmap->depth_format.tex_border_color[0] = 1;

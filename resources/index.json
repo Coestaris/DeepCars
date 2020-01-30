@@ -15,10 +15,6 @@
 
     "textures" : 
     [
-        { "fn" : "box_diff.png",            "name" : "box_diff" },
-        { "fn" : "box_spec.png",            "name" : "box_spec" },
-        { "fn" : "tex2.png",                "name" : "tex2"     },
-        { "fn" : "tex3.png",                "name" : "tex3"     },
         { "fn" : "grass.png",               "name" : "grass"    },
         { "fn" : "menu/btn_run_editor.png", "name" : "btn_run_editor" },
         { "fn" : "menu/btn_about.png",      "name" : "btn_about" },
@@ -46,17 +42,20 @@
 
     "models": 
     [
-        { "fn" : "cube.obj",   "name" : "cube"  },
-        { "fn" : "teapot.obj", "name" : "teapot"  },
-        { "fn" : "torus.obj",  "name" : "torus" },
-        { "fn" : "column.obj",  "name" : "column" }
+        { "fn" : "column.obj",  "name" : "column" },
+        { "fn" : "car.obj",  "name" : "car" },
+        { "fn" : "sphere.obj",  "name" : "sphere" },
+        { "fn" : "ring.obj",  "name" : "ring" },
+        { "fn" : "lenin.obj",  "name" : "lenin" }
     ],
 
     "materials":
     [
         { "fn": "grass.json",   "name": "grass"   },
-        { "fn": "default.json", "name": "default" },
-        { "fn": "column.json", "name": "column" }
+        { "fn": "column.json", "name": "column" },
+        { "fn": "sphere.json", "name": "menu_spheres" },
+        { "fn": "car1.json", "name": "car1" },
+        { "fn": "car2.json", "name": "car2" }
     ],
 
     "fonts":

@@ -12,9 +12,9 @@ void camera_key_event_func(object_t* this, uint32_t key, uint32_t state)
 {
    if (key == 9) //esc
       u_close();
-   if (key == 65 && state == KEY_RELEASE) //shift
+   if (key == 62 && state == KEY_RELEASE) //shift
       switch_ssao();
-   if (key == 106 && state == KEY_RELEASE) //cntr
+   if (key == 105 && state == KEY_RELEASE) //cntr
       switch_stages();
 }
 

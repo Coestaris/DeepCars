@@ -12,6 +12,7 @@
 #include "menu/obj_menu_drawer.h"
 #include "menu/obj_menu_camera_mover.h"
 #include "obj_default_bind_handler.h"
+#include "menu/obj_menu_phys.h"
 
 void setup_objects(scene_t* scene)
 {
@@ -26,36 +27,11 @@ void setup_objects(scene_t* scene)
                                    rm_getn(MATERIAL, "grass"),
                                    plane));
 
-   list_push(scene->startup_objects,
-             create_textured_dummy(vec3f(0,0,0), 10,
-                                   rm_getn(MATERIAL, "default"),
-                                   rm_getn(MODEL, "cube")));
-
-   list_push(scene->startup_objects,
-             create_textured_dummy(vec3f(0, 0, -16), 10,
-                                   rm_getn(MATERIAL, "default"),
-                                   rm_getn(MODEL, "torus")));
-
-   list_push(scene->startup_objects,
-             create_textured_dummy(vec3f(0, 0, 16), 10,
-                                   rm_getn(MATERIAL, "default"),
-                                   rm_getn(MODEL, "torus")));
-
-   list_push(scene->startup_objects,
-             create_textured_dummy(vec3f(-16, 0, 0), 10,
-                                   rm_getn(MATERIAL, "default"),
-                                   rm_getn(MODEL, "teapot")));
-
-   list_push(scene->startup_objects,
-             create_textured_dummy(vec3f(16, 0, 0), 10,
-                                   rm_getn(MATERIAL, "default"),
-                                   rm_getn(MODEL, "teapot")));
-
-   const int count = 20;
+   const size_t count = 20;
    const float step = 2.0f * M_PI / count;
-   for(int i = 0; i < count; i++)
+   for(size_t i = 0; i < count; i++)
    {
-      object_t* obj =   create_textured_dummy(
+      object_t* obj = create_textured_dummy(
             vec3f(cosf(i * step) * 70.0f, 0, sinf(i * step) * 70.0f),
             30,
             rm_getn(MATERIAL, "column"),
@@ -64,10 +40,34 @@ void setup_objects(scene_t* scene)
 
       list_push(scene->startup_objects, obj);
    }
+
+   for(size_t i = 0; i < SPHERES_COUNT; i++)
+   {
+      render_spheres[i] = create_textured_dummy(vec3f(0,0,0), SPHERE_RADIUS,
+            rm_getn(MATERIAL, "menu_spheres"),
+            rm_getn(MODEL, "sphere"));
+   }
+   render_car1 = create_textured_dummy(vec3f(0,0,0), CAR_SIZE,
+            rm_getn(MATERIAL, "car1"),
+            rm_getn(MODEL, "car"));
+
+   render_car2 = create_textured_dummy(vec3f(0,0,0), CAR_SIZE,
+            rm_getn(MATERIAL, "car2"),
+            rm_getn(MODEL, "car"));
+
+   list_push(scene->startup_objects, create_textured_dummy(vec3f(0,0,0), 154,
+             rm_getn(MATERIAL, "column"),
+             rm_getn(MODEL, "ring")));
+
+   list_push(scene->startup_objects, create_textured_dummy(vec3f(0,0,6), 60,
+                                                           rm_getn(MATERIAL, "column"),
+                                                           rm_getn(MODEL, "lenin")));
+
    list_push(scene->startup_objects, create_default_bind_handler());
    list_push(scene->startup_objects, create_menu_camera_mover());
    //list_push(scene->startup_objects, create_camera_control());
    list_push(scene->startup_objects, create_menu_drawer());
+   list_push(scene->startup_objects, create_menu_phys());
    list_push(scene->startup_objects, create_info_drawer());
 }
 

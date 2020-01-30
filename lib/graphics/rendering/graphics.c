@@ -178,13 +178,23 @@ inline mat4 gr_transform(vec3f_t pos, vec3f_t scale, vec3f_t rot)
    mat4_translate(model_mat, (float) pos.x, (float) pos.y, (float) pos.z);
    mat4_scale(model_mat, (float) scale.x, (float) scale.y, (float) scale.z);
 
-   mat4_rotate_x(x_rot_mat, rot.x);
-   mat4_rotate_y(y_rot_mat, rot.y);
-   mat4_rotate_z(z_rot_mat, rot.z);
+   if(rot.x != 0)
+   {
+      mat4_rotate_x(x_rot_mat, rot.x);
+      mat4_mulm(model_mat, x_rot_mat);
+   }
 
-   mat4_mulm(model_mat, x_rot_mat);
-   mat4_mulm(model_mat, y_rot_mat);
-   mat4_mulm(model_mat, z_rot_mat);
+   if(rot.y != 0)
+   {
+      mat4_rotate_y(y_rot_mat, rot.y);
+      mat4_mulm(model_mat, y_rot_mat);
+   }
+
+   if(rot.z != 0)
+   {
+      mat4_rotate_z(z_rot_mat, rot.z);
+      mat4_mulm(model_mat, z_rot_mat);
+   }
 
    return model_mat;
 }

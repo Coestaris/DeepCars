@@ -84,6 +84,7 @@ void update_menu_camera_mover(object_t* this)
       update_shadow_light();
    }
 
+
    camera->position[0] = camera_radius * sinf(time / 1000.0f);
    camera->position[1] = camera_y;
    camera->position[2] = camera_radius * cosf(time / 1000.0f);

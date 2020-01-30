@@ -12,7 +12,7 @@
 // Output debug information
 #define VERBOSE true
 #define DEBUG_LEVEL 3 // 2 - glCall, glPCall. 1 - glCall
-#define LIST_BOOTSTRAP_SIZE 32
+#define LIST_BOOTSTRAP_SIZE 50
 
 
 #if DEBUG_LEVEL >= 2
