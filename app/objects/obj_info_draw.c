@@ -10,7 +10,7 @@
 #include "../rendering/text_rendering.h"
 #include <stdlib.h>
 
-char buff[10][50];
+char buff[10][70];
 float last_fps;
 font_data_t font_data;
 font_data_t sec_font_data;

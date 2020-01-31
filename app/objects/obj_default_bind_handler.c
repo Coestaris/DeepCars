@@ -16,6 +16,10 @@ void camera_key_event_func(object_t* this, uint32_t key, uint32_t state)
       switch_ssao();
    if (key == 105 && state == KEY_RELEASE) //cntr
       switch_stages();
+   if (key == 108 && state == KEY_RELEASE) //alt
+      switch_fxaa();
+   if (key == 59 && state == KEY_RELEASE) //alt
+      switch_fxaa_edges();
 }
 
 object_t* create_default_bind_handler()

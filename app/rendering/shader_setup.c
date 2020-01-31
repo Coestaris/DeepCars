@@ -199,8 +199,28 @@ shader_t* setup_sprite(mat4 primitive_proj)
 
    sh_use(sh);
    sh_nset_mat4(sh, "projection", primitive_proj);
-   sh_nset_int(sh, "image", 0);
+   sh_nset_int(sh, "image", UNIFORM_SPRITE.tex = 0);
    sh_use(NULL);
 
    return sh;
+}
+
+shader_t* setup_fxaa(float threshold, float mul_r, float min_r, float max_span, win_info_t* win)
+{
+   shader_t* sh = s_getn_shader("fxaa");
+
+   UNIFORM_FXAA.show_edges = get_loc(sh, "u_showEdges");
+   UNIFORM_FXAA.on = get_loc(sh, "u_fxaaOn");
+
+   sh_use(sh);
+   sh_nset_int(sh, "u_colorTexture", UNIFORM_FXAA.tex = 0);
+   sh_nset_vec2v(sh, "u_texelStep", 1.0f / (float)win->w, 1.0f / (float)win->h);
+   sh_nset_float(sh, "u_lumaThreshold", threshold);
+   sh_nset_float(sh, "u_mulReduce", 1 / mul_r);
+   sh_nset_float(sh, "u_minReduce", 1 / min_r);
+   sh_nset_float(sh, "u_maxSpan", max_span);
+   sh_use(NULL);
+
+   return sh;
+
 }

@@ -35,15 +35,30 @@ texture_t* ssao_dummy_texture;
 texture_t* texture_to_draw;
 int ssao_state = 0;
 int state = -1;
+int fxaa_state = 1;
+int fxaa_edges = 0;
 
 mat4 view;
 
-char _buff[100];
+void switch_fxaa(void)
+{
+   fxaa_state = !fxaa_state;
+   printf("%i", fxaa_state);
+}
+
+void switch_fxaa_edges(void)
+{
+   fxaa_edges = !fxaa_edges;
+   printf("%i", fxaa_edges);
+}
+
+char _buff[140];
 char* get_ssao_stage_string()
 {
    if(state == 0)
-      snprintf(_buff, sizeof(_buff), "Default view, SSAO %s",
-            ssao_state ? "on" : "off");
+      snprintf(_buff, sizeof(_buff), "Default view, SSAO %s, FXAA: %s",
+            ssao_state ? "on" : "off",
+            fxaa_state ? "on" : "off");
    else
    {
       snprintf(_buff, sizeof(_buff),
@@ -129,13 +144,14 @@ inline void switch_stages(void)
    render_stage_t* skybox_stage = rc->stages->collection[STAGE_SKYBOX];
    render_stage_t* shadowmap_stage = rc->stages->collection[STAGE_SHADOWMAP];
    render_stage_t* shading_stage = rc->stages->collection[STAGE_SHADING];
+   render_stage_t* fxaa_stage = rc->stages->collection[STAGE_FXAA];
 
    state = (state + 1) % 8;
    switch(state)
    {
       default:
       case 0:
-         texture_to_draw = shading_stage->color0_tex; // result
+         texture_to_draw = fxaa_stage->color0_tex; // result
          break;
       case 1:
          texture_to_draw = g_buffer_stage->color0_tex; //positions
@@ -287,6 +303,18 @@ void bind_shading(render_stage_t* stage)
 
 void unbind_shading(render_stage_t* stage) { }
 
+// FXAA ROUTINES
+void bind_fxaa(render_stage_t* stage)
+{
+   render_stage_t* shading_stage = rc->stages->collection[STAGE_SHADING];
+   t_bind(shading_stage->color0_tex, UNIFORM_FXAA.tex);
+
+   sh_set_int(UNIFORM_FXAA.show_edges, fxaa_edges);
+   sh_set_int(UNIFORM_FXAA.on, fxaa_state);
+}
+
+void unbind_fxaa(render_stage_t* stage) { }
+
 // GAMMA / BYPASS ROUTINES
 void bind_bypass(render_stage_t* stage)
 {
@@ -357,6 +385,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shader_t* skybox_shader = setup_skybox(proj);
    shader_t* shadowmap_shader = setup_shadowmap();
    shader_t* shading_shader = setup_shading();
+   shader_t* fxaa_shader = setup_fxaa(0.5, 8, 128, 8, info);
    shader_t* gamma_shader = setup_gamma();
    br_shader = setup_br(primitive_proj, 27, 11);
    setup_sprite(primitive_proj);
@@ -422,12 +451,14 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    render_stage_t* ssao = rs_create("ssao", RM_FRAMEBUFFER, ssao_shader);
    ssao->attachments = TF_COLOR0;
    //color
-   ssao->color0_format.tex_width = (float)info->w / 2.0f;
-   ssao->color0_format.tex_height = (float)info->h / 2.0f;
+   ssao->color0_format.tex_width = (float)info->w;// / 2.0f;
+   ssao->color0_format.tex_height = (float)info->h;// / 2.0f;
    ssao->color0_format.tex_format = GL_RGB;
    ssao->color0_format.tex_int_format = GL_RED;
    ssao->color0_format.tex_wrapping_t = GL_CLAMP_TO_EDGE;
    ssao->color0_format.tex_wrapping_s = GL_CLAMP_TO_EDGE;
+   //ssao->color0_format.tex_min_filter = GL_LINEAR;
+   //ssao->color0_format.tex_mag_filter = GL_LINEAR;
    ssao->bind_func = bind_ssao;
    ssao->unbind_func = unbind_ssao;
    ssao->vao = rc_get_quad_vao();
@@ -435,11 +466,12 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 
    render_stage_t* ssao_blur = rs_create("ssao_blur", RM_FRAMEBUFFER, ssao_blur_shader);
    ssao_blur->attachments = TF_COLOR0;
-   ssao_blur->color0_format.tex_width = (float)info->w / 2.0f;
-   ssao_blur->color0_format.tex_height = (float)info->h / 2.0f;
+   ssao_blur->color0_format.tex_width = (float)info->w;// / 2.0f;
+   ssao_blur->color0_format.tex_height = (float)info->h;// / 2.0f;
    ssao_blur->color0_format.tex_format = GL_RGB;
    ssao_blur->color0_format.tex_int_format = GL_RED;
-
+   //ssao_blur->color0_format.tex_min_filter = GL_LINEAR;
+   //ssao_blur->color0_format.tex_mag_filter = GL_LINEAR;
    ssao_blur->bind_func = bind_ssao_blur;
    ssao_blur->unbind_func = unbind_ssao_blur;
    ssao_blur->vao = rc_get_quad_vao();
@@ -461,8 +493,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    render_stage_t* shadowmap = rs_create("shadow_map", RM_GEOMETRY, shadowmap_shader);
    shadowmap->attachments = TF_DEPTH;
    //depth
-   shadowmap->depth_format.tex_width = 2048;
-   shadowmap->depth_format.tex_height = 2048;
+   shadowmap->depth_format.tex_width = 1024;
+   shadowmap->depth_format.tex_height = 1024;
    shadowmap->depth_format.tex_wrapping_t = GL_CLAMP_TO_BORDER;
    shadowmap->depth_format.tex_wrapping_s = GL_CLAMP_TO_BORDER;
    shadowmap->depth_format.tex_border_color[0] = 1;
@@ -488,6 +520,15 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shading_data->camera = camera;
    shading_data->buffmat = cmat4();
 
+   render_stage_t* fxaa = rs_create("fxaa", RM_FRAMEBUFFER, fxaa_shader);
+   fxaa->attachments = TF_COLOR0;
+   fxaa->color0_format.tex_width = info->w;
+   fxaa->color0_format.tex_height = info->h;
+   fxaa->color0_format.tex_format = GL_RGB;
+   fxaa->color0_format.tex_int_format = GL_RGB;
+   fxaa->bind_func = bind_fxaa;
+   fxaa->unbind_func = unbind_fxaa;
+   fxaa->vao = rc_get_quad_vao();
 
    render_stage_t* bypass = rs_create("bypass", RM_BYPASS, gamma_shader);
    bypass->width = info->w;
@@ -510,6 +551,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    list_push(rc->stages, skybox);
    list_push(rc->stages, shadowmap);
    list_push(rc->stages, shading);
+   list_push(rc->stages, fxaa);
    list_push(rc->stages, bypass);
    list_push(rc->stages, primitive);
 

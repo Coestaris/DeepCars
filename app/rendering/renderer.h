@@ -13,8 +13,9 @@
 #define STAGE_SKYBOX 3
 #define STAGE_SHADOWMAP 4
 #define STAGE_SHADING 5
-#define STAGE_BYPASS 6
-#define STAGE_PRIMITIVE 7
+#define STAGE_FXAA 6
+#define STAGE_BYPASS 7
+#define STAGE_PRIMITIVE 8
 
 extern render_chain_t* rc;
 extern list_t* blurred_regions;
@@ -23,6 +24,8 @@ char* get_ssao_stage_string();
 
 void switch_stages(void);
 void switch_ssao(void);
+void switch_fxaa(void);
+void switch_fxaa_edges(void);
 void free_stages(void);
 render_chain_t* get_chain(win_info_t* win, camera_t* camera, mat4 proj);
 
