@@ -55,11 +55,12 @@ void setup_objects(scene_t* scene)
             rm_getn(MATERIAL, "car2"),
             rm_getn(MODEL, "car"));
 
-   list_push(scene->startup_objects, create_textured_dummy(vec3f(0,0,0), 154,
+   object_t* rng = NULL;
+   list_push(scene->startup_objects, rng = create_textured_dummy(vec3f(0,0,0), 140,
              rm_getn(MATERIAL, "column"),
              rm_getn(MODEL, "ring")));
+   //rng->scale.y = 300;
 
-   object_t* rng = NULL;
    list_push(scene->startup_objects, rng = create_textured_dummy(vec3f(0,0,0), 26,
                                                            rm_getn(MATERIAL, "column"),
                                                            rm_getn(MODEL, "ring")));
