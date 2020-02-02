@@ -25,6 +25,6 @@ genome_t* gn_create(size_t in_count, size_t out_count);
 
 //void gn_crossover
 //void gn_compatibility_distance
-
+void gn_write(genome_t* genome, const char* fn);
 
 #endif //DEEPCARS_GENOME_H
