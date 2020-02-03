@@ -44,3 +44,4 @@ The project also bundles third party software under its own licenses:
  - OIL - [MIT license](https://github.com/Coestaris/oil/blob/master/LICENSE)
  - fontbm - [MIT license](https://github.com/vladimirgamalyan/fontbm/blob/master/LICENSE)
  - Chipmunk2D - [MIT license](https://github.com/slembcke/Chipmunk2D/blob/master/LICENSE.txt)
+ - freetype - [Free Type License (FTL)](https://git.savannah.gnu.org/cgit/freetype/freetype2.git/tree/docs/FTL.TXT)
