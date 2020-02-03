@@ -1,3 +1,5 @@
+#include "oil/font.h"
+
 #include "app/loader.h"
 #include "sig_handlers.h"
 #include "mllib/genome.h"
@@ -5,7 +7,23 @@
 
 int main(int argc, char* argv[])
 {
+   if(!oilFontInit()) {
+      oilPrintError();
+      exit(1);
+   }
+   oilFont* font = oilFontLoad("../resources/fonts/arial.ttf",
+         32, 20, 128);
+
+   if(!font) {
+      oilPrintError();
+      exit(1);
+   }
+
    register_sig_handlers();
+   if(!oilFontFin()) {
+      oilPrintError();
+      exit(1);
+   }
 
    genome_t* gn = gn_create(3, 1, 1, false);
    list_push(gn->connections, cg_create(0, 3, 0.7f, 1, false));
