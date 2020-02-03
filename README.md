@@ -6,7 +6,7 @@ AI learns to drive a car using the NeuroEvolution algorithm.
 ```bash
 git clone --recurse-submodules https://github.com/Coestaris/DeepCars
 cd DeepCars
-sudo apt install mesa-utils libx11-dev libxi-dev imagemagick-6.q16
+sudo apt install mesa-utils libx11-dev libxi-dev imagemagick-6.q16 libfreetype6-dev 
 sudo apt install make cmake # If needed
 ```
 Also you need to install [Chipmunk2D](https://github.com/slembcke/Chipmunk2D) by following it's instalation instructions like:
