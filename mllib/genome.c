@@ -50,7 +50,7 @@ genome_t* gn_create(size_t in_count, size_t out_count, size_t hidden_count, bool
    return genome;
 }
 
-float rand_float(void)
+float gn_rand_float(void)
 {
    return (float)((uint32_t)rand()) / RAND_MAX;
 }
@@ -58,15 +58,13 @@ float rand_float(void)
 #define GN_WRITE_WIDTH 512
 #define GN_WRITE_HEIGHT 512
 #define GN_WRITE_RADIUS 30
-void gn_write(genome_t* genome, const char* fn)
+void gn_write(genome_t* genome, const char* fn, oilFont* font)
 {
    bmpImage* image = oilBMPCreateImageExt(GN_WRITE_WIDTH, GN_WRITE_HEIGHT, 24, BITMAPINFOHEADER);
    if(!image) {
       oilPrintError();
       return;
    }
-
-   srand(time(NULL));
 
    float* positions = malloc(sizeof(float) * 2 * genome->nodes->count);
    size_t inputs = 0;
@@ -100,8 +98,8 @@ void gn_write(genome_t* genome, const char* fn)
             while(true)
             {
                bool intersects = false;
-               float new_x = (float) rand_float() * (GN_WRITE_WIDTH - GN_WRITE_RADIUS * 6) + GN_WRITE_RADIUS * 3;
-               float new_y = (float) rand_float() * (GN_WRITE_HEIGHT - GN_WRITE_RADIUS * 6) + GN_WRITE_RADIUS * 3;;
+               float new_x = (float) gn_rand_float() * (GN_WRITE_WIDTH - GN_WRITE_RADIUS * 6) + GN_WRITE_RADIUS * 3;
+               float new_y = (float) gn_rand_float() * (GN_WRITE_HEIGHT - GN_WRITE_RADIUS * 6) + GN_WRITE_RADIUS * 3;;
 
                for (size_t j = 0; j < i; j++)
                {
@@ -138,6 +136,7 @@ void gn_write(genome_t* genome, const char* fn)
             break;
       }
    }
+   char buff[20];
 
    oilGrFill(image->colorMatrix, (oilColor){255,255,255});
    oilColor disabled_connection_color = {210, 210, 210};
@@ -170,6 +169,9 @@ void gn_write(genome_t* genome, const char* fn)
 
       oilGrFillCircle(image->colorMatrix, center_x, center_y,
                       5, connection_color);
+
+      snprintf(buff, sizeof(buff), "%li", connection->innovation);
+      oilGrDrawCenteredString(image->colorMatrix, font, buff, (x1 + x2) / 2, (y1 + y2) / 2, connection_color);
    }
 
    oilColor input_fill_color = {150, 0, 0};
@@ -190,6 +192,9 @@ void gn_write(genome_t* genome, const char* fn)
       oilGrDrawCircle(image->colorMatrix, positions[i * 2], positions[i * 2 + 1],
             GN_WRITE_RADIUS, border_color);
 
+      snprintf(buff, sizeof(buff), "%li", node->id + 1);
+      oilGrDrawCenteredString(image->colorMatrix, font, buff, positions[i * 2], positions[i * 2 + 1] + 5, border_color);
+
    }
 
    if(!oilBMPSave(image, (char*)fn))
@@ -201,4 +206,78 @@ void gn_write(genome_t* genome, const char* fn)
    vec4_free(buff_vec);
    free(positions);
    oilBMPFreeImage(image);
+}
+
+node_genome_t* gn_rand_node(genome_t* genome)
+{
+   return genome->nodes->collection[rand() % genome->nodes->count];
+}
+
+size_t innovation_counter = 0;
+
+#define GN_MUTATE_LINK_MAX_TRIES 100
+void gn_mutate_link(genome_t* genome)
+{
+   size_t tries = 0;
+   while(true)
+   {
+      bool possible = false;
+      bool exists = false;
+
+      assert(tries++ < GN_MUTATE_LINK_MAX_TRIES);
+
+      node_genome_t* node1 = gn_rand_node(genome);
+      node_genome_t* node2 = gn_rand_node(genome);
+
+      if (node1 != node2)
+      {
+         if (node1->type == INPUT && node2->type == HIDDEN)
+            possible = true;
+         else if (node1->type == HIDDEN && node2->type == OUTPUT)
+            possible = true;
+      }
+
+      if (!possible)
+         continue;
+
+      for(size_t i = 0; i < genome->connections->count; i++)
+      {
+         connection_genome_t* connection = genome->connections->collection[i];
+         if(connection->in_node == node1->id && connection->out_node == node2->id)
+         {
+            exists = true;
+            break;
+         }
+      }
+
+      if(exists)
+         continue;
+
+      list_push(genome->connections,
+            cg_create(node1->id, node2->id, 1, innovation_counter++, false));
+
+      break;
+   }
+}
+
+void gn_innovation_recalc(genome_t* genome)
+{
+   size_t max_innovation = 0;
+   for(size_t i = 0; i < genome->connections->count; i++)
+   {
+      connection_genome_t* connection = genome->connections->collection[i];
+      max_innovation = max_innovation > connection->innovation ? max_innovation : connection->innovation;
+   }
+
+   innovation_counter = max_innovation;
+}
+
+void gn_innovation_reset(void)
+{
+   innovation_counter = 0;
+}
+
+void gn_set_seed(uint32_t seed)
+{
+   srand(seed);
 }
