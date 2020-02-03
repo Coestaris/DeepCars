@@ -5,6 +5,7 @@
 #ifndef DEEPCARS_GENOME_H
 #define DEEPCARS_GENOME_H
 
+#include <stdbool.h>
 #include "../lib/structs.h"
 
 typedef struct _genome {
@@ -15,7 +16,7 @@ typedef struct _genome {
 
 } genome_t;
 
-genome_t* gn_create(size_t in_count, size_t out_count);
+genome_t* gn_create(size_t in_count, size_t out_count, size_t hidden_count, bool link);
 //todo:
 //void gn_mutate_link           create new connection
 //void gn_mutate_node            creates new node
