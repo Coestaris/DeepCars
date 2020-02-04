@@ -39,5 +39,5 @@ connection_genome_t* cg_copy(connection_genome_t* genome)
 
 inline void cg_disable(connection_genome_t* genome)
 {
-   genome->disabled = false;
+   genome->disabled = true;
 }

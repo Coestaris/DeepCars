@@ -5,6 +5,7 @@
 #include "sig_handlers.h"
 #include "mllib/genome.h"
 #include "mllib/connection_genome.h"
+#include "mllib/innovation.h"
 
 int main(int argc, char* argv[])
 {
@@ -35,7 +36,7 @@ int main(int argc, char* argv[])
    //list_push(gn->connections, cg_create(1, 4, 0.2f, 4, false));
    list_push(gn->connections, cg_create(4, 3, 0.4f, 5, false));
    list_push(gn->connections, cg_create(0, 4, 0.6f, 6, false));
-   gn_innovation_recalc(gn);
+   i_recalc(gn->connections);
 
    gn_set_seed(draw_seed);
    gn_write(gn, "image1.bmp", font);
@@ -45,6 +46,12 @@ int main(int argc, char* argv[])
 
    gn_set_seed(draw_seed);
    gn_write(gn, "image2.bmp", font);
+
+   gn_set_seed(time(NULL) + 11);
+   gn_mutate_node(gn);
+
+   gn_set_seed(draw_seed);
+   gn_write(gn, "image3.bmp", font);
 
    oilFontFree(font);
 

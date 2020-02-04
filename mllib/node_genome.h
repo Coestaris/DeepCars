@@ -2,8 +2,8 @@
 // Created by maxim on 2/1/20.
 //
 
-#ifndef DEEPCARS_NODE_GENOME_H
-#define DEEPCARS_NODE_GENOME_H
+#ifndef DEEPCARS_MLLIB_NODE_GENOME_H
+#define DEEPCARS_MLLIB_NODE_GENOME_H
 
 #include <stddef.h>
 
@@ -23,4 +23,4 @@ typedef struct _node_genome {
 node_genome_t* ng_create(node_type_t type, size_t id);
 void ng_free(node_genome_t* genome);
 
-#endif //DEEPCARS_NODE_GENOME_H
+#endif //DEEPCARS_MLLIB_NODE_GENOME_H
