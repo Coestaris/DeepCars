@@ -20,3 +20,8 @@ inline void ng_free(node_genome_t* genome)
 {
    free(genome);
 }
+
+node_genome_t* ng_clone(node_genome_t* genome)
+{
+   return ng_create(genome->type, genome->id);
+}

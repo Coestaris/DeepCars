@@ -30,7 +30,7 @@ inline void cg_free(connection_genome_t* genome)
    free(genome);
 }
 
-connection_genome_t* cg_copy(connection_genome_t* genome)
+connection_genome_t* cg_clone(connection_genome_t* genome)
 {
    connection_genome_t* copy = malloc(sizeof(connection_genome_t));
    memcpy(copy, genome, sizeof(connection_genome_t));

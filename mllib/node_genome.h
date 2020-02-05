@@ -20,6 +20,7 @@ typedef struct _node_genome {
 
 } node_genome_t;
 
+node_genome_t* ng_clone(node_genome_t* genome);
 node_genome_t* ng_create(node_type_t type, size_t id);
 void ng_free(node_genome_t* genome);
 

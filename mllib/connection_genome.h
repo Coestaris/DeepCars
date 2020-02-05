@@ -26,7 +26,7 @@ connection_genome_t* cg_create(
       size_t innovation,
       bool disabled);
 void cg_free(connection_genome_t* genome);
-connection_genome_t* cg_copy(connection_genome_t* genome);
+connection_genome_t* cg_clone(connection_genome_t* genome);
 void cg_disable(connection_genome_t* genome);
 
 #endif //DEEPCARS_MLLIB_CONNECTION_GENOME_H

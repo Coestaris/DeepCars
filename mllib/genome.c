@@ -143,7 +143,7 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
       float x2 = positions[connection->out_node * 2];
       float y2 = positions[connection->out_node * 2 + 1];
 
-      oilGrDrawLine(image->colorMatrix,
+      oilGrDrawLineSm(image->colorMatrix,
                     x1, y1,
                     x2, y2,
                     connection->disabled ? disabled_connection_color : connection_color);
@@ -159,8 +159,11 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
       if(center_y < 0) center_y = 0;
       else if(center_y > GN_WRITE_HEIGHT) center_y = GN_WRITE_HEIGHT - 1;
 
-      oilGrFillCircle(image->colorMatrix, center_x, center_y,
+      oilGrDrawCircleSm(image->colorMatrix, center_x, center_y,
                       5, connection_color);
+
+      oilGrFillCircle(image->colorMatrix, center_x, center_y,
+                      4, connection_color);
 
       snprintf(buff, sizeof(buff), "%li", connection->innovation);
       oilGrDrawCenteredString(image->colorMatrix, font, buff, (x1 + x2) / 2, (y1 + y2) / 2, connection_color);
@@ -181,8 +184,8 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
       }
       oilGrFillCircle(image->colorMatrix, positions[i * 2], positions[i * 2 + 1],
             GN_WRITE_RADIUS, *color);
-      oilGrDrawCircle(image->colorMatrix, positions[i * 2], positions[i * 2 + 1],
-            GN_WRITE_RADIUS, border_color);
+      oilGrDrawCircleSm(image->colorMatrix, positions[i * 2], positions[i * 2 + 1],
+            GN_WRITE_RADIUS + 1, border_color);
 
       snprintf(buff, sizeof(buff), "%li", node->id + 1);
       oilGrDrawCenteredString(image->colorMatrix, font, buff, positions[i * 2], positions[i * 2 + 1] + 5, border_color);
@@ -198,4 +201,43 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
    vec4_free(buff_vec);
    free(positions);
    oilBMPFreeImage(image);
+}
+
+genome_t* gn_crossover(genome_t* p1, genome_t* p2)
+{
+   genome_t* offspring = gn_create(0, 0, 0, false);
+   for(size_t i = 0; i < p1->nodes->count; i++)
+      list_push(offspring->nodes, ng_clone(p1->nodes->collection[i]));
+
+   for(size_t i = 0; i < p1->connections->count; i++)
+   {
+      connection_genome_t* p1_connection = p1->connections->collection[i];
+      connection_genome_t* p2_connection = NULL;
+
+      //find p2 connection with same innovation
+      for(size_t j = 0; j < p2->connections->count; j++)
+      {
+         connection_genome_t* connection = p2->connections->collection[j];
+         if(connection->innovation == p1_connection->innovation)
+         {
+            p2_connection = connection;
+            break;
+         }
+      }
+
+      if(p2_connection)
+      {
+         // matching gene
+         // randomly select one of them
+         list_push(offspring->connections, cg_clone(gn_rand_float() > 0.5f ? p1_connection : p2_connection));
+      }
+      else
+      {
+         // disjoint or excess gene
+         // get always from p1
+         list_push(offspring->connections, cg_clone(p1_connection));
+      }
+   }
+
+   return offspring;
 }

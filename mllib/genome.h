@@ -37,7 +37,9 @@ void gn_mutate_weight_nudge(genome_t* genome, float chance, float nudge_max, flo
 //sets a random value to a random weight
 void gn_mutate_weight_random(genome_t* genome, float chance, float min, float max);
 
-//void gn_crossover
+//creates new genome from two parent
+genome_t* gn_crossover(genome_t* p1, genome_t* p2);
+
 //void gn_compatibility_distance
 void gn_write(genome_t* genome, const char* fn, oilFont* font);
 
