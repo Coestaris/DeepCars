@@ -241,3 +241,88 @@ genome_t* gn_crossover(genome_t* p1, genome_t* p2)
 
    return offspring;
 }
+
+void gn_get_metrics(genome_t* g1, genome_t* g2, size_t* match, size_t* disjoint, size_t* excess, float* weight_diff_sum)
+{
+   *match = 0;
+   *disjoint = 0;
+   *excess = 0;
+   *weight_diff_sum = 0;
+
+   size_t max_innovation = 0;
+
+   for(size_t i = 0; i < g1->connections->count; i++)
+   {
+      connection_genome_t* g1_connection = g1->connections->collection[i];
+      connection_genome_t* g2_connection = NULL;
+
+      //find p2 connection with same innovation
+      for(size_t j = 0; j < g2->connections->count; j++)
+      {
+         connection_genome_t* connection = g2->connections->collection[j];
+         if(connection->innovation == g1_connection->innovation)
+         {
+            g2_connection = connection;
+            break;
+         }
+      }
+
+      if(g2_connection)
+      {
+         (*weight_diff_sum) += fabsf(g1_connection->weight - g2_connection->weight);
+         (*match)++;
+      }
+      else (*disjoint)++;
+
+      if(g1_connection->innovation > max_innovation)
+         max_innovation = g1_connection->innovation;
+   }
+
+   for(size_t i = 0; i < g2->connections->count; i++)
+   {
+      connection_genome_t* g2_connection = g2->connections->collection[i];
+      connection_genome_t* g1_connection = NULL;
+
+      //find p1 connection with same innovation
+      for(size_t j = 0; j < g1->connections->count; j++)
+      {
+         connection_genome_t* connection = g1->connections->collection[j];
+         if(connection->innovation == g2_connection->innovation)
+         {
+            g1_connection = connection;
+            break;
+         }
+      }
+
+      if(!g1_connection)
+      {
+         if(g2_connection->innovation < max_innovation)
+            (*disjoint)++;
+         else
+            (*excess)++;
+      }
+   }
+}
+
+float gn_compatibility_distance(genome_t* g1, genome_t* g2, float c1, float c2, float c3)
+{
+   size_t match_count = 0;
+   size_t disjoint_count = 0;
+   size_t excess_count = 0;
+   float diff = 0;
+   gn_get_metrics(g1, g2, &match_count, &disjoint_count, &excess_count, &diff);
+
+   size_t size_of_largest = g1->connections->count > g2->connections->count ?
+         g1->connections->count :
+         g2->connections->count;
+
+   if(size_of_largest < GN_COMATIBILITY_DISTANCE_THRESHOLD)
+      return excess_count * c1 +
+             disjoint_count * c2 +
+             (diff / match_count) * c3;
+   else
+      return excess_count * c1 / (float)size_of_largest +
+             disjoint_count * c2 / (float)size_of_largest +
+             (diff / match_count) * c3;
+}
+

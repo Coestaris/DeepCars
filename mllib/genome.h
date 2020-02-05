@@ -16,6 +16,8 @@
 #define GN_MUTATE_NODE_MAX_TRIES 100
 #define GN_MUTATE_LINK_MAX_TRIES 100
 
+#define GN_COMATIBILITY_DISTANCE_THRESHOLD 25
+
 typedef struct _genome {
    float fitness;
 
@@ -40,7 +42,9 @@ void gn_mutate_weight_random(genome_t* genome, float chance, float min, float ma
 //creates new genome from two parent
 genome_t* gn_crossover(genome_t* p1, genome_t* p2);
 
-//void gn_compatibility_distance
+//returns compatibility distance of two genomes
+float gn_compatibility_distance(genome_t* p1, genome_t* p2, float c1, float c2, float c3);
+
 void gn_write(genome_t* genome, const char* fn, oilFont* font);
 
 #endif //DEEPCARS_MLLIB_GENOME_H

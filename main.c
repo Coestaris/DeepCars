@@ -56,6 +56,8 @@ int main(int argc, char* argv[])
    list_push(gn2->connections, cg_create_d(1, 6, 0.6f, 10, false));
    i_recalc(gn2->connections);
 
+   gn_compatibility_distance(gn1, gn2, 1, 1, 3);
+
    gn_set_seed(draw_seed);
    gn_write(gn2, "p2.bmp", font);
 
