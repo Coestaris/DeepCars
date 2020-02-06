@@ -36,14 +36,14 @@ void gn_mutate_switch(genome_t* genome, float chance)
    }
 }
 
-void gn_mutate_weight_nudge(genome_t* genome, float chance, float nudge_max, float nudge_min)
+void gn_mutate_weight_nudge(genome_t* genome, float chance, float rate)
 {
    for(size_t i = 0; i < genome->connections->count; i++)
    {
       connection_genome_t* connection = genome->connections->collection[i];
       if(gn_rand_float() < chance)
       {
-         connection->weight += gn_rand_float() * (nudge_max - nudge_min) + nudge_min;
+         connection->weight += gn_rand_float() * (connection->weight * rate) * (rand() % 2 ? 1.0f : -1.0f);
       }
    }
 }

@@ -9,6 +9,11 @@
 #include "mllib/rand_helpers.h"
 #include "mllib/evaluator.h"
 
+float evaluate_func(genome_t* genome)
+{
+   return genome->connections->count * 100;
+}
+
 int main(int argc, char* argv[])
 {
    if(!oilFontInit()) {
@@ -40,7 +45,9 @@ int main(int argc, char* argv[])
    list_push(orig_genome->connections, cg_create(0, 4, 0.6f, 8, false));
    i_recalc(orig_genome->connections);
 
-   evaluator_t* evaluator = ev_create(100, orig_genome);
+   evaluator_t* evaluator = ev_create(100, orig_genome, evaluate_func);
+
+   ev_mutate(evaluator);
    ev_evaluate(evaluator);
 
    ev_free(evaluator);

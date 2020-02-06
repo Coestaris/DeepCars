@@ -47,7 +47,7 @@ void gn_mutate_node(genome_t* genome);
 //disables or enables a random connection
 void gn_mutate_switch(genome_t* genome, float chance);
 //offset weight
-void gn_mutate_weight_nudge(genome_t* genome, float chance, float nudge_max, float nudge_min);
+void gn_mutate_weight_nudge(genome_t* genome, float chance, float rate);
 //sets a random value to a random weight
 void gn_mutate_weight_random(genome_t* genome, float chance, float min, float max);
 

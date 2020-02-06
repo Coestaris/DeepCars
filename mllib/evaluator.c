@@ -5,15 +5,15 @@
 #ifdef __GNUC__
 #pragma implementation "evaluator.h"
 #endif
+#include "evaluator.h"
 
 #include <assert.h>
-#include "evaluator.h"
 #include "rand_helpers.h"
 
-evaluator_t* ev_create(size_t population_size, genome_t* orig)
+evaluator_t* ev_create(size_t population_size, genome_t* orig, evaluate_func_t evaluate_func)
 {
    evaluator_t* evaluator = malloc(sizeof(evaluator_t));
-   evaluator->evaluate_func = NULL;
+   evaluator->evaluate_func = evaluate_func;
    evaluator->genomes = list_create();
    evaluator->population_size = population_size;
    if(orig)
@@ -29,6 +29,7 @@ evaluator_t* ev_create(size_t population_size, genome_t* orig)
       evaluator->species[i]->members = list_create();
    }
    evaluator->species_count = 0;
+   evaluator->new_genomes = list_create();
 
    return evaluator;
 }
@@ -41,9 +42,14 @@ void ev_free(evaluator_t* evaluator)
 
    for(size_t i = 0; i < evaluator->population_size; i++)
    {
-      list_free(evaluator->species[i]->members);
-      free(evaluator->species[i]);
+      species_t* species = evaluator->species[i];
+      for(size_t j = 0; j < species->members->count; j++)
+         ng_free(species->members->collection[i]);
+
+      list_free(species->members);
+      free(species);
    }
+   list_free(evaluator->new_genomes);
    free(evaluator->species);
    free(evaluator);
 }
@@ -55,12 +61,10 @@ const float DT = 5;
 
 int32_t compare_genome(const void* p1, const void* p2)
 {
-   genome_t* g1 = p1;
-   genome_t* g2 = p2;
+   genome_t* g1 = (void*)p1;
+   genome_t* g2 = (void*)p2;
    return (g2->fitness - g1->fitness) * 1000;
 }
-
-list_t* new_genomes = NULL;
 
 species_t* ev_random_species(evaluator_t* ev)
 {
@@ -108,17 +112,6 @@ genome_t* ev_random_genome(species_t* ev)
 
 void ev_evaluate(evaluator_t* evaluator)
 {
-   // reset spicies
-   for(size_t i = 0; i < evaluator->species_count; i++)
-   {
-      species_t* species = evaluator->species[i];
-      size_t mascot_index = rand() % species->members->count;
-      species->mascot = species->members->collection[mascot_index];
-
-      species->members->count = 0;
-      list_push(species->members, species->mascot);
-   }
-
    // Place genomes into species
    for(size_t i = 0; i < evaluator->genomes->count; i++)
    {
@@ -182,8 +175,8 @@ void ev_evaluate(evaluator_t* evaluator)
       species->adjusted_score += genome->fitness / (float)species->members->count;
    }
 
-   if(!new_genomes)
-      new_genomes = list_create();
+   if(!evaluator->new_genomes)
+      evaluator->new_genomes = list_create();
 
    // put best genomes from each species into next generation
    for(size_t i = 0; i < evaluator->species_count; i++)
@@ -191,10 +184,17 @@ void ev_evaluate(evaluator_t* evaluator)
       species_t* species = evaluator->species[i];
 
       qsort(species->members->collection, species->members->count, sizeof(void*), compare_genome);
-      list_push(new_genomes, gn_clone(species->members->collection[0]));
+      list_push(evaluator->new_genomes, gn_clone(species->members->collection[0]));
+
+      // get new mascot for next iterations
+      size_t mascot_index = rand() % species->members->count;
+      species->mascot = species->members->collection[mascot_index];
+
+      species->members->count = 0;
+      list_push(species->members, gn_clone(species->mascot));
    }
 
-   while(new_genomes->count < evaluator->population_size)
+   while(evaluator->new_genomes->count < evaluator->population_size)
    {
       species_t* species = ev_random_species(evaluator);
 
@@ -206,10 +206,42 @@ void ev_evaluate(evaluator_t* evaluator)
          child = gn_crossover(p1, p2);
       else
          child = gn_crossover(p2, p1);
+
+      list_push(evaluator->new_genomes, child);
    }
 
+   // now we can free all old genomes
    for(size_t i = 0; i < evaluator->genomes->count; i++)
       gn_free(evaluator->genomes->collection[i]);
+   evaluator->genomes->count = 0;
 
-   evaluator->genomes = new_genomes;
+   // copy all genomes from new list to an old one
+   for(size_t i = 0; i < evaluator->new_genomes->count; i++)
+      list_push(evaluator->genomes, evaluator->new_genomes->collection[i]);
+}
+
+const float link_chance = 0.1;
+const float node_chance = 0.1;
+const float switch_chance = 0.08;
+const float reassign_chance = 0.2;
+const float nudge_chance = 0.9;
+const float nudge_rate = 0.2;
+#define EV_MUTATE_MIN_WEIGHT -2
+#define EV_MUTATE_MAX_WEIGHT 2
+
+void ev_mutate(evaluator_t* evaluator)
+{
+   for(size_t i = 0; i < evaluator->genomes->count; i++)
+   {
+      genome_t* genome = evaluator->genomes->collection[i];
+      if(gn_rand_float() < link_chance)
+         gn_mutate_link(genome);
+
+      if(gn_rand_float() < node_chance)
+         gn_mutate_node(genome);
+
+      gn_mutate_switch(genome, switch_chance);
+      gn_mutate_weight_random(genome, reassign_chance, EV_MUTATE_MIN_WEIGHT, EV_MUTATE_MAX_WEIGHT);
+      gn_mutate_weight_nudge(genome, nudge_chance, nudge_rate);
+   }
 }
