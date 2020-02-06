@@ -17,7 +17,7 @@ innovation_t i_get(void)
 
 void i_recalc(list_t* connections)
 {
-   size_t max_innovation = 0;
+   innovation_t max_innovation = 0;
    for(size_t i = 0; i < connections->count; i++)
    {
       connection_genome_t* connection = connections->collection[i];

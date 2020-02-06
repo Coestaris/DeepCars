@@ -18,11 +18,23 @@
 
 #define GN_COMATIBILITY_DISTANCE_THRESHOLD 25
 
+struct _genome;
+
+typedef struct _species
+{
+   struct _genome* mascot;
+   list_t* members;
+   float adjusted_score;
+} species_t;
+
+
 typedef struct _genome {
    float fitness;
 
    list_t* connections;
    list_t* nodes;
+
+   species_t* species_id;
 
 } genome_t;
 
@@ -46,5 +58,9 @@ genome_t* gn_crossover(genome_t* p1, genome_t* p2);
 float gn_compatibility_distance(genome_t* p1, genome_t* p2, float c1, float c2, float c3);
 
 void gn_write(genome_t* genome, const char* fn, oilFont* font);
+
+void gn_free(genome_t* genome);
+
+genome_t* gn_clone(genome_t* genome);
 
 #endif //DEEPCARS_MLLIB_GENOME_H

@@ -19,6 +19,7 @@ genome_t* gn_create(size_t in_count, size_t out_count, size_t hidden_count, bool
    genome_t* genome = malloc(sizeof(genome_t));
    genome->nodes = list_create();
    genome->connections = list_create();
+   genome->species_id = 0;
 
    size_t index = 0;
    for(size_t i = 0; i < in_count; i++)
@@ -249,7 +250,7 @@ void gn_get_metrics(genome_t* g1, genome_t* g2, size_t* match, size_t* disjoint,
    *excess = 0;
    *weight_diff_sum = 0;
 
-   size_t max_innovation = 0;
+   innovation_t max_innovation = 0;
 
    for(size_t i = 0; i < g1->connections->count; i++)
    {
@@ -326,3 +327,29 @@ float gn_compatibility_distance(genome_t* g1, genome_t* g2, float c1, float c2, 
              (diff / match_count) * c3;
 }
 
+void gn_free(genome_t* genome)
+{
+   for(size_t i = 0; i < genome->connections->count; i++)
+      cg_free(genome->connections->collection[i]);
+   list_free(genome->connections);
+
+   for(size_t i = 0; i < genome->nodes->count; i++)
+      cg_free(genome->nodes->collection[i]);
+   list_free(genome->nodes);
+
+   free(genome);
+}
+
+genome_t* gn_clone(genome_t* genome)
+{
+   genome_t* new = malloc(sizeof(genome_t));
+   new->connections = list_create();
+   for(size_t i = 0; i < genome->connections->count; i++)
+      list_push(new->connections, cg_clone(genome->connections->collection[i]));
+   new->nodes = list_create();
+   for(size_t i = 0; i < genome->nodes->count; i++)
+      list_push(new->nodes, ng_clone(genome->nodes->collection[i]));
+   new->species_id = genome->species_id;
+   new->fitness = genome->fitness;
+   return new;
+}
