@@ -11,24 +11,18 @@
 #include "../oil/graphics.h"
 #include "../lib/graphics/gmath.h"
 #include "connection_genome.h"
-#include "node_genome.h"
 #include "rand_helpers.h"
 
 genome_t* gn_create(size_t in_count, size_t out_count, size_t hidden_count, bool link)
 {
    genome_t* genome = malloc(sizeof(genome_t));
-   genome->nodes = list_create();
+   genome->input_count = in_count;
+   genome->output_count = out_count;
+   genome->nodes_count = in_count + out_count + hidden_count;
+
    genome->connections = list_create();
    genome->species_id = 0;
    genome->fitness = 0;
-
-   size_t index = 0;
-   for(size_t i = 0; i < in_count; i++)
-      list_push(genome->nodes, ng_create(INPUT, index++));
-   for(size_t i = 0; i < out_count; i++)
-      list_push(genome->nodes, ng_create(OUTPUT, index++));
-   for(size_t i = 0; i < hidden_count; i++)
-      list_push(genome->nodes, ng_create(HIDDEN, index++));
 
    if(link)
    {
@@ -60,16 +54,9 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
       return;
    }
 
-   float* positions = malloc(sizeof(float) * 2 * genome->nodes->count);
+   float* positions = malloc(sizeof(float) * 2 * genome->nodes_count);
    size_t inputs = 0;
    size_t outputs = 0;
-
-   for(size_t i = 0; i < genome->nodes->count; i++)
-      switch(((node_genome_t*)genome->nodes->collection[i])->type)
-      {
-         case INPUT: inputs++; break;
-         case OUTPUT: outputs++; break;
-      }
 
    float input_mul = (GN_WRITE_WIDTH / (float)(inputs));
    float input_offset = input_mul / 2.0f;
@@ -77,62 +64,58 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
    float output_offset = output_mul / 2.0f;
    size_t input_i = 0;
    size_t output_i = 0;
-   for(size_t i = 0; i < genome->nodes->count; i++)
+   for(size_t i = 0; i < genome->nodes_count; i++)
    {
-      node_genome_t* node = genome->nodes->collection[i];
-      switch (node->type)
+      if(i < genome->input_count)
       {
-         case INPUT:
-            positions[i * 2] = (input_i++) * input_mul + input_offset;
-            positions[i * 2 + 1] = GN_WRITE_HEIGHT - GN_WRITE_RADIUS - 5;
-            break;
-         case HIDDEN:
+         positions[i * 2] = (input_i++) * input_mul + input_offset;
+         positions[i * 2 + 1] = GN_WRITE_HEIGHT - GN_WRITE_RADIUS - 5;
+      }
+      else if(i < genome->input_count + genome->output_count)
+      {
+
+         size_t tries = 0;
+         while (true)
          {
-            size_t tries = 0;
-            while(true)
+            bool intersects = false;
+            float new_x = (float) gn_rand_float() * (GN_WRITE_WIDTH - GN_WRITE_RADIUS * 6) + GN_WRITE_RADIUS * 3;
+            float new_y = (float) gn_rand_float() * (GN_WRITE_HEIGHT - GN_WRITE_RADIUS * 6) + GN_WRITE_RADIUS * 3;;
+
+            for (size_t j = genome->input_count + genome->output_count - 1; j < i; j++)
             {
-               bool intersects = false;
-               float new_x = (float) gn_rand_float() * (GN_WRITE_WIDTH - GN_WRITE_RADIUS * 6) + GN_WRITE_RADIUS * 3;
-               float new_y = (float) gn_rand_float() * (GN_WRITE_HEIGHT - GN_WRITE_RADIUS * 6) + GN_WRITE_RADIUS * 3;;
+               float node_x = positions[j * 2];
+               float node_y = positions[j * 2 + 1];
 
-               for (size_t j = 0; j < i; j++)
+               float dist = sqrtf(
+                     (new_x - node_x) * (new_x - node_x) +
+                     (new_y - node_y) * (new_y - node_y));
+
+               if (dist < GN_WRITE_RADIUS * 3)
                {
-                  node_genome_t* node = genome->nodes->collection[j];
-                  if (node->type != HIDDEN) continue;
-
-                  float node_x = positions[j * 2];
-                  float node_y = positions[j * 2 + 1];
-
-                  float dist = sqrtf(
-                        (new_x - node_x) * (new_x - node_x) +
-                        (new_y - node_y) * (new_y - node_y));
-
-                  if (dist < GN_WRITE_RADIUS * 3)
-                  {
-                     intersects = true;
-                     break;
-                  }
-               }
-
-               positions[i * 2] = new_x;
-               positions[i * 2 + 1] = new_y;
-
-               tries++;
-               if(tries < 1000)
-               {
-                  //ну раз найти не ссмог то и похуй
+                  intersects = true;
                   break;
                }
-
-               if(!intersects)
-                  break;
             }
-            break;
+
+            positions[i * 2] = new_x;
+            positions[i * 2 + 1] = new_y;
+
+            tries++;
+            if (tries < 1000)
+            {
+               //ну раз найти не ссмог то и похуй
+               break;
+            }
+
+            if (!intersects)
+               break;
          }
-         case OUTPUT:
-            positions[i * 2] = (output_i++) * output_mul + output_offset;
-            positions[i * 2 + 1] = GN_WRITE_RADIUS + 5;
-            break;
+      }
+      else
+      {
+         positions[i * 2] = (output_i++) * output_mul + output_offset;
+         positions[i * 2 + 1] = GN_WRITE_RADIUS + 5;
+         break;
       }
    }
    char buff[20];
@@ -181,21 +164,21 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
    oilColor output_fill_color = {0, 150, 0};
    oilColor hidden_fill_color = {0, 150, 150};
    oilColor border_color = {0, 0, 0};
-   for(size_t i = 0; i < genome->nodes->count; i++)
+   for(size_t i = 0; i < genome->nodes_count; i++)
    {
-      node_genome_t* node = genome->nodes->collection[i];
       oilColor* color;
-      switch(node->type) {
-         case INPUT: color = &input_fill_color; break;
-         case HIDDEN: color = &hidden_fill_color; break;
-         case OUTPUT: color = &output_fill_color; break;
-      }
+      if(i < genome->input_count)
+         color = &input_fill_color;
+      else if(i < genome->input_count + genome->output_count)
+         color = &hidden_fill_color;
+      else color = &output_fill_color;
+
       oilGrFillCircle(image->colorMatrix, positions[i * 2], positions[i * 2 + 1],
             GN_WRITE_RADIUS, *color);
       oilGrDrawCircleSm(image->colorMatrix, positions[i * 2], positions[i * 2 + 1],
             GN_WRITE_RADIUS + 1, border_color);
 
-      snprintf(buff, sizeof(buff), "%li", node->id + 1);
+      snprintf(buff, sizeof(buff), "%li", i + 1);
       oilGrDrawCenteredString(image->colorMatrix, font, buff, positions[i * 2], positions[i * 2 + 1] + 5, border_color);
 
    }
@@ -213,9 +196,11 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
 
 genome_t* gn_crossover(genome_t* p1, genome_t* p2)
 {
-   genome_t* offspring = gn_create(0, 0, 0, false);
-   for(size_t i = 0; i < p1->nodes->count; i++)
-      list_push(offspring->nodes, ng_clone(p1->nodes->collection[i]));
+   genome_t* offspring = gn_create(
+         p1->input_count,
+         p1->output_count,
+         p1->nodes_count - p1->input_count - p1->output_count,
+         false);
 
    for(size_t i = 0; i < p1->connections->count; i++)
    {
@@ -340,10 +325,6 @@ void gn_free(genome_t* genome)
       cg_free(genome->connections->collection[i]);
    list_free(genome->connections);
 
-   for(size_t i = 0; i < genome->nodes->count; i++)
-      cg_free(genome->nodes->collection[i]);
-   list_free(genome->nodes);
-
    free(genome);
 }
 
@@ -353,10 +334,12 @@ genome_t* gn_clone(genome_t* genome)
    new->connections = list_create();
    for(size_t i = 0; i < genome->connections->count; i++)
       list_push(new->connections, cg_clone(genome->connections->collection[i]));
-   new->nodes = list_create();
-   for(size_t i = 0; i < genome->nodes->count; i++)
-      list_push(new->nodes, ng_clone(genome->nodes->collection[i]));
    new->species_id = genome->species_id;
    new->fitness = genome->fitness;
+
+   new->input_count = genome->input_count;
+   new->output_count = genome->output_count;
+   new->nodes_count = genome->nodes_count;
+
    return new;
 }

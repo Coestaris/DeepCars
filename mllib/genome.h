@@ -30,9 +30,10 @@ typedef struct _species
 
 typedef struct _genome {
    float fitness;
-
    list_t* connections;
-   list_t* nodes;
+   size_t input_count;
+   size_t output_count;
+   size_t nodes_count;
 
    species_t* species_id;
 

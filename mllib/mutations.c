@@ -4,7 +4,6 @@
 #include <assert.h>
 #include "genome.h"
 #include "connection_genome.h"
-#include "node_genome.h"
 #include "rand_helpers.h"
 
 void gn_mutate_node(genome_t* genome)
@@ -19,15 +18,16 @@ void gn_mutate_node(genome_t* genome)
          return;
       }
 
-   node_genome_t* new_node = ng_create(HIDDEN, genome->nodes->count);
+   size_t id = genome->nodes_count;
 
    cg_disable(connection);
 
    list_push(genome->connections,
-             cg_create(connection->in_node, new_node->id, 1, i_get(), false));
+             cg_create(connection->in_node, id, 1, i_get(), false));
    list_push(genome->connections,
-             cg_create(new_node->id, connection->out_node, connection->weight, i_get(), false));
-   list_push(genome->nodes, new_node);
+             cg_create(id, connection->out_node, connection->weight, i_get(), false));
+
+   genome->nodes_count++;
 }
 
 void gn_mutate_switch(genome_t* genome, float chance)
@@ -78,14 +78,15 @@ void gn_mutate_link(genome_t* genome)
          return;
       }
 
-      node_genome_t* node1 = gn_rand_node(genome);
-      node_genome_t* node2 = gn_rand_node(genome);
+      size_t i1 = rand() % genome->nodes_count;
+      size_t i2 = rand() % genome->nodes_count;
 
-      if (node1 != node2)
+      if (i1 != i2)
       {
-         if (node1->type == INPUT && node2->type == HIDDEN)
+         if (i1 < genome->input_count && i2 > genome->input_count + genome->output_count) // i1 - input, i2 - hidden
             possible = true;
-         else if (node1->type == HIDDEN && node2->type == OUTPUT)
+         else if (i1 > genome->input_count + genome->output_count
+               && i2 > genome->input_count && i2 < genome->input_count + genome->output_count) //i1 - hidden, i2 - output
             possible = true;
       }
 
@@ -95,7 +96,7 @@ void gn_mutate_link(genome_t* genome)
       for(size_t i = 0; i < genome->connections->count; i++)
       {
          connection_genome_t* connection = genome->connections->collection[i];
-         if(connection->in_node == node1->id && connection->out_node == node2->id)
+         if(connection->in_node == i1 && connection->out_node == i2)
          {
             exists = true;
             break;
@@ -106,7 +107,7 @@ void gn_mutate_link(genome_t* genome)
          continue;
 
       list_push(genome->connections,
-                cg_create(node1->id, node2->id, 1, i_get(), false));
+                cg_create(i1, i2, 1, i_get(), false));
 
       break;
    }

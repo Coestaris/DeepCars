@@ -7,11 +7,6 @@
 #endif
 #include "rand_helpers.h"
 
-node_genome_t* gn_rand_node(genome_t* genome)
-{
-   return genome->nodes->collection[rand() % genome->nodes->count];
-}
-
 connection_genome_t* gn_rand_connection(genome_t* genome)
 {
    return genome->connections->collection[rand() % genome->connections->count];
