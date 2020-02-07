@@ -8,6 +8,9 @@
 #include "../lib/structs.h"
 #include "genome.h"
 
+#define EV_MUTATE_MIN_WEIGHT -2
+#define EV_MUTATE_MAX_WEIGHT 2
+
 typedef float (*evaluate_func_t)(genome_t* genome);
 
 typedef struct _evaluator {
@@ -28,5 +31,6 @@ void ev_mutate(evaluator_t* evaluator);
 void ev_evaluate(evaluator_t* evaluator);
 
 void ev_free(evaluator_t* evaluator);
+genome_t* ev_fittest_genome(evaluator_t* evaluator);
 
 #endif //DEEPCARS_EVALUATOR_H

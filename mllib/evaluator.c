@@ -21,12 +21,13 @@ evaluator_t* ev_create(size_t population_size, genome_t* orig, evaluate_func_t e
       for(size_t i = 0; i < population_size; i++)
          list_push(evaluator->genomes, gn_clone(orig));
    }
-   evaluator->species = malloc(sizeof(struct _species) * population_size);
+   evaluator->species = malloc(sizeof(struct _species*) * population_size);
    for(size_t i = 0; i < population_size; i++)
    {
       evaluator->species[i] = malloc(sizeof(species_t));
       evaluator->species[i]->mascot = NULL;
       evaluator->species[i]->members = list_create();
+      evaluator->species[i]->adjusted_score = 0;
    }
    evaluator->species_count = 0;
    evaluator->new_genomes = list_create();
@@ -43,9 +44,6 @@ void ev_free(evaluator_t* evaluator)
    for(size_t i = 0; i < evaluator->population_size; i++)
    {
       species_t* species = evaluator->species[i];
-      for(size_t j = 0; j < species->members->count; j++)
-         ng_free(species->members->collection[i]);
-
       list_free(species->members);
       free(species);
    }
@@ -56,8 +54,8 @@ void ev_free(evaluator_t* evaluator)
 
 const float c1 = 1;
 const float c2 = 1;
-const float c3 = 5;
-const float DT = 5;
+const float c3 = 1;
+const float DT = 6;
 
 int32_t compare_genome(const void* p1, const void* p2)
 {
@@ -112,6 +110,14 @@ genome_t* ev_random_genome(species_t* ev)
 
 void ev_evaluate(evaluator_t* evaluator)
 {
+   //Reset species
+   for(size_t i = 0; i < evaluator->species_count; i++)
+   {
+      species_t* species = evaluator->species[i];
+      species->members->count = 0;
+   }
+   evaluator->species_count = 0;
+
    // Place genomes into species
    for(size_t i = 0; i < evaluator->genomes->count; i++)
    {
@@ -141,7 +147,7 @@ void ev_evaluate(evaluator_t* evaluator)
       }
    }
 
-   // Remove unused species
+   /*// Remove unused species
    size_t empty_index = -1;
    bool found_empty;
    do
@@ -162,7 +168,7 @@ void ev_evaluate(evaluator_t* evaluator)
             evaluator->species[i] = evaluator->species[i - 1];
       else break;
    }
-   while(true);
+   while(true);*/
 
    // Evaluate genomes and assign score
    for(size_t i = 0; i < evaluator->genomes->count; i++)
@@ -184,14 +190,12 @@ void ev_evaluate(evaluator_t* evaluator)
       species_t* species = evaluator->species[i];
 
       qsort(species->members->collection, species->members->count, sizeof(void*), compare_genome);
-      list_push(evaluator->new_genomes, gn_clone(species->members->collection[0]));
 
       // get new mascot for next iterations
-      size_t mascot_index = rand() % species->members->count;
-      species->mascot = species->members->collection[mascot_index];
-
-      species->members->count = 0;
-      list_push(species->members, gn_clone(species->mascot));
+      //size_t mascot_index = rand() % species->members->count;
+      //species->mascot = gn_clone(species->members->collection[mascot_index]);
+      genome_t* new_mascot = gn_clone(species->members->collection[0]);
+      list_push(evaluator->new_genomes, new_mascot);
    }
 
    while(evaluator->new_genomes->count < evaluator->population_size)
@@ -218,6 +222,8 @@ void ev_evaluate(evaluator_t* evaluator)
    // copy all genomes from new list to an old one
    for(size_t i = 0; i < evaluator->new_genomes->count; i++)
       list_push(evaluator->genomes, evaluator->new_genomes->collection[i]);
+
+   evaluator->new_genomes->count = 0;
 }
 
 const float link_chance = 0.1;
@@ -226,8 +232,6 @@ const float switch_chance = 0.08;
 const float reassign_chance = 0.2;
 const float nudge_chance = 0.9;
 const float nudge_rate = 0.2;
-#define EV_MUTATE_MIN_WEIGHT -2
-#define EV_MUTATE_MAX_WEIGHT 2
 
 void ev_mutate(evaluator_t* evaluator)
 {
@@ -244,4 +248,22 @@ void ev_mutate(evaluator_t* evaluator)
       gn_mutate_weight_random(genome, reassign_chance, EV_MUTATE_MIN_WEIGHT, EV_MUTATE_MAX_WEIGHT);
       gn_mutate_weight_nudge(genome, nudge_chance, nudge_rate);
    }
+}
+
+
+genome_t* ev_fittest_genome(evaluator_t* evaluator)
+{
+   genome_t* fittest = NULL;
+   float f = 0;
+   for(size_t i = 0; i < evaluator->genomes->count; i++)
+   {
+      genome_t* genome = evaluator->genomes->collection[i];
+      if(genome->fitness >= f)
+      {
+         fittest = genome;
+         f = genome->fitness;
+      }
+   }
+
+   return fittest;
 }

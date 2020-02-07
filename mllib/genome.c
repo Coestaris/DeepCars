@@ -20,6 +20,7 @@ genome_t* gn_create(size_t in_count, size_t out_count, size_t hidden_count, bool
    genome->nodes = list_create();
    genome->connections = list_create();
    genome->species_id = 0;
+   genome->fitness = 0;
 
    size_t index = 0;
    for(size_t i = 0; i < in_count; i++)
@@ -117,7 +118,12 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
                positions[i * 2 + 1] = new_y;
 
                tries++;
-               assert(tries < 500);
+               if(tries < 1000)
+               {
+                  //ну раз найти не ссмог то и похуй
+                  break;
+               }
+
                if(!intersects)
                   break;
             }
@@ -167,7 +173,8 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
                       4, connection_color);
 
       snprintf(buff, sizeof(buff), "%li", connection->innovation);
-      oilGrDrawCenteredString(image->colorMatrix, font, buff, (x1 + x2) / 2, (y1 + y2) / 2, connection_color);
+      oilGrDrawCenteredString(image->colorMatrix, font, buff, (x1 + x2) / 2, (y1 + y2) / 2,
+               connection->disabled ? disabled_connection_color : connection_color);
    }
 
    oilColor input_fill_color = {150, 0, 0};

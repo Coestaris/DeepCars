@@ -11,7 +11,12 @@
 
 float evaluate_func(genome_t* genome)
 {
-   return genome->connections->count * 100;
+   size_t enabled_count = 0;
+   for(size_t i = 0; i < genome->connections->count; i++)
+      if(!((connection_genome_t *)genome->connections->collection[i])->disabled)
+         enabled_count++;
+
+   return 100.0f * enabled_count;
 }
 
 int main(int argc, char* argv[])
@@ -45,12 +50,28 @@ int main(int argc, char* argv[])
    list_push(orig_genome->connections, cg_create(0, 4, 0.6f, 8, false));
    i_recalc(orig_genome->connections);
 
-   evaluator_t* evaluator = ev_create(100, orig_genome, evaluate_func);
+   evaluator_t* evaluator = ev_create(200, orig_genome, evaluate_func);
 
-   ev_mutate(evaluator);
-   ev_evaluate(evaluator);
+   for(size_t i = 0; i < 1000000; i++)
+   {
+      gn_set_seed(time(NULL) + i);
+
+      ev_mutate(evaluator);
+      ev_evaluate(evaluator);
+
+      genome_t* fittest = ev_fittest_genome(evaluator);
+      printf("Fitness: %.3lf, Species: %li\n", fittest->fitness, evaluator->species_count);
+      if(i % 5 == 0)
+      {
+         char buff[50];
+         gn_set_seed(draw_seed);
+         snprintf(buff, sizeof(buff), "image%li.bmp", i);
+         //gn_write(fittest, buff, font);
+      }
+   }
 
    ev_free(evaluator);
+
    gn_free(orig_genome);
    oilFontFree(font);
 

@@ -10,10 +10,14 @@
 void gn_mutate_node(genome_t* genome)
 {
    connection_genome_t* connection;
-   size_t tries;
+   size_t tries = 0;
 
    while((connection = gn_rand_connection(genome))->disabled)
-      assert(tries++ > GN_MUTATE_NODE_MAX_TRIES);
+      if(tries++ > GN_MUTATE_NODE_MAX_TRIES)
+      {
+         //puts("tries++ < GN_MUTATE_NODE_MAX_TRIES");
+         return;
+      }
 
    node_genome_t* new_node = ng_create(HIDDEN, genome->nodes->count);
 
@@ -68,7 +72,11 @@ void gn_mutate_link(genome_t* genome)
       bool possible = false;
       bool exists = false;
 
-      assert(tries++ < GN_MUTATE_LINK_MAX_TRIES);
+      if(tries++ > GN_MUTATE_LINK_MAX_TRIES)
+      {
+         //puts("tries++ > GN_MUTATE_LINK_MAX_TRIES");
+         return;
+      }
 
       node_genome_t* node1 = gn_rand_node(genome);
       node_genome_t* node2 = gn_rand_node(genome);
