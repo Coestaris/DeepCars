@@ -13,16 +13,80 @@
 #include "connection_genome.h"
 #include "rand_helpers.h"
 
-genome_t* gn_create(size_t in_count, size_t out_count, size_t hidden_count, bool link)
+#define GN_CREATE_STARTUP_MAX_CONNECTIONS 20
+#define GN_CREATE_INCREASE_CONNECTIONS 1.5
+
+list_t* genome_bank;
+
+void gn_init_bank(void)
+{
+   genome_bank = list_create();
+}
+
+void gn_free_bank(void)
+{
+   for(size_t i = 0; i < genome_bank->count; i++)
+   {
+      genome_t* genome = genome_bank->collection[i];
+      free(genome->connections);
+      free(genome);
+   }
+   free(genome_bank);
+}
+
+genome_t* gn_alloc_new(void)
 {
    genome_t* genome = malloc(sizeof(genome_t));
+   genome->connections_max_count = GN_CREATE_STARTUP_MAX_CONNECTIONS;
+   genome->connections_count = 0;
+   genome->connections = malloc(sizeof(connection_genome_t) * genome->connections_max_count);
+   genome->_free = true;
+
+   genome->species_id = 0;
+   genome->fitness = 0;
+
+   return genome;
+}
+
+genome_t* gn_get_free_genome(void)
+{
+   for(size_t i = 0; i < genome_bank->count; i++)
+   {
+      genome_t* genome = genome_bank->collection[i];
+      if(genome->_free)
+      {
+         genome->_free = false;
+         return genome;
+      }
+   }
+
+   // no free genomes found, create new one
+   genome_t* genome =  gn_alloc_new();
+   genome->_free = false;
+   list_push(genome_bank, genome);
+   return genome;
+}
+
+void gn_push_connection(genome_t* genome, connection_genome_t connection_genome)
+{
+   if(genome->connections_count > genome->connections_max_count - 1)
+   {
+      size_t new_size = (float)genome->connections_max_count * GN_CREATE_INCREASE_CONNECTIONS;
+      genome->connections = realloc(genome->connections, sizeof(connection_genome_t) * new_size);
+      genome->connections_max_count = new_size;
+   }
+
+   genome->connections[genome->connections_count++] = connection_genome;
+}
+
+genome_t* gn_create(size_t in_count, size_t out_count, size_t hidden_count, bool link)
+{
+   genome_t* genome = gn_get_free_genome();
    genome->input_count = in_count;
    genome->output_count = out_count;
    genome->nodes_count = in_count + out_count + hidden_count;
-
-   genome->connections = list_create();
-   genome->species_id = 0;
-   genome->fitness = 0;
+   genome->connections_count = 0;
+   genome->species_id = NULL;
 
    if(link)
    {
@@ -30,16 +94,18 @@ genome_t* gn_create(size_t in_count, size_t out_count, size_t hidden_count, bool
       for (size_t i = 0; i < in_count; i++)
          for (size_t h = 0; h < hidden_count; h++)
          {
-            list_push(genome->connections,
-                      cg_create(i, h + in_count + out_count, 1, i_get(), false));
+            gn_push_connection(
+                  genome,
+                  cg_create(i, h + in_count + out_count, 1, i_get(), false));
          }
 
       //hidden - out connections
       for (size_t h = 0; h < hidden_count; h++)
          for (size_t o = 0; o < out_count; o++)
          {
-            list_push(genome->connections,
-                      cg_create(h + in_count + out_count, o + in_count, 1, i_get(), false));
+            gn_push_connection(
+                  genome,
+                  cg_create(h + in_count + out_count, o + in_count, 1, i_get(), false));
          }
    }
 
@@ -55,12 +121,10 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
    }
 
    float* positions = malloc(sizeof(float) * 2 * genome->nodes_count);
-   size_t inputs = 0;
-   size_t outputs = 0;
 
-   float input_mul = (GN_WRITE_WIDTH / (float)(inputs));
+   float input_mul = (GN_WRITE_WIDTH / (float)(genome->input_count));
    float input_offset = input_mul / 2.0f;
-   float output_mul = (GN_WRITE_WIDTH / (float)(outputs));
+   float output_mul = (GN_WRITE_WIDTH / (float)(genome->output_count));
    float output_offset = output_mul / 2.0f;
    size_t input_i = 0;
    size_t output_i = 0;
@@ -73,7 +137,11 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
       }
       else if(i < genome->input_count + genome->output_count)
       {
-
+         positions[i * 2] = (output_i++) * output_mul + output_offset;
+         positions[i * 2 + 1] = GN_WRITE_RADIUS + 5;
+      }
+      else
+      {
          size_t tries = 0;
          while (true)
          {
@@ -111,12 +179,6 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
                break;
          }
       }
-      else
-      {
-         positions[i * 2] = (output_i++) * output_mul + output_offset;
-         positions[i * 2 + 1] = GN_WRITE_RADIUS + 5;
-         break;
-      }
    }
    char buff[20];
 
@@ -124,9 +186,9 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
    oilColor disabled_connection_color = {210, 210, 210};
    oilColor connection_color = {0, 0, 0};
    vec4 buff_vec = cvec4(0, 0, 0, 0);
-   for(size_t i = 0; i < genome->connections->count; i++)
+   for(size_t i = 0; i < genome->connections_count; i++)
    {
-      connection_genome_t* connection = genome->connections->collection[i];
+      connection_genome_t* connection = &genome->connections[i];
 
       float x1 = positions[connection->in_node * 2];
       float y1 = positions[connection->in_node * 2 + 1];
@@ -202,15 +264,15 @@ genome_t* gn_crossover(genome_t* p1, genome_t* p2)
          p1->nodes_count - p1->input_count - p1->output_count,
          false);
 
-   for(size_t i = 0; i < p1->connections->count; i++)
+   for(size_t i = 0; i < p1->connections_count; i++)
    {
-      connection_genome_t* p1_connection = p1->connections->collection[i];
+      connection_genome_t* p1_connection = &p1->connections[i];
       connection_genome_t* p2_connection = NULL;
 
       //find p2 connection with same innovation
-      for(size_t j = 0; j < p2->connections->count; j++)
+      for(size_t j = 0; j < p2->connections_count; j++)
       {
-         connection_genome_t* connection = p2->connections->collection[j];
+         connection_genome_t* connection = &p2->connections[j];
          if(connection->innovation == p1_connection->innovation)
          {
             p2_connection = connection;
@@ -222,13 +284,13 @@ genome_t* gn_crossover(genome_t* p1, genome_t* p2)
       {
          // matching gene
          // randomly select one of them
-         list_push(offspring->connections, cg_clone(gn_rand_float() > 0.5f ? p1_connection : p2_connection));
+         gn_push_connection(offspring, cg_clone(gn_rand_float() > 0.5f ? p1_connection : p2_connection));
       }
       else
       {
          // disjoint or excess gene
          // get always from p1
-         list_push(offspring->connections, cg_clone(p1_connection));
+         gn_push_connection(offspring, cg_clone(p1_connection));
       }
    }
 
@@ -244,15 +306,15 @@ void gn_get_metrics(genome_t* g1, genome_t* g2, size_t* match, size_t* disjoint,
 
    innovation_t max_innovation = 0;
 
-   for(size_t i = 0; i < g1->connections->count; i++)
+   for(size_t i = 0; i < g1->connections_count; i++)
    {
-      connection_genome_t* g1_connection = g1->connections->collection[i];
+      connection_genome_t* g1_connection = &g1->connections[i];
       connection_genome_t* g2_connection = NULL;
 
       //find p2 connection with same innovation
-      for(size_t j = 0; j < g2->connections->count; j++)
+      for(size_t j = 0; j < g2->connections_count; j++)
       {
-         connection_genome_t* connection = g2->connections->collection[j];
+         connection_genome_t* connection = &g2->connections[j];
          if(connection->innovation == g1_connection->innovation)
          {
             g2_connection = connection;
@@ -271,15 +333,15 @@ void gn_get_metrics(genome_t* g1, genome_t* g2, size_t* match, size_t* disjoint,
          max_innovation = g1_connection->innovation;
    }
 
-   for(size_t i = 0; i < g2->connections->count; i++)
+   for(size_t i = 0; i < g2->connections_count; i++)
    {
-      connection_genome_t* g2_connection = g2->connections->collection[i];
+      connection_genome_t* g2_connection = &g2->connections[i];
       connection_genome_t* g1_connection = NULL;
 
       //find p1 connection with same innovation
-      for(size_t j = 0; j < g1->connections->count; j++)
+      for(size_t j = 0; j < g1->connections_count; j++)
       {
-         connection_genome_t* connection = g1->connections->collection[j];
+         connection_genome_t* connection = &g1->connections[j];
          if(connection->innovation == g2_connection->innovation)
          {
             g1_connection = connection;
@@ -305,9 +367,9 @@ float gn_compatibility_distance(genome_t* g1, genome_t* g2, float c1, float c2, 
    float diff = 0;
    gn_get_metrics(g1, g2, &match_count, &disjoint_count, &excess_count, &diff);
 
-   size_t size_of_largest = g1->connections->count > g2->connections->count ?
-         g1->connections->count :
-         g2->connections->count;
+   size_t size_of_largest = g1->connections_count > g2->connections_count ?
+         g1->connections_count :
+         g2->connections_count;
 
    if(size_of_largest < GN_COMATIBILITY_DISTANCE_THRESHOLD)
       return excess_count * c1 +
@@ -321,19 +383,17 @@ float gn_compatibility_distance(genome_t* g1, genome_t* g2, float c1, float c2, 
 
 void gn_free(genome_t* genome)
 {
-   for(size_t i = 0; i < genome->connections->count; i++)
-      cg_free(genome->connections->collection[i]);
-   list_free(genome->connections);
-
-   free(genome);
+   genome->_free = true;
 }
 
 genome_t* gn_clone(genome_t* genome)
 {
-   genome_t* new = malloc(sizeof(genome_t));
-   new->connections = list_create();
-   for(size_t i = 0; i < genome->connections->count; i++)
-      list_push(new->connections, cg_clone(genome->connections->collection[i]));
+   genome_t* new = gn_get_free_genome();
+
+   new->connections_count = genome->connections_count;
+   new->connections_max_count = genome->connections_max_count;
+   memcpy(new->connections, genome->connections, sizeof(connection_genome_t) * genome->connections_max_count);
+
    new->species_id = genome->species_id;
    new->fitness = genome->fitness;
 

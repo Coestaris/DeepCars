@@ -15,12 +15,13 @@ innovation_t i_get(void)
    return innovation_counter++;
 }
 
-void i_recalc(list_t* connections)
+void i_recalc(void* ptr, size_t count)
 {
+   connection_genome_t* connections = ptr;
    innovation_t max_innovation = 0;
-   for(size_t i = 0; i < connections->count; i++)
+   for(size_t i = 0; i < count; i++)
    {
-      connection_genome_t* connection = connections->collection[i];
+      connection_genome_t* connection = &connections[i];
       max_innovation = max_innovation > connection->innovation ? max_innovation : connection->innovation;
    }
 

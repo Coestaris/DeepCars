@@ -22,19 +22,22 @@ void gn_mutate_node(genome_t* genome)
 
    cg_disable(connection);
 
-   list_push(genome->connections,
-             cg_create(connection->in_node, id, 1, i_get(), false));
-   list_push(genome->connections,
-             cg_create(id, connection->out_node, connection->weight, i_get(), false));
+   gn_push_connection(
+         genome,
+         cg_create(connection->in_node, id, 1, i_get(), false));
+
+   gn_push_connection(
+         genome,
+         cg_create(id, connection->out_node, connection->weight, i_get(), false));
 
    genome->nodes_count++;
 }
 
 void gn_mutate_switch(genome_t* genome, float chance)
 {
-   for(size_t i = 0; i < genome->connections->count; i++)
+   for(size_t i = 0; i < genome->connections_count; i++)
    {
-      connection_genome_t* connection = genome->connections->collection[i];
+      connection_genome_t* connection = &genome->connections[i];
       if(gn_rand_float() < chance)
          connection->disabled = !connection->disabled;
    }
@@ -42,9 +45,9 @@ void gn_mutate_switch(genome_t* genome, float chance)
 
 void gn_mutate_weight_nudge(genome_t* genome, float chance, float rate)
 {
-   for(size_t i = 0; i < genome->connections->count; i++)
+   for(size_t i = 0; i < genome->connections_count; i++)
    {
-      connection_genome_t* connection = genome->connections->collection[i];
+      connection_genome_t* connection = &genome->connections[i];
       if(gn_rand_float() < chance)
       {
          connection->weight += gn_rand_float() * (connection->weight * rate) * (rand() % 2 ? 1.0f : -1.0f);
@@ -54,9 +57,9 @@ void gn_mutate_weight_nudge(genome_t* genome, float chance, float rate)
 
 void gn_mutate_weight_random(genome_t* genome, float chance, float min, float max)
 {
-   for(size_t i = 0; i < genome->connections->count; i++)
+   for(size_t i = 0; i < genome->connections_count; i++)
    {
-      connection_genome_t* connection = genome->connections->collection[i];
+      connection_genome_t* connection = &genome->connections[i];
       if(gn_rand_float() < chance)
       {
          connection->weight = gn_rand_float() * (max - min) + min;
@@ -93,9 +96,9 @@ void gn_mutate_link(genome_t* genome)
       if (!possible)
          continue;
 
-      for(size_t i = 0; i < genome->connections->count; i++)
+      for(size_t i = 0; i < genome->connections_count; i++)
       {
-         connection_genome_t* connection = genome->connections->collection[i];
+         connection_genome_t* connection = &genome->connections[i];
          if(connection->in_node == i1 && connection->out_node == i2)
          {
             exists = true;
@@ -106,8 +109,9 @@ void gn_mutate_link(genome_t* genome)
       if(exists)
          continue;
 
-      list_push(genome->connections,
-                cg_create(i1, i2, 1, i_get(), false));
+      gn_push_connection(
+            genome,
+            cg_create(i1, i2, 1, i_get(), false));
 
       break;
    }

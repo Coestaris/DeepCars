@@ -12,8 +12,8 @@
 float evaluate_func(genome_t* genome)
 {
    size_t enabled_count = 0;
-   for(size_t i = 0; i < genome->connections->count; i++)
-      if(!((connection_genome_t *)genome->connections->collection[i])->disabled)
+   for(size_t i = 0; i < genome->connections_count; i++)
+      if(!genome->connections[i].disabled)
          enabled_count++;
 
    return 100.0f * enabled_count;
@@ -39,20 +39,22 @@ int main(int argc, char* argv[])
       exit(1);
    }
 
+   gn_init_bank();
+
    uint32_t draw_seed = time(NULL);
 
    genome_t* orig_genome = gn_create(3, 1, 1, false);
-   list_push(orig_genome->connections, cg_create(0, 3, 0.7f, 1, false));
-   list_push(orig_genome->connections, cg_create(1, 3, -0.5f, 2, true));
-   list_push(orig_genome->connections, cg_create(2, 3, 0.5f, 3, false));
-   list_push(orig_genome->connections, cg_create(1, 4, 0.6f, 4, false));
-   list_push(orig_genome->connections, cg_create(4, 3, 0.4f, 5, false));
-   list_push(orig_genome->connections, cg_create(0, 4, 0.6f, 8, false));
-   i_recalc(orig_genome->connections);
+   gn_push_connection(orig_genome, cg_create(0, 3, 0.7f, 1, false));
+   gn_push_connection(orig_genome, cg_create(1, 3, -0.5f, 2, true));
+   gn_push_connection(orig_genome, cg_create(2, 3, 0.5f, 3, false));
+   gn_push_connection(orig_genome, cg_create(1, 4, 0.6f, 4, false));
+   gn_push_connection(orig_genome, cg_create(4, 3, 0.4f, 5, false));
+   gn_push_connection(orig_genome, cg_create(0, 4, 0.6f, 8, false));
+   i_recalc(orig_genome->connections, orig_genome->connections_count);
 
    evaluator_t* evaluator = ev_create(10, orig_genome, evaluate_func);
 
-   for(size_t i = 0; i < 100; i++)
+   for(size_t i = 0; i < 100000; i++)
    {
       gn_set_seed(time(NULL) + i);
 
@@ -60,19 +62,22 @@ int main(int argc, char* argv[])
       ev_evaluate(evaluator);
 
       genome_t* fittest = ev_fittest_genome(evaluator);
-      printf("Fitness: %.3lf, Species: %li\n", fittest->fitness, evaluator->species_count);
-      if(i % 5 == 0)
+      if(i % 100 == 0)
       {
+         printf("Fitness: %.3lf, Species: %li\n", fittest->fitness, evaluator->species_count);
          char buff[50];
          gn_set_seed(draw_seed);
-         snprintf(buff, sizeof(buff), "image%li.bmp", i);
-         //gn_write(fittest, buff, font);
+         //snprintf(buff, sizeof(buff), "image%li.bmp", i);
+         gn_write(fittest, buff, font);
       }
    }
 
    ev_free(evaluator);
 
    gn_free(orig_genome);
+
+   gn_free_bank();
+
    oilFontFree(font);
 
 /*

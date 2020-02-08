@@ -6,35 +6,30 @@
 #pragma implementation "connection_genome.h"
 #endif
 #include "connection_genome.h"
-#include <malloc.h>
 #include <string.h>
 
-connection_genome_t* cg_create(
+connection_genome_t cg_create(
       size_t in_node,
       size_t out_node,
       float weight,
       size_t innovation,
       bool disabled)
 {
-   connection_genome_t* genome = malloc(sizeof(connection_genome_t));
-   genome->in_node = in_node;
-   genome->out_node = out_node;
-   genome->weight = weight;
-   genome->innovation = innovation;
-   genome->disabled = disabled;
+   connection_genome_t genome =
+   {
+      .in_node = in_node,
+      .out_node = out_node,
+      .weight = weight,
+      .innovation = innovation,
+      .disabled = disabled
+   };
+
    return genome;
 }
 
-inline void cg_free(connection_genome_t* genome)
+connection_genome_t cg_clone(connection_genome_t* genome)
 {
-   free(genome);
-}
-
-connection_genome_t* cg_clone(connection_genome_t* genome)
-{
-   connection_genome_t* copy = malloc(sizeof(connection_genome_t));
-   memcpy(copy, genome, sizeof(connection_genome_t));
-   return copy;
+   return cg_create(genome->in_node, genome->out_node, genome->weight, genome->innovation, genome->disabled);
 }
 
 inline void cg_disable(connection_genome_t* genome)

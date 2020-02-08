@@ -8,10 +8,11 @@
 #include <stdbool.h>
 #include "../lib/structs.h"
 #include "../oil/font.h"
+#include "connection_genome.h"
 
 #define GN_WRITE_WIDTH 512
 #define GN_WRITE_HEIGHT 512
-#define GN_WRITE_RADIUS 30
+#define GN_WRITE_RADIUS 10
 
 #define GN_MUTATE_NODE_MAX_TRIES 100
 #define GN_MUTATE_LINK_MAX_TRIES 100
@@ -30,16 +31,26 @@ typedef struct _species
 
 typedef struct _genome {
    float fitness;
-   list_t* connections;
+   connection_genome_t* connections;
+   size_t connections_count;
+   size_t connections_max_count;
+
    size_t input_count;
    size_t output_count;
    size_t nodes_count;
 
    species_t* species_id;
 
+   bool _free;
+
 } genome_t;
 
+void gn_init_bank(void);
+void gn_free_bank(void);
+
 genome_t* gn_create(size_t in_count, size_t out_count, size_t hidden_count, bool link);
+
+void gn_push_connection(genome_t* genome, connection_genome_t connection_genome);
 
 //creates a new random connection
 void gn_mutate_link(genome_t* genome);
