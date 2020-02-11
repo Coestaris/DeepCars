@@ -9,7 +9,7 @@
 
 connection_genome_t* gn_rand_connection(genome_t* genome)
 {
-   return &genome->connections[rand() % genome->connections_count];
+   return &(genome->connections[rand() % genome->connections_count]);
 }
 
 void gn_set_seed(uint32_t seed)

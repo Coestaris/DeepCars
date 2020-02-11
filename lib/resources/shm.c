@@ -18,15 +18,15 @@ typedef struct _shm_node
 } shm_node_t;
 
 // Global list of manager's shaders
-list_t* nodes;
+list_t* shader_nodes;
 
 //
 // s_has_shader
 //
 bool s_has_shader(int id)
 {
-   for (size_t i = 0; i < nodes->count; i++)
-      if (((shm_node_t*)nodes->collection[i])->id == id) return true;
+   for (size_t i = 0; i < shader_nodes->count; i++)
+      if (((shm_node_t*)shader_nodes->collection[i])->id == id) return true;
    return false;
 }
 
@@ -45,7 +45,7 @@ void s_push(shader_t* shader, int id)
    node->shader = shader;
    node->id = id;
 
-   list_push(nodes, node);
+   list_push(shader_nodes, node);
 }
 
 //
@@ -53,7 +53,7 @@ void s_push(shader_t* shader, int id)
 //
 void s_init()
 {
-   nodes = list_create();
+   shader_nodes = list_create();
 }
 
 //
@@ -61,9 +61,9 @@ void s_init()
 //
 shader_t* s_getn_shader(const char* name)
 {
-   for (size_t i = 0; i < nodes->count; i++)
-      if (!strcmp(((shm_node_t*)nodes->collection[i])->shader->name, name))
-         return ((shm_node_t*)nodes->collection[i])->shader;
+   for (size_t i = 0; i < shader_nodes->count; i++)
+      if (!strcmp(((shm_node_t*)shader_nodes->collection[i])->shader->name, name))
+         return ((shm_node_t*)shader_nodes->collection[i])->shader;
 
    S_ERROR("Unable to find shader with name \"%s\"", name)
 }
@@ -73,9 +73,9 @@ shader_t* s_getn_shader(const char* name)
 //
 shader_t* s_get_shader(int id)
 {
-   for (size_t i = 0; i < nodes->count; i++)
-      if (((shm_node_t*)nodes->collection[i])->id == id)
-         return ((shm_node_t*)nodes->collection[i])->shader;
+   for (size_t i = 0; i < shader_nodes->count; i++)
+      if (((shm_node_t*)shader_nodes->collection[i])->id == id)
+         return ((shm_node_t*)shader_nodes->collection[i])->shader;
 
    S_ERROR("Unable to find shader with id \"%i\"", id)
 }
@@ -87,10 +87,10 @@ void s_free(bool free_shaders)
 {
    if(free_shaders)
    {
-      for (size_t i = 0; i < nodes->count; i++)
-         sh_free(((shm_node_t*) nodes->collection[i])->shader);
+      for (size_t i = 0; i < shader_nodes->count; i++)
+         sh_free(((shm_node_t*) shader_nodes->collection[i])->shader);
    }
 
-   list_free_elements(nodes);
-   list_free(nodes);
+   list_free_elements(shader_nodes);
+   list_free(shader_nodes);
 }

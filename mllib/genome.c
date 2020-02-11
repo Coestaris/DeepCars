@@ -13,67 +13,16 @@
 #include "connection_genome.h"
 #include "rand_helpers.h"
 
-#define GN_CREATE_STARTUP_MAX_CONNECTIONS 20
-#define GN_CREATE_INCREASE_CONNECTIONS 1.5
-
-list_t* genome_bank;
-
-void gn_init_bank(void)
-{
-   genome_bank = list_create();
-}
-
-void gn_free_bank(void)
-{
-   for(size_t i = 0; i < genome_bank->count; i++)
-   {
-      genome_t* genome = genome_bank->collection[i];
-      free(genome->connections);
-      free(genome);
-   }
-   free(genome_bank);
-}
-
-genome_t* gn_alloc_new(void)
-{
-   genome_t* genome = malloc(sizeof(genome_t));
-   genome->connections_max_count = GN_CREATE_STARTUP_MAX_CONNECTIONS;
-   genome->connections_count = 0;
-   genome->connections = malloc(sizeof(connection_genome_t) * genome->connections_max_count);
-   genome->_free = true;
-
-   genome->species_id = 0;
-   genome->fitness = 0;
-
-   return genome;
-}
-
-genome_t* gn_get_free_genome(void)
-{
-   for(size_t i = 0; i < genome_bank->count; i++)
-   {
-      genome_t* genome = genome_bank->collection[i];
-      if(genome->_free)
-      {
-         genome->_free = false;
-         return genome;
-      }
-   }
-
-   // no free genomes found, create new one
-   genome_t* genome =  gn_alloc_new();
-   genome->_free = false;
-   list_push(genome_bank, genome);
-   return genome;
-}
-
 void gn_push_connection(genome_t* genome, connection_genome_t connection_genome)
 {
    if(genome->connections_count > genome->connections_max_count - 1)
    {
-      size_t new_size = (float)genome->connections_max_count * GN_CREATE_INCREASE_CONNECTIONS;
-      genome->connections = realloc(genome->connections, sizeof(connection_genome_t) * new_size);
-      genome->connections_max_count = new_size;
+      /*size_t new_size = (float)genome->connections_max_count * GN_CREATE_INCREASE_CONNECTIONS;
+      genome->connections = realloc(genome->connections, sizeof(connection_genome_t) * new_size + 1);
+      genome->connections_max_count = new_size;*/
+      //to much
+      puts("Push connection overrun");
+      return;
    }
 
    genome->connections[genome->connections_count++] = connection_genome;
@@ -384,6 +333,7 @@ float gn_compatibility_distance(genome_t* g1, genome_t* g2, float c1, float c2, 
 void gn_free(genome_t* genome)
 {
    genome->_free = true;
+   genome->connections_count = 0;
 }
 
 genome_t* gn_clone(genome_t* genome)
@@ -392,7 +342,14 @@ genome_t* gn_clone(genome_t* genome)
 
    new->connections_count = genome->connections_count;
    new->connections_max_count = genome->connections_max_count;
-   memcpy(new->connections, genome->connections, sizeof(connection_genome_t) * genome->connections_max_count);
+
+   if(new->connections_max_count < genome->connections_count)
+   {
+      genome->connections = realloc(genome->connections, sizeof(connection_genome_t) * genome->connections_count);
+      new->connections_max_count = genome->connections_count;
+   }
+
+   memcpy(new->connections, genome->connections, sizeof(connection_genome_t) * genome->connections_count);
 
    new->species_id = genome->species_id;
    new->fitness = genome->fitness;

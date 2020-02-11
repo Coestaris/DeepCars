@@ -14,7 +14,7 @@ void gn_mutate_node(genome_t* genome)
    while((connection = gn_rand_connection(genome))->disabled)
       if(tries++ > GN_MUTATE_NODE_MAX_TRIES)
       {
-         //puts("tries++ < GN_MUTATE_NODE_MAX_TRIES");
+         puts("tries++ < GN_MUTATE_NODE_MAX_TRIES");
          return;
       }
 

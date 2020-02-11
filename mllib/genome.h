@@ -19,6 +19,9 @@
 
 #define GN_COMATIBILITY_DISTANCE_THRESHOLD 25
 
+#define GN_CREATE_STARTUP_MAX_CONNECTIONS 200
+#define GN_CREATE_INCREASE_CONNECTIONS 1.5
+
 struct _genome;
 
 typedef struct _species
@@ -74,5 +77,7 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font);
 void gn_free(genome_t* genome);
 
 genome_t* gn_clone(genome_t* genome);
+
+genome_t* gn_get_free_genome(void);
 
 #endif //DEEPCARS_MLLIB_GENOME_H

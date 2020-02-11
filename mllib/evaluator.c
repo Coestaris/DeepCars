@@ -54,7 +54,7 @@ void ev_free(evaluator_t* evaluator)
 
 const float c1 = 1;
 const float c2 = 1;
-const float c3 = 1;
+const float c3 = 0.4;
 const float DT = 6;
 
 int32_t compare_genome(const void* p1, const void* p2)
