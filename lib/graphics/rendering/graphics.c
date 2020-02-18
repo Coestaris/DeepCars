@@ -41,7 +41,7 @@ mat4 x_rot_mat;
 mat4 y_rot_mat;
 mat4 z_rot_mat;
 
-struct queue_item {
+struct _queue_item {
 
    uint8_t mode;
 
@@ -280,7 +280,7 @@ inline void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2f_t positio
    assert(queue_length[depth] < MAX_QUEUE_COUNT);
 
    size_t index = queue_length[depth];
-   struct queue_item* qi = &queue[depth][index];
+   struct _queue_item* qi = &queue[depth][index];
    qi->mode = 0;
    qi->tex = texture;
    qi->position = position;
@@ -293,14 +293,14 @@ inline void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2f_t positio
    queue_length[depth]++;
 }
 
-inline void gr_pq_push_string(uint8_t depth, font_t* f, vec2f_t position,
+void gr_pq_push_string(uint8_t depth, font_t* f, vec2f_t position,
                        vec2f_t scale, char* string, bool bind_shader, void* data)
 {
    assert(depth < MAX_DEPTH);
    assert(queue_length[depth] < MAX_QUEUE_COUNT);
 
    size_t index = queue_length[depth];
-   struct queue_item* qi = &queue[depth][index];
+   struct _queue_item* qi = &queue[depth][index];
    qi->mode = 1;
    qi->font = f;
    qi->position = position;
@@ -319,7 +319,7 @@ void gr_pq_flush(void)
    {
       for(size_t i = 0; i < queue_length[d]; i++)
       {
-         struct queue_item* qi = &queue[d][i];
+         struct _queue_item* qi = &queue[d][i];
          switch(qi->mode)
          {
             case 0:

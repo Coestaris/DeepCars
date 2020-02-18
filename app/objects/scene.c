@@ -14,7 +14,12 @@
 #include "obj_default_bind_handler.h"
 #include "menu/obj_menu_phys.h"
 
-void setup_objects(scene_t* scene)
+void setup_editor_objects(scene_t* scene)
+{
+
+}
+
+void setup_menu_objects(scene_t* scene)
 {
    model_t* plane = m_create_plane(50, 50, true);
    m_normalize(plane, true, true, true, true);
@@ -59,7 +64,7 @@ void setup_objects(scene_t* scene)
    list_push(scene->startup_objects, rng = create_textured_dummy(vec3f(0,0,0), 140,
              rm_getn(MATERIAL, "column"),
              rm_getn(MODEL, "ring")));
-   //rng->scale.y = 300;
+   rng->scale.y = 155;
 
    list_push(scene->startup_objects, rng = create_textured_dummy(vec3f(0,0,0), 26,
                                                            rm_getn(MATERIAL, "column"),
@@ -78,7 +83,7 @@ void setup_objects(scene_t* scene)
    list_push(scene->startup_objects, create_info_drawer());
 }
 
-void setup_shadow_light(scene_t* scene)
+void setup_menu_shadow_light(scene_t* scene)
 {
    const float near_plane = 0.01f;
    const float far_plane = 200.0f;
@@ -91,10 +96,10 @@ void setup_shadow_light(scene_t* scene)
    shadow_light->light_camera->target = cvec4(0, 0, 0, 0);
    scene->shadow_light = shadow_light;
 
-   shadow_light->brightness = 1.0f;
+   shadow_light->brightness = 0.8f;
 }
 
-void setup_lights(scene_t* scene)
+void setup_menu_lights(scene_t* scene)
 {
    const float angle = M_PI * 2 / NR_LIGHTS;
    const float radius = 70;
@@ -127,8 +132,8 @@ void setup_lights(scene_t* scene)
    }
 }
 
-void setup_light(scene_t* scene)
+void setup_menu_light(scene_t* scene)
 {
-   setup_shadow_light(scene);
-   setup_lights(scene);
+   setup_menu_shadow_light(scene);
+   setup_menu_lights(scene);
 }

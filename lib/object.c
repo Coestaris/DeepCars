@@ -32,26 +32,9 @@ object_t* o_clone(object_t* object)
 {
    object_t* new_object = malloc(sizeof(object_t));
    memcpy(new_object, object, sizeof(object_t));
-/*   switch(new_object->draw_mode)
-   {
-      case DM_COLORED:
-         new_object->draw_info = malloc(sizeof(draw_info_colored_t));
-         memcpy(new_object->draw_info, object->draw_info, sizeof(draw_info_colored_t));
-         break;
-      case DM_COLORED_SHADED:
-         new_object->draw_info = malloc(sizeof(draw_info_colored_shaded_t));
-         memcpy(new_object->draw_info, object->draw_info, sizeof(draw_info_colored_shaded_t));
-         break;
-         break;
-      case DM_TEXTURED:
-         new_object->draw_info = malloc(sizeof(draw_info_textured_t));
-         memcpy(new_object->draw_info, object->draw_info, sizeof(draw_info_textured_t));
-         break;
-      case DM_TEXTURED_SHADED:
-         new_object->draw_info = malloc(sizeof(draw_info_textured_shaded_t));
-         memcpy(new_object->draw_info, object->draw_info, sizeof(draw_info_textured_shaded_t));
-         break;
-   }*/
+
+   new_object->draw_info = malloc(sizeof(draw_info_t));
+   memcpy(new_object->draw_info, object->draw_info, sizeof(draw_info_t));
 
    return new_object;
 }

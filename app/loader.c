@@ -21,11 +21,14 @@ void app_load_resources(void)
 {
    scene_t* menu = sc_create(SCENEID_MENU);
    menu->skybox = rm_getn(TEXTURE, "skybox");
+   setup_menu_objects(menu);
+   setup_menu_light(menu);
 
-   setup_objects(menu);
-   setup_light(menu);
+   scene_t* editor = sc_create(SCENEID_EDITOR);
+   setup_editor_objects(editor);
 
    scm_push_scene(menu);
+   scm_push_scene(editor);
 }
 
 void app_init_graphics(void)

@@ -23,7 +23,8 @@ typedef struct _geometry_shader_data {
 
 } geometry_shader_data_t;
 
-render_chain_t* rc;
+render_chain_t* default_rc;
+render_chain_t* editor_rc;
 
 //ssao
 texture_t* noise_texure;
@@ -75,8 +76,8 @@ char* get_ssao_stage_string()
 
 inline void update_shadow_light(void)
 {
-   render_stage_t* shadow_map_stage = rc->stages->collection[STAGE_SHADOWMAP];
-   render_stage_t* shading_stage = rc->stages->collection[STAGE_SHADING];
+   render_stage_t* shadow_map_stage = default_rc->stages->collection[STAGE_SHADOWMAP];
+   render_stage_t* shading_stage = default_rc->stages->collection[STAGE_SHADING];
    shadow_map_stage->skip = false;
 
    scene_t* scene = scm_get_current();
@@ -102,7 +103,7 @@ inline void update_shadow_light(void)
 
 inline void update_lights(void)
 {
-   render_stage_t* shading_stage = rc->stages->collection[STAGE_SHADING];
+   render_stage_t* shading_stage = default_rc->stages->collection[STAGE_SHADING];
    list_t* lights = scm_get_current()->lights;
 
    shader_t* shading_shader = shading_stage->shader;
@@ -123,7 +124,7 @@ inline void update_lights(void)
 
 inline void switch_ssao(void)
 {
-   render_stage_t* ssao_blur_stage = rc->stages->collection[STAGE_SSAO_BLUR];
+   render_stage_t* ssao_blur_stage = default_rc->stages->collection[STAGE_SSAO_BLUR];
    if(ssao_state)
    {
       ssao_texture = ssao_dummy_texture;
@@ -138,13 +139,13 @@ inline void switch_ssao(void)
 
 inline void switch_stages(void)
 {
-   render_stage_t* g_buffer_stage = rc->stages->collection[STAGE_G_BUFFER];
-   render_stage_t* ssao_stage = rc->stages->collection[STAGE_SSAO];
-   render_stage_t* ssao_blur_stage = rc->stages->collection[STAGE_SSAO_BLUR];
-   render_stage_t* skybox_stage = rc->stages->collection[STAGE_SKYBOX];
-   render_stage_t* shadowmap_stage = rc->stages->collection[STAGE_SHADOWMAP];
-   render_stage_t* shading_stage = rc->stages->collection[STAGE_SHADING];
-   render_stage_t* fxaa_stage = rc->stages->collection[STAGE_FXAA];
+   render_stage_t* g_buffer_stage = default_rc->stages->collection[STAGE_G_BUFFER];
+   render_stage_t* ssao_stage = default_rc->stages->collection[STAGE_SSAO];
+   render_stage_t* ssao_blur_stage = default_rc->stages->collection[STAGE_SSAO_BLUR];
+   render_stage_t* skybox_stage = default_rc->stages->collection[STAGE_SKYBOX];
+   render_stage_t* shadowmap_stage = default_rc->stages->collection[STAGE_SHADOWMAP];
+   render_stage_t* shading_stage = default_rc->stages->collection[STAGE_SHADING];
+   render_stage_t* fxaa_stage = default_rc->stages->collection[STAGE_FXAA];
 
    state = (state + 1) % 8;
    switch(state)
@@ -204,7 +205,7 @@ void bind_ssao(render_stage_t* stage)
 {
    //GL_PCALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-   render_stage_t* g_buffer_stage = rc->stages->collection[STAGE_G_BUFFER];
+   render_stage_t* g_buffer_stage = default_rc->stages->collection[STAGE_G_BUFFER];
 
    t_bind(g_buffer_stage->color0_tex, UNIFORM_SSAO.pos_tex);
    t_bind(g_buffer_stage->color1_tex, UNIFORM_SSAO.norm_tex);
@@ -244,7 +245,7 @@ void unbind_skybox(render_stage_t* stage)
 
 void draw_skybox(render_stage_t* stage)
 {
-   render_stage_t* g_buffer_stage = rc->stages->collection[STAGE_G_BUFFER];
+   render_stage_t* g_buffer_stage = default_rc->stages->collection[STAGE_G_BUFFER];
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, g_buffer_stage->fbo));
    {
       GL_PCALL(glDepthFunc(GL_LEQUAL));
@@ -284,8 +285,8 @@ void setup_object_shadowmap(render_stage_t* stage, object_t* object, mat4 model_
 // SHADING ROUTINES
 void bind_shading(render_stage_t* stage)
 {
-   render_stage_t* g_buffer_stage = rc->stages->collection[STAGE_G_BUFFER];
-   render_stage_t* shadowmap_stage = rc->stages->collection[STAGE_SHADOWMAP];
+   render_stage_t* g_buffer_stage = default_rc->stages->collection[STAGE_G_BUFFER];
+   render_stage_t* shadowmap_stage = default_rc->stages->collection[STAGE_SHADOWMAP];
 
    scene_t* scene = scm_get_current();
    geometry_shader_data_t* data = stage->data;
@@ -306,7 +307,7 @@ void unbind_shading(render_stage_t* stage) { }
 // FXAA ROUTINES
 void bind_fxaa(render_stage_t* stage)
 {
-   render_stage_t* shading_stage = rc->stages->collection[STAGE_SHADING];
+   render_stage_t* shading_stage = default_rc->stages->collection[STAGE_SHADING];
    t_bind(shading_stage->color0_tex, UNIFORM_FXAA.tex);
 
    sh_set_int(UNIFORM_FXAA.show_edges, fxaa_edges);
@@ -341,7 +342,7 @@ list_t* blurred_regions;
 shader_t* br_shader;
 void draw_primitives(render_stage_t* stage)
 {
-   render_stage_t* rs = rc->stages->collection[STAGE_SHADING];
+   render_stage_t* rs = default_rc->stages->collection[STAGE_SHADING];
 
    sh_use(br_shader);
 
@@ -385,7 +386,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shader_t* skybox_shader = setup_skybox(proj);
    shader_t* shadowmap_shader = setup_shadowmap();
    shader_t* shading_shader = setup_shading();
-   shader_t* fxaa_shader = setup_fxaa(0.5, 8, 128, 8, info);
+   shader_t* fxaa_shader = setup_fxaa(0.3f, 8, 128, 8, info);
    shader_t* gamma_shader = setup_gamma();
    br_shader = setup_br(primitive_proj, 27, 11);
    setup_sprite(primitive_proj);
@@ -493,8 +494,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    render_stage_t* shadowmap = rs_create("shadow_map", RM_GEOMETRY, shadowmap_shader);
    shadowmap->attachments = TF_DEPTH;
    //depth
-   shadowmap->depth_format.tex_width = 1024;
-   shadowmap->depth_format.tex_height = 1024;
+   shadowmap->depth_format.tex_width = 2048;
+   shadowmap->depth_format.tex_height = 2048;
    shadowmap->depth_format.tex_wrapping_t = GL_CLAMP_TO_BORDER;
    shadowmap->depth_format.tex_wrapping_s = GL_CLAMP_TO_BORDER;
    shadowmap->depth_format.tex_border_color[0] = 1;
@@ -544,20 +545,24 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    primitive->unbind_func = unbind_primitive;
    primitive->custom_draw_func = draw_primitives;
 
-   rc = rc_create();
-   list_push(rc->stages, g_buffer);
-   list_push(rc->stages, ssao);
-   list_push(rc->stages, ssao_blur);
-   list_push(rc->stages, skybox);
-   list_push(rc->stages, shadowmap);
-   list_push(rc->stages, shading);
-   list_push(rc->stages, fxaa);
-   list_push(rc->stages, bypass);
-   list_push(rc->stages, primitive);
+   default_rc = rc_create();
+   list_push(default_rc->stages, g_buffer);
+   list_push(default_rc->stages, ssao);
+   list_push(default_rc->stages, ssao_blur);
+   list_push(default_rc->stages, skybox);
+   list_push(default_rc->stages, shadowmap);
+   list_push(default_rc->stages, shading);
+   list_push(default_rc->stages, fxaa);
+   list_push(default_rc->stages, bypass);
+   list_push(default_rc->stages, primitive);
 
-   rc_build(rc);
+   editor_rc = rc_create();
+   list_push(default_rc->stages, primitive);
+
+   rc_build(default_rc);
+   rc_build(editor_rc);
    GL_PCALL(glEnable(GL_DEPTH_TEST));
-   return rc;
+   return default_rc;
 }
 
 void free_geometry_shader_data(render_chain_t* render_chain, size_t index)
@@ -568,25 +573,26 @@ void free_geometry_shader_data(render_chain_t* render_chain, size_t index)
 
 void free_stages(void)
 {
-   free_geometry_shader_data(rc, STAGE_G_BUFFER);
-   rs_free(rc->stages->collection[STAGE_G_BUFFER]);
+   free_geometry_shader_data(default_rc, STAGE_G_BUFFER);
+   rs_free(default_rc->stages->collection[STAGE_G_BUFFER]);
 
-   rs_free(rc->stages->collection[STAGE_SSAO]);
-   rs_free(rc->stages->collection[STAGE_SSAO_BLUR]);
+   rs_free(default_rc->stages->collection[STAGE_SSAO]);
+   rs_free(default_rc->stages->collection[STAGE_SSAO_BLUR]);
 
-   free_geometry_shader_data(rc, STAGE_SKYBOX);
-   rs_free(rc->stages->collection[STAGE_SKYBOX]);
+   free_geometry_shader_data(default_rc, STAGE_SKYBOX);
+   rs_free(default_rc->stages->collection[STAGE_SKYBOX]);
 
-   rs_free(rc->stages->collection[STAGE_SHADOWMAP]);
+   rs_free(default_rc->stages->collection[STAGE_SHADOWMAP]);
 
-   free_geometry_shader_data(rc, STAGE_SHADING);
-   rs_free(rc->stages->collection[STAGE_SHADING]);
+   free_geometry_shader_data(default_rc, STAGE_SHADING);
+   rs_free(default_rc->stages->collection[STAGE_SHADING]);
 
-   rs_free(rc->stages->collection[STAGE_BYPASS]);
+   rs_free(default_rc->stages->collection[STAGE_FXAA]);
+   rs_free(default_rc->stages->collection[STAGE_BYPASS]);
+   rs_free(default_rc->stages->collection[STAGE_PRIMITIVE]);
 
-   rs_free(rc->stages->collection[STAGE_PRIMITIVE]);
-
-   rc_free(rc, false);
+   rc_free(default_rc, false);
+   rc_free(editor_rc, false);
 
    mat4_free(view);
 

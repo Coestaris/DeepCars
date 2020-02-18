@@ -9,13 +9,20 @@
 
 #include <chipmunk/chipmunk.h>
 
+bool freed_phys;
 cpBody* spheres[SPHERES_COUNT];
+cpShape* sphere_shapes[SPHERES_COUNT];
 object_t* render_spheres[SPHERES_COUNT];
 object_t* render_car1;
 object_t* render_car2;
 
 cpBody* car1;
 cpBody* car2;
+
+cpShape* car1_shape;
+cpShape* car2_shape;
+cpShape* bound1_shape;
+cpShape* bound2_shape;
 
 cpSpace * space;
 cpFloat time_step = 1.0 / FPS_TO_LOCK;
@@ -72,7 +79,7 @@ void update_menu_phys(object_t* this)
    cpSpaceStep(space, time_step);
 }
 
-cpBody* createCar(cpVect pos)
+cpBody* createCar(cpVect pos, cpShape** shape)
 {
    cpFloat mass = 5;
    cpFloat moment = cpMomentForBox(mass, CAR_SIZE, CAR_SIZE / 2.0f);
@@ -80,14 +87,34 @@ cpBody* createCar(cpVect pos)
 
    cpBodySetPosition(car, pos);
 
-   cpShape* shape = cpSpaceAddShape(space, cpBoxShapeNew(car, CAR_SIZE, CAR_SIZE / 2.0f, 0));
-   cpShapeSetFriction(shape, 2);
+   *shape = cpSpaceAddShape(space, cpBoxShapeNew(car, CAR_SIZE, CAR_SIZE / 2.0f, 0));
+   cpShapeSetFriction(*shape, 2);
    return car;
+}
+
+void free_menu_phys(object_t* object)
+{
+   if(!freed_phys)
+   {
+      cpSpaceFree(space);
+
+      for (size_t i = 0; i < SPHERES_COUNT; i++)
+         cpShapeFree(sphere_shapes[i]);
+
+      cpShapeFree(car1_shape);
+      cpShapeFree(car2_shape);
+
+      cpShapeFree(bound1_shape);
+      cpShapeFree(bound2_shape);
+
+      freed_phys = true;
+   }
 }
 
 object_t* create_menu_phys(void)
 {
-  space = cpSpaceNew();
+   freed_phys = false;
+   space = cpSpaceNew();
 
    cpVect gravity = cpv(0, 0);
    cpSpaceSetGravity(space, gravity);
@@ -104,11 +131,10 @@ object_t* create_menu_phys(void)
       float y1 = bound_r * cosf(angle);
       float y2 = bound_r * cosf(angle + diff);
 
-      cpShape* shape = cpSpaceAddShape(space, cpSegmentShapeNew(cpSpaceGetStaticBody(space),
+      bound1_shape = cpSpaceAddShape(space, cpSegmentShapeNew(cpSpaceGetStaticBody(space),
                                                                 cpv(x1, y1), cpv(x2, y2), 0.0f));
-
-      cpShapeSetElasticity(shape, 1.0f);
-      cpShapeSetFriction(shape, 1.0f);
+      cpShapeSetElasticity(bound1_shape, 1.0f);
+      cpShapeSetFriction(bound1_shape, 1.0f);
    }
 
    bound_r = 13;
@@ -120,11 +146,11 @@ object_t* create_menu_phys(void)
       float y1 = bound_r * cosf(angle);
       float y2 = bound_r * cosf(angle + diff);
 
-      cpShape* shape = cpSpaceAddShape(space, cpSegmentShapeNew(cpSpaceGetStaticBody(space),
+      bound2_shape = cpSpaceAddShape(space, cpSegmentShapeNew(cpSpaceGetStaticBody(space),
                                                                 cpv(x1, y1), cpv(x2, y2), 0.0f));
 
-      cpShapeSetElasticity(shape, 1.0f);
-      cpShapeSetFriction(shape, 1.0f);
+      cpShapeSetElasticity(bound2_shape, 1.0f);
+      cpShapeSetFriction(bound2_shape, 1.0f);
    }
 
    //creating spheres
@@ -138,16 +164,17 @@ object_t* create_menu_phys(void)
       float yoff = rand() % 2 ? drand48() * 20 + 20 : -(drand48() * 20 + 20);
 
       cpBodySetPosition(ballBody, cpv(xoff,yoff));
-      cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, SPHERE_RADIUS / 2.0, cpvzero));
-      cpShapeSetFriction(ballShape, 0.4);
+      sphere_shapes[i] = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, SPHERE_RADIUS / 2.0, cpvzero));
+      cpShapeSetFriction(sphere_shapes[i], 0.4);
       spheres[i] = ballBody;
    }
 
-   car1 = createCar(cpv(25, 25));
-   car2 = createCar(cpv(-25, -25));
+   car1 = createCar(cpv(25, 25), &car1_shape);
+   car2 = createCar(cpv(-25, -25), &car2_shape);
 
    object_t* this = o_create();
    this->update_func = update_menu_phys;
+   this->destroy_func = free_menu_phys;
 
    return this;
 }

@@ -181,6 +181,7 @@ shader_t* setup_br(mat4 primitive_proj, float sigma, size_t kernel_len)
       snprintf(buff, sizeof(buff), "kernel[%li]", i);
       sh_nset_float(sh, buff, kernel[i]);
    }
+   free(kernel);
 
    sh_nset_int(sh, "tex", UNIFORM_BR.tex = 0);
    sh_nset_int(sh, "backTex", UNIFORM_BR.back_tex = 1);

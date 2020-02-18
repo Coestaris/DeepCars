@@ -20,6 +20,7 @@
 #define WIN_TITLE  "DeepCars"
 
 #define SCENEID_MENU 0
+#define SCENEID_EDITOR 1
 
 extern win_info_t* win;
 extern camera_t* camera;

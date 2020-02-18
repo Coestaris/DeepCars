@@ -12,6 +12,7 @@
 #include "../../rendering/renderer.h"
 #include "obj_menu_camera_mover.h"
 
+bool freed_regions;
 bool about;
 blurred_region_t* btn_run_br;
 blurred_region_t* btn_about_br;
@@ -25,6 +26,10 @@ texture_t* about_logo_texture;
 
 vec4 selected_color;
 vec4 default_color;
+bool changing_trans;
+float p = 1;
+float t = 1;
+float sprite_transparency;
 
 bool in_rec(blurred_region_t* br, vec2f_t pos)
 {
@@ -32,12 +37,6 @@ bool in_rec(blurred_region_t* br, vec2f_t pos)
       pos.x > br->x && pos.x < br->x + br->w &&
       pos.y > br->y && pos.y < br->y + br->h;
 }
-
-bool changing_trans;
-float p = 1;
-float t = 1;
-
-float sprite_transparency;
 
 void update_menu_drawer(object_t* this)
 {
@@ -123,7 +122,8 @@ void mouse_menu_drawer(object_t* this, uint32_t x, uint32_t y, uint32_t state, u
       {
          if (in_rec(btn_run_br, pos))
          {
-            puts("RUN");
+            rc_set_current(editor_rc);
+            scm_load_scene(SCENEID_EDITOR, true);
          }
          else if (in_rec(btn_about_br, pos))
          {
@@ -153,11 +153,29 @@ void mouse_menu_drawer(object_t* this, uint32_t x, uint32_t y, uint32_t state, u
    }
 }
 
+void free_menu_drawer(object_t* drawer)
+{
+   if(!freed_regions)
+   {
+      vec4_free(selected_color);
+      vec4_free(default_color);
+
+      free_br(btn_run_br);
+      free_br(btn_about_br);
+      free_br(btn_exit_br);
+
+      free_br(btn_back_br);
+      free_br(about_page);
+      freed_regions = true;
+   }
+}
+
 object_t* create_menu_drawer()
 {
+   freed_regions = false;
    about = false;
    object_t* this = o_create();
-   render_stage_t* rs = rc->stages->collection[STAGE_SHADING];
+   render_stage_t* rs = default_rc->stages->collection[STAGE_SHADING];
 
    selected_color = cvec4(0.5, 0.55, 0.5, 1);
    default_color = cvec4(0.3, 0.3, 0.3, 1);
@@ -203,6 +221,7 @@ object_t* create_menu_drawer()
 
    this->update_func = update_menu_drawer;
    this->mouse_event_func = mouse_menu_drawer;
+   this->destroy_func = free_menu_drawer;
 
    return this;
 }

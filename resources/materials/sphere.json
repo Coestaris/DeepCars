@@ -1,6 +1,9 @@
 {
     "mode": 2,
+    "map_diffuse" : "ball",
     "diffuse" : [1, 0.5, 0],
+
+    "map_specular" : "grass_specular",
     "specular" : [0.2, 0.2, 0.2],
     "shininess": 256,
     "ambient": [1,1,1]

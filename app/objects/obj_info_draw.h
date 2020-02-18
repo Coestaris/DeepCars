@@ -8,6 +8,7 @@
 #include "../../lib/object_include.h"
 #include "../win_defaults.h"
 
-object_t* create_info_drawer();
+object_t* create_info_drawer(void);
+void switch_text_drawer(void);
 
 #endif //DEEPCARS_OBJ_INFO_DRAW_H

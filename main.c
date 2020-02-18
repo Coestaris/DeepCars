@@ -38,7 +38,7 @@ float evaluate_func(genome_t* genome)
 
 int main(int argc, char* argv[])
 {
-   if(!oilFontInit()) {
+/*   if(!oilFontInit()) {
       oilPrintError();
       exit(1);
    }
@@ -115,15 +115,14 @@ int main(int argc, char* argv[])
 
    gn_free_bank();
 
-   oilFontFree(font);
+   oilFontFree(font);*/
 
-/*
-   gn_set_seed(draw_seed);
+/*   gn_set_seed(draw_seed);
    gn_write(gn1, "p1.bmp", font);*/
-/*   app_init_graphics();
+   app_init_graphics();
    app_load_resources();
 
    app_run();
 
-   app_fin();*/
+   app_fin();
 }

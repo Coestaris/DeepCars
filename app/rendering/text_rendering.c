@@ -19,8 +19,8 @@ mat4 primitive_proj;
 void bind_default_font(font_t* font, void* data)
 {
    struct _font_data fd = *(struct _font_data*)data;
-   sh_set_vec4(UNIFORM_FONT.color, fd.color);
-   sh_set_vec3(UNIFORM_FONT.borderColor, fd.border_color);
+   //sh_set_vec4(UNIFORM_FONT.color, fd.color);
+   //sh_set_vec3(UNIFORM_FONT.borderColor, fd.border_color);
    sh_set_vec4v(UNIFORM_FONT.params,
                 fd.color_off, fd.color_k,
                 fd.back_off, fd.back_k);

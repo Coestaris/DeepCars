@@ -5,11 +5,11 @@ in vec2 TexCoord;
 
 // parameters (you'd probably want to use them as uniforms to more easily tweak the effect)
 #define kernelSize 64
-#define radius  3
+#define radius  2
 #define bias 0.12
 
 // tile noise texture over screen based on screen dimensions divided by noise size
-const vec2 noiseScale = vec2(1200.0/1.0, 800.0/1.0);
+const vec2 noiseScale = vec2(1200.0/1.5, 800.0/1.5);
 
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;

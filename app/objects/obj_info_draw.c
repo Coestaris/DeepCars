@@ -14,35 +14,45 @@ char buff[10][70];
 float last_fps;
 font_data_t font_data;
 font_data_t sec_font_data;
+bool draw;
+
+void switch_text_drawer(void)
+{
+   draw = !draw;
+}
 
 void update_drawer(object_t* this)
 {
-   list_t* objects = u_get_objects();
-   render_chain_t* chain = rc_get_current();
-   float fps = u_get_fps();
-
-   if(fps != last_fps)
+   if(draw)
    {
-      snprintf(buff[0], sizeof(buff[0]), "%s. FPS: %.3f (%i objects)\n",
-               get_ssao_stage_string(), (float)fps, (int)objects->count);
+      list_t* objects = u_get_objects();
+      render_chain_t* chain = rc_get_current();
+      float fps = u_get_fps();
 
-      for(size_t i = 0; i < chain->stages->count; i++)
+      if (fps != last_fps)
       {
-         render_stage_t* stage = chain->stages->collection[i];
-         snprintf(buff[i + 1], sizeof(buff[i + 1]), "%i. %s: %.3f ms",
-                  (int)i, stage->name, stage->render_time);
-      }
-   }
-   last_fps = fps;
+         snprintf(buff[0], sizeof(buff[0]), "%s. FPS: %.3f (%i objects)\n",
+                  get_ssao_stage_string(), (float) fps, (int) objects->count);
 
-   for(size_t i = 0; i < chain->stages->count + 1; i++)
-      draw_monospace_string(0, i == 0 ? &font_data : &sec_font_data,
-            vec2f(0,16 * i + (i != 0 ? 15 : 0)), i == 0 ? vec2f(0.5, 0.5) : vec2f(0.3, 0.3),
-            buff[i]);
+         for (size_t i = 0; i < chain->stages->count; i++)
+         {
+            render_stage_t* stage = chain->stages->collection[i];
+            snprintf(buff[i + 1], sizeof(buff[i + 1]), "%i. %s: %.3f ms",
+                     (int) i, stage->name, stage->render_time);
+         }
+      }
+      last_fps = fps;
+
+      for (size_t i = 0; i < chain->stages->count + 1; i++)
+         draw_monospace_string(0, i == 0 ? &font_data : &sec_font_data,
+                               vec2f(0, 16 * i + (i != 0 ? 15 : 0)), i == 0 ? vec2f(0.5, 0.5) : vec2f(0.3, 0.3),
+                               buff[i]);
+   }
 }
 
 object_t* create_info_drawer()
 {
+   draw = true;
    font_data.color = COLOR_BLACK;
    font_data.color_off = 0.1f;
    font_data.color_k = 9.0f;

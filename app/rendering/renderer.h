@@ -17,7 +17,8 @@
 #define STAGE_BYPASS 7
 #define STAGE_PRIMITIVE 8
 
-extern render_chain_t* rc;
+extern render_chain_t* default_rc;
+extern render_chain_t* editor_rc;
 extern list_t* blurred_regions;
 
 char* get_ssao_stage_string();

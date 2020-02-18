@@ -71,7 +71,6 @@ if __name__ == "__main__":
         sp.get_packer(), 
         tp.get_texture_packer(),
         tp.get_cubemap_packer(),
-        mp.get_packer(),
         mtp.get_packer(),
         fp.get_packer()
     ]

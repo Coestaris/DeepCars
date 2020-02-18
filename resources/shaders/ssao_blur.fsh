@@ -5,7 +5,7 @@ in vec2 TexCoord;
 
 uniform sampler2D ssaoInput;
 
-const int radius = 1;
+const int radius = 2;
 
 void main()
 {

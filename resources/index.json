@@ -17,6 +17,8 @@
     "textures" : 
     [
         { "fn" : "grass.png",               "name" : "grass"    },
+        { "fn" : "grass_specular.png",      "name" : "grass_specular"    },
+        { "fn" : "ball.png",      "name" : "ball"    },
         { "fn" : "menu/btn_run_editor.png", "name" : "btn_run_editor" },
         { "fn" : "menu/btn_about.png",      "name" : "btn_about" },
         { "fn" : "menu/btn_exit.png",       "name" : "btn_exit" },

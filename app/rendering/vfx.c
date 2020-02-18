@@ -72,6 +72,13 @@ blurred_region_t* create_br(win_info_t* info, vec2f_t pos, vec2f_t size, vec2f_t
    return br;
 }
 
+void free_br(blurred_region_t* br)
+{
+   //if(br->gray_color)
+      //vec4_free(br->gray_color);
+   free(br);
+}
+
 float normpdf(float x, float sigma)
 {
    return 0.39894*exp(-0.5*x*x/(sigma*sigma))/sigma;
