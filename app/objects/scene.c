@@ -4,19 +4,19 @@
 
 #include "../../lib/scene.h"
 #include "../../lib/resources/rmanager.h"
-#include "obj_dummy.h"
-#include "obj_camera_control.h"
-#include "../win_defaults.h"
-#include "obj_info_draw.h"
 #include "../rendering/renderer.h"
+#include "../win_defaults.h"
+#include "obj_dummy.h"
+#include "obj_info_draw.h"
+#include "obj_default_bind_handler.h"
 #include "menu/obj_menu_drawer.h"
 #include "menu/obj_menu_camera_mover.h"
-#include "obj_default_bind_handler.h"
 #include "menu/obj_menu_phys.h"
+#include "editor/obj_editor_drawer.h"
 
 void setup_editor_objects(scene_t* scene)
 {
-
+   list_push(scene->startup_objects, create_editor_drawer());
 }
 
 void setup_menu_objects(scene_t* scene)

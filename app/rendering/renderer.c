@@ -378,7 +378,6 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    ssao_kernel = generate_kernel(KERNEL_SIZE);
    ssao_dummy_texture = mt_create_colored_tex(COLOR_WHITE);
    view = cmat4();
-   int msaa = 2;
 
    shader_t* g_buffer_shader = setup_g_buffer(proj);
    shader_t* ssao_shader = setup_ssao(ssao_kernel, proj);
@@ -388,7 +387,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shader_t* shading_shader = setup_shading();
    shader_t* fxaa_shader = setup_fxaa(0.3f, 8, 128, 8, info);
    shader_t* gamma_shader = setup_gamma();
-   br_shader = setup_br(primitive_proj, 27, 11);
+   br_shader = setup_br(primitive_proj, 27, 7);
    setup_sprite(primitive_proj);
 
    render_stage_t* g_buffer = rs_create("gbuffer", RM_GEOMETRY, g_buffer_shader);
@@ -490,12 +489,11 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    skybox_data->buffmat = cmat4();
    skybox_data->camera = camera;
 
-
    render_stage_t* shadowmap = rs_create("shadow_map", RM_GEOMETRY, shadowmap_shader);
    shadowmap->attachments = TF_DEPTH;
    //depth
-   shadowmap->depth_format.tex_width = 2048;
-   shadowmap->depth_format.tex_height = 2048;
+   shadowmap->depth_format.tex_width = 1024;
+   shadowmap->depth_format.tex_height = 1024;
    shadowmap->depth_format.tex_wrapping_t = GL_CLAMP_TO_BORDER;
    shadowmap->depth_format.tex_wrapping_s = GL_CLAMP_TO_BORDER;
    shadowmap->depth_format.tex_border_color[0] = 1;
@@ -557,7 +555,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    list_push(default_rc->stages, primitive);
 
    editor_rc = rc_create();
-   list_push(default_rc->stages, primitive);
+   list_push(editor_rc->stages, primitive);
 
    rc_build(default_rc);
    rc_build(editor_rc);

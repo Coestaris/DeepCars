@@ -62,7 +62,10 @@ void update_menu_phys(object_t* this)
    for(size_t i = 0; i < SPHERES_COUNT; i++)
    {
       cpVect pos = cpBodyGetPosition(spheres[i]);
-      render_spheres[i]->position = vec3f(pos.x, 0, pos.y);
+      cpVect speed = cpBodyGetVelocity(spheres[i]);
+      render_spheres[i]->position = vec3f(pos.x, SPHERE_RADIUS / 2.0f, pos.y);
+      render_spheres[i]->rotation.x += -speed.y / 120;
+      render_spheres[i]->rotation.y += -speed.x / 120;
    }
 
    cpVect pos1 = cpBodyGetPosition(car1);
