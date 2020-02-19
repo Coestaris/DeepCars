@@ -18,14 +18,37 @@
     [
         { "fn" : "grass.png",               "name" : "grass"    },
         { "fn" : "grass_specular.png",      "name" : "grass_specular"    },
-        { "fn" : "ball.png",      "name" : "ball"    },
+        { "fn" : "ball.png",                "name" : "ball" },
         { "fn" : "menu/btn_run_editor.png", "name" : "btn_run_editor" },
         { "fn" : "menu/btn_about.png",      "name" : "btn_about" },
         { "fn" : "menu/btn_exit.png",       "name" : "btn_exit" },
         { "fn" : "menu/logo.png",           "name" : "logo" },
         { "fn" : "menu/about_logo.png",     "name" : "about_logo" },
         { "fn" : "menu/btn_back.png",       "name" : "btn_back" },
-        { "fn" : "menu/about.png",          "name" : "about" }
+        { "fn" : "menu/about.png",          "name" : "about" },
+
+        { "fn" : "editor/toolbar_selected.png",             "name" : "editor_toolbar_selected" },
+
+        { "fn" : "editor/run.png",                          "name" : "editor_run" },
+        { "fn" : "editor/run_selected.png",                 "name" : "editor_run_selected" },
+        { "fn" : "editor/toolbar_eraser.png",               "name" : "editor_toolbar_eraser" },
+        { "fn" : "editor/toolbar_eraser_clicked.png",       "name" : "editor_toolbar_eraser_clicked" },
+        { "fn" : "editor/toolbar_eraser_selected.png",      "name" : "editor_toolbar_eraser_selected" },
+        { "fn" : "editor/toolbar_grid.png",                 "name" : "editor_toolbar_grid" },
+        { "fn" : "editor/toolbar_grid_clicked.png",         "name" : "editor_toolbar_grid_clicked" },
+        { "fn" : "editor/toolbar_grid_selected.png",        "name" : "editor_toolbar_grid_selected" },
+        { "fn" : "editor/toolbar_obstacle.png",             "name" : "editor_toolbar_obstacle" },
+        { "fn" : "editor/toolbar_obstacle_clicked.png",     "name" : "editor_toolbar_obstacle_clicked" },
+        { "fn" : "editor/toolbar_obstacle_selected.png",    "name" : "editor_toolbar_obstacle_selected" },
+        { "fn" : "editor/toolbar_slip.png",                 "name" : "editor_toolbar_slip" },
+        { "fn" : "editor/toolbar_slip_clicked.png",         "name" : "editor_toolbar_slip_clicked" },
+        { "fn" : "editor/toolbar_slip_selected.png",        "name" : "editor_toolbar_slip_selected" },
+        { "fn" : "editor/toolbar_start.png",                "name" : "editor_toolbar_start" },
+        { "fn" : "editor/toolbar_start_clicked.png",        "name" : "editor_toolbar_start_clicked" },
+        { "fn" : "editor/toolbar_start_selected.png",       "name" : "editor_toolbar_start_selected" },
+        { "fn" : "editor/toolbar_wall.png",                 "name" : "editor_toolbar_wall" },
+        { "fn" : "editor/toolbar_wall_clicked.png",         "name" : "editor_toolbar_wall_clicked" },
+        { "fn" : "editor/toolbar_wall_selected.png",        "name" : "editor_toolbar_wall_selected" }
     ],
 
     "cubemaps": 

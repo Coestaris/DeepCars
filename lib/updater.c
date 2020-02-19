@@ -77,6 +77,15 @@ void u_close(void)
 // Looping through all objects and draws it
 void u_draw_func(void)
 {
+   if(current_scene->backcolor)
+   {
+      GL_PCALL(glClearColor(
+            current_scene->backcolor[0],
+            current_scene->backcolor[1],
+            current_scene->backcolor[2],
+            current_scene->backcolor[3]));
+   }
+
    render_chain_t* chain = rc_get_current();
    list_t* stages = chain->stages;
 
@@ -351,7 +360,7 @@ void u_start_loop(win_info_t* info)
    // main app loop
    while (1)
    {
-      // check close condition
+      // CHECK close condition
       if (closed) break;
       // if there's no pending events
       if (XPending(info->display) == 0)

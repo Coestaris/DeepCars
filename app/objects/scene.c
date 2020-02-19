@@ -16,6 +16,7 @@
 
 void setup_editor_objects(scene_t* scene)
 {
+   scene->backcolor = cvec4(0.50, 0.56640625, 0.34765625, 0);
    list_push(scene->startup_objects, create_editor_drawer());
 }
 
@@ -80,7 +81,7 @@ void setup_menu_objects(scene_t* scene)
    //list_push(scene->startup_objects, create_camera_control());
    list_push(scene->startup_objects, create_menu_drawer());
    list_push(scene->startup_objects, create_menu_phys());
-   list_push(scene->startup_objects, create_info_drawer());
+   //list_push(scene->startup_objects, create_info_drawer());
 }
 
 void setup_menu_shadow_light(scene_t* scene)

@@ -55,7 +55,7 @@ void rm_init(void)
 //
 // rm_get()
 //
-void* rm_get(resource_type_t type, uint32_t id)
+void* rm_get_try(resource_type_t type, uint32_t id)
 {
    switch(type)
    {
@@ -82,15 +82,13 @@ void* rm_get(resource_type_t type, uint32_t id)
                return (((struct _font_node*)fonts->collection[i])->font);
             }
    }
-   RM_ERROR("Unable to find %s with id \"%i\"",
-            type == TEXTURE ? "texture" : (type == MODEL ? "model" : "material"),
-            id);
+   return NULL;
 }
 
 //
 // rm_getn()
 //
-void* rm_getn(resource_type_t type, const char* name)
+void* rm_getn_try(resource_type_t type, const char* name)
 {
    switch(type)
    {
@@ -119,10 +117,28 @@ void* rm_getn(resource_type_t type, const char* name)
             }
          break;
    }
+   return NULL;
+}
 
-   RM_ERROR("Unable to find %s with name \"%s\"",
-         type == TEXTURE ? "texture" : (type == MODEL ? "model" : "material"),
-         name);
+
+void* rm_get(resource_type_t type, uint32_t id)
+{
+   void* ptr = rm_get_try(type, id);
+   if(!ptr)
+      RM_ERROR("Unable to find %s with id \"%i\"",
+           type == TEXTURE ? "texture" : (type == MODEL ? "model" : "material"),
+           id);
+   return ptr;
+}
+
+void* rm_getn(resource_type_t type, const char* name)
+{
+   void* ptr = rm_getn_try(type, name);
+   if(!ptr)
+      RM_ERROR("Unable to find %s with name \"%s\"",
+           type == TEXTURE ? "texture" : (type == MODEL ? "model" : "material"),
+           name);
+   return ptr;
 }
 
 //

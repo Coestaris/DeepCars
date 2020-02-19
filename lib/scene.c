@@ -18,6 +18,7 @@ scene_t* sc_create(uint32_t id)
    scene_t* scene = malloc(sizeof(scene_t));
    scene->id = id;
    scene->shadow_light = NULL;
+   scene->backcolor = NULL;
    scene->lights = list_create();
    scene->startup_objects = list_create();
 
@@ -35,6 +36,9 @@ void sc_free(scene_t* scene)
 
    for (size_t i = 0; i < scene->startup_objects->count; i++)
       o_free((object_t*) scene->startup_objects->collection[i]);
+
+   if(scene->backcolor)
+      vec4_free(scene->backcolor);
 
    list_free(scene->lights);
    list_free(scene->startup_objects);

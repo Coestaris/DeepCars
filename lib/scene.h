@@ -27,6 +27,8 @@ typedef struct _scene
 
    shadow_light_t* shadow_light;
 
+   vec4 backcolor;
+
 } scene_t;
 
 // scene_t constructor

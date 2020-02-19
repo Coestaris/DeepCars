@@ -167,6 +167,7 @@ void free_menu_drawer(object_t* drawer)
       free_br(btn_back_br);
       free_br(about_page);
       freed_regions = true;
+      blurred_regions->count = 0;
    }
 }
 
