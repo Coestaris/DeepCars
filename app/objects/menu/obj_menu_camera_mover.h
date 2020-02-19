@@ -10,6 +10,7 @@
 static const float default_camera_y = 49.372597f;
 static const float default_camera_r = 102;
 
+float smootherstep(float edge0, float edge1, float x);
 void update_camera(float new_y, float new_r);
 
 object_t* create_menu_camera_mover();

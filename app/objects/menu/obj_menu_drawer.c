@@ -23,10 +23,13 @@ blurred_region_t* about_page;
 
 texture_t* logo_texture;
 texture_t* about_logo_texture;
+texture_t* black_texture;
 
 vec4 selected_color;
 vec4 default_color;
 bool changing_trans;
+bool exiting;
+bool going_editor;
 float p = 1;
 float t = 1;
 float sprite_transparency;
@@ -41,6 +44,26 @@ bool in_rec(blurred_region_t* br, vec2f_t pos)
 void update_menu_drawer(object_t* this)
 {
    vec2f_t mouse = u_get_mouse_pos();
+
+   if(exiting || going_editor)
+   {
+      p = 1 - smootherstep(0,0, t += exiting ? 0.03f : 0.02f);
+      gr_pq_push_sprite(5, black_texture,
+                        vec2f(0, 0),
+                        vec2f(default_win->w,default_win->h), vec2f(0, 0), 0, true, &p);
+
+      if(p <= 0)
+      {
+         if(exiting)
+            u_close();
+         else
+         {
+            rc_set_current(editor_rc);
+            scm_load_scene(SCENEID_EDITOR, true);
+         }
+         return;
+      }
+   }
 
    if((!about && ((!changing_trans) || (changing_trans && t != 0))) || (about && changing_trans && p > 0))
       gr_pq_push_sprite(0, logo_texture,
@@ -115,15 +138,16 @@ void update_menu_drawer(object_t* this)
 
 void mouse_menu_drawer(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
 {
-   if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT)
+   if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && !exiting && !going_editor)
    {
       vec2f_t pos = vec2f(x, y);
       if(!about)
       {
          if (in_rec(btn_run_br, pos))
          {
-            rc_set_current(editor_rc);
-            scm_load_scene(SCENEID_EDITOR, true);
+            p = 1;
+            t = 0;
+            going_editor = true;
          }
          else if (in_rec(btn_about_br, pos))
          {
@@ -136,7 +160,9 @@ void mouse_menu_drawer(object_t* this, uint32_t x, uint32_t y, uint32_t state, u
          }
          else if (in_rec(btn_exit_br, pos))
          {
-            u_close();
+            p = 1;
+            t = 0;
+            exiting = true;
          }
       }
       else
@@ -173,6 +199,7 @@ void free_menu_drawer(object_t* drawer)
 
 object_t* create_menu_drawer()
 {
+   black_texture = rm_getn(TEXTURE, "__generated_mt_grass_trans_0.0_0.0_0.0");
    freed_regions = false;
    about = false;
    object_t* this = o_create();
