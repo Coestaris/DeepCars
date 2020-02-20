@@ -38,17 +38,11 @@ bool toolbar_wall_clicked;
 
 float editor_p = 0;
 
-enum {
-  ERASER,
-  OBSTACLE,
-  SLIP,
-  START,
-  WALL,
-
-} toolbar_state;
+enum _toolbar_state toolbar_state;
 vec2f_t selected_toolbar_state_pos;
 size_t grid_state;
 size_t current_grid_size;
+void (*field_click_func)(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse);
 
 #define grid_size 256
 
@@ -104,7 +98,7 @@ void create_grid(size_t size)
 void draw(texture_t* texture, vec2f_t position)
 {
    float a = 1;
-   gr_pq_push_sprite(5, texture, position, vec2f(1, 1),
+   gr_pq_push_sprite(4, texture, position, vec2f(1, 1),
                      vec2f(0, 0), 0, default_sprite_renderer, &a);
 }
 
@@ -124,7 +118,7 @@ void update_editor(object_t* this)
    if(editor_p <= 1)
    {
       editor_p += 0.03f;
-      gr_pq_push_sprite(9, editor_black_texture,
+      gr_pq_push_sprite(4, editor_black_texture,
                         vec2f(0, 0),
                         vec2f(default_win->w,default_win->h), vec2f(0, 0), 0, default_sprite_renderer, &editor_p);
    }
@@ -162,7 +156,7 @@ void update_editor(object_t* this)
          float screen_x = x * (float)grid_size;
          float screen_y = y * (float)grid_size;
 
-         draw_depth(2, grid, vec2f(screen_x, screen_y));
+         draw_depth(1, grid, vec2f(screen_x, screen_y));
       }
    }
 }
@@ -180,8 +174,7 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
          selected_toolbar_state_pos = toolbar_eraser_pos;
       }
    }
-
-   if(CHECK(toolbar_grid_pos, toolbar_grid_texture[grid_state][0]))
+   else if(CHECK(toolbar_grid_pos, toolbar_grid_texture[grid_state][0]))
    {
       toolbar_grid_clicked = state == MOUSE_PRESSED && mouse == MOUSE_LEFT;
       if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT)
@@ -202,18 +195,16 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
             grid = NULL;
       }
    }
-
-   if(CHECK(toolbar_obstacle_pos, toolbar_obstacle_texture[0]))
+   else if(CHECK(toolbar_obstacle_pos, toolbar_obstacle_texture[0]))
    {
       toolbar_obstacle_clicked = state == MOUSE_PRESSED && mouse == MOUSE_LEFT;
       if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT)
       {
          toolbar_state = OBSTACLE;
          selected_toolbar_state_pos = toolbar_obstacle_pos;
+      }
    }
-   }
-
-   if(CHECK(toolbar_slip_pos, toolbar_slip_texture[0]))
+   else if(CHECK(toolbar_slip_pos, toolbar_slip_texture[0]))
    {
       toolbar_slip_clicked = state == MOUSE_PRESSED && mouse == MOUSE_LEFT;
       if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT)
@@ -222,25 +213,27 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
          selected_toolbar_state_pos = toolbar_slip_pos;
       }
    }
-
-   if(CHECK(toolbar_start_pos, toolbar_start_texture[0]))
+   else if(CHECK(toolbar_start_pos, toolbar_start_texture[0]))
    {
       toolbar_start_clicked = state == MOUSE_PRESSED && mouse == MOUSE_LEFT;
       if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT)
       {
-         toolbar_state = ERASER;
+         toolbar_state = START;
          selected_toolbar_state_pos = toolbar_start_pos;
       }
    }
-
-   if(CHECK(toolbar_wall_pos, toolbar_wall_texture[0]))
+   else if(CHECK(toolbar_wall_pos, toolbar_wall_texture[0]))
    {
       toolbar_wall_clicked = state == MOUSE_PRESSED && mouse == MOUSE_LEFT;
       if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT)
       {
-         toolbar_state = ERASER;
+         toolbar_state = WALL;
          selected_toolbar_state_pos = toolbar_wall_pos;
       }
+   }
+   else
+   {
+      field_click_func(x, y, state, mouse);
    }
 }
 
@@ -257,6 +250,7 @@ object_t* create_editor_drawer(void)
    toolbar_slip_pos = vec2f(200 ,752);
    create_grid(32);
    grid_state = 2;
+   current_grid_size = 32;
 
    toolbar_selected = rm_getn(TEXTURE, "editor_toolbar_selected");
 
@@ -299,7 +293,7 @@ object_t* create_editor_drawer(void)
    toolbar_wall_texture[1] = rm_getn(TEXTURE, "editor_toolbar_wall_selected");
    toolbar_wall_texture[2] = rm_getn(TEXTURE, "editor_toolbar_wall_clicked");
 
-   toolbar_state = ERASER;
+   toolbar_state = WALL;
    selected_toolbar_state_pos = toolbar_wall_pos;
 
    object_t* this = o_create();

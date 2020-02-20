@@ -350,8 +350,7 @@ void u_start_loop(win_info_t* info)
    XEvent event;
    XSelectInput(info->display, info->win,
        KeyPressMask      | KeyReleaseMask   | ButtonPressMask | ButtonReleaseMask    |
-       PointerMotionMask | ButtonMotionMask | ExposureMask    | VisibilityChangeMask |
-       ResizeRedirectMask);
+       PointerMotionMask | ButtonMotionMask | ExposureMask);
 
    Atom wmDelete = XInternAtom(info->display, "WM_DELETE_WINDOW", True);
    XSetWMProtocols(info->display, info->win, &wmDelete, 1);

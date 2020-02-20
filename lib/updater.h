@@ -23,6 +23,8 @@
 #define MOUSE_LEFT 1
 #define MOUSE_MIDDLE 2
 #define MOUSE_RIGHT 3
+#define MOUSE_WHEELUP 4
+#define MOUSE_WHEELDOWN 5
 
 // Average FPS count to be locked
 #define FPS_TO_LOCK 60.0

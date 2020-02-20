@@ -17,8 +17,8 @@
 #include "render_stage.h"
 #include "../../resources/font.h"
 
-#define MAX_DEPTH 10
-#define MAX_QUEUE_COUNT 50
+#define MAX_DEPTH 5
+#define MAX_QUEUE_COUNT 100
 
 typedef struct _sprite_renderer
 {
