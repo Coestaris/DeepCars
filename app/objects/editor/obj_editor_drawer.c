@@ -7,6 +7,7 @@
 #endif
 #include "obj_editor_drawer.h"
 #include "../../../lib/resources/rmanager.h"
+#include "../../rendering/renderer.h"
 
 texture_t* run_button_texture[2];
 texture_t* toolbar_eraser_texture[3];
@@ -104,14 +105,14 @@ void draw(texture_t* texture, vec2f_t position)
 {
    float a = 1;
    gr_pq_push_sprite(5, texture, position, vec2f(1, 1),
-                     vec2f(0, 0), 0, true, &a);
+                     vec2f(0, 0), 0, default_sprite_renderer, &a);
 }
 
 void draw_depth(size_t depth, texture_t* texture, vec2f_t position)
 {
    float a = 1;
    gr_pq_push_sprite(depth, texture, position, vec2f(1, 1),
-                     vec2f(0, 0), 0, true, &a);
+                     vec2f(0, 0), 0, default_sprite_renderer, &a);
 }
 
 #define CHECK(position, texture)                           \
@@ -125,7 +126,7 @@ void update_editor(object_t* this)
       editor_p += 0.03f;
       gr_pq_push_sprite(9, editor_black_texture,
                         vec2f(0, 0),
-                        vec2f(default_win->w,default_win->h), vec2f(0, 0), 0, true, &editor_p);
+                        vec2f(default_win->w,default_win->h), vec2f(0, 0), 0, default_sprite_renderer, &editor_p);
    }
 
    vec2f_t pos = u_get_mouse_pos();

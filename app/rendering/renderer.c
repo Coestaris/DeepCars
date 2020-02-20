@@ -41,6 +41,11 @@ int fxaa_edges = 0;
 
 mat4 view;
 
+list_t* blurred_regions;
+sprite_renderer_t* default_sprite_renderer;
+primitive_renderer_t* default_primitive_renderer;
+shader_t* br_shader;
+
 void switch_fxaa(void)
 {
    fxaa_state = !fxaa_state;
@@ -338,8 +343,6 @@ void unbind_primitive(render_stage_t* stage)
    glEnable(GL_DEPTH_TEST);
 }
 
-list_t* blurred_regions;
-shader_t* br_shader;
 void draw_primitives(render_stage_t* stage)
 {
    render_stage_t* rs = default_rc->stages->collection[STAGE_SHADING];
@@ -367,6 +370,18 @@ void draw_primitives(render_stage_t* stage)
    gr_pq_flush();
 }
 
+void bind_sprite_renderer(sprite_renderer_t* this, mat4 transform, void* data)
+{
+   float trans = *((float*)data);
+   sh_set_mat4(UNIFORM_SPRITE.model, transform);
+   sh_set_float(UNIFORM_SPRITE.transparency, trans);
+}
+
+void bind_line_renderer(struct _primitive_renderer* this, float width, vec4 color, void* data)
+{
+   sh_set_vec3(UNIFORM_PRIMITIVE.color, color);
+}
+
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 {
    blurred_regions = list_create();
@@ -388,7 +403,14 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shader_t* fxaa_shader = setup_fxaa(0.3f, 8, 128, 8, info);
    shader_t* gamma_shader = setup_gamma();
    br_shader = setup_br(primitive_proj, 27, 7);
-   setup_sprite(primitive_proj);
+   shader_t* sprite_shader = setup_sprite(primitive_proj);
+   shader_t* primitive_shader = setup_primitive(primitive_proj);
+
+   default_sprite_renderer = gr_create_sprite_renderer(sprite_shader);
+   default_sprite_renderer->bind_func = bind_sprite_renderer;
+
+   default_primitive_renderer = gr_create_primitive_renderer(primitive_shader);
+   default_primitive_renderer->bind_line_func = bind_line_renderer;
 
    render_stage_t* g_buffer = rs_create("gbuffer", RM_GEOMETRY, g_buffer_shader);
    g_buffer->attachments = TF_COLOR0 | TF_COLOR1 | TF_COLOR2 | TF_COLOR3 | TF_DEPTH;
@@ -571,6 +593,9 @@ void free_geometry_shader_data(render_chain_t* render_chain, size_t index)
 
 void free_stages(void)
 {
+   free(default_primitive_renderer);
+   free(default_sprite_renderer);
+
    free_geometry_shader_data(default_rc, STAGE_G_BUFFER);
    rs_free(default_rc->stages->collection[STAGE_G_BUFFER]);
 

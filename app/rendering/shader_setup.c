@@ -223,5 +223,17 @@ shader_t* setup_fxaa(float threshold, float mul_r, float min_r, float max_span, 
    sh_use(NULL);
 
    return sh;
+}
 
+shader_t* setup_primitive(mat4 primitive_proj)
+{
+   shader_t* sh = s_getn_shader("primitive");
+
+   UNIFORM_PRIMITIVE.color = get_loc(sh, "primitive_color");
+
+   sh_use(sh);
+   sh_nset_mat4(sh, "projection", primitive_proj);
+   sh_use(NULL);
+
+   return sh;
 }

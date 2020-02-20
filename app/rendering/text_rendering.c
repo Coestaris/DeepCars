@@ -29,12 +29,12 @@ void bind_default_font(font_t* font, void* data)
 
 void draw_default_string(uint8_t depth, font_data_t* data, vec2f_t pos, vec2f_t scale, char* str)
 {
-   gr_pq_push_string(depth, default_font, pos, scale, str, true, data);
+   gr_pq_push_string(depth, default_font, pos, scale, str, data);
 }
 
 inline void draw_monospace_string(uint8_t depth, font_data_t* data, vec2f_t pos, vec2f_t scale, char* str)
 {
-   gr_pq_push_string(depth, monospace_font, pos, scale, str, true, data);
+   gr_pq_push_string(depth, monospace_font, pos, scale, str, data);
 }
 
 void init_fonts(win_info_t* info)

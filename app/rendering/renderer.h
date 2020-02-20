@@ -6,6 +6,7 @@
 #define DEEPCARS_RENDERER_H
 
 #include "../../lib/graphics/rendering/render_chain.h"
+#include "../../lib/object_include.h"
 
 #define STAGE_G_BUFFER 0
 #define STAGE_SSAO 1
@@ -16,6 +17,9 @@
 #define STAGE_FXAA 6
 #define STAGE_BYPASS 7
 #define STAGE_PRIMITIVE 8
+
+extern sprite_renderer_t* default_sprite_renderer;
+extern primitive_renderer_t* default_primitive_renderer;
 
 extern render_chain_t* default_rc;
 extern render_chain_t* editor_rc;

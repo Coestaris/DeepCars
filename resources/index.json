@@ -1,17 +1,18 @@
 {
     "shaders" : 
     [
-        { "vertex" : "g_buffer.vsh",          "fragment" : "g_buffer.fsh",         "name":  "g_buffer"  },
-        { "vertex" : "2d_shaders/bypass.vsh", "fragment" : "ssao.fsh",             "name":  "ssao"      },
-        { "vertex" : "2d_shaders/bypass.vsh", "fragment" : "ssao_blur.fsh",        "name":  "ssao_blur" },
-        { "vertex" : "skybox.vsh",            "fragment" : "skybox.fsh",           "name":  "skybox"    },
-        { "vertex" : "shadowmap.vsh",         "fragment" : "shadowmap.fsh",        "name":  "shadowmap" },
-        { "vertex" : "shading.vsh",           "fragment" : "shading.fsh",          "name":  "shading"   },
-        { "vertex" : "2d_shaders/bypass.vsh", "fragment" : "fxaa.fsh",             "name":  "fxaa"      },
-        { "vertex" : "2d_shaders/bypass.vsh", "fragment" : "gamma.fsh",            "name":  "gamma"     },
-        { "vertex" : "2d_shaders/font.vsh",   "fragment" : "2d_shaders/font.fsh",  "name":  "font"      },
+        { "vertex" : "g_buffer.vsh",                  "fragment" : "g_buffer.fsh",                  "name": "g_buffer"  },
+        { "vertex" : "2d_shaders/bypass.vsh",         "fragment" : "ssao.fsh",                      "name": "ssao"      },
+        { "vertex" : "2d_shaders/bypass.vsh",         "fragment" : "ssao_blur.fsh",                 "name": "ssao_blur" },
+        { "vertex" : "skybox.vsh",                    "fragment" : "skybox.fsh",                    "name": "skybox"    },
+        { "vertex" : "shadowmap.vsh",                 "fragment" : "shadowmap.fsh",                 "name": "shadowmap" },
+        { "vertex" : "shading.vsh",                   "fragment" : "shading.fsh",                   "name": "shading"   },
+        { "vertex" : "2d_shaders/bypass.vsh",         "fragment" : "fxaa.fsh",                      "name": "fxaa"      },
+        { "vertex" : "2d_shaders/bypass.vsh",         "fragment" : "gamma.fsh",                     "name": "gamma"     },
+        { "vertex" : "2d_shaders/font.vsh",           "fragment" : "2d_shaders/font.fsh",           "name": "font"      },
         { "vertex" : "2d_shaders/blurred_region.vsh", "fragment" : "2d_shaders/blurred_region.fsh", "name": "blurred_region" },
-        { "vertex" : "2d_shaders/sprite.vsh",         "fragment" : "2d_shaders/sprite.fsh",         "name": "sprite" }
+        { "vertex" : "2d_shaders/sprite.vsh",         "fragment" : "2d_shaders/sprite.fsh",         "name": "sprite" },
+        { "vertex" : "2d_shaders/primitive.vsh",      "fragment" : "2d_shaders/primitive.fsh",      "name": "primitive" }
     ],
 
     "textures" : 

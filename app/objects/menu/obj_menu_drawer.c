@@ -50,7 +50,7 @@ void update_menu_drawer(object_t* this)
       p = 1 - smootherstep(0,0, t += exiting ? 0.03f : 0.02f);
       gr_pq_push_sprite(5, black_texture,
                         vec2f(0, 0),
-                        vec2f(default_win->w,default_win->h), vec2f(0, 0), 0, true, &p);
+                        vec2f(default_win->w,default_win->h), vec2f(0, 0), 0, default_sprite_renderer, &p);
 
       if(p <= 0)
       {
@@ -68,11 +68,11 @@ void update_menu_drawer(object_t* this)
    if((!about && ((!changing_trans) || (changing_trans && t != 0))) || (about && changing_trans && p > 0))
       gr_pq_push_sprite(0, logo_texture,
             vec2f(((float)win->w - (float)logo_texture->width) / 2.0f, 75),
-            vec2f(1,1), vec2f(0, 0), 0, true, &sprite_transparency);
+            vec2f(1,1), vec2f(0, 0), 0, default_sprite_renderer, &sprite_transparency);
    else
       gr_pq_push_sprite(0, about_logo_texture,
                         vec2f(((float)win->w - (float)about_logo_texture->width) / 2.0f, 75),
-                        vec2f(1,1), vec2f(0, 0), 0, true, &sprite_transparency);
+                        vec2f(1,1), vec2f(0, 0), 0, default_sprite_renderer, &sprite_transparency);
 
    if(!about)
    {

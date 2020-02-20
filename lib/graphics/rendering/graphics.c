@@ -48,10 +48,17 @@ struct _queue_item {
    texture_t* tex;
    vec2f_t center;
    float angle;
+   sprite_renderer_t* sprite_renderer;
    bool bind_shader;
 
    font_t* font;
    char* string;
+
+   vec2f_t p1;
+   vec2f_t p2;
+   float width;
+   vec4 color;
+   primitive_renderer_t* primitive_renderer;
 
    vec2f_t position;
    vec2f_t scale;
@@ -65,8 +72,6 @@ inline void gr_fill(vec4 color)
    GL_PCALL(glClearColor(color[0], color[1], color[2], color[3]));
 }
 
-shader_t* sprite_shader;
-GLuint vao;
 void gr_init()
 {
    COLOR_WHITE = cvec4(1, 1, 1, 0);
@@ -96,33 +101,6 @@ void gr_init()
 
    memset(queue, 0, sizeof(queue));
    memset(queue_length, 0, sizeof(queue_length));
-
-   sprite_shader = s_getn_shader("sprite");
-
-   // Configure VAO/VBO
-   GLuint vbo;
-   GLfloat vertices[] = {
-         // Pos      // Tex
-         0.0f, 1.0f, 0.0f, 1.0f,
-         1.0f, 0.0f, 1.0f, 0.0f,
-         0.0f, 0.0f, 0.0f, 0.0f,
-
-         0.0f, 1.0f, 0.0f, 1.0f,
-         1.0f, 1.0f, 1.0f, 1.0f,
-         1.0f, 0.0f, 1.0f, 0.0f
-   };
-
-   glGenVertexArrays(1, &vao);
-   glGenBuffers(1, &vbo);
-
-   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-   glBindVertexArray(vao);
-   glEnableVertexAttribArray(0);
-   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindVertexArray(0);
 }
 
 inline void gr_render_vao(GLuint vao)
@@ -221,12 +199,11 @@ inline void gr_unbind(render_stage_t* stage)
    }
 }
 
-void gr_draw_string(font_t* f, vec2f_t position, vec2f_t scale, char* string, bool bind_shader, void* data)
+void gr_draw_string(font_t* f, vec2f_t position, vec2f_t scale, char* string, void* data)
 {
    float start_x = position.x;
 
-   if(bind_shader)
-      sh_use(f->shader);
+   sh_use(f->shader);
 
    f->bind_func(f, data);
 
@@ -269,49 +246,72 @@ void gr_draw_string(font_t* f, vec2f_t position, vec2f_t scale, char* string, bo
    GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
    GL_PCALL(glBindVertexArray(0));
 
-   if(bind_shader)
-      sh_use(NULL);
+   sh_use(NULL);
 }
 
-inline void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2f_t position,
-                       vec2f_t scale, vec2f_t center, float angle, bool bind_shader, void* data)
+enum pq_type {
+   SPRITE,
+   STRING,
+   LINE
+};
+
+void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2f_t position,
+                       vec2f_t scale, vec2f_t center, float angle,
+                       sprite_renderer_t* sprite_renderer, void* data)
 {
    assert(depth < MAX_DEPTH);
    assert(queue_length[depth] < MAX_QUEUE_COUNT);
 
    size_t index = queue_length[depth];
    struct _queue_item* qi = &queue[depth][index];
-   qi->mode = 0;
+   qi->mode = SPRITE;
    qi->tex = texture;
    qi->position = position;
    qi->scale = scale;
    qi->center = center;
    qi->angle = angle;
-   qi->bind_shader = bind_shader;
+   qi->sprite_renderer = sprite_renderer;
    qi->data = data;
 
    queue_length[depth]++;
 }
 
 void gr_pq_push_string(uint8_t depth, font_t* f, vec2f_t position,
-                       vec2f_t scale, char* string, bool bind_shader, void* data)
+                       vec2f_t scale, char* string, void* data)
 {
    assert(depth < MAX_DEPTH);
    assert(queue_length[depth] < MAX_QUEUE_COUNT);
 
    size_t index = queue_length[depth];
    struct _queue_item* qi = &queue[depth][index];
-   qi->mode = 1;
+   qi->mode = STRING;
    qi->font = f;
    qi->position = position;
    qi->scale = scale;
    qi->string = string;
-   qi->bind_shader = bind_shader;
    qi->data = data;
 
    queue_length[depth]++;
 }
 
+void gr_pq_push_line(uint8_t depth, vec2f_t p1, vec2f_t p2, float width, vec4 color,
+                     primitive_renderer_t* primitive_renderer, void* data)
+{
+   assert(depth < MAX_DEPTH);
+   assert(queue_length[depth] < MAX_QUEUE_COUNT);
+
+   size_t index = queue_length[depth];
+   struct _queue_item* qi = &queue[depth][index];
+   qi->mode = LINE;
+   qi->p1 = p1;
+   qi->p2 = p2;
+   qi->width = width;
+   qi->color = color;
+   qi->primitive_renderer = primitive_renderer;
+   qi->data = data;
+
+   queue_length[depth]++;
+}
 
 void gr_pq_flush(void)
 {
@@ -322,25 +322,32 @@ void gr_pq_flush(void)
          struct _queue_item* qi = &queue[d][i];
          switch(qi->mode)
          {
-            case 0:
+            case SPRITE:
                gr_draw_sprite(
                      qi->tex,
                      qi->position,
                      qi->scale,
                      qi->center,
                      qi->angle,
-                     qi->bind_shader,
+                     qi->sprite_renderer,
                      qi->data);
                break;
-            case 1:
+            case STRING:
                gr_draw_string(
                      qi->font,
                      qi->position,
                      qi->scale,
                      qi->string,
-                     qi->bind_shader,
                      qi->data);
                break;
+            case LINE:
+               gr_draw_line(
+                     qi->p1,
+                     qi->p2,
+                     qi->width,
+                     qi->color,
+                     qi->primitive_renderer,
+                     qi->data);
             default:
                break;
          }
@@ -350,26 +357,115 @@ void gr_pq_flush(void)
 }
 
 void gr_draw_sprite(texture_t* texture, vec2f_t position, vec2f_t scale, vec2f_t center, float angle,
-                    bool bind_shader, void* data)
+      sprite_renderer_t* sprite_renderer, void* data)
 {
-   if(bind_shader)
-      sh_use(sprite_shader);
-
-   float trans = *(float*)data;
+   sh_use(sprite_renderer->shader);
 
    mat4_identity(model_mat);
-   mat4_translate(model_mat, position.x - default_win->w / 2.0f, default_win->h / 2.0f - position.y, 0);
+
+   mat4_translate(model_mat, center.x / 2.0f, center.y / 2.0f, 0);
+   mat4_rotate_y(model_mat, angle);
+   mat4_translate(model_mat, -center.x / 2.0f, -center.y / 2.0f, 0);
+
+   mat4_translate(model_mat, position.x - (float)default_win->w / 2.0f, (float)default_win->h / 2.0f - position.y, 0);
    mat4_scale(model_mat, texture->width * scale.x, -texture->height * scale.y, 1);
 
-   sh_nset_mat4(sprite_shader, "model", model_mat);
-   sh_nset_float(sprite_shader, "transparency", trans);
+   sprite_renderer->bind_func(sprite_renderer, model_mat, data);
 
    t_bind(texture, 0);
 
-   glBindVertexArray(vao);
-   glDrawArrays(GL_TRIANGLES, 0, 6);
-   glBindVertexArray(0);
+   GL_PCALL(glBindVertexArray(sprite_renderer->vao));
+   GL_PCALL(glDrawArrays(GL_TRIANGLES, 0, 6));
+   GL_PCALL(glBindVertexArray(0));
 
-   if(bind_shader)
-      sh_use(NULL);
+   sh_use(NULL);
+}
+
+void gr_draw_line(vec2f_t p1, vec2f_t p2, float width, vec4 color,
+                  primitive_renderer_t* primitive_renderer, void* data)
+{
+   p1.x = p1.x - (float)default_win->w / 2.0f;
+   p1.y = (float)default_win->h / 2.0f - p1.y;
+   p2.x = p2.x - (float)default_win->w / 2.0f;
+   p2.y = (float)default_win->h / 2.0f - p2.y;
+
+   sh_use(primitive_renderer->shader);
+
+   primitive_renderer->bind_line_func(primitive_renderer, width, color, data);
+
+   GL_PCALL(glBindVertexArray(primitive_renderer->vao));
+   GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, primitive_renderer->vbo));
+
+   float gl_data[2 * 2] = {
+         p1.x, p1.y,
+         p2.x, p2.y
+   };
+
+   glEnable(GL_PROGRAM_POINT_SIZE);
+   glPointSize(10);
+
+   GL_PCALL(glBufferData(GL_ARRAY_BUFFER, sizeof(gl_data), gl_data, GL_DYNAMIC_DRAW));
+   //GL_PCALL(glLineWidth(width));
+
+
+   GL_PCALL(glDrawArrays(GL_LINES, 0, 2));
+
+   GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+   GL_PCALL(glBindVertexArray(0));
+
+   sh_use(NULL);
+   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+}
+
+sprite_renderer_t* gr_create_sprite_renderer(shader_t* shader)
+{
+   sprite_renderer_t* sprite_renderer = malloc(sizeof(sprite_renderer_t));
+   sprite_renderer->shader = shader;
+   sprite_renderer->bind_func = NULL;
+
+   // Configure VAO/VBO
+   GLuint vbo;
+   GLfloat vertices[] = {
+         // Pos      // Tex
+         0.0f, 1.0f, 0.0f, 1.0f,
+         1.0f, 0.0f, 1.0f, 0.0f,
+         0.0f, 0.0f, 0.0f, 0.0f,
+
+         0.0f, 1.0f, 0.0f, 1.0f,
+         1.0f, 1.0f, 1.0f, 1.0f,
+         1.0f, 0.0f, 1.0f, 0.0f
+   };
+
+   GL_CALL(glGenVertexArrays(1, &sprite_renderer->vao));
+   GL_CALL(glGenBuffers(1, &vbo));
+
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+   GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
+
+   GL_CALL(glBindVertexArray(sprite_renderer->vao));
+   GL_CALL(glEnableVertexAttribArray(0));
+   GL_CALL(glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0));
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+   GL_CALL(glBindVertexArray(0));
+   return sprite_renderer;
+}
+
+primitive_renderer_t* gr_create_primitive_renderer(shader_t* shader)
+{
+   primitive_renderer_t* primitive_renderer = malloc(sizeof(primitive_renderer_t));
+   primitive_renderer->shader = shader;
+   primitive_renderer->bind_line_func = NULL;
+
+   GL_CALL(glGenVertexArrays(1, &primitive_renderer->vao));
+   GL_CALL(glGenBuffers(1, &primitive_renderer->vbo));
+
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, primitive_renderer->vbo));
+   GL_CALL(glBufferData(GL_ARRAY_BUFFER, 0, NULL, GL_DYNAMIC_DRAW));
+
+   GL_CALL(glBindVertexArray(primitive_renderer->vao));
+   GL_CALL(glEnableVertexAttribArray(0));
+   GL_CALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0));
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+   GL_CALL(glBindVertexArray(0));
+   return primitive_renderer;
 }

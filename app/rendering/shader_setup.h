@@ -104,6 +104,11 @@ struct {
 
 } UNIFORM_FXAA;
 
+struct {
+   GLint color;
+
+} UNIFORM_PRIMITIVE;
+
 shader_t* setup_g_buffer(mat4 proj);
 shader_t* setup_ssao(vec4* kernel, mat4 proj);
 shader_t* setup_ssao_blur(void);
@@ -114,6 +119,7 @@ shader_t* setup_gamma(void);
 shader_t* setup_font(mat4 primitive_proj);
 shader_t* setup_br(mat4 primitive_proj, float sigma, size_t kernel_len);
 shader_t* setup_sprite(mat4 primitive_proj);
+shader_t* setup_primitive(mat4 primitive_proj);
 shader_t* setup_fxaa(float threshold, float mul_r, float min_r, float max_span, win_info_t* win);
 
 #pragma clang diagnostic pop

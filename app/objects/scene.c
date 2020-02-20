@@ -13,11 +13,13 @@
 #include "menu/obj_menu_camera_mover.h"
 #include "menu/obj_menu_phys.h"
 #include "editor/obj_editor_drawer.h"
+#include "editor/obj_editor_map.h"
 
 void setup_editor_objects(scene_t* scene)
 {
    scene->backcolor = cvec4(0.50, 0.56640625, 0.34765625, 0);
    list_push(scene->startup_objects, create_editor_drawer());
+   list_push(scene->startup_objects, create_editor_map());
 }
 
 void setup_menu_objects(scene_t* scene)
