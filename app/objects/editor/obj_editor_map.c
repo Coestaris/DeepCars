@@ -5,7 +5,7 @@
 #ifdef __GNUC__
 #pragma implementation "obj_editor_map.h"
 #endif
-#include "obj_editor_map.h"
+#include "map_saver.h"
 #include "obj_editor_drawer.h"
 #include "../../rendering/renderer.h"
 #include "../../../lib/resources/rmanager.h"

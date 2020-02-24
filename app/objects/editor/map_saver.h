@@ -8,12 +8,12 @@
 #include "../../../lib/structs.h"
 #include "obj_editor_drawer.h"
 
-struct _wall {
+typedef struct _wall {
    vec2f_t p1;
    vec2f_t p2;
 } wall_t;
 
-struct _map_object {
+typedef struct _map_object {
    vec2f_t pos;
 
    vec2f_t p1;
