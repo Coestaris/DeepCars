@@ -61,10 +61,14 @@
         { "fn" : "editor/toolbar_start.png",                "name" : "editor_toolbar_start" },
         { "fn" : "editor/toolbar_start_clicked.png",        "name" : "editor_toolbar_start_clicked" },
         { "fn" : "editor/toolbar_start_selected.png",       "name" : "editor_toolbar_start_selected" },
+        { "fn" : "editor/toolbar_fin.png",                  "name" : "editor_toolbar_fin" },
+        { "fn" : "editor/toolbar_fin_clicked.png",          "name" : "editor_toolbar_fin_clicked" },
+        { "fn" : "editor/toolbar_fin_selected.png",         "name" : "editor_toolbar_fin_selected" },
         { "fn" : "editor/toolbar_wall.png",                 "name" : "editor_toolbar_wall" },
         { "fn" : "editor/toolbar_wall_clicked.png",         "name" : "editor_toolbar_wall_clicked" },
         { "fn" : "editor/toolbar_wall_selected.png",        "name" : "editor_toolbar_wall_selected" },
-        { "fn" : "editor/finish_flag.png",                  "name" : "editor_finish_flag" }
+        { "fn" : "editor/finish_flag.png",                  "name" : "editor_finish_flag" },
+        { "fn" : "editor/start_flag.png",                   "name" : "editor_start_flag" }
     ],
 
     "cubemaps": 

@@ -15,6 +15,7 @@ texture_t* toolbar_grid_texture[5][3];
 texture_t* toolbar_obstacle_texture[3];
 texture_t* toolbar_slip_texture[3];
 texture_t* toolbar_start_texture[3];
+texture_t* toolbar_fin_texture[3];
 texture_t* toolbar_wall_texture[3];
 texture_t* toolbar_selected;
 
@@ -27,6 +28,7 @@ vec2f_t toolbar_grid_pos;
 vec2f_t toolbar_obstacle_pos;
 vec2f_t toolbar_slip_pos;
 vec2f_t toolbar_start_pos;
+vec2f_t toolbar_fin_pos;
 vec2f_t toolbar_wall_pos;
 
 bool toolbar_eraser_clicked;
@@ -34,6 +36,7 @@ bool toolbar_grid_clicked;
 bool toolbar_obstacle_clicked;
 bool toolbar_slip_clicked;
 bool toolbar_start_clicked;
+bool toolbar_fin_clicked;
 bool toolbar_wall_clicked;
 
 float editor_p = 0;
@@ -143,6 +146,9 @@ void update_editor(object_t* this)
    if(CHECK(toolbar_start_pos, toolbar_start_texture[0])) draw(toolbar_start_texture[toolbar_start_clicked ? 2 : 1], toolbar_start_pos);
    else draw(toolbar_start_texture[0], toolbar_start_pos);
 
+   if(CHECK(toolbar_fin_pos, toolbar_fin_texture[0])) draw(toolbar_fin_texture[toolbar_fin_clicked ? 2 : 1], toolbar_fin_pos);
+   else draw(toolbar_fin_texture[0], toolbar_fin_pos);
+
    if(CHECK(toolbar_wall_pos, toolbar_wall_texture[0])) draw(toolbar_wall_texture[toolbar_wall_clicked ? 2 : 1], toolbar_wall_pos);
    else draw(toolbar_wall_texture[0], toolbar_wall_pos);
 
@@ -222,6 +228,15 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
          selected_toolbar_state_pos = toolbar_start_pos;
       }
    }
+   else if(CHECK(toolbar_fin_pos, toolbar_fin_texture[0]))
+   {
+      toolbar_fin_clicked = state == MOUSE_PRESSED && mouse == MOUSE_LEFT;
+      if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT)
+      {
+         toolbar_state = FIN;
+         selected_toolbar_state_pos = toolbar_fin_pos;
+      }
+   }
    else if(CHECK(toolbar_wall_pos, toolbar_wall_texture[0]))
    {
       toolbar_wall_clicked = state == MOUSE_PRESSED && mouse == MOUSE_LEFT;
@@ -246,8 +261,9 @@ object_t* create_editor_drawer(void)
    toolbar_grid_pos = vec2f(16 ,752);
    toolbar_wall_pos = vec2f(80 ,752);
    toolbar_start_pos = vec2f(120 ,752);
-   toolbar_obstacle_pos = vec2f(160 ,752);
-   toolbar_slip_pos = vec2f(200 ,752);
+   toolbar_fin_pos = vec2f(160 ,752);
+   toolbar_obstacle_pos = vec2f(200 ,752);
+   toolbar_slip_pos = vec2f(240 ,752);
    create_grid(32);
    grid_state = 2;
    current_grid_size = 32;
@@ -288,6 +304,10 @@ object_t* create_editor_drawer(void)
    toolbar_start_texture[0] = rm_getn(TEXTURE, "editor_toolbar_start");
    toolbar_start_texture[1] = rm_getn(TEXTURE, "editor_toolbar_start_selected");
    toolbar_start_texture[2] = rm_getn(TEXTURE, "editor_toolbar_start_clicked");
+
+   toolbar_fin_texture[0] = rm_getn(TEXTURE, "editor_toolbar_fin");
+   toolbar_fin_texture[1] = rm_getn(TEXTURE, "editor_toolbar_fin_selected");
+   toolbar_fin_texture[2] = rm_getn(TEXTURE, "editor_toolbar_fin_clicked");
 
    toolbar_wall_texture[0] = rm_getn(TEXTURE, "editor_toolbar_wall");
    toolbar_wall_texture[1] = rm_getn(TEXTURE, "editor_toolbar_wall_selected");

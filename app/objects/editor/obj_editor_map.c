@@ -10,25 +10,11 @@
 #include "../../rendering/renderer.h"
 #include "../../../lib/resources/rmanager.h"
 
-struct _wall {
-   vec2f_t p1;
-   vec2f_t p2;
-};
-
-struct _map_object {
-   vec2f_t pos;
-
-   vec2f_t p1;
-   vec2f_t p2;
-
-   float rotation;
-   enum _toolbar_state type;
-};
-
 texture_t* texture_start;
+texture_t* texture_fin;
 
-list_t* walls;
-list_t* map_objects;
+list_t* walls = NULL;
+list_t* map_objects = NULL;
 float rotation;
 
 vec2f_t prev_point;
@@ -49,9 +35,9 @@ vec2f_t floor_point(vec2f_t pos)
 void wheel_mouse_editor_map(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
 {
    if(state == MOUSE_RELEASE && mouse == MOUSE_WHEELDOWN)
-      rotation -= M_PI / 36;
+      rotation -= M_PI / (current_grid_size == 0 ? 72 : 36);
    else if(state == MOUSE_RELEASE && mouse == MOUSE_WHEELUP)
-      rotation += M_PI / 36;
+      rotation += M_PI / (current_grid_size == 0 ? 72 : 36);
 }
 
 // taken from https://github.com/Coestaris/Zomboid2.0/blob/master/client/lib/ltracer/ltracer_math.c
@@ -153,6 +139,31 @@ void calculate_start_points(vec2f_t pos, float angle, vec2f_t* p1, vec2f_t* p2)
    }
 }
 
+void draw_line_arrow(vec2f_t p1, vec2f_t p2, float l, float w, float h, vec4 color)
+{
+   //calculate direction
+   vec2f_t d = vec2f(p2.x - p1.x, p2.y - p1.y);
+   //calculate normal
+   vec2f_t n = vec2f(d.y, -d.x);
+   float n_len = sqrtf(n.x * n.x + n.y * n.y);
+   //normalize normal
+   n.x /= n_len;
+   n.y /= n_len;
+   //normalize direction
+   d.x /= n_len;
+   d.y /= n_len;
+
+   vec2f_t src = vec2f((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f);
+   vec2f_t dest = vec2f(src.x + n.x * l, src.y + n.y * l);
+
+   vec2f_t a = vec2f(dest.x - n.x * h + d.x * w, dest.y - n.y * h + d.y * w);
+   vec2f_t b = vec2f(dest.x - n.x * h - d.x * w, dest.y - n.y * h - d.y * w);
+
+   gr_pq_push_line(1, src, dest, 4, color, default_primitive_renderer, NULL);
+   gr_pq_push_line(1, dest, a, 4, color, default_primitive_renderer, NULL);
+   gr_pq_push_line(1, dest, b, 4, color, default_primitive_renderer, NULL);
+}
+
 void update_editor_map(object_t* this)
 {
    float trans = 0;
@@ -163,11 +174,16 @@ void update_editor_map(object_t* this)
       switch(object->type)
       {
          case START:
+         case FIN:
             gr_pq_push_line(1, object->p1, object->p2, 4, COLOR_BLACK, default_primitive_renderer, NULL);
-            gr_pq_push_sprite(1, texture_start, vec2f(object->p1.x, object->p1.y - texture_start->height),
-                              vec2f(1, 1), vec2f(0, 0), 0, default_sprite_renderer, &trans);
-            gr_pq_push_sprite(1, texture_start, vec2f(object->p2.x, object->p2.y - texture_start->height),
-                              vec2f(1, 1), vec2f(0, 0), 0, default_sprite_renderer, &trans);
+            gr_pq_push_sprite(1, object->type == START ? texture_start : texture_fin,
+                  vec2f(object->p1.x, object->p1.y - texture_start->height),
+                  vec2f(1, 1), vec2f(0, 0), 0, default_sprite_renderer, &trans);
+            gr_pq_push_sprite(1, object->type == START ? texture_start : texture_fin,
+                  vec2f(object->p2.x, object->p2.y - texture_start->height),
+                  vec2f(1, 1), vec2f(0, 0), 0, default_sprite_renderer, &trans);
+            if(object->type == START)
+               draw_line_arrow(object->p1, object->p2, 40, 4, 10, COLOR_GREEN);
             break;
          case ERASER:
          case OBSTACLE:
@@ -189,10 +205,10 @@ void update_editor_map(object_t* this)
       draw_line(prev_point, pos);
    }
 
-   if(toolbar_state == START)
+   if(toolbar_state == START || toolbar_state == FIN)
    {
       vec2f_t pos = floor_point(u_get_mouse_pos());
-      float angle = roundf(rotation / (M_PI / 36)) * M_PI / 36;
+      float angle = current_grid_size == 0 ? rotation : (float)(roundf(rotation / (M_PI / 36)) * M_PI / 36);
       vec2f_t p1, p2;
       calculate_start_points(pos, angle, &p1, &p2);
 
@@ -207,10 +223,12 @@ void update_editor_map(object_t* this)
 
       gr_pq_push_line(1, p1, p2, 4, COLOR_BLACK, default_primitive_renderer, NULL);
 
-      gr_pq_push_sprite(1, texture_start, vec2f(p1.x, p1.y - texture_start->height),
+      gr_pq_push_sprite(1, toolbar_state == START ? texture_start : texture_fin, vec2f(p1.x, p1.y - texture_start->height),
             vec2f(1, 1), vec2f(0, 0), 0, default_sprite_renderer, &trans);
-      gr_pq_push_sprite(1, texture_start, vec2f(p2.x, p2.y - texture_start->height),
+      gr_pq_push_sprite(1, toolbar_state == START ? texture_start : texture_fin, vec2f(p2.x, p2.y - texture_start->height),
             vec2f(1, 1), vec2f(0, 0), 0, default_sprite_renderer, &trans);
+      if(toolbar_state == START)
+         draw_line_arrow(p1, p2, 40, 4, 10, COLOR_GREEN);
    }
 }
 
@@ -229,15 +247,15 @@ void mouse_editor_map(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
       prev_point = pos;
       first_point_set = true;
    }
-   else if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && toolbar_state == START)
+   else if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && (toolbar_state == START || toolbar_state == FIN))
    {
       struct _map_object* object = malloc(sizeof(struct _map_object));
       object->rotation = rotation;
-      object->type = START;
+      object->type = toolbar_state;
       object->pos = pos;
 
       vec2f_t pos = floor_point(u_get_mouse_pos());
-      float angle = roundf(rotation / (M_PI / 36)) * M_PI / 36;
+      float angle = current_grid_size == 0 ? rotation : (float)(roundf(rotation / (M_PI / 36)) * M_PI / 36);
       vec2f_t p1, p2;
       calculate_start_points(pos, angle, &p1, &p2);
 
@@ -251,10 +269,13 @@ void mouse_editor_map(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
 
 object_t* create_editor_map(void)
 {
-   texture_start = rm_getn(TEXTURE, "editor_finish_flag");
+   if(!walls)
+      walls = list_create();
+   if(!map_objects)
+      map_objects = list_create();
 
-   walls = list_create();
-   map_objects = list_create();
+   texture_start = rm_getn(TEXTURE, "editor_start_flag");
+   texture_fin = rm_getn(TEXTURE, "editor_finish_flag");
 
    object_t* this = o_create();
    this->update_func = update_editor_map;
