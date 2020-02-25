@@ -9,6 +9,9 @@
 #include "../../../lib/resources/rmanager.h"
 #include "../../rendering/renderer.h"
 
+#define toolbar_size 33
+#define grid_size 256
+
 texture_t* run_button_texture[2];
 texture_t* toolbar_eraser_texture;
 texture_t* toolbar_grid_texture[5];
@@ -23,6 +26,11 @@ texture_t* toolbar_frame;
 texture_t* toolbar_back;
 texture_t* toolbar_back_selected;
 texture_t* toolbar_clicked;
+
+texture_t* tabbutton_ffnn;
+texture_t* tabbutton_ga;
+texture_t* tabbutton_map;
+texture_t* tabbutton_file;
 
 texture_t* grid;
 texture_t* editor_black_texture;
@@ -51,9 +59,6 @@ vec2f_t selected_toolbar_state_pos;
 size_t grid_state;
 size_t current_grid_size;
 void (*field_click_func)(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse);
-
-#define toolbar_size 33
-#define grid_size 256
 
 void create_grid(size_t size)
 {
@@ -343,6 +348,11 @@ object_t* create_editor_drawer(void)
    create_grid(32);
    grid_state = 2;
    current_grid_size = 32;
+
+   tabbutton_ffnn = rm_getn(TEXTURE, "editor_tabbutton_ffnn");
+   tabbutton_ga = rm_getn(TEXTURE, "editor_tabbutton_ga");
+   tabbutton_map = rm_getn(TEXTURE, "editor_tabbutton_map");
+   tabbutton_file = rm_getn(TEXTURE, "editor_tabbutton_file");
 
    toolbar_selected = rm_getn(TEXTURE, "editor_toolbar_selected");
    toolbar_frame = rm_getn(TEXTURE, "editor_toolbar_frame");
