@@ -51,6 +51,7 @@
         { "fn" : "editor/toolbar_obstacle.png",            "name" : "editor_toolbar_obstacle" },
         { "fn" : "editor/toolbar_slip.png",                "name" : "editor_toolbar_slip" },
 
+        { "fn" : "editor/tabbutton_arrow.png",              "name" : "editor_tabbutton_arrow" },
         { "fn" : "editor/tabbutton_ffnn.png",              "name" : "editor_tabbutton_ffnn" },
         { "fn" : "editor/tabbutton_file.png",              "name" : "editor_tabbutton_file" },
         { "fn" : "editor/tabbutton_ga.png",                "name" : "editor_tabbutton_ga" },

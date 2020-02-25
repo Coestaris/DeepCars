@@ -27,10 +27,17 @@ texture_t* toolbar_back;
 texture_t* toolbar_back_selected;
 texture_t* toolbar_clicked;
 
+texture_t* tabbutton_arrow;
 texture_t* tabbutton_ffnn;
 texture_t* tabbutton_ga;
 texture_t* tabbutton_map;
 texture_t* tabbutton_file;
+
+vec2f_t tabbutton_ffnn_pos;
+vec2f_t tabbutton_ga_pos;
+vec2f_t tabbutton_map_pos;
+vec2f_t tabbutton_file_pos;
+vec2f_t tabbutton_selected_pos;
 
 texture_t* grid;
 texture_t* editor_black_texture;
@@ -52,11 +59,18 @@ bool toolbar_start_clicked;
 bool toolbar_fin_clicked;
 bool toolbar_wall_clicked;
 
+texture_t* tab_texture;
+texture_t* tab_file_texture;
+texture_t* tab_ffnn_texture;
+texture_t* tab_ga_texture;
+texture_t* tab_map_texture;
+vec2f_t tab_pos;
 float editor_p = 0;
 
 enum _toolbar_state toolbar_state;
 vec2f_t selected_toolbar_state_pos;
 size_t grid_state;
+size_t tab_state;
 size_t current_grid_size;
 void (*field_click_func)(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse);
 
@@ -136,6 +150,10 @@ void draw_centered(texture_t* texture, vec2f_t position)
 #define CHECK(position)                           \
    pos.x > position.x && pos.x < position.x + toolbar_size && \
    pos.y > position.y && pos.y < position.y + toolbar_size    \
+
+#define CHECK_SIZE(position, tex)                           \
+   pos.x > position.x && pos.x < position.x + tex->width && \
+   pos.y > position.y && pos.y < position.y + tex->height    \
 
 void update_editor(object_t* this)
 {
@@ -231,8 +249,22 @@ void update_editor(object_t* this)
    draw_centered(toolbar_slip_texture, toolbar_slip_pos);
    draw_centered(toolbar_frame, toolbar_slip_pos);
 
-
-
+   draw(tabbutton_ffnn, tabbutton_ffnn_pos);
+   draw(tabbutton_ga, tabbutton_ga_pos);
+   draw(tabbutton_map, tabbutton_map_pos);
+   draw(tabbutton_file, tabbutton_file_pos);
+   if(tab_state != -1)
+   {
+      draw(tabbutton_arrow, tabbutton_selected_pos);
+      draw(tab_texture, tab_pos);
+      switch(tab_state)
+      {
+         case 0: if(tab_ffnn_texture) draw(tab_ffnn_texture, tab_pos); break;
+         case 1: if(tab_ga_texture) draw(tab_ga_texture, tab_pos); break;
+         case 2: if(tab_map_texture) draw(tab_map_texture, tab_pos); break;
+         case 3: if(tab_file_texture) draw(tab_file_texture, tab_pos); break;
+      }
+   }
    draw(toolbar_selected, selected_toolbar_state_pos);
 
    if(grid)
@@ -327,6 +359,49 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
          selected_toolbar_state_pos = toolbar_wall_pos;
       }
    }
+   else if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && CHECK_SIZE(tabbutton_ffnn_pos, tabbutton_ffnn))
+   {
+      if(tab_state == 0)
+         tab_state = -1;
+      else
+      {
+         tabbutton_selected_pos = tabbutton_ffnn_pos;
+         tab_state = 0;
+      }
+   }
+   else if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && CHECK_SIZE(tabbutton_ga_pos, tabbutton_ga))
+   {
+      if(tab_state == 1)
+         tab_state = -1;
+      else
+      {
+         tabbutton_selected_pos = tabbutton_ga_pos;
+         tab_state = 1;
+      }
+   }
+   else if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && CHECK_SIZE(tabbutton_map_pos, tabbutton_map))
+   {
+      if(tab_state == 2)
+         tab_state = -1;
+      else
+      {
+         tabbutton_selected_pos = tabbutton_map_pos;
+         tab_state = 2;
+      }
+   }
+   else if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && CHECK_SIZE(tabbutton_file_pos, tabbutton_file))
+   {
+      if(tab_state == 3)
+         tab_state = -1;
+      else
+      {
+         tabbutton_selected_pos = tabbutton_file_pos;
+         tab_state = 3;
+      }
+   } else if(tab_state != -1 && state == MOUSE_RELEASE && mouse == MOUSE_LEFT && CHECK_SIZE(tab_pos, tab_texture))
+   {
+      //??
+   }
    else
    {
       field_click_func(x, y, state, mouse);
@@ -335,8 +410,15 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
 
 object_t* create_editor_drawer(void)
 {
+   tab_texture = rm_getn(TEXTURE, "editor_tab");
+   tab_file_texture = rm_getn(TEXTURE, "editor_tab_file");
+   tab_ffnn_texture = NULL;//rm_getn(TEXTURE, "editor_tab_ffnn");
+   tab_ga_texture =   NULL;//rm_getn(TEXTURE, "editor_tab_ga");
+   tab_map_texture =  NULL;//rm_getn(TEXTURE, "editor_tab_map");
+
    editor_black_texture = rm_getn(TEXTURE, "__generated_mt_grass_trans_0.0_0.0_0.0");
 
+   tab_pos = vec2f(871, 7);
    run_button_pos = vec2f(895, 698);
    toolbar_eraser_pos = vec2f(16 ,704);
    toolbar_grid_pos = vec2f(16 ,752);
@@ -349,10 +431,17 @@ object_t* create_editor_drawer(void)
    grid_state = 2;
    current_grid_size = 32;
 
+   tabbutton_arrow = rm_getn(TEXTURE, "editor_tabbutton_arrow");
    tabbutton_ffnn = rm_getn(TEXTURE, "editor_tabbutton_ffnn");
    tabbutton_ga = rm_getn(TEXTURE, "editor_tabbutton_ga");
    tabbutton_map = rm_getn(TEXTURE, "editor_tabbutton_map");
    tabbutton_file = rm_getn(TEXTURE, "editor_tabbutton_file");
+
+   tabbutton_ffnn_pos = vec2f(1168, 16);
+   tabbutton_ga_pos = vec2f(1168, 128);
+   tabbutton_map_pos = vec2f(1168, 240);
+   tabbutton_file_pos = vec2f(1168, 352);
+   tab_state = -1;
 
    toolbar_selected = rm_getn(TEXTURE, "editor_toolbar_selected");
    toolbar_frame = rm_getn(TEXTURE, "editor_toolbar_frame");
