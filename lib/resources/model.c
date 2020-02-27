@@ -738,7 +738,10 @@ model_t* m_create_plane(uint32_t vpoly, uint32_t hpoly, bool global_uv)
    }
 
    model->model_len->faces_count = faces;
-   model->filename = strdup("__generated_plane");
+
+   char buff[50];
+   snprintf(buff, sizeof(buff), "__generated_plane%i", rand());
+   model->filename = strdup(buff);
 
    return model;
 }
