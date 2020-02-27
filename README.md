@@ -6,7 +6,7 @@ AI learns to drive a car using the NeuroEvolution algorithm.
 ```bash
 git clone --recurse-submodules https://github.com/Coestaris/DeepCars
 cd DeepCars
-sudo apt install mesa-utils libx11-dev libxi-dev imagemagick-6.q16 libfreetype6-dev 
+sudo apt install mesa-utils libx11-dev libxi-dev imagemagick-6.q16 libfreetype6-dev libgtk-3-dev
 sudo apt install make cmake # If needed
 ```
 Also you need to install [Chipmunk2D](https://github.com/slembcke/Chipmunk2D) by following it's instalation instructions like:
@@ -45,3 +45,4 @@ The project also bundles third party software under its own licenses:
  - fontbm - [MIT license](https://github.com/vladimirgamalyan/fontbm/blob/master/LICENSE)
  - Chipmunk2D - [MIT license](https://github.com/slembcke/Chipmunk2D/blob/master/LICENSE.txt)
  - freetype - [Free Type License (FTL)](https://git.savannah.gnu.org/cgit/freetype/freetype2.git/tree/docs/FTL.TXT)
+ - osdialog - [CC0 License](https://github.com/AndrewBelt/osdialog/blob/master/LICENSE.txt)
