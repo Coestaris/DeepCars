@@ -58,6 +58,8 @@ struct {
    GLint shadow_light_bright;
    GLint shadow_light_lightspace;
 
+   GLint lights_count;
+
    GLint pos_tex;
    GLint norm_tex;
    GLint albedoSpec_tex;

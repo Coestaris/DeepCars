@@ -21,6 +21,7 @@
 
 #define SCENEID_MENU 0
 #define SCENEID_EDITOR 1
+#define SCENEID_GAME 2
 
 extern win_info_t* win;
 extern camera_t* camera;

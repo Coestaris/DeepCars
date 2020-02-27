@@ -114,6 +114,8 @@ inline void update_lights(void)
    shader_t* shading_shader = shading_stage->shader;
    sh_use(shading_shader);
 
+   sh_set_int(UNIFORM_SHADING.lights_count, lights->count);
+
    for (size_t i = 0; i < lights->count; i++)
    {
       light_t* lt = lights->collection[i];

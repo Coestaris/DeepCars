@@ -22,13 +22,20 @@ void app_load_resources(void)
    scene_t* menu = sc_create(SCENEID_MENU);
    menu->skybox = rm_getn(TEXTURE, "skybox");
    setup_menu_objects(menu);
-   setup_menu_light(menu);
+   setup_menu_lights(menu);
+   setup_menu_shadow_light(menu);
 
    scene_t* editor = sc_create(SCENEID_EDITOR);
    setup_editor_objects(editor);
 
+   scene_t* game = sc_create(SCENEID_GAME);
+   game->skybox = rm_getn(TEXTURE, "skybox");
+   setup_menu_shadow_light(game);
+   setup_game_objects(game);
+
    scm_push_scene(menu);
    scm_push_scene(editor);
+   scm_push_scene(game);
 }
 
 void app_init_graphics(void)
@@ -59,7 +66,6 @@ void app_init_graphics(void)
          cvec4(0, 1, 0, 0));
 
    rc_create_perspective(win, proj_mat, 65.f, 0.1f, 500);
-
    rc_set_current(get_chain(win, camera, proj_mat));
 }
 

@@ -12,6 +12,7 @@
 #include "../../rendering/text_rendering.h"
 #include "../../../osdialog/osdialog.h"
 #include "obj_editor_map.h"
+#include "../../win_defaults.h"
 
 #define toolbar_size 33
 #define grid_size 256
@@ -75,6 +76,7 @@ texture_t* tab_ga_texture;
 texture_t* tab_map_texture;
 vec2f_t tab_pos;
 float editor_p = 0;
+osdialog_filters* filters = NULL;
 
 enum _toolbar_state toolbar_state;
 vec2f_t selected_toolbar_state_pos;
@@ -177,10 +179,8 @@ void update_editor(object_t* this)
    vec2f_t pos = u_get_mouse_pos();
    int32_t ms = u_get_mouse_state(MOUSE_LEFT);
 
-   if(CHECK(run_button_pos)) draw(run_button_texture[1], run_button_pos);
+   if(CHECK_SIZE(run_button_pos, run_button_texture[1])) draw(run_button_texture[1], run_button_pos);
    else draw(run_button_texture[0], run_button_pos);
-
-
 
    if(CHECK(toolbar_eraser_pos))
    {
@@ -422,22 +422,30 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
    {
       if(CHECK_SIZE(tab_file_load_pos, tab_file_selected))
       {
-         osdialog_filters* filters = osdialog_filters_parse("Map files:map");
          char* fn = osdialog_file(OSDIALOG_SAVE, MAP_SAVE_DIR, "map.map", filters);
-         map_save(walls, map_objects, fn, prev_point, first_point_set);
-         free(fn);
-         osdialog_filters_free(filters);
+         if(fn)
+         {
+            map_save(walls, map_objects, fn, prev_point, first_point_set);
+            free(fn);
+         }
       }
       else if(CHECK_SIZE(tab_file_save_pos, tab_file_selected))
       {
-         osdialog_filters* filters = osdialog_filters_parse("Map files:map");
          char* fn = osdialog_file(OSDIALOG_OPEN, MAP_SAVE_DIR, "map.map", filters);
-         map_load(walls, map_objects, fn, &prev_point, &first_point_set);
-         free(fn);
-         osdialog_filters_free(filters);
-         //todo
+         if(fn)
+         {
+            map_load(walls, map_objects, fn, &prev_point, &first_point_set);
+            free(fn);
+         }
       }
-      //??
+   }
+   else if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && CHECK_SIZE(run_button_pos, run_button_texture[0]))
+   {
+      rc_set_current(default_rc);
+      scm_load_scene(SCENEID_GAME, true);
+
+      update_lights();
+      update_shadow_light();
    }
    else
    {
@@ -447,6 +455,9 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
 
 object_t* create_editor_drawer(void)
 {
+   if(!filters)
+      filters = osdialog_filters_parse("Map files:map");
+
    tab_texture = rm_getn(TEXTURE, "editor_tab");
    tab_file_texture = rm_getn(TEXTURE, "editor_tab_file");
    tab_ffnn_texture = NULL;//rm_getn(TEXTURE, "editor_tab_ffnn");

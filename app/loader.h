@@ -9,7 +9,9 @@
 
 void setup_menu_objects(scene_t* scene);
 void setup_editor_objects(scene_t* scene);
-void setup_menu_light(scene_t* scene);
+void setup_menu_lights(scene_t* scene);
+void setup_menu_shadow_light(scene_t* scene);
+void setup_game_objects(scene_t* scene);
 
 void app_init_graphics(void);
 void app_load_resources(void);

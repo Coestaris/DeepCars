@@ -22,7 +22,8 @@ struct ShadowLight {
     sampler2D shadowMap;
 };
 
-const int NR_LIGHTS = 30;
+#define MAX_LIGHTS 30
+uniform int lightsCount;
 
 //uniform sampler2D gViewPosition;
 uniform sampler2D gPosition;
@@ -30,7 +31,7 @@ uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
 uniform sampler2D ssao;
 
-uniform Light lights[NR_LIGHTS];
+uniform Light lights[MAX_LIGHTS];
 uniform ShadowLight shadowLight;
 uniform vec3 viewPos;
 
@@ -111,7 +112,7 @@ void main()
 
             lighting *= 0.5;// hard-coded ambient component
             vec3 viewDir  = normalize(viewPos - FragPos);
-            for (int i = 0; i < NR_LIGHTS; ++i)
+            for (int i = 0; i < lightsCount; ++i)
             {
                 float distance = length(lights[i].Position - FragPos);
                 if (distance < lights[i].Radius)

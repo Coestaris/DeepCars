@@ -100,6 +100,7 @@ shader_t* setup_shading(void)
    UNIFORM_SHADING.shadow_light_direction = get_loc(sh, "shadowLight.Direction");
    UNIFORM_SHADING.shadow_light_bright = get_loc(sh, "shadowLight.Brightness");
    UNIFORM_SHADING.shadow_light_lightspace = get_loc(sh, "shadowLight.lightSpaceMatrix");
+   UNIFORM_SHADING.lights_count = get_loc(sh, "lightsCount");
 
    for(size_t i = 0; i < NR_LIGHTS; i++)
    {

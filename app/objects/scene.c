@@ -14,6 +14,9 @@
 #include "menu/obj_menu_phys.h"
 #include "editor/obj_editor_drawer.h"
 #include "editor/obj_editor_map.h"
+#include "obj_camera_control.h"
+
+model_t* plane;
 
 void setup_editor_objects(scene_t* scene)
 {
@@ -22,13 +25,25 @@ void setup_editor_objects(scene_t* scene)
    list_push(scene->startup_objects, create_editor_map());
 }
 
+void setup_game_objects(scene_t* scene)
+{
+   list_push(scene->startup_objects,
+             create_textured_dummy(vec3f(-1000, 0, -1000), 2000,
+                                   rm_getn(MATERIAL, "grass"),
+                                   plane));
+   list_push(scene->startup_objects, create_camera_control());
+   list_push(scene->startup_objects, create_default_bind_handler());
+}
+
 void setup_menu_objects(scene_t* scene)
 {
-   model_t* plane = m_create_plane(50, 50, true);
-   m_normalize(plane, true, true, true, true);
-   m_build(plane);
-
-   rm_push(MODEL, plane, -1);
+   if(!plane)
+   {
+      plane = m_create_plane(50, 50, true);
+      m_normalize(plane, true, true, true, true);
+      m_build(plane);
+      rm_push(MODEL, plane, -1);
+   }
 
    list_push(scene->startup_objects,
              create_textured_dummy(vec3f(-1000, 0, -1000), 2000,
@@ -133,10 +148,4 @@ void setup_menu_lights(scene_t* scene)
       l_calc_radius(lt);
       list_push(scene->lights, lt);
    }
-}
-
-void setup_menu_light(scene_t* scene)
-{
-   setup_menu_shadow_light(scene);
-   setup_menu_lights(scene);
 }
