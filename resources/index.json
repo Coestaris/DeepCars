@@ -58,7 +58,9 @@
         { "fn" : "editor/tabbutton_map.png",               "name" : "editor_tabbutton_map" },
 
         { "fn" : "editor/tab.png",                "name" : "editor_tab" },
-        { "fn" : "editor/tab_file.png",           "name" : "editor_tab_file" }
+        { "fn" : "editor/tab_file.png",           "name" : "editor_tab_file" },
+        { "fn" : "editor/tab_file_selected.png",  "name" : "editor_tab_file_selected" },
+        { "fn" : "editor/tab_file_clicked.png",   "name" : "editor_tab_file_clicked" }
     ],
 
     "cubemaps": 

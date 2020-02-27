@@ -1,3 +1,6 @@
 [submodule "oil"]
 	path = oil
 	url = https://github.com/Coestaris/oil
+[submodule "osdialog"]
+	path = osdialog
+	url = https://github.com/AndrewBelt/osdialog

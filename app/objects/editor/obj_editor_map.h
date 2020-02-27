@@ -9,6 +9,8 @@
 
 extern list_t* walls;
 extern list_t* map_objects;
+extern vec2f_t prev_point;
+extern bool first_point_set;
 
 object_t* create_editor_map(void);
 

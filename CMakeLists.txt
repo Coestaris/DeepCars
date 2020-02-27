@@ -11,13 +11,28 @@ add_executable(DeepCars main.c lib/graphics/rendering/graphics.c lib/graphics/re
 target_sources(DeepCars PUBLIC ${oilSources})
 target_sources(DeepCars PUBLIC ${oilHeaders})
 
+target_sources(DeepCars PUBLIC osdialog/osdialog.h)
+target_sources(DeepCars PUBLIC osdialog/osdialog_gtk3.c osdialog/osdialog.c)
+
+find_package(PkgConfig)
+if (PKG_CONFIG_FOUND)
+    pkg_check_modules(GTK "gtk+-3.0")
+    if (GTK_FOUND)
+        target_link_libraries(DeepCars ${GTK_LIBRARIES})
+        include_directories(${GTK_INCLUDE})
+        add_definitions(${GTK_CFLAGS} ${GTK_CFLAGS_OTHER})
+    endif()
+endif()
+
 # For OIL
 include_directories(/usr/include/freetype2)
 target_link_libraries(DeepCars X11 freetype)
 
 
+
 target_link_libraries(DeepCars X11 GL z m)
 target_link_libraries(DeepCars X11 chipmunk pthread)
+#target_link_libraries(DeepCars glib-2.0 gtk-3 gdk-3)
 
 # For gcov
 #target_compile_options(DeepCars PRIVATE "-fprofile-arcs")

@@ -5,10 +5,14 @@
 #ifdef __GNUC__
 #pragma implementation "map_saver.h"
 #endif
+
+#include <dirent.h>
+#include <sys/stat.h>
 #include "map_saver.h"
 #include "../../win_defaults.h"
+#include "../../../osdialog/osdialog.h"
 
-void map_save(list_t* walls, list_t* objects, char* file)
+void map_save(list_t* walls, list_t* objects, char* file, vec2f_t prev_point, bool first_point_set)
 {
    assert(walls);
    assert(objects);
@@ -16,6 +20,9 @@ void map_save(list_t* walls, list_t* objects, char* file)
    FILE* f = fopen(file, "wb");
    if(!f)
       APP_ERROR("Unable to open file \"%s\"", file);
+
+   fwrite(&prev_point, sizeof(vec2f_t), 1, f);
+   fwrite(&first_point_set, sizeof(bool), 1, f);
 
    size_t c = sizeof(wall_t);
    fwrite(&c, sizeof(c), 1, f);
@@ -41,7 +48,7 @@ void map_save(list_t* walls, list_t* objects, char* file)
    fclose(f);
 }
 
-void map_load(list_t* walls, list_t* objects, char* file)
+void map_load(list_t* walls, list_t* objects, char* file, vec2f_t* prev_point, bool* first_point_set)
 {
    list_free_elements(walls);
    list_free_elements(objects);
@@ -51,6 +58,10 @@ void map_load(list_t* walls, list_t* objects, char* file)
       APP_ERROR("Unable to open file \"%s\"", file);
 
    size_t c = 0;
+
+   fread(prev_point, sizeof(vec2f_t), 1, f);
+   fread(first_point_set, sizeof(bool), 1, f);
+
    fread(&c, sizeof(c), 1, f);
    if(c != sizeof(wall_t))
       APP_ERROR("Sizes of sizeof(wall_t) and size stored in file doesn't match. Stored value: %li, sizeof(wall_t): %li",
@@ -80,4 +91,3 @@ void map_load(list_t* walls, list_t* objects, char* file)
 
    fclose(f);
 }
-

@@ -8,6 +8,8 @@
 #include "../../../lib/structs.h"
 #include "obj_editor_drawer.h"
 
+#define MAP_SAVE_DIR "maps"
+
 typedef struct _wall {
    vec2f_t p1;
    vec2f_t p2;
@@ -23,7 +25,7 @@ typedef struct _map_object {
    enum _toolbar_state type;
 } map_object_t;
 
-void map_save(list_t* walls, list_t* objects, char* file);
-void map_load(list_t* walls, list_t* objects, char* file);
+void map_save(list_t* walls, list_t* objects, char* file, vec2f_t prev_point, bool first_point_set);
+void map_load(list_t* walls, list_t* objects, char* file, vec2f_t* prev_point, bool* first_point_set);
 
 #endif //DEEPCARS_MAP_SAVER_H

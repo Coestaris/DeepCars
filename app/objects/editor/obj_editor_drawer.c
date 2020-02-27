@@ -8,6 +8,10 @@
 #include "obj_editor_drawer.h"
 #include "../../../lib/resources/rmanager.h"
 #include "../../rendering/renderer.h"
+#include "map_saver.h"
+#include "../../rendering/text_rendering.h"
+#include "../../../osdialog/osdialog.h"
+#include "obj_editor_map.h"
 
 #define toolbar_size 33
 #define grid_size 256
@@ -50,6 +54,11 @@ vec2f_t toolbar_slip_pos;
 vec2f_t toolbar_start_pos;
 vec2f_t toolbar_fin_pos;
 vec2f_t toolbar_wall_pos;
+
+vec2f_t tab_file_save_pos;
+vec2f_t tab_file_load_pos;
+texture_t* tab_file_selected;
+texture_t* tab_file_clicked;
 
 bool toolbar_eraser_clicked;
 bool toolbar_grid_clicked;
@@ -147,12 +156,12 @@ void draw_centered(texture_t* texture, vec2f_t position)
 }
 
 
-#define CHECK(position)                           \
+#define CHECK(position)                                       \
    pos.x > position.x && pos.x < position.x + toolbar_size && \
    pos.y > position.y && pos.y < position.y + toolbar_size    \
 
-#define CHECK_SIZE(position, tex)                           \
-   pos.x > position.x && pos.x < position.x + tex->width && \
+#define CHECK_SIZE(position, tex)                            \
+   pos.x > position.x && pos.x < position.x + tex->width &&  \
    pos.y > position.y && pos.y < position.y + tex->height    \
 
 void update_editor(object_t* this)
@@ -166,6 +175,7 @@ void update_editor(object_t* this)
    }
 
    vec2f_t pos = u_get_mouse_pos();
+   int32_t ms = u_get_mouse_state(MOUSE_LEFT);
 
    if(CHECK(run_button_pos)) draw(run_button_texture[1], run_button_pos);
    else draw(run_button_texture[0], run_button_pos);
@@ -266,6 +276,15 @@ void update_editor(object_t* this)
       }
    }
    draw(toolbar_selected, selected_toolbar_state_pos);
+
+   if(CHECK_SIZE(tab_file_load_pos, tab_file_selected) && tab_state == 3)
+   {
+      draw(ms == MOUSE_PRESSED ? tab_file_clicked : tab_file_selected, tab_file_load_pos);
+   }
+   if(CHECK_SIZE(tab_file_save_pos, tab_file_selected) && tab_state == 3)
+   {
+      draw(ms == MOUSE_PRESSED ? tab_file_clicked : tab_file_selected, tab_file_save_pos);
+   }
 
    if(grid)
    {
@@ -398,8 +417,26 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
          tabbutton_selected_pos = tabbutton_file_pos;
          tab_state = 3;
       }
-   } else if(tab_state != -1 && state == MOUSE_RELEASE && mouse == MOUSE_LEFT && CHECK_SIZE(tab_pos, tab_texture))
+   }
+   else if(tab_state != -1 && state == MOUSE_RELEASE && mouse == MOUSE_LEFT && CHECK_SIZE(tab_pos, tab_texture))
    {
+      if(CHECK_SIZE(tab_file_load_pos, tab_file_selected))
+      {
+         osdialog_filters* filters = osdialog_filters_parse("Map files:map");
+         char* fn = osdialog_file(OSDIALOG_SAVE, MAP_SAVE_DIR, "map.map", filters);
+         map_save(walls, map_objects, fn, prev_point, first_point_set);
+         free(fn);
+         osdialog_filters_free(filters);
+      }
+      else if(CHECK_SIZE(tab_file_save_pos, tab_file_selected))
+      {
+         osdialog_filters* filters = osdialog_filters_parse("Map files:map");
+         char* fn = osdialog_file(OSDIALOG_OPEN, MAP_SAVE_DIR, "map.map", filters);
+         map_load(walls, map_objects, fn, &prev_point, &first_point_set);
+         free(fn);
+         osdialog_filters_free(filters);
+         //todo
+      }
       //??
    }
    else
@@ -415,6 +452,11 @@ object_t* create_editor_drawer(void)
    tab_ffnn_texture = NULL;//rm_getn(TEXTURE, "editor_tab_ffnn");
    tab_ga_texture =   NULL;//rm_getn(TEXTURE, "editor_tab_ga");
    tab_map_texture =  NULL;//rm_getn(TEXTURE, "editor_tab_map");
+
+   tab_file_save_pos = vec2f(895, 400);
+   tab_file_load_pos = vec2f(1027, 400);
+   tab_file_selected = rm_getn(TEXTURE, "editor_tab_file_selected");
+   tab_file_clicked = rm_getn(TEXTURE, "editor_tab_file_clicked");
 
    editor_black_texture = rm_getn(TEXTURE, "__generated_mt_grass_trans_0.0_0.0_0.0");
 
@@ -472,6 +514,7 @@ object_t* create_editor_drawer(void)
    object_t* this = o_create();
    this->update_func = update_editor;
    this->mouse_event_func = mouse_editor;
+
    return this;
 }
 

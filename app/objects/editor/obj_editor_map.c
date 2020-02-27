@@ -281,5 +281,8 @@ object_t* create_editor_map(void)
    this->update_func = update_editor_map;
    this->mouse_event_func = wheel_mouse_editor_map;
    field_click_func = mouse_editor_map;
+
+   map_load(walls, map_objects, MAP_SAVE_DIR "/1.map", &prev_point, &first_point_set);
+
    return this;
 }
