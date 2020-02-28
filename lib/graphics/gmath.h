@@ -113,6 +113,8 @@ void vec4_cross(vec4 a, vec4 b);
 // Length of vector
 float vec4_len(vec4 v);
 
+float vec4_dist(vec4 a, vec4 b);
+
 // Normalize given vector
 void vec4_norm(vec4 v);
 

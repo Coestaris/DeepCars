@@ -136,21 +136,21 @@ void create_grid(size_t size)
 
 void draw(texture_t* texture, vec2f_t position)
 {
-   float a = 1;
+   static float a = 0;
    gr_pq_push_sprite(3, texture, position, vec2f(1, 1),
                      vec2f(0, 0), 0, default_sprite_renderer, &a);
 }
 
 void draw_depth(size_t depth, texture_t* texture, vec2f_t position)
 {
-   float a = 1;
+   static float a = 0;
    gr_pq_push_sprite(depth, texture, position, vec2f(1, 1),
                      vec2f(0, 0), 0, default_sprite_renderer, &a);
 }
 
 void draw_centered(texture_t* texture, vec2f_t position)
 {
-   float a = 1;
+   static float a = 0;
    gr_pq_push_sprite(3, texture,
          vec2f(position.x - (texture->width - toolbar_size) / 2.0, position.y - (texture->height - toolbar_size) / 2.0),
          vec2f(1, 1),

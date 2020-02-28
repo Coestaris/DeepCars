@@ -166,7 +166,7 @@ void draw_line_arrow(vec2f_t p1, vec2f_t p2, float l, float w, float h, vec4 col
 
 void update_editor_map(object_t* this)
 {
-   float trans = 0;
+   static float trans = 0;
    for(size_t i = 0; i < map_objects->count; i++)
    {
       struct _map_object* object = map_objects->collection[i];
