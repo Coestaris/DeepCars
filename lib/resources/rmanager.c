@@ -100,7 +100,7 @@ void* rm_getn_try(resource_type_t type, const char* name)
          break;
       case MODEL:
          for(size_t i = 0; i < models->count; i++)
-            if(!strcmp(((struct _model_node*)models->collection[i])->model->filename, name)) {
+            if(!strcmp(((struct _model_node*)models->collection[i])->model->name, name)) {
                return (((struct _model_node*)models->collection[i])->model);
             }
          break;

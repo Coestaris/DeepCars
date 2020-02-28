@@ -16,7 +16,9 @@
 #include "resources/texture.h"
 #include "resources/font.h"
 #include "resources/model.h"
+#include "resources/rmanager.h"
 
 #include "graphics/rendering/graphics.h"
+#include "graphics/rendering/render_stage.h"
 
 #endif //DEEPCARS_OBJECT_INCLUDE_H

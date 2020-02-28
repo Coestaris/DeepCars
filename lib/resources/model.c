@@ -63,13 +63,7 @@ typedef struct
 } obj_descriptor_t;
 
 // Push element to a specified array of model
-void m_push_vertex(model_t* model, vec4 vec);
-void m_push_normal(model_t* model, vec4 vec);
-void m_push_tex_coord(model_t* model, vec4 vec);
-void m_push_face(model_t* model, model_face_t* face);
-void m_push_group_name(model_t* model, char* group_name);
-void m_push_mtllib(model_t* model, char* mtllib);
-void m_push_used_material(model_t* model, material_t* used_material);
+#include "model_push.h"
 
 // List of all supported descriptors
 obj_descriptor_t allowed_descriptors[] =
@@ -348,7 +342,7 @@ model_t* m_create()
    memset(model->mtl_libs, 0, sizeof(char*) * model->model_len->mtl_libs_max_count);
 
    model->object_name = NULL;
-   model->filename = NULL;
+   model->name = NULL;
 
    model->VBO = 0;
    model->VAO = 0;
@@ -373,7 +367,7 @@ model_t* m_load_s(char* name, char* source)
    }
 
    model_t* model = m_create();
-   model->filename = name;
+   model->name = name;
 
    m_parse_lines(model, source);
 
@@ -449,9 +443,9 @@ void m_free(model_t* model)
    if (model->VAO != 0)
       GL_CALL(glDeleteBuffers(1, &(model->VAO)))
 
-   M_LOG("Freed model \"%s\"", model->filename);
+   M_LOG("Freed model \"%s\"", model->name);
 
-   free(model->filename);
+   free(model->name);
    free(model);
 }
 
@@ -741,7 +735,7 @@ model_t* m_create_plane(uint32_t vpoly, uint32_t hpoly, bool global_uv)
 
    char buff[50];
    snprintf(buff, sizeof(buff), "__generated_plane%i", rand());
-   model->filename = strdup(buff);
+   model->name = strdup(buff);
 
    return model;
 }

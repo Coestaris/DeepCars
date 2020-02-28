@@ -18,6 +18,8 @@
 #define STAGE_BYPASS 7
 #define STAGE_PRIMITIVE 8
 
+#define WIREFRAME
+
 extern sprite_renderer_t* default_sprite_renderer;
 extern primitive_renderer_t* default_primitive_renderer;
 

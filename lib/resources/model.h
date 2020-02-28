@@ -72,7 +72,7 @@ typedef struct _model_len
 typedef struct _model
 {
    // Path to the model file
-   char* filename;
+   char* name;
 
    // List of all vertices used in this model
    vec4* vertices;

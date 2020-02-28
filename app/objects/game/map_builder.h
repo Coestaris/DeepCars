@@ -7,6 +7,6 @@
 
 #include "../../../lib/resources/model.h"
 
-model_t* build_model(list_t* walls);
+model_t* build_map_model(list_t* walls);
 
 #endif //DEEPCARS_MAP_BUILDER_H

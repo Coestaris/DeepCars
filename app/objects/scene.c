@@ -15,6 +15,7 @@
 #include "editor/obj_editor_drawer.h"
 #include "editor/obj_editor_map.h"
 #include "obj_camera_control.h"
+#include "game/obj_game_map.h"
 
 model_t* plane;
 
@@ -33,6 +34,7 @@ void setup_game_objects(scene_t* scene)
                                    plane));
    list_push(scene->startup_objects, create_camera_control());
    list_push(scene->startup_objects, create_default_bind_handler());
+   list_push(scene->startup_objects, create_game_map());
 }
 
 void setup_menu_objects(scene_t* scene)

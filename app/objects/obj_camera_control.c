@@ -29,10 +29,10 @@ void camera_update_func(object_t* this)
    c_rotate(camera, camera_pitch, camera_yaw);
 
    vec4_cpy(camera_dir_cpy, camera->direction);
-   vec4_mulf(camera_dir_cpy, .2f);
+   vec4_mulf(camera_dir_cpy, .4f);
 
    vec4_cpy(camera_cross_cpy, camera->_camera_right);
-   vec4_mulf(camera_cross_cpy, .2f);
+   vec4_mulf(camera_cross_cpy, .4f);
 
    //a
    if (u_get_key_state(38) == KEY_PRESSED)
