@@ -109,4 +109,7 @@ vec2f_t vec2f(double_t x, double_t y);
 // vec3f_t constructor
 vec3f_t vec3f(double_t x, double_t y, double_t z);
 
+double max(double a, double b);
+double min(double a, double b);
+
 #endif //DEEPCARS_STRUCTS_H

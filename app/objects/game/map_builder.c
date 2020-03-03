@@ -98,16 +98,69 @@ struct _normal create_normal(vec2f_t p1, vec2f_t p2)
    return n;
 }
 
+bool check_intersection(double ray_x1, double ray_y1, double ray_x2, double ray_y2, vec2f_t seg1, vec2f_t seg2)
+{
+   double r_px = ray_x1;
+   double r_py = ray_y1;
+   double r_dx = ray_x2 - ray_x1;
+   double r_dy = ray_y2 - ray_y1;
+
+   double s_px = seg1.x;
+   double s_py = seg1.y;
+   double s_dx = seg2.x - seg1.x;
+   double s_dy = seg2.y - seg1.y;
+
+   if ((fabs(r_dx)) < GET_INTERSECTION_COMP) // Vertical vector
+   {
+      double min_sx = min(seg1.x, seg2.x);
+      double min_sy = min(seg1.y, seg2.y);
+      double min_ry = min(ray_y1, ray_y2);
+      double max_sx = max(seg1.x, seg2.x);
+      double max_sy = max(seg1.y, seg2.y);
+      double max_ry = max(ray_y1, ray_y2);
+
+      if (fabs(s_dx) < GET_INTERSECTION_COMP) return false; // Parallel
+      else if(fabs(s_dy) < GET_INTERSECTION_COMP) return max_sx > r_px && r_px > min_sx && max_ry > s_py && s_py > min_ry; // Normal
+      else // Other
+      {
+         vec2f_t norm = normalize(vec2f(s_dx, s_dy));
+         double y = (min_sx - norm.x * r_px) / norm.y;
+         return (max_sy > y && y > min_sy && max_ry > y && y > min_ry);
+      }
+   }
+
+   if ((fabs(r_dy)) < GET_INTERSECTION_COMP) // Horizontal vector
+   {
+      double min_sx = min(seg1.x, seg2.x);
+      double min_sy = min(seg1.y, seg2.y);
+      double min_rx = min(ray_x1, ray_x2);
+      double max_sx = max(seg1.x, seg2.x);
+      double max_sy = max(seg1.y, seg2.y);
+      double max_rx = max(ray_x1, ray_x2);
+
+      if (fabs(s_dy) < GET_INTERSECTION_COMP) return false; // Parallel
+      else if(fabs(s_dx) < GET_INTERSECTION_COMP) return max_sy > r_py && r_py > min_sy && max_rx > s_px && s_px > min_rx; // Normal
+      else // Other
+      {
+         vec2f_t norm = normalize(vec2f(s_dx, s_dy));
+         double x = (min_sy - norm.y * r_py) / norm.x;
+         return (max_sx > x && x > min_sx && max_rx > x && x > min_rx);
+      }
+   }
+
+   return get_intersection(ray_x1, ray_y1, ray_x2, ray_y2, seg1, seg2, &r_px, &r_py, &r_dx);
+}
+
 bool intersects(struct _normal n, struct _normal n1, struct _normal n2, struct _normal n3)
 {
    vec2f_t dest = vec2f(n.p.x + n.n.x * 10000, n.p.y + n.n.y * 10000);
    double dist, x, y;
 
-   if(get_intersection(n.p.x, n.p.y, dest.x, dest.y, n1.p1, n1.p2, &x, &y, &dist))
+   if(check_intersection(n.p.x, n.p.y, dest.x, dest.y, n1.p1, n1.p2))
       return true;
-   if(get_intersection(n.p.x, n.p.y, dest.x, dest.y, n2.p1, n2.p2, &x, &y, &dist))
+   if(check_intersection(n.p.x, n.p.y, dest.x, dest.y, n2.p1, n2.p2))
       return true;
-   if(get_intersection(n.p.x, n.p.y, dest.x, dest.y, n3.p1, n3.p2, &x, &y, &dist))
+   if(check_intersection(n.p.x, n.p.y, dest.x, dest.y, n3.p1, n3.p2))
       return true;
 
    return false;

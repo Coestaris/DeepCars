@@ -173,3 +173,13 @@ list_t* list_create()
 
    return list;
 }
+
+double max(double a, double b)
+{
+   return a > b ? a : b;
+}
+
+double min(double a, double b)
+{
+   return a > b ? b : a;
+}
