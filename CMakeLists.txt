@@ -28,8 +28,6 @@ endif()
 include_directories(/usr/include/freetype2)
 target_link_libraries(DeepCars X11 freetype)
 
-
-
 target_link_libraries(DeepCars X11 GL z m)
 target_link_libraries(DeepCars X11 chipmunk pthread)
 #target_link_libraries(DeepCars glib-2.0 gtk-3 gdk-3)

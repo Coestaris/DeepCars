@@ -214,6 +214,42 @@ void setup_object_g_buffer(render_stage_t* stage, object_t* object, mat4 model_m
    sh_set_mat4(UNIFORM_GBUFF.model, model_mat);
 }
 
+// NORMAL ROUTINES
+void bind_normal(render_stage_t* stage)
+{
+   sh_set_vec3(UNIFORM_NORMAL.color, COLOR_WHITE);
+   sh_set_mat4(UNIFORM_NORMAL.view, view);
+}
+
+void unbind_normal(render_stage_t* stage) { }
+
+void draw_normal(render_stage_t* stage)
+{
+   render_stage_t* g_buffer_stage = default_rc->stages->collection[STAGE_G_BUFFER];
+   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, g_buffer_stage->fbo));
+   list_t* objects = u_get_objects();
+
+   //GL_PCALL(glEnable(GL_DEPTH_TEST));
+   for(size_t i = 0; i < objects->count; i++)
+   {
+      object_t* object = objects->collection[i];
+      if(object->draw_info->draw_normals)
+      {
+         gr_transform(object->position, object->scale, object->rotation);
+         sh_set_mat4(UNIFORM_NORMAL.model, model_mat);
+
+         GL_PCALL(glBindVertexArray(object->draw_info->normal_vao));
+         GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, object->draw_info->normal_vbo));
+
+         GL_PCALL(glDrawArrays(GL_LINES, 0, object->draw_info->normal_buffer_len));
+
+         GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+         GL_PCALL(glBindVertexArray(0));
+      }
+   }
+   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+}
+
 // SSAO ROUTINES
 void bind_ssao(render_stage_t* stage)
 {
@@ -404,6 +440,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    view = cmat4();
 
    shader_t* g_buffer_shader = setup_g_buffer(proj);
+   shader_t* normal_shader = setup_normal(proj);
    shader_t* ssao_shader = setup_ssao(ssao_kernel, proj);
    shader_t* ssao_blur_shader = setup_ssao_blur();
    shader_t* skybox_shader = setup_skybox(proj);
@@ -478,6 +515,13 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    geometry_shader_data_t* g_buffer_data = (g_buffer->data = malloc(sizeof(geometry_shader_data_t)));
    g_buffer_data->camera = camera;
    g_buffer_data->buffmat = cmat4();
+
+   render_stage_t* normal = rs_create("normal", RM_CUSTOM, normal_shader);
+   normal->width = (float)info->w;
+   normal->height = (float)info->h;
+   normal->bind_func = bind_normal;
+   normal->unbind_func = unbind_normal;
+   normal->custom_draw_func = draw_normal;
 
    render_stage_t* ssao = rs_create("ssao", RM_FRAMEBUFFER, ssao_shader);
    ssao->attachments = TF_COLOR0;
@@ -576,6 +620,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 
    default_rc = rc_create();
    list_push(default_rc->stages, g_buffer);
+   list_push(default_rc->stages, normal);
    list_push(default_rc->stages, ssao);
    list_push(default_rc->stages, ssao_blur);
    list_push(default_rc->stages, skybox);
@@ -607,6 +652,7 @@ void free_stages(void)
 
    free_geometry_shader_data(default_rc, STAGE_G_BUFFER);
    rs_free(default_rc->stages->collection[STAGE_G_BUFFER]);
+   rs_free(default_rc->stages->collection[STAGE_NORMAL]);
 
    rs_free(default_rc->stages->collection[STAGE_SSAO]);
    rs_free(default_rc->stages->collection[STAGE_SSAO_BLUR]);

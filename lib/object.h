@@ -29,6 +29,11 @@ typedef struct _draw_info {
 
    material_t* material;
 
+   bool draw_normals;
+   GLint normal_vao;
+   GLint normal_vbo;
+   size_t normal_buffer_len;
+
 } draw_info_t;
 
 // Struct that describes drawable object

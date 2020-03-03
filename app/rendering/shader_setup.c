@@ -37,6 +37,21 @@ shader_t* setup_g_buffer(mat4 proj)
    return sh;
 }
 
+shader_t* setup_normal(mat4 proj)
+{
+   shader_t* sh = s_getn_shader("normal");
+
+   UNIFORM_NORMAL.color = get_loc(sh, "color");
+   UNIFORM_NORMAL.view = get_loc(sh, "view");
+   UNIFORM_NORMAL.model = get_loc(sh, "model");
+
+   sh_use(sh);
+   sh_nset_mat4(sh, "projection", proj);
+   sh_use(NULL);
+
+   return sh;
+}
+
 shader_t* setup_ssao(vec4* kernel, mat4 proj)
 {
    shader_t* sh = s_getn_shader("ssao");

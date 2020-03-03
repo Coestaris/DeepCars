@@ -401,8 +401,8 @@ void gr_draw_line(vec2f_t p1, vec2f_t p2, float width, vec4 color,
          p2.x, p2.y
    };
 
-   glEnable(GL_PROGRAM_POINT_SIZE);
-   glPointSize(10);
+   //glEnable(GL_PROGRAM_POINT_SIZE);
+   //glPointSize(10);
 
    GL_PCALL(glBufferData(GL_ARRAY_BUFFER, sizeof(gl_data), gl_data, GL_DYNAMIC_DRAW));
 

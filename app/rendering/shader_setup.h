@@ -20,6 +20,13 @@ struct {
 } UNIFORM_GBUFF;
 
 struct {
+   GLint color;
+   GLint view;
+   GLint model;
+
+} UNIFORM_NORMAL;
+
+struct {
    GLint pos_tex;
    GLint norm_tex;
    GLint noise_tex;
@@ -112,6 +119,7 @@ struct {
 } UNIFORM_PRIMITIVE;
 
 shader_t* setup_g_buffer(mat4 proj);
+shader_t* setup_normal(mat4 proj);
 shader_t* setup_ssao(vec4* kernel, mat4 proj);
 shader_t* setup_ssao_blur(void);
 shader_t* setup_skybox(mat4 proj);

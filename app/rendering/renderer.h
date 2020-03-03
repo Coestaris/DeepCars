@@ -9,14 +9,15 @@
 #include "../../lib/object_include.h"
 
 #define STAGE_G_BUFFER 0
-#define STAGE_SSAO 1
-#define STAGE_SSAO_BLUR 2
-#define STAGE_SKYBOX 3
-#define STAGE_SHADOWMAP 4
-#define STAGE_SHADING 5
-#define STAGE_FXAA 6
-#define STAGE_BYPASS 7
-#define STAGE_PRIMITIVE 8
+#define STAGE_NORMAL 1
+#define STAGE_SSAO 2
+#define STAGE_SSAO_BLUR 3
+#define STAGE_SKYBOX 4
+#define STAGE_SHADOWMAP 5
+#define STAGE_SHADING 6
+#define STAGE_FXAA 7
+#define STAGE_BYPASS 8
+#define STAGE_PRIMITIVE 9
 
 //#define WIREFRAME
 

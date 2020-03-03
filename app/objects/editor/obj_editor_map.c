@@ -5,6 +5,7 @@
 #ifdef __GNUC__
 #pragma implementation "obj_editor_map.h"
 #endif
+#include "obj_editor_map.h"
 #include "map_saver.h"
 #include "obj_editor_drawer.h"
 #include "../../rendering/renderer.h"
@@ -40,14 +41,13 @@ void wheel_mouse_editor_map(object_t* this, uint32_t x, uint32_t y, uint32_t sta
       rotation += M_PI / (current_grid_size == 0 ? 72 : 36);
 }
 
-// taken from https://github.com/Coestaris/Zomboid2.0/blob/master/client/lib/ltracer/ltracer_math.c
-int getIntersection(double rayX1, double rayY1, double rayX2, double rayY2, vec2f_t seg1, vec2f_t  seg2,
-                            double* rx, double* ry, double* dist)
+bool get_intersection(double ray_x1, double ray_y1, double ray_x2, double ray_y2, vec2f_t seg1, vec2f_t  seg2,
+                     double* rx, double* ry, double* dist)
 {
-   double r_px = rayX1;
-   double r_py = rayY1;
-   double r_dx = rayX2 - rayX1;
-   double r_dy = rayY2 - rayY1;
+   double r_px = ray_x1;
+   double r_py = ray_y1;
+   double r_dx = ray_x2 - ray_x1;
+   double r_dy = ray_y2 - ray_y1;
 
    double s_px = seg1.x;
    double s_py = seg1.y;
@@ -57,7 +57,8 @@ int getIntersection(double rayX1, double rayY1, double rayX2, double rayY2, vec2
    double r_mag = sqrt(r_dx * r_dx + r_dy * r_dy);
    double s_mag = sqrt(s_dx * s_dx + s_dy * s_dy);
 
-   if (r_dx / r_mag == s_dx / s_mag && r_dy / r_mag == s_dy / s_mag)
+   if (fabs(r_dx / r_mag - s_dx / s_mag) < GET_INTERSECTION_COMP &&
+       fabs(r_dy / r_mag - s_dy / s_mag) < GET_INTERSECTION_COMP)
    {
       return false;
    }
@@ -77,7 +78,7 @@ int getIntersection(double rayX1, double rayY1, double rayX2, double rayY2, vec2
 
 void calculate_start_points(vec2f_t pos, float angle, vec2f_t* p1, vec2f_t* p2)
 {
-   const double max_dist = sqrtf(2) * default_win->w;
+   const double max_dist = sqrtf(2) * (float)default_win->w;
 
    *p1 = vec2f(
          pos.x - max_dist * cosf(angle),
@@ -98,7 +99,7 @@ void calculate_start_points(vec2f_t pos, float angle, vec2f_t* p1, vec2f_t* p2)
    for(size_t i = 0; i < walls->count; i++)
    {
       struct _wall* wall = walls->collection[i];
-      bool found = getIntersection(pos.x, pos.y, p1->x, p1->y, wall->p1, wall->p2, &dest_x, &dest_y, &dest_dist);
+      bool found = get_intersection(pos.x, pos.y, p1->x, p1->y, wall->p1, wall->p2, &dest_x, &dest_y, &dest_dist);
       if(found && min_p1 > dest_dist)
       {
          min_p1_x = dest_x;
@@ -107,7 +108,7 @@ void calculate_start_points(vec2f_t pos, float angle, vec2f_t* p1, vec2f_t* p2)
          found_p1 = true;
       }
 
-      found = getIntersection(pos.x, pos.y, p2->x, p2->y, wall->p1, wall->p2, &dest_x, &dest_y, &dest_dist);
+      found = get_intersection(pos.x, pos.y, p2->x, p2->y, wall->p1, wall->p2, &dest_x, &dest_y, &dest_dist);
       if(found && min_p2 > dest_dist)
       {
          min_p2_x = dest_x;

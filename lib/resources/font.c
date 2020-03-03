@@ -23,9 +23,9 @@ uint16_t read16(uint8_t** ptr)
 uint32_t read32(uint8_t** ptr)
 {
    return
-      read8(ptr) << 0U |
-      read8(ptr) << 8U |
-      read8(ptr) << 16U|
+      read8(ptr) << 0U  |
+      read8(ptr) << 8U  |
+      read8(ptr) << 16U |
       read8(ptr) << 24U;
 }
 

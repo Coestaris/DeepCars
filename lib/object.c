@@ -59,6 +59,10 @@ object_t* o_create()
 
    object->draw_info = malloc(sizeof(draw_info_t));
    object->draw_info->model = NULL;
+   object->draw_info->draw_normals = false;
+   object->draw_info->shadows = true;
+   object->draw_info->normal_vao = 0;
+   object->draw_info->normal_buffer_len = 0;
    object->draw_info->drawable = false;
    return object;
 }

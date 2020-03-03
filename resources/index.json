@@ -2,6 +2,7 @@
     "shaders" : 
     [
         { "vertex" : "g_buffer.vsh",                  "fragment" : "g_buffer.fsh",                  "name": "g_buffer"  },
+        { "vertex" : "normal.vsh",                    "fragment" : "normal.fsh",                    "name": "normal"    },
         { "vertex" : "2d_shaders/bypass.vsh",         "fragment" : "ssao.fsh",                      "name": "ssao"      },
         { "vertex" : "2d_shaders/bypass.vsh",         "fragment" : "ssao_blur.fsh",                 "name": "ssao_blur" },
         { "vertex" : "skybox.vsh",                    "fragment" : "skybox.fsh",                    "name": "skybox"    },

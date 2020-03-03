@@ -9,8 +9,9 @@
 #include "../editor/map_saver.h"
 #include "../../../lib/resources/model_push.h"
 #include "../../win_defaults.h"
+#include "../editor/obj_editor_map.h"
 
-#define WALL_HEIGHT 30
+#define WALL_HEIGHT 10
 #define WALL_WIDTH 10
 #define MIN_DIST 0.1
 
@@ -23,7 +24,6 @@ bool cmp_vectors(vec4 p1, vec4 p2, float dist)
 {
    return vec4_dist(p1, p2) < dist;
 }
-
 
 model_face_t* alloc_face(model_t* m, size_t* normal_counter, size_t p1id, size_t p2id, size_t p3id, size_t p4id, vec4 normal)
 {
@@ -73,7 +73,7 @@ vec2f_t normalize(vec2f_t n)
 
 vec2f_t normal(vec2f_t p)
 {
-   return normalize(vec2f(p.y, -p.x));
+   return normalize(vec2f(-p.y, p.x));
 }
 
 double dot(vec2f_t v1, vec2f_t v2)
@@ -81,20 +81,50 @@ double dot(vec2f_t v1, vec2f_t v2)
    return v1.x * v2.x + v1.y * v2.y;
 }
 
-double face_dot(vec2f_t v1, bool m1, vec2f_t v2, bool m2)
+struct _normal
 {
-   if(m1)
-   {
-      v1.x *= -1;
-      v1.y *= -1;
-   }
-   if(m2)
-   {
-      v2.x *= -1;
-      v2.y *= -1;
-   }
+   vec2f_t p1, p2, p;
+   vec2f_t d, n;
+};
 
-   return dot(normalize(v1), normalize(v2));
+struct _normal create_normal(vec2f_t p1, vec2f_t p2)
+{
+   struct _normal n;
+   n.d = vec2f(p2.x - p1.x, p2.y - p1.y);
+   n.n = normal(n.d);
+   n.p1 = p1;
+   n.p2 = p2;
+   n.p = vec2f((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f);
+   return n;
+}
+
+bool intersects(struct _normal n, struct _normal n1, struct _normal n2, struct _normal n3)
+{
+   vec2f_t dest = vec2f(n.p.x + n.n.x * 10000, n.p.y + n.n.y * 10000);
+   double dist, x, y;
+
+   if(get_intersection(n.p.x, n.p.y, dest.x, dest.y, n1.p1, n1.p2, &x, &y, &dist))
+      return true;
+   if(get_intersection(n.p.x, n.p.y, dest.x, dest.y, n2.p1, n2.p2, &x, &y, &dist))
+      return true;
+   if(get_intersection(n.p.x, n.p.y, dest.x, dest.y, n3.p1, n3.p2, &x, &y, &dist))
+      return true;
+
+   return false;
+}
+
+void reverse(struct _normal* n, size_t i, struct _normal normals[4])
+{
+   struct _normal others[3];
+   size_t c = 0;
+   for(size_t j = 0; j < 4; j++)
+      if(j != i) others[c++] = normals[j];
+
+   if(intersects(*n, others[0], others[1], others[2]))
+   {
+      n->n.x *= -1;
+      n->n.y *= -1;
+   }
 }
 
 void push_height_rec(model_t* m, size_t* i, size_t* normal_counter, vec2f_t p1, vec2f_t p2, vec2f_t p3, vec2f_t p4, float height)
@@ -112,32 +142,22 @@ void push_height_rec(model_t* m, size_t* i, size_t* normal_counter, vec2f_t p1, 
    model_face_t* face5 = alloc_face(m, normal_counter, p1id, p2id, p4id, p3id, cvec4(0, -1, 0, 0));
    model_face_t* face6 = alloc_face(m, normal_counter, p1hid, p2hid, p4hid, p3hid, cvec4(0, 1, 0, 0));
 
-   vec2f_t d1 = vec2f(p2.x - p1.x, p2.y - p1.y);
-   vec2f_t d2 = vec2f(p4.x - p3.x, p4.y - p3.y);
-   vec2f_t d3 = vec2f(p2.x - p4.x, p2.y - p4.y);
-   vec2f_t d4 = vec2f(p1.x - p3.x, p1.y - p3.y);
+   struct _normal normals[4] =
+   {
+      create_normal(p1, p2),
+      create_normal(p3, p4),
+      create_normal(p4, p2),
+      create_normal(p3, p1),
+   };
 
-   vec2f_t n1 = normal(d1);
-   if(face_dot(n1, false, d4, true) > 0 || face_dot(n1, false, d3, false) > 0)
-      n1 = vec2f(-n1.x, -n1.y);
+   for(size_t j = 0; j < 4; j++)
+      reverse(&(normals[j]), j, normals);
 
-   vec2f_t n2 = normal(d2);
-   if(face_dot(n2, false, d3, true) > 0 || face_dot(n2, false, d4, false) > 0)
-      n2 = vec2f(-n2.x, -n2.y);
+   model_face_t* face1 = alloc_face(m, normal_counter, p1id, p2id, p2hid, p1hid, cvec4(normals[0].n.x, 0, normals[0].n.y, 0));
+   model_face_t* face4 = alloc_face(m, normal_counter, p3id, p4id, p4hid, p3hid, cvec4(normals[1].n.x, 0, normals[1].n.y, 0));
 
-   vec2f_t n3 = normal(d3);
-   if(face_dot(n3, false, d1, true) > 0 || face_dot(n3, false, d2, false) > 0)
-      n3 = vec2f(-n3.x, -n3.y);
-
-   vec2f_t n4 = normal(d4);
-   if(face_dot(n4, false, d2, true) > 0 || face_dot(n4, false, d1, false) > 0)
-      n4 = vec2f(-n4.x, -n4.y);
-
-   model_face_t* face1 = alloc_face(m, normal_counter, p1id, p2id, p2hid, p1hid, cvec4(n1.x, 0, n1.y, 0));
-   model_face_t* face4 = alloc_face(m, normal_counter, p3id, p4id, p4hid, p3hid, cvec4(n2.x, 0, n2.y, 0));
-
-   model_face_t* face2 = alloc_face(m, normal_counter, p4id, p2id, p2hid, p4hid, cvec4(n3.x, 0, n3.y, 0));
-   model_face_t* face3 = alloc_face(m, normal_counter, p3id, p1id, p1hid, p3hid, cvec4(n4.x, 0, n4.y, 0));
+   model_face_t* face2 = alloc_face(m, normal_counter, p4id, p2id, p2hid, p4hid, cvec4(normals[2].n.x, 0, normals[2].n.y, 0));
+   model_face_t* face3 = alloc_face(m, normal_counter, p3id, p1id, p1hid, p3hid, cvec4(normals[3].n.x, 0, normals[3].n.y, 0));
 
    m_push_face(m, face1);
    m_push_face(m, face2);
