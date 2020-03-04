@@ -76,11 +76,13 @@ void* rm_get_try(resource_type_t type, uint32_t id)
             if(((struct _material_node*)materials->collection[i])->id == id) {
                return (((struct _material_node*)materials->collection[i])->material);
             }
+         break;
       case FONT:
          for(size_t i = 0; i < fonts->count; i++)
             if(((struct _font_node*)fonts->collection[i])->id == id) {
                return (((struct _font_node*)fonts->collection[i])->font);
             }
+         break;
    }
    return NULL;
 }
@@ -144,7 +146,7 @@ void* rm_getn(resource_type_t type, const char* name)
 //
 // rm_push()
 //
-void rm_push(resource_type_t type, void* data, uint32_t id)
+void rm_push(resource_type_t type, void* data, int32_t id)
 {
    switch(type)
    {

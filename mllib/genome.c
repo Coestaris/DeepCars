@@ -131,9 +131,9 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
    }
    char buff[20];
 
-   oilGrFill(image->colorMatrix, (oilColor){255,255,255});
-   oilColor disabled_connection_color = {210, 210, 210};
-   oilColor connection_color = {0, 0, 0};
+   oilGrFill(image->colorMatrix, (oilColor){255,255,255, 0});
+   oilColor disabled_connection_color = {210, 210, 210, 0};
+   oilColor connection_color = {0, 0, 0, 0};
    vec4 buff_vec = cvec4(0, 0, 0, 0);
    for(size_t i = 0; i < genome->connections_count; i++)
    {
@@ -171,10 +171,10 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
                connection->disabled ? disabled_connection_color : connection_color);
    }
 
-   oilColor input_fill_color = {150, 0, 0};
-   oilColor output_fill_color = {0, 150, 0};
-   oilColor hidden_fill_color = {0, 150, 150};
-   oilColor border_color = {0, 0, 0};
+   oilColor input_fill_color = {150, 0, 0, 0};
+   oilColor output_fill_color = {0, 150, 0, 0};
+   oilColor hidden_fill_color = {0, 150, 150, 0};
+   oilColor border_color = {0, 0, 0, 0};
    for(size_t i = 0; i < genome->nodes_count; i++)
    {
       oilColor* color;

@@ -36,7 +36,7 @@ size_t find_vector(model_t* m, size_t* counter, bool normal, vec4 to_find)
    vec4* array = normal ? m->normals : m->tex_coords;
    size_t len = normal ? m->model_len->normals_count : m->model_len->tex_coords_count;
 
-   size_t index = -1;
+   int64_t index = -1;
    for(size_t i = 0; i < len; i++)
    {
       if(cmp_vectors(array[i], to_find, MIN_DIST / 2))
@@ -56,7 +56,7 @@ size_t find_vector(model_t* m, size_t* counter, bool normal, vec4 to_find)
          m_push_tex_coord(m, to_find);
    }
 
-   return index;
+   return (size_t)index;
 }
 
 model_face_t* alloc_face(
@@ -259,10 +259,10 @@ void push_hexahedron(
 {
    float len = vec2_dist(p1, p3);
    size_t n = len / (WALL_WIDTH * 2);
-   float rest_len = len - n * (WALL_WIDTH * 2);
+   float rest_len = len - (float)n * (WALL_WIDTH * 2);
    float step = (WALL_WIDTH * 2) / (len);
 
-   //Lerp p1 and p3, p2 and p4
+   // Lerp p1 and p3, p2 and p4
    for(size_t s = 0; s < n; s++)
    {
       float v1 = s * step;

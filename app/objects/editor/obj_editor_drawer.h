@@ -16,9 +16,9 @@ extern enum _toolbar_state {
    WALL,
 } toolbar_state;
 
-extern size_t grid_state;
-extern size_t tab_state;
-extern size_t current_grid_size;
+extern uint8_t grid_state;
+extern int8_t tab_state;
+extern uint8_t current_grid_size;
 extern void (*field_click_func)(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse);
 
 object_t* create_editor_drawer(void);

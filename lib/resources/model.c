@@ -396,7 +396,10 @@ model_t* m_load(const char* filename)
    char* data = malloc(size + 1);
    memset(data, 0, size + 1);
 
-   fread(data, size, 1, f);
+   if(fread(data, size, 1, f) != 1)
+   {
+      M_ERROR("Unable to read model data from file",0);
+   }
 
    model_t* model = m_load_s(strdup(filename), data);
 
@@ -536,7 +539,7 @@ void m_store_vertex(
 
    if(use_normal)
    {
-      size_t norm_index = supposed_normals ? vert_index : f->normal_id[id] - 1;
+      size_t norm_index = supposed_normals ? vert_index : (f->normal_id[id] - 1);
       buffer[(*buffer_index)++] = model->normals[norm_index][0];
       buffer[(*buffer_index)++] = model->normals[norm_index][1];
       buffer[(*buffer_index)++] = model->normals[norm_index][2];

@@ -59,6 +59,7 @@ static int w_ctx_error_handler(Display* dpy, XErrorEvent* ev)
       ev->request_code, ev->resourceid, ev->serial);
 
    W_ERROR((const char*)buff, 0);
+   return 0;
 }
 
 //
@@ -139,7 +140,7 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
       W_LOG("Getting XVisualInfos",0);
    int best_fbc_index = -1, worst_fbc_index = -1, best_num_samp = -1, worst_num_samp = 999;
 
-   for (size_t i = 0; i < fbcount; i++)
+   for (size_t i = 0; i < (size_t)fbcount; i++)
    {
       XVisualInfo* vi = glXGetVisualFromFBConfig(info->display, fbc[i]);
       if (vi)

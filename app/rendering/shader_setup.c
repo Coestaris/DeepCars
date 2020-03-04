@@ -18,7 +18,8 @@ GLint get_loc(shader_t* sh, const char* name)
    {
       APP_ERROR("glGetUniformLocation of \"%s\" in shader \"%s\" returned -1", name, sh->name);
    }
-   else return location;
+
+   return location;
 }
 
 shader_t* setup_g_buffer(mat4 proj)
@@ -192,7 +193,7 @@ shader_t* setup_br(mat4 primitive_proj, float sigma, size_t kernel_len)
    sh_nset_float(sh, "z", z);
    for(size_t i = 0; i < kernel_len; i++)
    {
-      char buff[20];
+      char buff[35];
       snprintf(buff, sizeof(buff), "kernel[%li]", i);
       sh_nset_float(sh, buff, kernel[i]);
    }

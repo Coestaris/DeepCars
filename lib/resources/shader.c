@@ -162,7 +162,10 @@ void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* frag
       vertex_len = ftell(f);
       fseek(f, 0, SEEK_SET);
       vertex_source = malloc(vertex_len + 1);
-      fread(vertex_source, vertex_len, 1, f);
+      if(fread(vertex_source, vertex_len, 1, f) == 1)
+      {
+         SH_ERROR("Unable to read vertex data from file",0);
+      }
       vertex_source[vertex_len] = 0;
       fclose(f);
    }
@@ -177,7 +180,10 @@ void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* frag
       geometry_len = ftell(f);
       fseek(f, 0, SEEK_SET);
       geometry_source = malloc(geometry_len + 1);
-      fread(geometry_source, geometry_len, 1, f);
+      if(fread(geometry_source, geometry_len, 1, f) == 1)
+      {
+         SH_ERROR("Unable to read geometry data from file",0);
+      }
       geometry_source[geometry_len] = 0;
       fclose(f);
    }
@@ -192,7 +198,10 @@ void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* frag
       fragment_len = ftell(f);
       fseek(f, 0, SEEK_SET);
       fragment_source = malloc(fragment_len + 1);
-      fread(fragment_source, fragment_len, 1, f);
+      if(fread(fragment_source, fragment_len, 1, f) == 1)
+      {
+         SH_ERROR("Unable to read vertex data from file",0);
+      }
       fragment_source[fragment_len] = 0;
       fclose(f);
    }
@@ -287,7 +296,7 @@ inline void sh_set_vec4(GLint location, vec4 v)
 
 inline void sh_nset_int(shader_t* sh, const char* name, int value)
 {
-   GLuint location = glGetUniformLocation(sh->prog_id, name);
+   GLint location = glGetUniformLocation(sh->prog_id, name);
 #if DEBUG_LEVEL == 3
    assert(location != -1);
 #endif
@@ -296,7 +305,7 @@ inline void sh_nset_int(shader_t* sh, const char* name, int value)
 
 inline void sh_nset_float(shader_t* sh, const char* name, float value)
 {
-   GLuint location = glGetUniformLocation(sh->prog_id, name);
+   GLint location = glGetUniformLocation(sh->prog_id, name);
 #if DEBUG_LEVEL == 3
    assert(location != -1);
 #endif
@@ -305,7 +314,7 @@ inline void sh_nset_float(shader_t* sh, const char* name, float value)
 
 inline void sh_nset_mat4(shader_t* sh, const char* name, mat4 value)
 {
-   GLuint location = glGetUniformLocation(sh->prog_id, name);
+   GLint location = glGetUniformLocation(sh->prog_id, name);
 #if DEBUG_LEVEL == 3
    assert(location != -1);
 #endif
@@ -314,7 +323,7 @@ inline void sh_nset_mat4(shader_t* sh, const char* name, mat4 value)
 
 inline void sh_nset_vec2v(shader_t* sh, const char* name, float a, float b)
 {
-   GLuint location = glGetUniformLocation(sh->prog_id, name);
+   GLint location = glGetUniformLocation(sh->prog_id, name);
 #if DEBUG_LEVEL == 3
    assert(location != -1);
 #endif
@@ -326,10 +335,9 @@ inline void sh_nset_vec2(shader_t* sh, const char* name, vec4 v)
    sh_nset_vec2v(sh, name, v[0], v[1]);
 }
 
-
 inline void sh_nset_vec3v(shader_t* sh, const char* name, float a, float b, float c)
 {
-   GLuint location = glGetUniformLocation(sh->prog_id, name);
+   GLint location = glGetUniformLocation(sh->prog_id, name);
 #if DEBUG_LEVEL == 3
    assert(location != -1);
 #endif
@@ -343,7 +351,7 @@ inline void sh_nset_vec3(shader_t* sh, const char* name, vec4 v)
 
 inline void sh_nset_vec4v(shader_t* sh, const char* name, float a, float b, float c, float d)
 {
-   GLuint location = glGetUniformLocation(sh->prog_id, name);
+   GLint location = glGetUniformLocation(sh->prog_id, name);
 #if DEBUG_LEVEL == 3
    assert(location != -1);
 #endif

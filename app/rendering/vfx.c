@@ -89,13 +89,13 @@ float* create_gaussian_kernel(float sigma, float* z, size_t* k_size, size_t len)
    *k_size = (len - 1) / 2;
    float* kernel = malloc(sizeof(float) * len);
 
-   for (int j = 0; j <= *k_size; ++j)
+   for (size_t j = 0; j <= *k_size; ++j)
    {
       kernel[*k_size + j] = kernel[*k_size - j] = normpdf(j, sigma);
    }
 
    *z = 0;
-   for (int j = 0; j < len; j++)
+   for (size_t j = 0; j < len; j++)
    {
       *z += kernel[j];
    }

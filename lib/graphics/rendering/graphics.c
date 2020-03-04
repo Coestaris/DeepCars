@@ -215,7 +215,7 @@ void gr_draw_string(font_t* f, vec2 position, vec2 scale, char* string, void* da
 
    for(size_t i = 0; i < strlen(string); i++)
    {
-      charinfo_t* ci = &f->infos[string[i]];
+      charinfo_t* ci = &f->infos[(size_t)string[i]];
       if(string[i] == '\n')
       {
          position.y += f->base * scale.y;

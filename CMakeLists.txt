@@ -3,6 +3,8 @@ project(DeepCars C)
 
 set(CMAKE_C_STANDARD 99)
 
+set(CMAKE_C_FLAGS "-O3 -Wall -Wextra -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-parameter")
+
 FILE(GLOB oilSources oil/*.c)
 FILE(GLOB oilHeaders oil/*.h)
 
@@ -30,7 +32,6 @@ target_link_libraries(DeepCars X11 freetype)
 
 target_link_libraries(DeepCars X11 GL z m)
 target_link_libraries(DeepCars X11 chipmunk pthread)
-#target_link_libraries(DeepCars glib-2.0 gtk-3 gdk-3)
 
 # For gcov
 #target_compile_options(DeepCars PRIVATE "-fprofile-arcs")

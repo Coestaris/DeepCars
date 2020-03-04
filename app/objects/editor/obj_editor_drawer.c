@@ -80,9 +80,9 @@ osdialog_filters* filters = NULL;
 
 enum _toolbar_state toolbar_state;
 vec2 selected_toolbar_state_pos;
-size_t grid_state;
-size_t tab_state;
-size_t current_grid_size;
+uint8_t grid_state;
+int8_t tab_state;
+uint8_t current_grid_size;
 void (*field_click_func)(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse);
 
 void create_grid(size_t size)
@@ -288,8 +288,8 @@ void update_editor(object_t* this)
 
    if(grid)
    {
-      for(size_t x = 0; x < default_win->w / grid_size + 1; x++)
-      for(size_t y = 0; y < default_win->h / grid_size + 1; y++)
+      for(size_t x = 0; x < default_win->w / grid_size + 1U; x++)
+      for(size_t y = 0; y < default_win->h / grid_size + 1U; y++)
       {
          float screen_x = x * (float)grid_size;
          float screen_y = y * (float)grid_size;

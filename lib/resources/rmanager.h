@@ -26,7 +26,7 @@ void* rm_get_try(resource_type_t type, uint32_t id);
 
 void* rm_getn_try(resource_type_t type, const char* name);
 
-void rm_push(resource_type_t type, void* data, uint32_t id);
+void rm_push(resource_type_t type, void* data, int32_t id);
 
 void rm_free(bool free_tex, bool free_model, bool free_mat, bool free_font);
 
