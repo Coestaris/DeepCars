@@ -31,7 +31,6 @@ typedef struct _draw_info {
 
    bool draw_normals;
    GLint normal_vao;
-   GLint normal_vbo;
    size_t normal_buffer_len;
 
 } draw_info_t;

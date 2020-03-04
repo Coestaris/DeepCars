@@ -32,9 +32,9 @@ bool exiting;
 bool going_editor;
 float p = 1;
 float t = 1;
-float sprite_transparency;
+static float sprite_transparency;
 
-bool in_rec(blurred_region_t* br, vec2f_t pos)
+bool in_rec(blurred_region_t* br, vec2 pos)
 {
    return
       pos.x > br->x && pos.x < br->x + br->w &&
@@ -43,7 +43,7 @@ bool in_rec(blurred_region_t* br, vec2f_t pos)
 
 void update_menu_drawer(object_t* this)
 {
-   vec2f_t mouse = u_get_mouse_pos();
+   vec2 mouse = u_get_mouse_pos();
 
    if(exiting || going_editor)
    {
@@ -140,7 +140,7 @@ void mouse_menu_drawer(object_t* this, uint32_t x, uint32_t y, uint32_t state, u
 {
    if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && !exiting && !going_editor)
    {
-      vec2f_t pos = vec2f(x, y);
+      vec2 pos = vec2f(x, y);
       if(!about)
       {
          if (in_rec(btn_run_br, pos))

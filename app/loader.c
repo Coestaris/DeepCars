@@ -73,12 +73,12 @@ void app_run(void)
 {
    scm_load_scene(SCENEID_MENU, true);
 
+   init_fonts(win);
+
    switch_stages();
    switch_ssao();
    update_lights();
    update_shadow_light();
-
-   init_fonts(win);
 
    u_start_loop(win);
 }

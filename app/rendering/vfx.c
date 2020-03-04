@@ -7,7 +7,7 @@
 #endif
 #include "vfx.h"
 
-blurred_region_t* create_br(win_info_t* info, vec2f_t pos, vec2f_t size, vec2f_t back_tex_size)
+blurred_region_t* create_br(win_info_t* info, vec2 pos, vec2 size, vec2 back_tex_size)
 {
    blurred_region_t* br = malloc(sizeof(blurred_region_t));
    br->x = pos.x;

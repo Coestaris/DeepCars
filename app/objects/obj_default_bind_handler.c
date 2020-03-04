@@ -23,6 +23,8 @@ void camera_key_event_func(object_t* this, uint32_t key, uint32_t state)
       switch_fxaa_edges();
    else if (key == 135 && state == KEY_RELEASE) //popup menu
       switch_text_drawer();
+   else if (key == 61 && state == KEY_RELEASE) // dot
+      switch_wireframe();
 }
 
 object_t* create_default_bind_handler()

@@ -90,9 +90,9 @@ void gl_check(const char* line, int line_index, const char* file)
 //
 // vec2f
 //
-inline vec2f_t vec2f(double_t x, double_t y)
+inline vec2 vec2f(double_t x, double_t y)
 {
-   vec2f_t v = {x, y};
+   vec2 v = {x, y};
    return v;
 }
 
@@ -174,12 +174,48 @@ list_t* list_create()
    return list;
 }
 
-double max(double a, double b)
+inline double max(double a, double b)
 {
    return a > b ? a : b;
 }
 
-double min(double a, double b)
+inline double min(double a, double b)
 {
    return a > b ? b : a;
+}
+
+inline double vec2_dist(vec2 a, vec2 b)
+{
+   return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
+
+inline double vec2_len(vec2 v)
+{
+   return sqrt(v.x * v.x + v.y * v.y);
+}
+
+inline vec2 vec2_normalize(vec2 n)
+{
+   double n_len = vec2_len(n);
+   n.x /= n_len;
+   n.y /= n_len;
+   return n;
+}
+
+inline vec2 vec2_normal(vec2 p)
+{
+   return vec2_normalize(vec2f(-p.y, p.x));
+}
+
+inline double vec2_dot(vec2 v1, vec2 v2)
+{
+   return v1.x * v2.x + v1.y * v2.y;
+}
+
+
+inline vec2 vec2_lerp(vec2 a, vec2 b, double v)
+{
+   return vec2f(
+         a.x * v + b.x * (1 - v),
+         a.y * v + b.y * (1 - v));
 }

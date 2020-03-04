@@ -32,6 +32,7 @@ char* get_ssao_stage_string();
 
 void switch_stages(void);
 void switch_ssao(void);
+void switch_wireframe(void);
 void switch_fxaa(void);
 void switch_fxaa_edges(void);
 void free_stages(void);

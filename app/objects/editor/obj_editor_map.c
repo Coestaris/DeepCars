@@ -18,15 +18,15 @@ list_t* walls = NULL;
 list_t* map_objects = NULL;
 float rotation;
 
-vec2f_t prev_point;
+vec2 prev_point;
 bool first_point_set = false;
 
-void draw_line(vec2f_t p1, vec2f_t p2)
+void draw_line(vec2 p1, vec2 p2)
 {
    gr_pq_push_line(2, p1, p2, 4, COLOR_WHITE, default_primitive_renderer, NULL);
 }
 
-vec2f_t floor_point(vec2f_t pos)
+vec2 floor_point(vec2 pos)
 {
    pos.x = current_grid_size != 0 ? roundf((float)pos.x / (float) current_grid_size) * (float) current_grid_size : pos.x;
    pos.y = current_grid_size != 0 ? roundf((float)pos.y / (float) current_grid_size) * (float) current_grid_size : pos.y;
@@ -41,8 +41,8 @@ void wheel_mouse_editor_map(object_t* this, uint32_t x, uint32_t y, uint32_t sta
       rotation += M_PI / (current_grid_size == 0 ? 72 : 36);
 }
 
-bool get_intersection(double ray_x1, double ray_y1, double ray_x2, double ray_y2, vec2f_t seg1, vec2f_t  seg2,
-                     double* rx, double* ry, double* dist)
+bool get_intersection(double ray_x1, double ray_y1, double ray_x2, double ray_y2, vec2 seg1, vec2  seg2,
+                      double* rx, double* ry, double* dist)
 {
    double r_px = ray_x1;
    double r_py = ray_y1;
@@ -76,7 +76,7 @@ bool get_intersection(double ray_x1, double ray_y1, double ray_x2, double ray_y2
    return true;
 }
 
-void calculate_start_points(vec2f_t pos, float angle, vec2f_t* p1, vec2f_t* p2)
+void calculate_start_points(vec2 pos, float angle, vec2* p1, vec2* p2)
 {
    const double max_dist = sqrtf(2) * (float)default_win->w;
 
@@ -140,25 +140,19 @@ void calculate_start_points(vec2f_t pos, float angle, vec2f_t* p1, vec2f_t* p2)
    }
 }
 
-void draw_line_arrow(vec2f_t p1, vec2f_t p2, float l, float w, float h, vec4 color)
+void draw_line_arrow(vec2 p1, vec2 p2, float l, float w, float h, vec4 color)
 {
    //calculate direction
-   vec2f_t d = vec2f(p2.x - p1.x, p2.y - p1.y);
+   vec2 d = vec2_normalize(vec2f(p2.x - p1.x, p2.y - p1.y));
+
    //calculate normal
-   vec2f_t n = vec2f(d.y, -d.x);
-   float n_len = sqrtf(n.x * n.x + n.y * n.y);
-   //normalize normal
-   n.x /= n_len;
-   n.y /= n_len;
-   //normalize direction
-   d.x /= n_len;
-   d.y /= n_len;
+   vec2 n = vec2_normal(d);
 
-   vec2f_t src = vec2f((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f);
-   vec2f_t dest = vec2f(src.x + n.x * l, src.y + n.y * l);
+   vec2 src = vec2f((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f);
+   vec2 dest = vec2f(src.x + n.x * l, src.y + n.y * l);
 
-   vec2f_t a = vec2f(dest.x - n.x * h + d.x * w, dest.y - n.y * h + d.y * w);
-   vec2f_t b = vec2f(dest.x - n.x * h - d.x * w, dest.y - n.y * h - d.y * w);
+   vec2 a = vec2f(dest.x - n.x * h + d.x * w, dest.y - n.y * h + d.y * w);
+   vec2 b = vec2f(dest.x - n.x * h - d.x * w, dest.y - n.y * h - d.y * w);
 
    gr_pq_push_line(1, src, dest, 4, color, default_primitive_renderer, NULL);
    gr_pq_push_line(1, dest, a, 4, color, default_primitive_renderer, NULL);
@@ -202,21 +196,21 @@ void update_editor_map(object_t* this)
 
    if(toolbar_state == WALL && (walls->count != 0 || first_point_set))
    {
-      vec2f_t pos = floor_point(u_get_mouse_pos());
+      vec2 pos = floor_point(u_get_mouse_pos());
       draw_line(prev_point, pos);
    }
 
    if(toolbar_state == START || toolbar_state == FIN)
    {
-      vec2f_t pos = floor_point(u_get_mouse_pos());
+      vec2 pos = floor_point(u_get_mouse_pos());
       float angle = current_grid_size == 0 ? rotation : (float)(roundf(rotation / (M_PI / 36)) * M_PI / 36);
-      vec2f_t p1, p2;
+      vec2 p1, p2;
       calculate_start_points(pos, angle, &p1, &p2);
 
-      vec2f_t pp1 = vec2f(
+      vec2 pp1 = vec2f(
             pos.x - 50 * cosf(angle),
             pos.y - 50 * sinf(angle));
-      vec2f_t pp2 = vec2f(
+      vec2 pp2 = vec2f(
             pos.x - 50 * cosf(angle+ M_PI),
             pos.y - 50 * sinf(angle+ M_PI));
 
@@ -235,7 +229,7 @@ void update_editor_map(object_t* this)
 
 void mouse_editor_map(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
 {
-   vec2f_t pos = floor_point(vec2f(x, y));
+   vec2 pos = floor_point(vec2f(x, y));
    if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && toolbar_state == WALL)
    {
       if(first_point_set)
@@ -255,9 +249,9 @@ void mouse_editor_map(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
       object->type = toolbar_state;
       object->pos = pos;
 
-      vec2f_t pos = floor_point(u_get_mouse_pos());
+      vec2 pos = floor_point(u_get_mouse_pos());
       float angle = current_grid_size == 0 ? rotation : (float)(roundf(rotation / (M_PI / 36)) * M_PI / 36);
-      vec2f_t p1, p2;
+      vec2 p1, p2;
       calculate_start_points(pos, angle, &p1, &p2);
 
       object->p1 = p1;

@@ -22,9 +22,12 @@ void game_map_update(object_t* this)
       rm_push(MODEL, m, -1);
 
       float normal_length = 10.0f;
-      size_t s = m->model_len->faces_count * 6;
+      size_t s = m->model_len->faces_count * 12;
       float* buffer = malloc(sizeof(float) * s);
       size_t buffer_counter = 0;
+
+      vec4 color1 = COLOR_GREEN;
+      vec4 color2 = COLOR_WHITE;
 
       for(size_t i = 0; i < m->model_len->faces_count; i++)
       {
@@ -53,9 +56,18 @@ void game_map_update(object_t* this)
          buffer[buffer_counter++] = x1;
          buffer[buffer_counter++] = y1;
          buffer[buffer_counter++] = z1;
+
+         buffer[buffer_counter++] = color1[0];
+         buffer[buffer_counter++] = color1[1];
+         buffer[buffer_counter++] = color1[2];
+
          buffer[buffer_counter++] = x2;
          buffer[buffer_counter++] = y2;
          buffer[buffer_counter++] = z2;
+
+         buffer[buffer_counter++] = color2[0];
+         buffer[buffer_counter++] = color2[1];
+         buffer[buffer_counter++] = color2[2];
       }
 
       GLuint normal_vao;
@@ -70,7 +82,9 @@ void game_map_update(object_t* this)
 
       GL_CALL(glBindVertexArray(normal_vao));
       GL_CALL(glEnableVertexAttribArray(0));
-      GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0));
+      GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0));
+      GL_CALL(glEnableVertexAttribArray(1));
+      GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat))));
 
       GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
       GL_CALL(glBindVertexArray(0));
@@ -81,7 +95,6 @@ void game_map_update(object_t* this)
 
       obj->draw_info->draw_normals = true;
       obj->draw_info->normal_vao = normal_vao;
-      obj->draw_info->normal_vbo = normal_vbo;
       obj->draw_info->normal_buffer_len = s / 3;
       u_push_object(obj);
 

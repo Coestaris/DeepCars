@@ -38,26 +38,26 @@ texture_t* tabbutton_ga;
 texture_t* tabbutton_map;
 texture_t* tabbutton_file;
 
-vec2f_t tabbutton_ffnn_pos;
-vec2f_t tabbutton_ga_pos;
-vec2f_t tabbutton_map_pos;
-vec2f_t tabbutton_file_pos;
-vec2f_t tabbutton_selected_pos;
+vec2 tabbutton_ffnn_pos;
+vec2 tabbutton_ga_pos;
+vec2 tabbutton_map_pos;
+vec2 tabbutton_file_pos;
+vec2 tabbutton_selected_pos;
 
 texture_t* grid;
 texture_t* editor_black_texture;
 
-vec2f_t run_button_pos;
-vec2f_t toolbar_eraser_pos;
-vec2f_t toolbar_grid_pos;
-vec2f_t toolbar_obstacle_pos;
-vec2f_t toolbar_slip_pos;
-vec2f_t toolbar_start_pos;
-vec2f_t toolbar_fin_pos;
-vec2f_t toolbar_wall_pos;
+vec2 run_button_pos;
+vec2 toolbar_eraser_pos;
+vec2 toolbar_grid_pos;
+vec2 toolbar_obstacle_pos;
+vec2 toolbar_slip_pos;
+vec2 toolbar_start_pos;
+vec2 toolbar_fin_pos;
+vec2 toolbar_wall_pos;
 
-vec2f_t tab_file_save_pos;
-vec2f_t tab_file_load_pos;
+vec2 tab_file_save_pos;
+vec2 tab_file_load_pos;
 texture_t* tab_file_selected;
 texture_t* tab_file_clicked;
 
@@ -74,12 +74,12 @@ texture_t* tab_file_texture;
 texture_t* tab_ffnn_texture;
 texture_t* tab_ga_texture;
 texture_t* tab_map_texture;
-vec2f_t tab_pos;
+vec2 tab_pos;
 float editor_p = 0;
 osdialog_filters* filters = NULL;
 
 enum _toolbar_state toolbar_state;
-vec2f_t selected_toolbar_state_pos;
+vec2 selected_toolbar_state_pos;
 size_t grid_state;
 size_t tab_state;
 size_t current_grid_size;
@@ -134,21 +134,21 @@ void create_grid(size_t size)
    }
 }
 
-void draw(texture_t* texture, vec2f_t position)
+void draw(texture_t* texture, vec2 position)
 {
    static float a = 0;
    gr_pq_push_sprite(3, texture, position, vec2f(1, 1),
                      vec2f(0, 0), 0, default_sprite_renderer, &a);
 }
 
-void draw_depth(size_t depth, texture_t* texture, vec2f_t position)
+void draw_depth(size_t depth, texture_t* texture, vec2 position)
 {
    static float a = 0;
    gr_pq_push_sprite(depth, texture, position, vec2f(1, 1),
                      vec2f(0, 0), 0, default_sprite_renderer, &a);
 }
 
-void draw_centered(texture_t* texture, vec2f_t position)
+void draw_centered(texture_t* texture, vec2 position)
 {
    static float a = 0;
    gr_pq_push_sprite(3, texture,
@@ -176,7 +176,7 @@ void update_editor(object_t* this)
                         vec2f(default_win->w,default_win->h), vec2f(0, 0), 0, default_sprite_renderer, &editor_p);
    }
 
-   vec2f_t pos = u_get_mouse_pos();
+   vec2 pos = u_get_mouse_pos();
    int32_t ms = u_get_mouse_state(MOUSE_LEFT);
 
    if(CHECK_SIZE(run_button_pos, run_button_texture[1])) draw(run_button_texture[1], run_button_pos);
@@ -301,7 +301,7 @@ void update_editor(object_t* this)
 
 void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
 {
-   vec2f_t pos = u_get_mouse_pos();
+   vec2 pos = u_get_mouse_pos();
 
    if(CHECK(toolbar_eraser_pos))
    {

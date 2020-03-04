@@ -48,22 +48,22 @@ void gr_free(void);
 
 mat4 gr_transform(vec3f_t pos, vec3f_t scale, vec3f_t rot);
 
-void gr_draw_string(font_t* f, vec2f_t position, vec2f_t scale, char* string, void* data);
-void gr_draw_sprite(texture_t* texture, vec2f_t position, vec2f_t scale, vec2f_t center, float angle,
+void gr_draw_string(font_t* f, vec2 position, vec2 scale, char* string, void* data);
+void gr_draw_sprite(texture_t* texture, vec2 position, vec2 scale, vec2 center, float angle,
                     sprite_renderer_t* sprite_renderer, void* data);
-void gr_draw_line(vec2f_t p1, vec2f_t p2, float width, vec4 color,
+void gr_draw_line(vec2 p1, vec2 p2, float width, vec4 color,
                   primitive_renderer_t* primitive_renderer, void* data);
 void gr_render_object(object_t* obj);
 void gr_render_vao(GLuint vao);
 void gr_bind(render_stage_t* stage);
 void gr_unbind(render_stage_t* stage);
 
-void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2f_t position,
-      vec2f_t scale, vec2f_t center, float angle, sprite_renderer_t* sprite_renderer, void* data);
-void gr_pq_push_string(uint8_t depth, font_t* f, vec2f_t position,
-      vec2f_t scale, char* string, void* data);
-void gr_pq_push_line(uint8_t depth, vec2f_t p1, vec2f_t p2, float width, vec4 color,
-      primitive_renderer_t* primitive_renderer, void* data);
+void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2 position,
+                       vec2 scale, vec2 center, float angle, sprite_renderer_t* sprite_renderer, void* data);
+void gr_pq_push_string(uint8_t depth, font_t* f, vec2 position,
+                       vec2 scale, char* string, void* data);
+void gr_pq_push_line(uint8_t depth, vec2 p1, vec2 p2, float width, vec4 color,
+                     primitive_renderer_t* primitive_renderer, void* data);
 
 void gr_pq_flush(void);
 

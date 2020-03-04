@@ -41,7 +41,6 @@ shader_t* setup_normal(mat4 proj)
 {
    shader_t* sh = s_getn_shader("normal");
 
-   UNIFORM_NORMAL.color = get_loc(sh, "color");
    UNIFORM_NORMAL.view = get_loc(sh, "view");
    UNIFORM_NORMAL.model = get_loc(sh, "model");
 

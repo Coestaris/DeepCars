@@ -37,6 +37,7 @@ texture_t* texture_to_draw;
 int ssao_state = 0;
 int state = -1;
 int fxaa_state = 1;
+int wireframe = 0;
 int fxaa_edges = 0;
 
 mat4 view;
@@ -46,16 +47,22 @@ sprite_renderer_t* default_sprite_renderer;
 primitive_renderer_t* default_primitive_renderer;
 shader_t* br_shader;
 
+void switch_wireframe(void)
+{
+   wireframe = !wireframe;
+   APP_LOG("WIREFRAME MODE: %s", wireframe ? "ON" : "OFF");
+}
+
 void switch_fxaa(void)
 {
    fxaa_state = !fxaa_state;
-   printf("%i", fxaa_state);
+   APP_LOG("FXAA: %s", fxaa_state ? "ON" : "OFF");
 }
 
 void switch_fxaa_edges(void)
 {
    fxaa_edges = !fxaa_edges;
-   printf("%i", fxaa_edges);
+   APP_LOG("FXAA EDGES: %s", fxaa_edges ? "ON" : "OFF");
 }
 
 char _buff[140];
@@ -191,9 +198,8 @@ void bind_g_buffer(render_stage_t* stage)
    GL_PCALL(glClearColor(0,0,0,0));
    GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
 
-#ifdef WIREFRAME
-   GL_PCALL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-#endif
+   if(wireframe)
+      GL_PCALL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 
    geometry_shader_data_t* data = (geometry_shader_data_t*)stage->data;
    c_to_mat(view, data->camera);
@@ -202,9 +208,8 @@ void bind_g_buffer(render_stage_t* stage)
 
 void unbind_g_buffer(render_stage_t* stage)
 {
-#ifdef WIREFRAME
-   GL_PCALL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
-#endif
+   if(wireframe)
+      GL_PCALL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
 }
 
 void setup_object_g_buffer(render_stage_t* stage, object_t* object, mat4 model_mat)
@@ -217,7 +222,6 @@ void setup_object_g_buffer(render_stage_t* stage, object_t* object, mat4 model_m
 // NORMAL ROUTINES
 void bind_normal(render_stage_t* stage)
 {
-   sh_set_vec3(UNIFORM_NORMAL.color, COLOR_WHITE);
    sh_set_mat4(UNIFORM_NORMAL.view, view);
 }
 
@@ -239,11 +243,9 @@ void draw_normal(render_stage_t* stage)
          sh_set_mat4(UNIFORM_NORMAL.model, model_mat);
 
          GL_PCALL(glBindVertexArray(object->draw_info->normal_vao));
-         GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, object->draw_info->normal_vbo));
 
          GL_PCALL(glDrawArrays(GL_LINES, 0, object->draw_info->normal_buffer_len));
 
-         GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
          GL_PCALL(glBindVertexArray(0));
       }
    }

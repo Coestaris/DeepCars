@@ -18,10 +18,11 @@ typedef struct _font_data {
    float color_k;
    float back_off;
    float back_k;
+
 } font_data_t;
 
-void draw_default_string(uint8_t depth, font_data_t* data, vec2f_t pos, vec2f_t scale, char* str);
-void draw_monospace_string(uint8_t depth, font_data_t* data, vec2f_t pos, vec2f_t scale, char* str);
+void draw_default_string(uint8_t depth, font_data_t* data, vec2 pos, vec2 scale, char* str);
+void draw_monospace_string(uint8_t depth, font_data_t* data, vec2 pos, vec2 scale, char* str);
 void init_fonts(win_info_t* info);
 
 #endif //DEEPCARS_TEXT_RENDERING_H

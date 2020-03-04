@@ -145,7 +145,7 @@ void u_draw_func(void)
 //
 // u_get_mouse_pos()
 //
-vec2f_t u_get_mouse_pos()
+vec2 u_get_mouse_pos()
 {
    return vec2f(mouse_x, mouse_y);
 }

@@ -7,12 +7,10 @@
 #endif
 
 #include <dirent.h>
-#include <sys/stat.h>
 #include "map_saver.h"
 #include "../../win_defaults.h"
-#include "../../../osdialog/osdialog.h"
 
-void map_save(list_t* walls, list_t* objects, char* file, vec2f_t prev_point, bool first_point_set)
+void map_save(list_t* walls, list_t* objects, char* file, vec2 prev_point, bool first_point_set)
 {
    assert(walls);
    assert(objects);
@@ -21,7 +19,7 @@ void map_save(list_t* walls, list_t* objects, char* file, vec2f_t prev_point, bo
    if(!f)
       APP_ERROR("Unable to open file \"%s\"", file);
 
-   fwrite(&prev_point, sizeof(vec2f_t), 1, f);
+   fwrite(&prev_point, sizeof(vec2), 1, f);
    fwrite(&first_point_set, sizeof(bool), 1, f);
 
    size_t c = sizeof(wall_t);
@@ -48,7 +46,7 @@ void map_save(list_t* walls, list_t* objects, char* file, vec2f_t prev_point, bo
    fclose(f);
 }
 
-void map_load(list_t* walls, list_t* objects, char* file, vec2f_t* prev_point, bool* first_point_set)
+void map_load(list_t* walls, list_t* objects, char* file, vec2* prev_point, bool* first_point_set)
 {
    list_free_elements(walls);
    list_free_elements(objects);
@@ -59,7 +57,7 @@ void map_load(list_t* walls, list_t* objects, char* file, vec2f_t* prev_point, b
 
    size_t c = 0;
 
-   fread(prev_point, sizeof(vec2f_t), 1, f);
+   fread(prev_point, sizeof(vec2), 1, f);
    fread(first_point_set, sizeof(bool), 1, f);
 
    fread(&c, sizeof(c), 1, f);

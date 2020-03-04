@@ -46,7 +46,7 @@ struct _queue_item {
    uint8_t mode;
 
    texture_t* tex;
-   vec2f_t center;
+   vec2 center;
    float angle;
    sprite_renderer_t* sprite_renderer;
    bool bind_shader;
@@ -54,14 +54,14 @@ struct _queue_item {
    font_t* font;
    char* string;
 
-   vec2f_t p1;
-   vec2f_t p2;
+   vec2 p1;
+   vec2 p2;
    float width;
    vec4 color;
    primitive_renderer_t* primitive_renderer;
 
-   vec2f_t position;
-   vec2f_t scale;
+   vec2 position;
+   vec2 scale;
    void* data;
 } queue[MAX_DEPTH][MAX_QUEUE_COUNT];
 
@@ -199,7 +199,7 @@ inline void gr_unbind(render_stage_t* stage)
    }
 }
 
-void gr_draw_string(font_t* f, vec2f_t position, vec2f_t scale, char* string, void* data)
+void gr_draw_string(font_t* f, vec2 position, vec2 scale, char* string, void* data)
 {
    float start_x = position.x;
 
@@ -255,8 +255,8 @@ enum pq_type {
    LINE
 };
 
-void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2f_t position,
-                       vec2f_t scale, vec2f_t center, float angle,
+void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2 position,
+                       vec2 scale, vec2 center, float angle,
                        sprite_renderer_t* sprite_renderer, void* data)
 {
    assert(depth < MAX_DEPTH);
@@ -276,8 +276,8 @@ void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2f_t position,
    queue_length[depth]++;
 }
 
-void gr_pq_push_string(uint8_t depth, font_t* f, vec2f_t position,
-                       vec2f_t scale, char* string, void* data)
+void gr_pq_push_string(uint8_t depth, font_t* f, vec2 position,
+                       vec2 scale, char* string, void* data)
 {
    assert(depth < MAX_DEPTH);
    assert(queue_length[depth] < MAX_QUEUE_COUNT);
@@ -294,7 +294,7 @@ void gr_pq_push_string(uint8_t depth, font_t* f, vec2f_t position,
    queue_length[depth]++;
 }
 
-void gr_pq_push_line(uint8_t depth, vec2f_t p1, vec2f_t p2, float width, vec4 color,
+void gr_pq_push_line(uint8_t depth, vec2 p1, vec2 p2, float width, vec4 color,
                      primitive_renderer_t* primitive_renderer, void* data)
 {
    assert(depth < MAX_DEPTH);
@@ -356,8 +356,8 @@ void gr_pq_flush(void)
    }
 }
 
-void gr_draw_sprite(texture_t* texture, vec2f_t position, vec2f_t scale, vec2f_t center, float angle,
-      sprite_renderer_t* sprite_renderer, void* data)
+void gr_draw_sprite(texture_t* texture, vec2 position, vec2 scale, vec2 center, float angle,
+                    sprite_renderer_t* sprite_renderer, void* data)
 {
    sh_use(sprite_renderer->shader);
 
@@ -381,7 +381,7 @@ void gr_draw_sprite(texture_t* texture, vec2f_t position, vec2f_t scale, vec2f_t
    sh_use(NULL);
 }
 
-void gr_draw_line(vec2f_t p1, vec2f_t p2, float width, vec4 color,
+void gr_draw_line(vec2 p1, vec2 p2, float width, vec4 color,
                   primitive_renderer_t* primitive_renderer, void* data)
 {
    p1.x = p1.x - (float)default_win->w / 2.0f;

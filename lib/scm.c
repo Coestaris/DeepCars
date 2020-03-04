@@ -60,6 +60,8 @@ void scm_load_scene(uint32_t id, bool free)
 
    for (size_t i = 0; i < scene->startup_objects->count; i++)
       u_push_object(o_clone((object_t*) scene->startup_objects->collection[i]));
+
+   SCM_LOG("Loaded scene %li. %li startup objects copied", id, scene->startup_objects->count);
 }
 
 //

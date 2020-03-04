@@ -12,8 +12,8 @@
 #include "../../lib/resources/rmanager.h"
 #include "shader_setup.h"
 
-font_t* default_font;
-font_t* monospace_font;
+static font_t* default_font;
+static font_t* monospace_font;
 mat4 primitive_proj;
 
 void bind_default_font(font_t* font, void* data)
@@ -27,12 +27,12 @@ void bind_default_font(font_t* font, void* data)
    t_bind(font->texture, UNIFORM_FONT.tex);
 }
 
-void draw_default_string(uint8_t depth, font_data_t* data, vec2f_t pos, vec2f_t scale, char* str)
+void draw_default_string(uint8_t depth, font_data_t* data, vec2 pos, vec2 scale, char* str)
 {
    gr_pq_push_string(depth, default_font, pos, scale, str, data);
 }
 
-inline void draw_monospace_string(uint8_t depth, font_data_t* data, vec2f_t pos, vec2f_t scale, char* str)
+inline void draw_monospace_string(uint8_t depth, font_data_t* data, vec2 pos, vec2 scale, char* str)
 {
    gr_pq_push_string(depth, monospace_font, pos, scale, str, data);
 }
@@ -40,6 +40,7 @@ inline void draw_monospace_string(uint8_t depth, font_data_t* data, vec2f_t pos,
 void init_fonts(win_info_t* info)
 {
    shader_t* font_shader = setup_font(primitive_proj);
+   
    default_font = rm_getn(FONT, "default");
    default_font->bind_func = bind_default_font;
    default_font->win = win;

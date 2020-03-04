@@ -11,21 +11,21 @@
 #define MAP_SAVE_DIR "maps"
 
 typedef struct _wall {
-   vec2f_t p1;
-   vec2f_t p2;
+   vec2 p1;
+   vec2 p2;
 } wall_t;
 
 typedef struct _map_object {
-   vec2f_t pos;
+   vec2 pos;
 
-   vec2f_t p1;
-   vec2f_t p2;
+   vec2 p1;
+   vec2 p2;
 
    float rotation;
    enum _toolbar_state type;
 } map_object_t;
 
-void map_save(list_t* walls, list_t* objects, char* file, vec2f_t prev_point, bool first_point_set);
-void map_load(list_t* walls, list_t* objects, char* file, vec2f_t* prev_point, bool* first_point_set);
+void map_save(list_t* walls, list_t* objects, char* file, vec2 prev_point, bool first_point_set);
+void map_load(list_t* walls, list_t* objects, char* file, vec2* prev_point, bool* first_point_set);
 
 #endif //DEEPCARS_MAP_SAVER_H
