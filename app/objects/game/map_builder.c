@@ -192,7 +192,8 @@ void push_height_rec(
       model_t* m, size_t* i, size_t* normal_counter, size_t* tex_counter,
       vec2 p1, vec2 p2, vec2 p3, vec2 p4,
       float height,
-      bool default_tex, float tex_reduce)
+      bool default_tex, float tex_x_reduce, float tex_y_reduce,
+      bool last, bool first)
 {
    size_t p1id, p2id, p3id, p4id, p1hid, p2hid, p3hid, p4hid;
    m_push_vertex(m, cvec4(p1.x, 0, p1.y, 0)); p1id = (*i)++;
@@ -204,22 +205,29 @@ void push_height_rec(
    m_push_vertex(m, cvec4(p3.x, height, p3.y, 0)); p3hid = (*i)++;
    m_push_vertex(m, cvec4(p4.x, height, p4.y, 0)); p4hid = (*i)++;
 
-   vec4 t1, t2, t3, t4;
    if(default_tex)
-      tex_reduce = 0;
+   {
+      tex_x_reduce = 0;
+      tex_y_reduce = 0;
+   }
    else
    {
-      tex_reduce = 1;
-      printf("%f\n", tex_reduce);
+      printf("x %f y %f\n", tex_x_reduce, tex_y_reduce);
    }
 
-   t1 = cvec4(0, (1 - tex_reduce), 0, 0);
-   t2 = cvec4(1, (1 - tex_reduce), 0, 0);
-   t3 = cvec4(1, tex_reduce, 0, 0);
-   t4 = cvec4(0, tex_reduce, 0, 0);
+   vec4 dt1 = cvec4(0, 1, 0, 0);
+   vec4 dt2 = cvec4(1, 1, 0, 0);
+   vec4 dt3 = cvec4(1, 0, 0, 0);
+   vec4 dt4 = cvec4(0, 0, 0, 0);
 
-   model_face_t* face5 = alloc_face(m, normal_counter, tex_counter, t1, t2, t3, t4,
-         p1id, p2id, p4id, p3id, cvec4(0, -1, 0, 0));
+   vec4 t1 = cvec4(0, 1 - tex_y_reduce, 0, 0);
+   vec4 t2 = cvec4(1 - tex_x_reduce, 1 - tex_y_reduce, 0, 0);
+   vec4 t3 = cvec4(1 - tex_x_reduce, 0, 0, 0);
+   vec4 t4 = cvec4(0, 0, 0, 0);
+   //vec4 t2 = cvec4(1 - tex_reduce, 0, 0, 0);
+
+   /*model_face_t* face5 = alloc_face(m, normal_counter, tex_counter, t1, t2, t3, t4,
+         p1id, p2id, p4id, p3id, cvec4(0, -1, 0, 0));*/
    model_face_t* face6 = alloc_face(m, normal_counter, tex_counter, t1, t2, t3, t4,
          p1hid, p2hid, p4hid, p3hid, cvec4(0, 1, 0, 0));
 
@@ -234,21 +242,30 @@ void push_height_rec(
    for(size_t j = 0; j < 4; j++)
       reverse(&(normals[j]), j, normals);
 
-   model_face_t* face1 = alloc_face(m, normal_counter, tex_counter, t1, t2, t3, t4,
-         p1id, p2id, p2hid, p1hid, cvec4(normals[0].n.x, 0, normals[0].n.y, 0));
-   model_face_t* face4 = alloc_face(m, normal_counter, tex_counter, t1, t2, t3, t4,
-         p3id, p4id, p4hid, p3hid, cvec4(normals[1].n.x, 0, normals[1].n.y, 0));
+   // Texture mapping not used here
+   if(first)
+   {
+      model_face_t* face1 = alloc_face(m, normal_counter, tex_counter, dt1, dt2, dt3, dt4,
+            p1id, p2id, p2hid, p1hid, cvec4(normals[0].n.x, 0, normals[0].n.y, 0));
 
-   model_face_t* face2 = alloc_face(m, normal_counter, tex_counter, t1, t2, t3, t4,
+      m_push_face(m, face1);
+   }
+
+   if(last)
+   {
+      model_face_t* face4 = alloc_face(m, normal_counter, tex_counter, dt1, dt2, dt3, dt4,
+            p3id, p4id, p4hid, p3hid, cvec4(normals[1].n.x, 0, normals[1].n.y, 0));
+
+      m_push_face(m, face4);
+   }
+   model_face_t* face2 = alloc_face(m, normal_counter, tex_counter, dt1, dt2, dt3, dt4,
          p4id, p2id, p2hid, p4hid, cvec4(normals[2].n.x, 0, normals[2].n.y, 0));
-   model_face_t* face3 = alloc_face(m, normal_counter, tex_counter, t1, t2, t3, t4,
+   model_face_t* face3 = alloc_face(m, normal_counter, tex_counter, dt1, dt2, dt3, dt4,
          p3id, p1id, p1hid, p3hid, cvec4(normals[3].n.x, 0, normals[3].n.y, 0));
 
-   m_push_face(m, face1);
    m_push_face(m, face2);
    m_push_face(m, face3);
-   m_push_face(m, face4);
-   m_push_face(m, face5);
+   //m_push_face(m, face5); We dont need bottom face
    m_push_face(m, face6);
 }
 
@@ -274,7 +291,7 @@ void push_hexahedron(
       vec2 int_p4 = vec2_lerp(p2, p4, v2);
 
       push_height_rec(m, i, normal_counter, tex_counter, int_p1, int_p2, int_p3, int_p4, height,
-            true, 0);
+            true, 0, 0, i == 0, false);
    }
 
    float last_v = n * step;
@@ -282,8 +299,11 @@ void push_hexahedron(
    vec2 int_p2 = vec2_lerp(p2, p4, last_v);
 
    // Proceed last one
+   vec2 d = vec2_normalize(vec2f(p3.x - p1.x, p3.y - p1.y));
+   float l = rest_len / (WALL_WIDTH * 2);
+
    push_height_rec(m, i, normal_counter, tex_counter, int_p1, int_p2, p1, p2, height, false,
-         rest_len / (WALL_WIDTH * 2));
+         fabs(l * d.x), fabs(l * d.y), false, true);
 }
 
 void push_prism(
@@ -291,7 +311,8 @@ void push_prism(
       vec2 p1, vec2 p2, vec2 p3, vec2 p4,
       float height)
 {
-   push_height_rec(m, i, normal_counter, tex_counter, p1, p2, p3, p4, height, true, 0);
+   push_height_rec(m, i, normal_counter, tex_counter, p1, p2, p3, p4, height,
+         true, 0, 0, true, true);
 }
 
 model_t* build_map_model(list_t* walls)
