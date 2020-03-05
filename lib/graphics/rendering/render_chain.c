@@ -8,14 +8,12 @@
 #include "render_chain.h"
 #include "../win.h"
 
-render_chain_t* current_chain;
-
-GLuint quad_vao;
-GLuint quad_vbo;
-GLuint quad_ebo;
-
-GLuint cube_vao;
-GLuint cube_vbo;
+static render_chain_t* current_chain;
+static GLuint          quad_vao;
+static GLuint          quad_vbo;
+static GLuint          quad_ebo;
+static GLuint          cube_vao;
+static GLuint          cube_vbo;
 
 void rc_free(render_chain_t* rc, bool free_stages)
 {
@@ -58,46 +56,19 @@ render_chain_t* rc_get_current(void)
    return current_chain;
 }
 
-void setup_cube()
+static void setup_cube(void)
 {
-   float skyboxVertices[] = {
-           // positions
-           -1.0f,  1.0f, -1.0f,
-           -1.0f, -1.0f, -1.0f,
-           1.0f, -1.0f, -1.0f,
-           1.0f, -1.0f, -1.0f,
-           1.0f,  1.0f, -1.0f,
-           -1.0f,  1.0f, -1.0f,
-           -1.0f, -1.0f,  1.0f,
-           -1.0f, -1.0f, -1.0f,
-           -1.0f,  1.0f, -1.0f,
-           -1.0f,  1.0f, -1.0f,
-           -1.0f,  1.0f,  1.0f,
-           -1.0f, -1.0f,  1.0f,
-           1.0f, -1.0f, -1.0f,
-           1.0f, -1.0f,  1.0f,
-           1.0f,  1.0f,  1.0f,
-           1.0f,  1.0f,  1.0f,
-           1.0f,  1.0f, -1.0f,
-           1.0f, -1.0f, -1.0f,
-           -1.0f, -1.0f,  1.0f,
-           -1.0f,  1.0f,  1.0f,
-           1.0f,  1.0f,  1.0f,
-           1.0f,  1.0f,  1.0f,
-           1.0f, -1.0f,  1.0f,
-           -1.0f, -1.0f,  1.0f,
-           -1.0f,  1.0f, -1.0f,
-           1.0f,  1.0f, -1.0f,
-           1.0f,  1.0f,  1.0f,
-           1.0f,  1.0f,  1.0f,
-           -1.0f,  1.0f,  1.0f,
-           -1.0f,  1.0f, -1.0f,
-           -1.0f, -1.0f, -1.0f,
-           -1.0f, -1.0f,  1.0f,
-           1.0f, -1.0f, -1.0f,
-           1.0f, -1.0f, -1.0f,
-           -1.0f, -1.0f,  1.0f,
-           1.0f, -1.0f,  1.0f
+   float skybox_vertices[] =
+   {
+     -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,
+      1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f, -1.0f,
+     -1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f,
+      1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,
+      1.0f,  1.0f, -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,
+      1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,
+     -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,
+     -1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,
+      1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f
    };
 
    GL_CALL(glGenVertexArrays(1, &cube_vao));
@@ -106,7 +77,7 @@ void setup_cube()
    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, cube_vbo));
 
    GL_CALL(glBindVertexArray(cube_vao));
-   GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW));
+   GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), &skybox_vertices, GL_STATIC_DRAW));
    GL_CALL(glEnableVertexAttribArray(0));
    GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0));
 
@@ -115,17 +86,19 @@ void setup_cube()
    GL_CALL(glBindVertexArray(0));
 }
 
-void setup_quad()
+static void setup_quad(void)
 {
-   float vertices[] = {
-           1.0f,  1.0f, 0.0f,    1.0f, 1.0f,
-           1.0f, -1.0f, 0.0f,    1.0f, 0.0f,
-           -1.0f, -1.0f, 0.0f,   0.0f, 0.0f,
-           -1.0f,  1.0f, 0.0f,   0.0f, 1.0f
+   float quad_vertices[] =
+   {
+      1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+      1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+     -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+     -1.0f,  1.0f, 0.0f, 0.0f, 1.0f
    };
-   GLuint indices[] = {
-           0, 1, 3,
-           1, 2, 3
+   GLuint indices[] =
+   {
+      0, 1, 3,
+      1, 2, 3
    };
 
    GL_CALL(glGenVertexArrays(1, &quad_vao));
@@ -134,7 +107,7 @@ void setup_quad()
    GL_CALL(glBindVertexArray(quad_vao));
 
    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, quad_vbo));
-   GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
+   GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(quad_vertices), quad_vertices, GL_STATIC_DRAW));
 
    GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quad_ebo));
    GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));

@@ -17,7 +17,8 @@
 #include "vfx.h"
 #include "text_rendering.h"
 
-typedef struct _geometry_shader_data {
+typedef struct _geometry_shader_data
+{
    camera_t* camera;
    mat4 buffmat;
 

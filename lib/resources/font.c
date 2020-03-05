@@ -10,17 +10,17 @@
 #define F_LOG(format, ...) DC_LOG("font.c", format, __VA_ARGS__)
 #define F_ERROR(format, ...) DC_ERROR("font.c", format, __VA_ARGS__)
 
-uint8_t read8(uint8_t** ptr)
+static uint8_t read8(uint8_t** ptr)
 {
    return *((*ptr)++);
 }
 
-uint16_t read16(uint8_t** ptr)
+static uint16_t read16(uint8_t** ptr)
 {
    return read8(ptr) | read8(ptr) << 8U;
 }
 
-uint32_t read32(uint8_t** ptr)
+static uint32_t read32(uint8_t** ptr)
 {
    return
       read8(ptr) << 0U  |
@@ -162,5 +162,7 @@ font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info
 
 void f_free(font_t* font)
 {
-
+   F_LOG("Font %s freed", font->name);
+   DEEPCARS_FREE(font->name);
+   DEEPCARS_FREE(font);
 }

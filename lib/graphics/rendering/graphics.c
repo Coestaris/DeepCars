@@ -16,33 +16,40 @@
 // for current scene
 #include "../../scm.h"
 
-vec4 COLOR_WHITE;
-vec4 COLOR_SILVER;
-vec4 COLOR_GRAY;
-vec4 COLOR_BLACK;
-vec4 COLOR_RED;
-vec4 COLOR_MAROON;
-vec4 COLOR_YELLOW;
-vec4 COLOR_OLIVE;
-vec4 COLOR_LIME;
-vec4 COLOR_GREEN;
-vec4 COLOR_AQUA;
-vec4 COLOR_TEAL;
-vec4 COLOR_BLUE;
-vec4 COLOR_NAVY;
-vec4 COLOR_FUCHSIA;
-vec4 COLOR_PURPLE;
+vec4        COLOR_WHITE;
+vec4        COLOR_SILVER;
+vec4        COLOR_GRAY;
+vec4        COLOR_BLACK;
+vec4        COLOR_RED;
+vec4        COLOR_MAROON;
+vec4        COLOR_YELLOW;
+vec4        COLOR_OLIVE;
+vec4        COLOR_LIME;
+vec4        COLOR_GREEN;
+vec4        COLOR_AQUA;
+vec4        COLOR_TEAL;
+vec4        COLOR_BLUE;
+vec4        COLOR_NAVY;
+vec4        COLOR_FUCHSIA;
+vec4        COLOR_PURPLE;
 
-mat4 proj_mat;
-mat4 view_mat;
-mat4 model_mat;
+mat4        proj_mat;
+mat4        view_mat;
+mat4        model_mat;
 
-mat4 x_rot_mat;
-mat4 y_rot_mat;
-mat4 z_rot_mat;
+static mat4 x_rot_mat;
+static mat4 y_rot_mat;
+static mat4 z_rot_mat;
 
-struct _queue_item {
+enum pq_type
+{
+   SPRITE,
+   STRING,
+   LINE
+};
 
+static struct _queue_item
+{
    uint8_t mode;
 
    texture_t* tex;
@@ -65,7 +72,7 @@ struct _queue_item {
    void* data;
 } queue[MAX_DEPTH][MAX_QUEUE_COUNT];
 
-size_t queue_length[MAX_DEPTH];
+static size_t queue_length[MAX_DEPTH];
 
 inline void gr_fill(vec4 color)
 {
@@ -142,7 +149,7 @@ void gr_release(void)
    mat4_free(z_rot_mat);
 }
 
-void gr_draw_model(model_t* model)
+static void gr_draw_model(model_t* model)
 {
    GL_PCALL(glBindVertexArray(model->VAO))
    GL_PCALL(glDrawArrays(GL_TRIANGLES, 0, model->triangles_count * 3))
@@ -249,13 +256,7 @@ void gr_draw_string(font_t* f, vec2 position, vec2 scale, char* string, void* da
    sh_use(NULL);
 }
 
-enum pq_type {
-   SPRITE,
-   STRING,
-   LINE
-};
-
-void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2 position,
+inline void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2 position,
                        vec2 scale, vec2 center, float angle,
                        sprite_renderer_t* sprite_renderer, void* data)
 {
@@ -276,7 +277,7 @@ void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2 position,
    queue_length[depth]++;
 }
 
-void gr_pq_push_string(uint8_t depth, font_t* f, vec2 position,
+inline void gr_pq_push_string(uint8_t depth, font_t* f, vec2 position,
                        vec2 scale, char* string, void* data)
 {
    assert(depth < MAX_DEPTH);
@@ -294,7 +295,7 @@ void gr_pq_push_string(uint8_t depth, font_t* f, vec2 position,
    queue_length[depth]++;
 }
 
-void gr_pq_push_line(uint8_t depth, vec2 p1, vec2 p2, float width, vec4 color,
+inline void gr_pq_push_line(uint8_t depth, vec2 p1, vec2 p2, float width, vec4 color,
                      primitive_renderer_t* primitive_renderer, void* data)
 {
    assert(depth < MAX_DEPTH);
@@ -426,15 +427,15 @@ sprite_renderer_t* gr_create_sprite_renderer(shader_t* shader)
 
    // Configure VAO/VBO
    GLuint vbo;
-   GLfloat vertices[] = {
-         // Pos      // Tex
-         0.0f, 1.0f, 0.0f, 1.0f,
-         1.0f, 0.0f, 1.0f, 0.0f,
-         0.0f, 0.0f, 0.0f, 0.0f,
+   GLfloat vertices[] =
+   {
+      0.0f, 1.0f, 0.0f, 1.0f,
+      1.0f, 0.0f, 1.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 0.0f,
 
-         0.0f, 1.0f, 0.0f, 1.0f,
-         1.0f, 1.0f, 1.0f, 1.0f,
-         1.0f, 0.0f, 1.0f, 0.0f
+      0.0f, 1.0f, 0.0f, 1.0f,
+      1.0f, 1.0f, 1.0f, 1.0f,
+      1.0f, 0.0f, 1.0f, 0.0f
    };
 
    GL_CALL(glGenVertexArrays(1, &sprite_renderer->vao));

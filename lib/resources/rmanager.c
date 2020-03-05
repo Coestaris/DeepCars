@@ -36,10 +36,10 @@ struct _font_node {
    font_t* font;
 };
 
-list_t*  textures;
-list_t*  models;
-list_t*  materials;
-list_t*  fonts;
+static list_t*    textures;
+static list_t*    models;
+static list_t*    materials;
+static list_t*    fonts;
 
 //
 // rm_init()

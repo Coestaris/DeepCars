@@ -7,8 +7,8 @@
 
 #include "../../lib/object_include.h"
 
-typedef struct _blurred_region {
-
+typedef struct _blurred_region
+{
    bool visible;
 
    float x, y;

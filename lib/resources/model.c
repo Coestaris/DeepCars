@@ -55,7 +55,7 @@ typedef enum _obj_descriptor_type
 } obj_descriptor_type_t;
 
 // Represents descriptor and it's string value to compare with words
-typedef struct
+typedef struct _obj_descriptor
 {
    const char* string;
    obj_descriptor_type_t type;
@@ -66,7 +66,7 @@ typedef struct
 #include "model_push.h"
 
 // List of all supported descriptors
-obj_descriptor_t allowed_descriptors[] =
+static obj_descriptor_t allowed_descriptors[] =
 {
         // Contains single vertex information, possible 4 values
        {"v",      OD_VERTEX},
@@ -91,22 +91,23 @@ obj_descriptor_t allowed_descriptors[] =
 };
 
 // Array to store current word to proceed
-char              word[MAX_WORD_LEN];
+static char              word[MAX_WORD_LEN];
 // Buffer face to store temp values
-model_face_t*     face;
+static model_face_t*     face;
 // Buffer vector to store temp values
-vec4              buff_vec;
+static vec4              buff_vec;
 // Total count of supported descriptors
-const size_t      descriptors_count = sizeof(allowed_descriptors) / sizeof(allowed_descriptors[0]);
+static const size_t      descriptors_count =
+      sizeof(allowed_descriptors) / sizeof(allowed_descriptors[0]);
 
 // Return true if symbol is white space (separator)
-bool m_is_separator(char sym)
+static bool m_is_separator(char sym)
 {
    return (sym == ' ' || sym == '\n' || sym == '\t' || sym == '\0');
 }
 
 // Separate string to words storing result to word
-bool m_read_next_word(const char* string, size_t* start_index, size_t end_index)
+static bool m_read_next_word(const char* string, size_t* start_index, size_t end_index)
 {
    if (*start_index >= end_index)
       return false;
@@ -127,7 +128,7 @@ bool m_read_next_word(const char* string, size_t* start_index, size_t end_index)
 }
 
 // Parses face word and stores result to i1, i2, i3 separating it by whitespaces
-void m_parse_face(int32_t* i1, int32_t* i2, int32_t* i3)
+static void m_parse_face(int32_t* i1, int32_t* i2, int32_t* i3)
 {
    int32_t* ptr = i1;
    size_t power = 0;
@@ -148,7 +149,7 @@ void m_parse_face(int32_t* i1, int32_t* i2, int32_t* i3)
 }
 
 // Parse double stored in word
-double_t m_parse_double(size_t line_index)
+static double_t m_parse_double(size_t line_index)
 {
    char* err;
    double_t d = strtod(word, &err);
@@ -166,7 +167,7 @@ double_t m_parse_double(size_t line_index)
 // Separates string slice between specified indices into words
 // and proceeding it storing results to a model. It will determine
 // descriptor type and validate its inputs
-void m_proceed_line(model_t* model, const char* string, size_t start_index, size_t end_index, size_t line_index)
+static void m_proceed_line(model_t* model, const char* string, size_t start_index, size_t end_index, size_t line_index)
 {
    if (start_index == end_index)
       return;
@@ -276,7 +277,7 @@ void m_proceed_line(model_t* model, const char* string, size_t start_index, size
 }
 
 // Separates input to lines and for each of them calls m_proceed_line
-void m_parse_lines(model_t* model, const char* str)
+static void m_parse_lines(model_t* model, const char* str)
 {
    size_t start_index = 0;
    size_t end_index = 0;
@@ -524,7 +525,7 @@ void m_info(model_t* model)
 }
 
 // Stores vertex data to a buffer according to model parameters
-void m_store_vertex(
+static void m_store_vertex(
         model_t* model,
         model_face_t* f,
         size_t id,
@@ -553,7 +554,6 @@ void m_store_vertex(
       buffer[(*buffer_index)++] = model->tex_coords[tex_index][0];
       buffer[(*buffer_index)++] = model->tex_coords[tex_index][1];
    }
-
 }
 
 //

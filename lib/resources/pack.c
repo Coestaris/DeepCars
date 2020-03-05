@@ -10,12 +10,8 @@
 #define P_LOG(format, ...) DC_LOG("pack.c", format, __VA_ARGS__)
 #define P_ERROR(format, ...) DC_ERROR("pack.c", format, __VA_ARGS__)
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
 #include <zlib.h>
+
 #include "../../oil/crc32.h"
 #include "shader.h"
 #include "shm.h"
@@ -38,12 +34,13 @@
          P_ERROR("Buffer overflow",0);                      \
       }
 
-struct _pack_chunk {
+struct _pack_chunk
+{
    size_t id;
    void (*handler)(uint8_t* data, size_t length);
 };
 
-void p_decompress(size_t in_len, size_t out_len, uint8_t* buff_in, uint8_t* buff_out)
+static void p_decompress(size_t in_len, size_t out_len, uint8_t* buff_in, uint8_t* buff_out)
 {
    z_stream infstream;
    infstream.zalloc = Z_NULL;
@@ -68,7 +65,7 @@ void p_decompress(size_t in_len, size_t out_len, uint8_t* buff_in, uint8_t* buff
 }
 
 // Handles model chunk and adds parsed models to mm
-void p_handler_model(uint8_t* data, size_t length)
+static void p_handler_model(uint8_t* data, size_t length)
 {
    size_t      count = 0;
 
@@ -120,7 +117,7 @@ void p_handler_model(uint8_t* data, size_t length)
 }
 
 // Handles shaders chunk and adds parsed shaders to shm
-void p_handler_shader(uint8_t* data, size_t length)
+static void p_handler_shader(uint8_t* data, size_t length)
 {
    size_t      count = 0;
 
@@ -224,7 +221,7 @@ void p_handler_shader(uint8_t* data, size_t length)
 }
 
 // Handles texture chunk and adds parsed textures to txm
-void p_handler_texture(uint8_t* data, size_t length)
+static void p_handler_texture(uint8_t* data, size_t length)
 {
    size_t      count = 0;
 
@@ -344,7 +341,7 @@ void p_handler_texture(uint8_t* data, size_t length)
    DEEPCARS_FREE(name);
 }
 
-void p_handler_material(uint8_t* data, size_t length)
+static void p_handler_material(uint8_t* data, size_t length)
 {
    size_t      count = 0;
 
@@ -453,7 +450,7 @@ void p_handler_material(uint8_t* data, size_t length)
    DEEPCARS_FREE(normal);
 }
 
-void p_handler_font(uint8_t* data, size_t length)
+static void p_handler_font(uint8_t* data, size_t length)
 {
    size_t      count = 0;
 
@@ -491,7 +488,8 @@ void p_handler_font(uint8_t* data, size_t length)
 }
 
 // Array of supported chunks
-struct _pack_chunk supported_chunks[] = {
+static struct _pack_chunk supported_chunks[] =
+{
    {0, p_handler_model },
    {1, p_handler_shader },
    {2, p_handler_texture },
@@ -500,10 +498,11 @@ struct _pack_chunk supported_chunks[] = {
    {5, p_handler_font },
 };
 
-const size_t supported_chunks_count = sizeof(supported_chunks) / sizeof(struct _pack_chunk);
+static const size_t supported_chunks_count =
+      sizeof(supported_chunks) / sizeof(struct _pack_chunk);
 
 // Bytes from which the file must begin to be considered as a pack file
-char magic_bytes[] = { 'D', 'P', 'A', 'C', 'K' };
+static char magic_bytes[] = { 'D', 'P', 'A', 'C', 'K' };
 
 //
 // p_load()

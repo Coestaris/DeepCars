@@ -23,8 +23,8 @@ typedef struct _light
 
 } light_t;
 
-typedef struct _shadow_light {
-
+typedef struct _shadow_light
+{
    vec4 position;
 
    float brightness;

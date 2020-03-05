@@ -13,7 +13,8 @@
 
 typedef float (*evaluate_func_t)(genome_t* genome);
 
-typedef struct _evaluator {
+typedef struct _evaluator
+{
    size_t population_size;
    list_t* genomes;
    list_t* new_genomes;

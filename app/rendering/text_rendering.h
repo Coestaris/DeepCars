@@ -13,7 +13,8 @@
 
 extern mat4 primitive_proj;
 
-typedef struct _font_data {
+typedef struct _font_data
+{
    vec4 color;
    vec4 border_color;
    float color_off;

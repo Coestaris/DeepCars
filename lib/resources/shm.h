@@ -21,7 +21,7 @@ void s_push(shader_t* shader, int id);
 void s_init(void);
 
 // Frees all used by manager resources
-void s_release(bool DEEPCARS_FREE_shaders);
+void s_release(bool free_shaders);
 
 // Returns shader with specified id
 shader_t* s_get_shader(int id);

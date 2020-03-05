@@ -22,41 +22,41 @@
 // FPS Lock variables
 //
 // Set true to finish loop
-bool        closed = false;
+static bool        closed = false;
 // Frame counter for FPS measurements
-uint64_t    counter = 0;
+static uint64_t    counter = 0;
 // Elapsed time between current time and last FPS measurement
-double_t    elapsed = 0;
+static double_t    elapsed = 0;
 // Average FPS count
-double_t    fps = 0;
+static double_t    fps = 0;
 // Current frame counter
-uint64_t    frames;
+static uint64_t    frames;
 
 //
 // Event processing variables
 //
-uint32_t    keys_state[256];
-uint32_t    mouse_state[10];
-uint32_t    mouse_x;
-uint32_t    mouse_y;
+static uint32_t    keys_state[256];
+static uint32_t    mouse_state[10];
+static uint32_t    mouse_x;
+static uint32_t    mouse_y;
 
 // Current X window allocated in win.h
 win_info_t*  default_win;
 
 // Global list of all drawable objects
-list_t*     objects;
+static list_t*     objects;
 // Preprocessed lists of listening objects
-list_t*     key_listeners;
-list_t*     mouse_listeners;
-list_t*     mousemove_listeners;
-list_t*     update_listeners;
+static list_t*     key_listeners;
+static list_t*     mouse_listeners;
+static list_t*     mousemove_listeners;
+static list_t*     update_listeners;
 
 #ifdef OUTPUT_RENDER_TIME
-size_t render_time_counter = 0;
+static size_t render_time_counter = 0;
 #endif
 
 // Get current millisecond of global time
-double_t u_get_millis(void)
+static double_t u_get_millis(void)
 {
    struct timeval tv;
    gettimeofday(&tv, NULL);
@@ -74,7 +74,7 @@ void u_close(void)
 
 // Main draw function.
 // Looping through all objects and draws it
-void u_draw_func(void)
+static void u_draw_func(void)
 {
    if(current_scene->backcolor)
    {
@@ -167,7 +167,7 @@ int u_get_mouse_state(int mouse)
 
 // Main event handler function.
 // Sets all necessary states and run all callbacks in listeners
-void u_event_handler(XEvent event)
+static void u_event_handler(XEvent event)
 {
    switch (event.type)
    {
@@ -284,7 +284,7 @@ uint64_t u_get_frames()
 
 // Measures the time between frames and
 // waits for the required amount of time
-void u_measure_time(void)
+static void u_measure_time(void)
 {
    double_t tick_start = u_get_millis();
    u_draw_func(); //draw routine

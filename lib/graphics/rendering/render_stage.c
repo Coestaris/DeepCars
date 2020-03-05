@@ -11,7 +11,7 @@
 #define RS_LOG(format, ...) DC_LOG("render_stage.c", format, __VA_ARGS__)
 #define RS_ERROR(format, ...) DC_ERROR("render_stage.c", format, __VA_ARGS__)
 
-void rs_set_color_options(attachment_options_t* ao)
+static void rs_set_color_options(attachment_options_t* ao)
 {
    ao->tex_width = 1024;
    ao->tex_height = 1024;
@@ -28,7 +28,7 @@ void rs_set_color_options(attachment_options_t* ao)
    ao->tex_target = GL_TEXTURE_2D;
 }
 
-void rs_set_depth_options(attachment_options_t* ao)
+static void rs_set_depth_options(attachment_options_t* ao)
 {
    ao->tex_width = 1024;
    ao->tex_height = 1024;
@@ -105,7 +105,7 @@ void rs_free(render_stage_t* rs)
    DEEPCARS_FREE(rs);
 }
 
-texture_t* rs_setup_tex(GLenum attachment, attachment_options_t options, GLuint fbo, const char* target)
+static texture_t* rs_setup_tex(GLenum attachment, attachment_options_t options, GLuint fbo, const char* target)
 {
    GLuint id;
    GL_CALL(glGenTextures(1, &id));
@@ -145,7 +145,7 @@ texture_t* rs_setup_tex(GLenum attachment, attachment_options_t options, GLuint 
    return t;
 }
 
-void rs_check_sizes(render_stage_t* rs, attachment_options_t options)
+static void rs_check_sizes(render_stage_t* rs, attachment_options_t options)
 {
    if(!rs->width)
    {

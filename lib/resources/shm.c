@@ -15,10 +15,11 @@ typedef struct _shm_node
 {
    shader_t* shader;
    int id;
+
 } shm_node_t;
 
 // Global list of manager's shaders
-list_t* shader_nodes;
+static list_t* shader_nodes;
 
 //
 // s_has_shader
@@ -85,9 +86,9 @@ shader_t* s_get_shader(int id)
 //
 // s_release
 //
-void s_release(bool DEEPCARS_FREE_shaders)
+void s_release(bool free_shaders)
 {
-   if(DEEPCARS_FREE_shaders)
+   if(free_shaders)
    {
       for (size_t i = 0; i < shader_nodes->count; i++)
          sh_free(((shm_node_t*) shader_nodes->collection[i])->shader);

@@ -18,8 +18,8 @@ typedef void (* key_event_func_t)(struct _object* this, uint32_t key, uint32_t s
 typedef void (* mouse_event_func_t)(struct _object* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse);
 typedef void (* mousemove_event_func_t)(struct _object* this, uint32_t x, uint32_t y);
 
-typedef struct _draw_info {
-
+typedef struct _draw_info
+{
    bool drawable;
 
    // Model to be rendered

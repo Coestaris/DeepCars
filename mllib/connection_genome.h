@@ -9,7 +9,8 @@
 #include <stdbool.h>
 #include "innovation.h"
 
-typedef struct _connection_genome {
+typedef struct _connection_genome
+{
    size_t in_node;
    size_t out_node;
    float weight;

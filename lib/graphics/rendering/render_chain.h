@@ -14,8 +14,8 @@
 #include "../../resources/shm.h"
 #include "../win.h"
 
-typedef struct _render_chain {
-
+typedef struct _render_chain
+{
    list_t* stages;
    void* data;
 

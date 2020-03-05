@@ -44,7 +44,7 @@ void l_sh_free(shadow_light_t* light)
    if(light->light_view) mat4_free(light->light_view);
    if(light->light_proj) mat4_free(light->light_proj);
    if(light->light_space) mat4_free(light->light_space);
-   if(light->light_camera) c_DEEPCARS_FREE(light->light_camera);
+   if(light->light_camera) c_free(light->light_camera);
 
    vec4_free(light->position);
    //vec4_free(light->direction);

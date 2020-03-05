@@ -11,7 +11,9 @@
 #define SCM_ERROR(format, ...) DC_ERROR("scm.c", format, __VA_ARGS__)
 
 // List of all pushed scenes
-list_t* scenes;
+static list_t* scenes;
+
+// Current loaded scene
 scene_t* current_scene = NULL;
 
 //

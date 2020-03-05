@@ -33,7 +33,8 @@ typedef struct _species
 } species_t;
 
 
-typedef struct _genome {
+typedef struct _genome
+{
    float fitness;
    connection_genome_t* connections;
    size_t connections_count;

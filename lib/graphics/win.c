@@ -14,9 +14,9 @@
 //
 // GLX setup parameters
 //
-int glx_major_version   = GLX_DEFAULT_MAJOR_VERSION;
-int glx_minor_version   = GLX_DEFAULT_MINOR_VERSION;
-int glx_flags           = GLX_DEFAULT_FLAGS;
+static int glx_major_version   = GLX_DEFAULT_MAJOR_VERSION;
+static int glx_minor_version   = GLX_DEFAULT_MINOR_VERSION;
+static int glx_flags           = GLX_DEFAULT_FLAGS;
 
 // ??
 typedef GLXContext (* gl_x_create_context_attribs_arb_proc_t)(Display*, GLXFBConfig, GLXContext, Bool, const int*);

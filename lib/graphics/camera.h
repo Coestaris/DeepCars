@@ -40,7 +40,7 @@ typedef struct _camera
 camera_t* c_create(vec4 position, vec4 up);
 
 // Frees all used by camera resources
-void c_DEEPCARS_FREE(camera_t* camera);
+void c_free(camera_t* camera);
 
 // Calculates view matrix from camera objects
 void c_to_mat(mat4 m, camera_t* camera);

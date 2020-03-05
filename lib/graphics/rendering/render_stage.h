@@ -2,11 +2,11 @@
 // Created by maxim on 11/30/19.
 //
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCInconsistentNamingInspection"
-
 #ifndef DEEPCARS_RENDER_STAGE_H
 #define DEEPCARS_RENDER_STAGE_H
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCInconsistentNamingInspection"
 
 #define MEASURE_RENDER_TIME
 #define MEASURE_RENDER_SMOOTH 0.9
@@ -17,7 +17,8 @@
 #include "../../object.h"
 #include "../../resources/shader.h"
 
-typedef enum _render_mode {
+typedef enum _render_mode
+{
    RM_CUSTOM,
    RM_CUSTOM_FRAMEBUFFER,
    RM_GEOMETRY,
@@ -26,7 +27,8 @@ typedef enum _render_mode {
 
 } render_mode_t;
 
-typedef enum tex_format {
+typedef enum tex_format
+{
   TF_STENCIL   = 1,
   TF_DEPTH     = 2,
   TF_COLOR0    = 4,
@@ -38,7 +40,8 @@ typedef enum tex_format {
 
 } tex_format_t;
 
-typedef struct _attachment_options {
+typedef struct _attachment_options
+{
 
    GLenum tex_format;
    GLenum tex_int_format;
@@ -55,7 +58,8 @@ typedef struct _attachment_options {
 
 } attachment_options_t;
 
-typedef struct _render_stage {
+typedef struct _render_stage
+{
 
    mat4 proj;
    mat4 view;
@@ -121,6 +125,7 @@ void rs_free(render_stage_t* rs);
 
 void rs_build_tex(render_stage_t* rs);
 
+#pragma clang diagnostic pop
+
 #endif //DEEPCARS_RENDER_STAGE_H
 
-#pragma clang diagnostic pop

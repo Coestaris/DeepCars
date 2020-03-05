@@ -32,9 +32,9 @@ camera_t* c_create(vec4 position, vec4 up)
 }
 
 //
-// c_DEEPCARS_FREE()
+// c_free()
 //
-void c_DEEPCARS_FREE(camera_t* camera)
+void c_free(camera_t* camera)
 {
    if (camera->position)
       vec4_free(camera->position);

@@ -10,6 +10,8 @@
 #include "gmath.h"
 #include "../resources/texture.h"
 
+#define MT_CACHE_MIN_DIST 1.e-4
+
 /*# Modes:
 # 0 - no ambient           (ambient ignored)
 # 1 - ambient              (specular ignored)

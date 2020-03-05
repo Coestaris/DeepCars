@@ -12,7 +12,8 @@
 
 #define FONT_SCALE 8.0f
 
-typedef struct _charinfo {
+typedef struct _charinfo
+{
    int id;
 
    float tex_coord[8];
@@ -26,7 +27,8 @@ typedef struct _charinfo {
 
 } charinfo_t;
 
-typedef struct _font {
+typedef struct _font
+{
    char* name;
 
    void (*bind_func)(struct _font* font, void* data);

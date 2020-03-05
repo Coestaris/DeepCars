@@ -11,6 +11,14 @@
 #define MT_LOG(format, ...) DC_LOG("material.c", format, __VA_ARGS__)
 #define MT_ERROR(format, ...) DC_ERROR("material.c", format, __VA_ARGS__)
 
+struct _cache_node
+{
+   float color[3];
+   texture_t* texture;
+};
+
+static list_t* material_cache;
+
 material_t* mt_create(char* name, uint8_t mode)
 {
    material_t* material = DEEPCARS_MALLOC(sizeof(material_t));
@@ -45,21 +53,14 @@ void mt_free(material_t* material)
    DEEPCARS_FREE(material);
 }
 
-struct _cache_node{
-   float color[3];
-   texture_t* texture;
-};
-
-list_t* material_cache;
-
-texture_t* mt_get_from_cache(vec4 color)
+static texture_t* mt_get_from_cache(vec4 color)
 {
    for(size_t i = 0; i < material_cache->count; i++)
    {
       struct _cache_node* node = material_cache->collection[i];
-      if(fabsf(node->color[0] - color[0]) < .5e-3 &&
-         fabsf(node->color[1] - color[1]) < .5e-3 &&
-         fabsf(node->color[2] - color[2]) < .5e-3)
+      if(fabsf(node->color[0] - color[0]) < MT_CACHE_MIN_DIST &&
+         fabsf(node->color[1] - color[1]) < MT_CACHE_MIN_DIST &&
+         fabsf(node->color[2] - color[2]) < MT_CACHE_MIN_DIST)
       {
          return node->texture;
       }
@@ -67,7 +68,7 @@ texture_t* mt_get_from_cache(vec4 color)
    return NULL;
 }
 
-void mt_cache(texture_t* tex, vec4 color)
+static void mt_cache(texture_t* tex, vec4 color)
 {
    struct _cache_node* node = DEEPCARS_MALLOC(sizeof(struct _cache_node));
    node->color[0] = color[0];
@@ -77,7 +78,7 @@ void mt_cache(texture_t* tex, vec4 color)
    list_push(material_cache, node);
 }
 
-texture_t* mt_to_texture(char* mat_name, const char* field, vec4 color)
+static texture_t* mt_to_texture(char* mat_name, const char* field, vec4 color)
 {
    texture_t* cached = mt_get_from_cache(color);
    if(cached) return cached;
