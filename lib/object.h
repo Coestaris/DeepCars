@@ -31,7 +31,7 @@ typedef struct _draw_info
    material_t* material;
 
    bool draw_normals;
-   GLint normal_vao;
+   GLuint normal_vao;
    size_t normal_buffer_len;
 
 } draw_info_t;
@@ -68,10 +68,6 @@ object_t* o_create();
 // Frees object and all its used resources
 void o_free(object_t* object);
 
-// Sets rendering parameters of object
-void o_dm_colored(object_t* object, vec4 color);
-void o_dm_colored_shaded(object_t* object, vec4 color, float ambient);
-void o_dm_textured(object_t* object, texture_t* texture);
-void o_dm_textured_shaded(object_t* object, texture_t* diffuse, texture_t* specular, texture_t* emit);
+void o_enable_draw_normals(object_t* object, vec4 color1, vec4 color2, float len);
 
 #endif //DEEPCARS_OBJECT_H

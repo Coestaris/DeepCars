@@ -798,3 +798,71 @@ void m_normalize(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_p
       }
    }
 }
+
+void m_calculate_normals_vao(model_t* model, vec4 color1, vec4 color2, float normal_len, GLuint* vao, size_t* len)
+{
+   size_t s = model->model_len->faces_count * 12;
+   float* buffer = DEEPCARS_MALLOC(sizeof(float) * s);
+   size_t buffer_counter = 0;
+
+   for(size_t i = 0; i < model->model_len->faces_count; i++)
+   {
+      model_face_t* face = model->faces[i];
+      assert(face->count != MAX_FACE_LEN);
+
+      vec4 normal = model->normals[face->normal_id[0] - 1];
+
+      float x = 0, y = 0, z = 0;
+      for(size_t j = 0; j < face->count; j++)
+      {
+         vec4 vert = model->vertices[face->vert_id[j] - 1];
+         x += vert[0];
+         y += vert[1];
+         z += vert[2];
+      }
+
+      float x1 = x / face->count;
+      float y1 = y / face->count;
+      float z1 = z / face->count;
+
+      float x2 = x1 + normal[0] * normal_len;
+      float y2 = y1 + normal[1] * normal_len;
+      float z2 = z1 + normal[2] * normal_len;
+
+      buffer[buffer_counter++] = x1;
+      buffer[buffer_counter++] = y1;
+      buffer[buffer_counter++] = z1;
+
+      buffer[buffer_counter++] = color1[0];
+      buffer[buffer_counter++] = color1[1];
+      buffer[buffer_counter++] = color1[2];
+
+      buffer[buffer_counter++] = x2;
+      buffer[buffer_counter++] = y2;
+      buffer[buffer_counter++] = z2;
+
+      buffer[buffer_counter++] = color2[0];
+      buffer[buffer_counter++] = color2[1];
+      buffer[buffer_counter++] = color2[2];
+   }
+
+   GLuint normal_vbo;
+
+   GL_CALL(glGenVertexArrays(1, vao));
+   GL_CALL(glGenBuffers(1, &normal_vbo));
+
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, normal_vbo));
+   GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * s, buffer, GL_STATIC_DRAW));
+   DEEPCARS_FREE(buffer);
+
+   GL_CALL(glBindVertexArray(*vao));
+   GL_CALL(glEnableVertexAttribArray(0));
+   GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*) 0));
+   GL_CALL(glEnableVertexAttribArray(1));
+   GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat))));
+
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+   GL_CALL(glBindVertexArray(0));
+
+   *len = s / 3;
+}

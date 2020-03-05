@@ -136,8 +136,7 @@ inline void vec4_cpy(vec4 dest, vec4 src)
 //
 vec4 vec4_ccpy(vec4 v)
 {
-   vec4 b = cvec4(v[0], v[1], v[2], v[3]);
-   return b;
+   return cvec4(v[0], v[1], v[2], v[3]);
 }
 
 //

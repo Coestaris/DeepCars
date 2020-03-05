@@ -162,7 +162,7 @@ font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info
 
 void f_free(font_t* font)
 {
-   F_LOG("Font %s freed", font->name);
+   F_LOG("Font \"%s\" freed", font->name);
    DEEPCARS_FREE(font->name);
    DEEPCARS_FREE(font);
 }

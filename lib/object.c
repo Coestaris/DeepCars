@@ -66,3 +66,18 @@ object_t* o_create()
    object->draw_info->drawable = false;
    return object;
 }
+
+void o_enable_draw_normals(object_t* object, vec4 color1, vec4 color2, float len)
+{
+   assert(object);
+   if(!object->draw_info->normal_vao)
+   {
+      assert(object->draw_info->model);
+
+      object->draw_info->draw_normals = true;
+      m_calculate_normals_vao(object->draw_info->model,
+            color1, color2, len,
+            &object->draw_info->normal_vao,
+            &object->draw_info->normal_buffer_len);
+   }
+}

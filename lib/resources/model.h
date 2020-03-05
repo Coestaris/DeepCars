@@ -127,4 +127,6 @@ model_t* m_create_plane(uint32_t vpoly, uint32_t hpoly, bool global_uv);
 // If norm_scale is set, scales the vertices of the model to the range of [1,0]
 void m_normalize(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_pos, bool norm_scale);
 
+void m_calculate_normals_vao(model_t* model, vec4 color1, vec4 color2, float normal_len, GLuint* vao, size_t* len);
+
 #endif //DEEPCARS_MODEL_H

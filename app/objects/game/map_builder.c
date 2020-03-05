@@ -21,17 +21,17 @@ struct _normal
    vec2 d, n;
 };
 
-bool cmp_points(vec2 p1, vec2 p2, float dist)
+static bool cmp_points(vec2 p1, vec2 p2, float dist)
 {
    return vec2_dist(p1, p2) < dist;
 }
 
-bool cmp_vectors(vec4 p1, vec4 p2, float dist)
+static bool cmp_vectors(vec4 p1, vec4 p2, float dist)
 {
    return vec4_dist(p1, p2) < dist;
 }
 
-size_t find_vector(model_t* m, size_t* counter, bool normal, vec4 to_find, float min_dist)
+static size_t find_vector(model_t* m, size_t* counter, bool normal, vec4 to_find, float min_dist)
 {
    vec4* array = normal ? m->normals : m->tex_coords;
    size_t len = normal ? m->model_len->normals_count : m->model_len->tex_coords_count;
@@ -59,7 +59,7 @@ size_t find_vector(model_t* m, size_t* counter, bool normal, vec4 to_find, float
    return (size_t)index;
 }
 
-model_face_t* alloc_face(
+static model_face_t* alloc_face(
       model_t* m,
       size_t* normal_counter, size_t* tex_counter,
       vec4 t1, vec4 t2, vec4 t3, vec4 t4,
@@ -76,10 +76,10 @@ model_face_t* alloc_face(
 
    size_t normal_index = find_vector(m, normal_counter, true, normal, MIN_DIST_FIND_NORMAL);
 
-   size_t t1_index = find_vector(m, tex_counter, false, t1, MIN_DIST_FIND_TEXCOORD);
-   size_t t2_index = find_vector(m, tex_counter, false, t2, MIN_DIST_FIND_TEXCOORD);
-   size_t t3_index = find_vector(m, tex_counter, false, t3, MIN_DIST_FIND_TEXCOORD);
-   size_t t4_index = find_vector(m, tex_counter, false, t4, MIN_DIST_FIND_TEXCOORD);
+   size_t t1_index = find_vector(m, tex_counter, false, vec4_ccpy(t1), MIN_DIST_FIND_TEXCOORD);
+   size_t t2_index = find_vector(m, tex_counter, false, vec4_ccpy(t2), MIN_DIST_FIND_TEXCOORD);
+   size_t t3_index = find_vector(m, tex_counter, false, vec4_ccpy(t3), MIN_DIST_FIND_TEXCOORD);
+   size_t t4_index = find_vector(m, tex_counter, false, vec4_ccpy(t4), MIN_DIST_FIND_TEXCOORD);
 
    f->normal_id[0] = normal_index;
    f->normal_id[1] = normal_index;
@@ -94,7 +94,7 @@ model_face_t* alloc_face(
    return f;
 }
 
-struct _normal create_normal(vec2 p1, vec2 p2)
+static struct _normal create_normal(vec2 p1, vec2 p2)
 {
    struct _normal n;
    n.d = vec2fp(p1, p2);
@@ -105,7 +105,7 @@ struct _normal create_normal(vec2 p1, vec2 p2)
    return n;
 }
 
-bool check_intersection(double ray_x1, double ray_y1, double ray_x2, double ray_y2, vec2 seg1, vec2 seg2)
+static bool check_intersection(double ray_x1, double ray_y1, double ray_x2, double ray_y2, vec2 seg1, vec2 seg2)
 {
    double r_px = ray_x1;
    double r_py = ray_y1;
@@ -160,7 +160,7 @@ bool check_intersection(double ray_x1, double ray_y1, double ray_x2, double ray_
    return get_intersection(ray_x1, ray_y1, ray_x2, ray_y2, seg1, seg2, &r_px, &r_py, &r_dx);
 }
 
-bool intersects(struct _normal n, struct _normal n1, struct _normal n2, struct _normal n3)
+static bool intersects(struct _normal n, struct _normal n1, struct _normal n2, struct _normal n3)
 {
    vec2 dest = vec2f(n.p.x + n.n.x * 10000, n.p.y + n.n.y * 10000);
 
@@ -174,7 +174,7 @@ bool intersects(struct _normal n, struct _normal n1, struct _normal n2, struct _
    return false;
 }
 
-void reverse(struct _normal* n, size_t i, struct _normal normals[4])
+static void reverse(struct _normal* n, size_t i, struct _normal normals[4])
 {
    struct _normal others[3];
    size_t c = 0;
@@ -188,7 +188,7 @@ void reverse(struct _normal* n, size_t i, struct _normal normals[4])
    }
 }
 
-void push_height_rec(
+static void push_height_rec(
       model_t* m, size_t* i, size_t* normal_counter, size_t* tex_counter,
       vec2 p1, vec2 p2, vec2 p3, vec2 p4,
       float height,
@@ -205,29 +205,22 @@ void push_height_rec(
    m_push_vertex(m, cvec4(p3.x, height, p3.y, 0)); p3hid = (*i)++;
    m_push_vertex(m, cvec4(p4.x, height, p4.y, 0)); p4hid = (*i)++;
 
-   if(default_tex)
-   {
-   }
-   else
-   {
-      //if(tex_x_reduce == 0) tex_x_reduce = 1;
-      printf("V: %f, D(%f, %f)\n", reduce_v, reduce_d.x, reduce_d.y);
-   }
-
    vec4 dt1 = cvec4(0, 1, 0, 0);
    vec4 dt2 = cvec4(1, 1, 0, 0);
    vec4 dt3 = cvec4(1, 0, 0, 0);
    vec4 dt4 = cvec4(0, 0, 0, 0);
 
-   vec4 t1 = default_tex ? dt1 : cvec4(0, 0.3, 0, 0);
-   vec4 t2 = default_tex ? dt2 : cvec4(1, 0.3, 0, 0);
+   vec4 t1 = default_tex ? dt1 : cvec4(0, reduce_v * reduce_d.x + (1 - reduce_v) * reduce_d.y, 0, 0);
+   vec4 t2 = default_tex ? dt2 : cvec4(1, reduce_v * reduce_d.x + (1 - reduce_v) * reduce_d.y, 0, 0);
    vec4 t3 = default_tex ? dt3 : cvec4(1, 0, 0, 0);
-   vec4 t4 = default_tex ? dt4 : cvec4(0, 0, 0, 0);
-   //vec4 t2 = cvec4(1 - tex_reduce, 0, 0, 0);
+
+   vec4 tt1 = default_tex ? dt1 : cvec4(0, 1, 0, 0);
+   vec4 tt2 = default_tex ? dt2 : cvec4(reduce_v * reduce_d.x + (1 - reduce_v) * reduce_d.y, 1, 0, 0);
+   vec4 tt3 = default_tex ? dt3 : cvec4(reduce_v * reduce_d.x + (1 - reduce_v) * reduce_d.y, 0, 0, 0);
 
    /*model_face_t* face5 = alloc_face(m, normal_counter, tex_counter, t1, t2, t3, t4,
          p1id, p2id, p4id, p3id, cvec4(0, -1, 0, 0));*/
-   model_face_t* face6 = alloc_face(m, normal_counter, tex_counter, t1, t2, t3, t4,
+   model_face_t* face6 = alloc_face(m, normal_counter, tex_counter, t1, t2, t3, dt4,
          p1hid, p2hid, p4hid, p3hid, cvec4(0, 1, 0, 0));
 
    struct _normal normals[4] =
@@ -257,9 +250,9 @@ void push_height_rec(
 
       m_push_face(m, face4);
    }
-   model_face_t* face2 = alloc_face(m, normal_counter, tex_counter, dt1, dt2, dt3, dt4,
+   model_face_t* face2 = alloc_face(m, normal_counter, tex_counter, tt1, tt2, tt3, dt4,
          p4id, p2id, p2hid, p4hid, cvec4(normals[2].n.x, 0, normals[2].n.y, 0));
-   model_face_t* face3 = alloc_face(m, normal_counter, tex_counter, dt1, dt2, dt3, dt4,
+   model_face_t* face3 = alloc_face(m, normal_counter, tex_counter, tt1, tt2, tt3, dt4,
          p3id, p1id, p1hid, p3hid, cvec4(normals[3].n.x, 0, normals[3].n.y, 0));
 
    m_push_face(m, face2);
@@ -268,7 +261,7 @@ void push_height_rec(
    m_push_face(m, face6);
 }
 
-void push_hexahedron(
+static void push_hexahedron(
       model_t* m, size_t* i, size_t* normal_counter, size_t* tex_counter,
       vec2 p1, vec2 p2, vec2 p3, vec2 p4,
       float height)
@@ -305,7 +298,7 @@ void push_hexahedron(
          l, d, false, true);
 }
 
-void push_prism(
+static void push_prism(
       model_t* m, size_t* i, size_t* normal_counter, size_t* tex_counter,
       vec2 p1, vec2 p2, vec2 p3, vec2 p4,
       float height)
@@ -322,28 +315,25 @@ model_t* build_map_model(list_t* walls)
    snprintf(buff, sizeof(buff), "__generated_map%i", rand());
    model->name = strdup(buff);
 
-   size_t counter = 1;
-   size_t normal_counter = 1;
-   size_t tex_counter = 1;
-
-   vec2 prev_offset = {0, 0};
-   vec2 prev_d = {0, 0};
-   vec2 first_d = {0, 0};
-   double p = 0;
-
-   vec2 t1 = {0, 0};
-   vec2 t2 = {0, 0};
-   vec2 t3 = {0, 0};
-   vec2 t4 = {0, 0};
-
-   vec2 first_p1 = {0, 0};
-   vec2 first_p2 = {0, 0};
+   size_t counter          = 1;
+   size_t normal_counter   = 1;
+   size_t tex_counter      = 1;
+   vec2   prev_offset      = vec2e;
+   vec2   prev_d           = vec2e;
+   vec2   first_d          = vec2e;
+   double p                = 0;
+   vec2   t1               = vec2e;
+   vec2   t2               = vec2e;
+   vec2   t3               = vec2e;
+   vec2   t4               = vec2e;
+   vec2   first_p1         = vec2e;
+   vec2   first_p2         = vec2e;
 
    for(size_t i = 0; i < walls->count; i++)
    {
       wall_t* wall = walls->collection[i];
-      vec2 p1 = wall->p1;
-      vec2 p2 = wall->p2;
+      vec2  p1 = wall->p1;
+      vec2  p2 = wall->p2;
       // Direction of current wall
       vec2 d = vec2_normalize(vec2fp(p1, p2));
       // Normal to current wall
@@ -419,9 +409,9 @@ model_t* build_map_model(list_t* walls)
          t4 = first_p1;
          t3 = first_p2;
 
-         vec2 m_point = {0, 0},
-               d1_point = {0, 0},
-               d2_point = {0, 0};
+         vec2 m_point = vec2e,
+              d1_point = vec2e,
+              d2_point = vec2e;
 
          //find matching points
          if     (cmp_points(t1, t3, MIN_DIST)) { m_point = t1; d1_point = t2; d2_point = t4; }
@@ -440,7 +430,5 @@ model_t* build_map_model(list_t* walls)
 
    return model;
 }
-
-
 
 #pragma clang diagnostic pop
