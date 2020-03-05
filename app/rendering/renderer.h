@@ -5,6 +5,8 @@
 #ifndef DEEPCARS_RENDERER_H
 #define DEEPCARS_RENDERER_H
 
+#include "../../lib/coredefs.h"
+
 #include "../../lib/graphics/rendering/render_chain.h"
 #include "../../lib/object_include.h"
 

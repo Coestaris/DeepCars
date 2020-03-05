@@ -12,7 +12,7 @@
 
 light_t* l_create()
 {
-   light_t* lt = malloc(sizeof(light_t));
+   light_t* lt = DEEPCARS_MALLOC(sizeof(light_t));
    lt->color = cvec4(1,1,1,1);
    lt->position = cvec4(0,0,0,1);
 
@@ -23,12 +23,12 @@ void l_free(light_t* light)
 {
    vec4_free(light->color);
    vec4_free(light->position);
-   free(light);
+   DEEPCARS_FREE(light);
 }
 
 shadow_light_t* l_sh_create(vec4 position, vec4 up)
 {
-   shadow_light_t* lt = malloc(sizeof(shadow_light_t));
+   shadow_light_t* lt = DEEPCARS_MALLOC(sizeof(shadow_light_t));
    lt->light_proj = cmat4();
    lt->light_view = cmat4();
    lt->light_space = cmat4();
@@ -44,11 +44,11 @@ void l_sh_free(shadow_light_t* light)
    if(light->light_view) mat4_free(light->light_view);
    if(light->light_proj) mat4_free(light->light_proj);
    if(light->light_space) mat4_free(light->light_space);
-   if(light->light_camera) c_free(light->light_camera);
+   if(light->light_camera) c_DEEPCARS_FREE(light->light_camera);
 
    vec4_free(light->position);
    //vec4_free(light->direction);
-   free(light);
+   DEEPCARS_FREE(light);
 }
 
 void l_calc_radius(light_t* light)

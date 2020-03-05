@@ -161,7 +161,7 @@ void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* frag
       fseek(f, 0, SEEK_END);
       vertex_len = ftell(f);
       fseek(f, 0, SEEK_SET);
-      vertex_source = malloc(vertex_len + 1);
+      vertex_source = DEEPCARS_MALLOC(vertex_len + 1);
       if(fread(vertex_source, vertex_len, 1, f) == 1)
       {
          SH_ERROR("Unable to read vertex data from file",0);
@@ -179,7 +179,7 @@ void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* frag
       fseek(f, 0, SEEK_END);
       geometry_len = ftell(f);
       fseek(f, 0, SEEK_SET);
-      geometry_source = malloc(geometry_len + 1);
+      geometry_source = DEEPCARS_MALLOC(geometry_len + 1);
       if(fread(geometry_source, geometry_len, 1, f) == 1)
       {
          SH_ERROR("Unable to read geometry data from file",0);
@@ -197,7 +197,7 @@ void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* frag
       fseek(f, 0, SEEK_END);
       fragment_len = ftell(f);
       fseek(f, 0, SEEK_SET);
-      fragment_source = malloc(fragment_len + 1);
+      fragment_source = DEEPCARS_MALLOC(fragment_len + 1);
       if(fread(fragment_source, fragment_len, 1, f) == 1)
       {
          SH_ERROR("Unable to read vertex data from file",0);
@@ -211,9 +211,9 @@ void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* frag
            geometry_source, geometry_len,
            fragment_source, fragment_len);
 
-   if(vertex_source) free(vertex_source);
-   if(geometry_source) free(geometry_source);
-   if(fragment_source) free(fragment_source);
+   if(vertex_source) DEEPCARS_FREE(vertex_source);
+   if(geometry_source) DEEPCARS_FREE(geometry_source);
+   if(fragment_source) DEEPCARS_FREE(fragment_source);
 }
 
 //
@@ -221,7 +221,7 @@ void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* frag
 //
 shader_t* sh_create(char* name)
 {
-   shader_t* sh = malloc(sizeof(shader_t));
+   shader_t* sh = DEEPCARS_MALLOC(sizeof(shader_t));
    sh->prog_id = 0;
    sh->name = name;
    sh->programs = 0;
@@ -236,8 +236,8 @@ void sh_free(shader_t* sh)
    SH_LOG("Freed shader \"%s\"", sh->name);
    GL_CALL(glDeleteProgram(sh->prog_id))
 
-   free(sh->name);
-   free(sh);
+   DEEPCARS_FREE(sh->name);
+   DEEPCARS_FREE(sh);
 }
 
 //

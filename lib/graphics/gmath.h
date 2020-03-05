@@ -8,11 +8,7 @@
 #ifndef DEEPCARS_GMATH_H
 #define DEEPCARS_GMATH_H
 
-#include <malloc.h>
-#include <string.h>
-#include <assert.h>
-#include <math.h>
-#include <assert.h>
+#include "../coredefs.h"
 
 typedef float* mat4; // 16 floats
 typedef float* vec4; // 4 floats

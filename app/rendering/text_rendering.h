@@ -5,10 +5,12 @@
 #ifndef DEEPCARS_TEXT_RENDERING_H
 #define DEEPCARS_TEXT_RENDERING_H
 
-#include <stdint.h>
+#include "../../lib/coredefs.h"
+
 #include "../../lib/graphics/gmath.h"
-#include "../../lib/structs.h"
+#include "../../lib/coredefs.h"
 #include "../../lib/graphics/win.h"
+
 extern mat4 primitive_proj;
 
 typedef struct _font_data {

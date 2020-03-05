@@ -12,6 +12,8 @@
 #define MEASURE_RENDER_SMOOTH 0.9
 //#define OUTPUT_RENDER_TIME 5
 
+#include "../../coredefs.h"
+
 #include "../../object.h"
 #include "../../resources/shader.h"
 

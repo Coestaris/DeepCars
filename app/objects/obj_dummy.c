@@ -4,7 +4,7 @@
 
 #include "obj_dummy.h"
 
-object_t* create_textured_dummy(vec3f_t pos, float size, material_t* material, model_t* model)
+object_t* create_textured_dummy(vec3 pos, float size, material_t* material, model_t* model)
 {
    object_t* this = o_create();
    this->position = pos;

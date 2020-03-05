@@ -15,9 +15,9 @@
 //
 texture_t* t_create(char* name)
 {
-   texture_t* t = malloc(sizeof(texture_t));
+   texture_t* t = DEEPCARS_MALLOC(sizeof(texture_t));
    t->name = name;
-   t->data = malloc(sizeof(texData));
+   t->data = DEEPCARS_MALLOC(sizeof(texData));
    t->texID = 0;
    t->mipmaps = 0;
 
@@ -40,9 +40,9 @@ void t_free(texture_t* tex)
    if(tex->texID)
       GL_CALL(glDeleteTextures(1, &tex->texID));
 
-   free(tex->name);
-   free(tex->data);
-   free(tex);
+   DEEPCARS_FREE(tex->name);
+   DEEPCARS_FREE(tex->data);
+   DEEPCARS_FREE(tex);
 }
 
 void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t height)
@@ -67,7 +67,7 @@ void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t he
 
 char* t_get_pretty_signature(texture_t* t)
 {
-   char* buffer = malloc(sizeof(char) * 100);
+   char* buffer = DEEPCARS_MALLOC(sizeof(char) * 100);
 
    snprintf(buffer, 100, "%s %s \"%s\" [%ix%i] (%li mipmap%s%s)",
          t->mipmaps <= 1 ? "" : "DDS",
@@ -137,7 +137,7 @@ void t_set_data_dds(texture_t* texture, GLenum fill_target, uint8_t* source, siz
             // DX10
             // unsupported, else will error
             // as it adds sizeof(struct DDS_HEADER_DXT10) between pixels
-            // so, buffer = malloc((file_size - 128) - sizeof(struct DDS_HEADER_DXT10));
+            // so, buffer = DEEPCARS_MALLOC((file_size - 128) - sizeof(struct DDS_HEADER_DXT10));
          default:
             str_format = "unknown";
             goto exit;

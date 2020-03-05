@@ -7,6 +7,7 @@
 #endif
 #include "genome.h"
 
+#include "../lib/list.h"
 #include "../oil/bmp.h"
 #include "../oil/graphics.h"
 #include "../lib/graphics/gmath.h"
@@ -69,7 +70,7 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
       return;
    }
 
-   float* positions = malloc(sizeof(float) * 2 * genome->nodes_count);
+   float* positions = DEEPCARS_MALLOC(sizeof(float) * 2 * genome->nodes_count);
 
    float input_mul = (GN_WRITE_WIDTH / (float)(genome->input_count));
    float input_offset = input_mul / 2.0f;
@@ -201,7 +202,7 @@ void gn_write(genome_t* genome, const char* fn, oilFont* font)
    }
 
    vec4_free(buff_vec);
-   free(positions);
+   DEEPCARS_FREE(positions);
    oilBMPFreeImage(image);
 }
 

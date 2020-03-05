@@ -95,7 +95,7 @@ cpBody* createCar(cpVect pos, cpShape** shape)
    return car;
 }
 
-void free_menu_phys(object_t* object)
+void DEEPCARS_FREE_menu_phys(object_t* object)
 {
    if(!freed_phys)
    {
@@ -177,7 +177,7 @@ object_t* create_menu_phys(void)
 
    object_t* this = o_create();
    this->update_func = update_menu_phys;
-   this->destroy_func = free_menu_phys;
+   this->destroy_func = DEEPCARS_FREE_menu_phys;
 
    return this;
 }

@@ -65,9 +65,9 @@ void scm_load_scene(uint32_t id, bool free)
 }
 
 //
-// scm_free
+// scm_release
 //
-void scm_free()
+void scm_release()
 {
    for (size_t i = 0; i < scenes->count; i++)
       sc_free((scene_t*) scenes->collection[i]);

@@ -7,13 +7,8 @@
 
 #define GL_GLEXT_PROTOTYPES
 
-#include <stdbool.h>
-#include <string.h>
-#include <malloc.h>
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
-#include <stdlib.h>
+#include "../coredefs.h"
+
 #include <GL/gl.h>
 #include <errno.h>
 

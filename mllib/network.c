@@ -54,7 +54,7 @@ void nw_forward(genome_t* genome, float* input, float* output)
 {
    if(!nodes)
    {
-      nodes = malloc(sizeof(struct _node) * genome->nodes_count);
+      nodes = DEEPCARS_MALLOC(sizeof(struct _node) * genome->nodes_count);
       memset(nodes, 0, sizeof(struct _node) * genome->nodes_count);
    }
    else

@@ -159,6 +159,8 @@ double_t m_parse_double(size_t line_index)
    {
       M_ERROR("Unable to parse %s. Expected float point value at line %li", word, line_index);
    }
+
+   return 0;
 }
 
 // Separates string slice between specified indices into words
@@ -260,7 +262,7 @@ void m_proceed_line(model_t* model, const char* string, size_t start_index, size
 
    if (descriptor->type == OD_FACE)
    {
-      model_face_t* new_face = malloc(sizeof(model_face_t));
+      model_face_t* new_face = DEEPCARS_MALLOC(sizeof(model_face_t));
       new_face->parent = model;
       new_face->count = word_count - 1;
       memcpy(new_face->normal_id, face->normal_id, sizeof(face->normal_id));
@@ -307,8 +309,8 @@ void m_parse_lines(model_t* model, const char* str)
 //
 model_t* m_create()
 {
-   model_t* model = malloc(sizeof(model_t));
-   model->model_len = malloc(sizeof(model_len_t));
+   model_t* model = DEEPCARS_MALLOC(sizeof(model_t));
+   model->model_len = DEEPCARS_MALLOC(sizeof(model_len_t));
    model->model_len->vertices_max_count = START_LEN_COUNT;
    model->model_len->normals_max_count = START_LEN_COUNT;
    model->model_len->tex_coords_max_count = START_LEN_COUNT;
@@ -323,22 +325,22 @@ model_t* m_create()
    model->model_len->group_names_count = 0;
    model->model_len->mtl_libs_count = 0;
 
-   model->vertices = malloc(sizeof(vec4) * model->model_len->vertices_max_count);
+   model->vertices = DEEPCARS_MALLOC(sizeof(vec4) * model->model_len->vertices_max_count);
    memset(model->vertices, 0, sizeof(vec4) * model->model_len->vertices_max_count);
 
-   model->normals = malloc(sizeof(vec4) * model->model_len->normals_max_count);
+   model->normals = DEEPCARS_MALLOC(sizeof(vec4) * model->model_len->normals_max_count);
    memset(model->normals, 0, sizeof(vec4) * model->model_len->normals_max_count);
 
-   model->tex_coords = malloc(sizeof(vec4) * model->model_len->tex_coords_max_count);
+   model->tex_coords = DEEPCARS_MALLOC(sizeof(vec4) * model->model_len->tex_coords_max_count);
    memset(model->tex_coords, 0, sizeof(vec4) * model->model_len->tex_coords_max_count);
 
-   model->faces = malloc(sizeof(model_face_t**) * model->model_len->faces_max_count);
+   model->faces = DEEPCARS_MALLOC(sizeof(model_face_t**) * model->model_len->faces_max_count);
    memset(model->faces, 0, sizeof(model_face_t**) * model->model_len->faces_max_count);
 
-   model->group_names = malloc(sizeof(char*) * model->model_len->group_names_max_count);
+   model->group_names = DEEPCARS_MALLOC(sizeof(char*) * model->model_len->group_names_max_count);
    memset(model->group_names, 0, sizeof(char*) * model->model_len->group_names_max_count);
 
-   model->mtl_libs = malloc(sizeof(char*) * model->model_len->mtl_libs_max_count);
+   model->mtl_libs = DEEPCARS_MALLOC(sizeof(char*) * model->model_len->mtl_libs_max_count);
    memset(model->mtl_libs, 0, sizeof(char*) * model->model_len->mtl_libs_max_count);
 
    model->object_name = NULL;
@@ -361,7 +363,7 @@ model_t* m_load_s(char* name, char* source)
 
    if (!face)
    {
-      face = malloc(sizeof(model_face_t));
+      face = DEEPCARS_MALLOC(sizeof(model_face_t));
       memset(face->normal_id, -1, sizeof(face->normal_id));
       memset(face->tex_id, -1, sizeof(face->tex_id));
    }
@@ -393,7 +395,7 @@ model_t* m_load(const char* filename)
    size_t size = ftell(f);
    fseek(f, 0, SEEK_SET);
 
-   char* data = malloc(size + 1);
+   char* data = DEEPCARS_MALLOC(size + 1);
    memset(data, 0, size + 1);
 
    if(fread(data, size, 1, f) != 1)
@@ -403,7 +405,7 @@ model_t* m_load(const char* filename)
 
    model_t* model = m_load_s(strdup(filename), data);
 
-   free(data);
+   DEEPCARS_FREE(data);
    fclose(f);
    return model;
 }
@@ -415,30 +417,30 @@ void m_free(model_t* model)
 {
    for (size_t i = 0; i < model->model_len->vertices_count; i++)
       vec4_free(model->vertices[i]);
-   free(model->vertices);
+   DEEPCARS_FREE(model->vertices);
 
    for (size_t i = 0; i < model->model_len->normals_count; i++)
       vec4_free(model->normals[i]);
-   free(model->normals);
+   DEEPCARS_FREE(model->normals);
 
    for (size_t i = 0; i < model->model_len->tex_coords_count; i++)
       vec4_free(model->tex_coords[i]);
-   free(model->tex_coords);
+   DEEPCARS_FREE(model->tex_coords);
 
    for (size_t i = 0; i < model->model_len->faces_count; i++)
-      free(model->faces[i]);
-   free(model->faces);
+      DEEPCARS_FREE(model->faces[i]);
+   DEEPCARS_FREE(model->faces);
 
    for (size_t i = 0; i < model->model_len->group_names_count; i++)
-      free(model->group_names[i]);
-   free(model->group_names);
+      DEEPCARS_FREE(model->group_names[i]);
+   DEEPCARS_FREE(model->group_names);
 
    for (size_t i = 0; i < model->model_len->mtl_libs_count; i++)
-      free(model->mtl_libs[i]);
-   free(model->mtl_libs);
+      DEEPCARS_FREE(model->mtl_libs[i]);
+   DEEPCARS_FREE(model->mtl_libs);
 
-   free(model->object_name);
-   free(model->model_len);
+   DEEPCARS_FREE(model->object_name);
+   DEEPCARS_FREE(model->model_len);
 
    if (model->VBO != 0)
       GL_CALL(glDeleteBuffers(1, &(model->VBO)))
@@ -448,8 +450,8 @@ void m_free(model_t* model)
 
    M_LOG("Freed model \"%s\"", model->name);
 
-   free(model->name);
-   free(model);
+   DEEPCARS_FREE(model->name);
+   DEEPCARS_FREE(model);
 }
 
 inline void m_push_vertex(model_t* model, vec4 vec)
@@ -576,8 +578,8 @@ void m_build(model_t* model)
       model->triangles_count += model->faces[i]->count - 2;
    }
 
-   float* buffer = malloc(sizeof(float) * size);
-   //uint32_t* index_buffer = malloc(sizeof(uint32_t) * model->triangles_count* 2);
+   float* buffer = DEEPCARS_MALLOC(sizeof(float) * size);
+   //uint32_t* index_buffer = DEEPCARS_MALLOC(sizeof(uint32_t) * model->triangles_count* 2);
    size_t buffer_index = 0;
    //size_t index_buffer_index = 0;
 
@@ -666,7 +668,7 @@ void m_build(model_t* model)
    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0))
    GL_CALL(glBindVertexArray(0))
 
-   free(buffer);
+   DEEPCARS_FREE(buffer);
 }
 
 model_t* m_create_plane(uint32_t vpoly, uint32_t hpoly, bool global_uv)
@@ -705,7 +707,7 @@ model_t* m_create_plane(uint32_t vpoly, uint32_t hpoly, bool global_uv)
          m_push_tex_coord(model, cvec4(x1, y1, 0, 0));
       }
 
-      model_face_t* f = malloc(sizeof(model_face_t));
+      model_face_t* f = DEEPCARS_MALLOC(sizeof(model_face_t));
       f->count = 4;
       f->vert_id[0] = i++;
       f->vert_id[1] = i++;

@@ -9,7 +9,6 @@
 
 #include "graphics/rendering/graphics.h"
 #include "resources/shader.h"
-#include "scene.h"
 #include "scm.h"
 #include "graphics/rendering/render_chain.h"
 
@@ -386,9 +385,9 @@ double_t u_get_fps()
 }
 
 //
-// u_free
+// u_release
 //
-void u_free()
+void u_release()
 {
    list_free(objects);
    list_free(key_listeners);

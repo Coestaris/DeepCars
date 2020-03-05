@@ -5,6 +5,7 @@
 #ifndef DEEPCARS_OBJECT_H
 #define DEEPCARS_OBJECT_H
 
+#include "coredefs.h"
 #include "resources/model.h"
 
 struct _object;
@@ -39,9 +40,9 @@ typedef struct _draw_info {
 typedef struct _object
 {
    // Transformation of object
-   vec3f_t position;
-   vec3f_t rotation;
-   vec3f_t scale;
+   vec3 position;
+   vec3 rotation;
+   vec3 scale;
 
    // Base object callbacks
    update_func_t update_func;

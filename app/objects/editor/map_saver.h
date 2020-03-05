@@ -5,7 +5,7 @@
 #ifndef DEEPCARS_MAP_SAVER_H
 #define DEEPCARS_MAP_SAVER_H
 
-#include "../../../lib/structs.h"
+#include "../../../lib/coredefs.h"
 #include "obj_editor_drawer.h"
 
 #define MAP_SAVE_DIR "maps"

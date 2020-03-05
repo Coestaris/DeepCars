@@ -10,12 +10,13 @@
 
 #define GL_GLEXT_PROTOTYPES
 
+#include "../coredefs.h"
+
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <malloc.h>
 
 #include "../graphics/gmath.h"
 #include "../graphics/material.h"

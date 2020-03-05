@@ -5,7 +5,7 @@
 #ifndef DEEPCARS_EVALUATOR_H
 #define DEEPCARS_EVALUATOR_H
 
-#include "../lib/structs.h"
+#include "../lib/coredefs.h"
 #include "genome.h"
 
 #define EV_MUTATE_MIN_WEIGHT -2

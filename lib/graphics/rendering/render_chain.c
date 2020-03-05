@@ -24,14 +24,14 @@ void rc_free(render_chain_t* rc, bool free_stages)
       for(size_t i = 0; i < rc->stages->count; i++)
          rs_free(rc->stages->collection[i]);
    }
-   if(rc->data) free(rc->data);
+   if(rc->data) DEEPCARS_FREE(rc->data);
    list_free(rc->stages);
-   free(rc);
+   DEEPCARS_FREE(rc);
 }
 
 render_chain_t* rc_create()
 {
-   render_chain_t* this = malloc(sizeof(render_chain_t));
+   render_chain_t* this = DEEPCARS_MALLOC(sizeof(render_chain_t));
    this->data = NULL;
    this->stages = list_create();
    return this;

@@ -6,9 +6,10 @@
 #define DEEPCARS_MLLIB_GENOME_H
 
 #include <stdbool.h>
-#include "../lib/structs.h"
+#include "../lib/coredefs.h"
 #include "../oil/font.h"
 #include "connection_genome.h"
+#include "../lib/list.h"
 
 #define GN_WRITE_WIDTH 512
 #define GN_WRITE_HEIGHT 512

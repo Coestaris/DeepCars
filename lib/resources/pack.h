@@ -5,6 +5,8 @@
 #ifndef DEEPCARS_PACK_H
 #define DEEPCARS_PACK_H
 
+#include "../coredefs.h"
+
 // Loads resources from the specified file
 void p_load(const char* name);
 

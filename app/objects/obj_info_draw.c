@@ -55,7 +55,7 @@ void update_drawer(object_t* this)
 object_t* create_info_drawer()
 {
    draw_text = true;
-   font_data = malloc(sizeof(font_data_t));
+   font_data = DEEPCARS_MALLOC(sizeof(font_data_t));
    font_data->color = COLOR_BLACK;
    font_data->color_off = 0.1f;
    font_data->color_k = 9.0f;
@@ -66,7 +66,7 @@ object_t* create_info_drawer()
    font_data->back_k = 4.5f;
    //font_data.border_color[3] = 1;
 
-   sec_font_data = malloc(sizeof(font_data_t));
+   sec_font_data = DEEPCARS_MALLOC(sizeof(font_data_t));
    sec_font_data->color = COLOR_BLACK;
    sec_font_data->color_off = 0.1f;
    sec_font_data->color_k = 9.0f;

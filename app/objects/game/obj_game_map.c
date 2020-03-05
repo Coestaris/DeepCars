@@ -23,7 +23,7 @@ void game_map_update(object_t* this)
 
       float normal_length = 10.0f;
       size_t s = m->model_len->faces_count * 12;
-      float* buffer = malloc(sizeof(float) * s);
+      float* buffer = DEEPCARS_MALLOC(sizeof(float) * s);
       size_t buffer_counter = 0;
 
       vec4 color1 = COLOR_GREEN;
@@ -78,7 +78,7 @@ void game_map_update(object_t* this)
 
       GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, normal_vbo));
       GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * s, buffer, GL_STATIC_DRAW));
-      free(buffer);
+      DEEPCARS_FREE(buffer);
 
       GL_CALL(glBindVertexArray(normal_vao));
       GL_CALL(glEnableVertexAttribArray(0));

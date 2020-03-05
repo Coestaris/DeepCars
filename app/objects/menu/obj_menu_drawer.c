@@ -12,7 +12,7 @@
 #include "../../rendering/renderer.h"
 #include "obj_menu_camera_mover.h"
 
-bool freed_regions;
+bool free_regions;
 bool about;
 blurred_region_t* btn_run_br;
 blurred_region_t* btn_about_br;
@@ -49,8 +49,8 @@ void update_menu_drawer(object_t* this)
    {
       p = 1 - smootherstep(0,0, t += exiting ? 0.03f : 0.02f);
       gr_pq_push_sprite(4, black_texture,
-                        vec2f(0, 0),
-                        vec2f(default_win->w,default_win->h), vec2f(0, 0), 0, default_sprite_renderer, &p);
+                        vec2e,
+                        vec2f(default_win->w,default_win->h), vec2e, 0, default_sprite_renderer, &p);
 
       if(p <= 0)
       {
@@ -68,11 +68,11 @@ void update_menu_drawer(object_t* this)
    if((!about && ((!changing_trans) || (changing_trans && t != 0))) || (about && changing_trans && p > 0))
       gr_pq_push_sprite(0, logo_texture,
             vec2f(((float)win->w - (float)logo_texture->width) / 2.0f, 75),
-            vec2f(1,1), vec2f(0, 0), 0, default_sprite_renderer, &sprite_transparency);
+            vec2u, vec2e, 0, default_sprite_renderer, &sprite_transparency);
    else
       gr_pq_push_sprite(0, about_logo_texture,
                         vec2f(((float)win->w - (float)about_logo_texture->width) / 2.0f, 75),
-                        vec2f(1,1), vec2f(0, 0), 0, default_sprite_renderer, &sprite_transparency);
+                        vec2u, vec2e, 0, default_sprite_renderer, &sprite_transparency);
 
    if(!about)
    {
@@ -181,7 +181,7 @@ void mouse_menu_drawer(object_t* this, uint32_t x, uint32_t y, uint32_t state, u
 
 void free_menu_drawer(object_t* drawer)
 {
-   if(!freed_regions)
+   if(!free_regions)
    {
       vec4_free(selected_color);
       vec4_free(default_color);
@@ -192,7 +192,7 @@ void free_menu_drawer(object_t* drawer)
 
       free_br(btn_back_br);
       free_br(about_page);
-      freed_regions = true;
+      free_regions = true;
       blurred_regions->count = 0;
    }
 }
@@ -200,7 +200,7 @@ void free_menu_drawer(object_t* drawer)
 object_t* create_menu_drawer()
 {
    black_texture = rm_getn(TEXTURE, "__generated_mt_grass_trans_0.0_0.0_0.0");
-   freed_regions = false;
+   free_regions = false;
    about = false;
    object_t* this = o_create();
    render_stage_t* rs = default_rc->stages->collection[STAGE_SHADING];

@@ -7,7 +7,7 @@
 #endif
 
 #include "rmanager.h"
-#include "../structs.h"
+#include "../coredefs.h"
 #include "../graphics/material.h"
 #include "texture.h"
 #include "model.h"
@@ -152,7 +152,7 @@ void rm_push(resource_type_t type, void* data, int32_t id)
    {
       case TEXTURE:
       {
-         struct _texture_node* node = malloc(sizeof(struct _texture_node));
+         struct _texture_node* node = DEEPCARS_MALLOC(sizeof(struct _texture_node));
          if(id == -1) node->id = textures->count;
          else node->id = id;
          node->texture = data;
@@ -161,7 +161,7 @@ void rm_push(resource_type_t type, void* data, int32_t id)
          break;
       case MODEL:
       {
-         struct _model_node* node = malloc(sizeof(struct _model_node));
+         struct _model_node* node = DEEPCARS_MALLOC(sizeof(struct _model_node));
          if(id == -1) node->id = models->count;
          else node->id = id;
          node->id = id;
@@ -171,7 +171,7 @@ void rm_push(resource_type_t type, void* data, int32_t id)
          break;
       case MATERIAL:
       {
-         struct _material_node* node = malloc(sizeof(struct _material_node));
+         struct _material_node* node = DEEPCARS_MALLOC(sizeof(struct _material_node));
          if(id == -1) node->id = materials->count;
          else node->id = id;
          node->id = id;
@@ -181,7 +181,7 @@ void rm_push(resource_type_t type, void* data, int32_t id)
          break;
       case FONT:
       {
-         struct _font_node* node = malloc(sizeof(struct _font_node));
+         struct _font_node* node = DEEPCARS_MALLOC(sizeof(struct _font_node));
          if(id == -1) node->id = fonts->count;
          else node->id = id;
          node->id = id;
@@ -193,21 +193,21 @@ void rm_push(resource_type_t type, void* data, int32_t id)
 }
 
 //
-// rm_free()
+// rm_release()
 //
-void rm_free(bool free_tex, bool free_model, bool free_mat, bool free_font)
+void rm_release(bool DEEPCARS_FREE_tex, bool DEEPCARS_FREE_model, bool DEEPCARS_FREE_mat, bool DEEPCARS_FREE_font)
 {
-   if(free_tex) for(size_t i = 0; i < textures->count; i++)
-         t_free(((struct _texture_node*)textures->collection[i])->texture);
+   if(DEEPCARS_FREE_tex) for(size_t i = 0; i < textures->count; i++)
+         t_free(((struct _texture_node*) textures->collection[i])->texture);
 
-   if(free_model) for(size_t i = 0; i < models->count; i++)
-         m_free(((struct _model_node*)models->collection[i])->model);
+   if(DEEPCARS_FREE_model) for(size_t i = 0; i < models->count; i++)
+         m_free(((struct _model_node*) models->collection[i])->model);
 
-   if(free_mat) for(size_t i = 0; i < materials->count; i++)
-         mt_free(((struct _material_node*)materials->collection[i])->material);
+   if(DEEPCARS_FREE_mat) for(size_t i = 0; i < materials->count; i++)
+         mt_free(((struct _material_node*) materials->collection[i])->material);
 
-   if(free_font) for(size_t i = 0; i < fonts->count; i++)
-         f_free(((struct _font_node*)fonts->collection[i])->font);
+   if(DEEPCARS_FREE_font) for(size_t i = 0; i < fonts->count; i++)
+         f_free(((struct _font_node*) fonts->collection[i])->font);
 
    list_free_elements(textures);
    list_free_elements(models);

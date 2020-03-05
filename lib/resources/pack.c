@@ -82,7 +82,7 @@ void p_handler_model(uint8_t* data, size_t length)
    READ_BUFF(id,sizeof(id));
    READ_BUFF(name_len,sizeof(name_len));
 
-   char* name = malloc(name_len + 1);
+   char* name = DEEPCARS_MALLOC(name_len + 1);
    READ_BUFF(*name, name_len);
    name[name_len] = '\0';
 
@@ -91,17 +91,17 @@ void p_handler_model(uint8_t* data, size_t length)
    READ_BUFF(data_len, sizeof(data_len));
    READ_BUFF(uncomp_data_len, sizeof(uncomp_data_len));
 
-   uint8_t* model_data = malloc(data_len);
+   uint8_t* model_data = DEEPCARS_MALLOC(data_len);
    READ_BUFF(*model_data, data_len);
 
    if(arhive)
    {
-      uint8_t* decompressed = malloc(uncomp_data_len);
+      uint8_t* decompressed = DEEPCARS_MALLOC(uncomp_data_len);
       memset(decompressed, 0, uncomp_data_len);
 
       p_decompress(data_len, uncomp_data_len, model_data, decompressed);
 
-      free(model_data);
+      DEEPCARS_FREE(model_data);
       model_data = decompressed;
    }
 
@@ -115,8 +115,8 @@ void p_handler_model(uint8_t* data, size_t length)
 
    rm_push(MODEL, m, id);
 
-   free(name);
-   free(model_data);
+   DEEPCARS_FREE(name);
+   DEEPCARS_FREE(model_data);
 }
 
 // Handles shaders chunk and adds parsed shaders to shm
@@ -132,7 +132,7 @@ void p_handler_shader(uint8_t* data, size_t length)
    READ_BUFF(id, sizeof(id));
    READ_BUFF(name_len,sizeof(name_len));
 
-   char* name = malloc(name_len + 1);
+   char* name = DEEPCARS_MALLOC(name_len + 1);
    READ_BUFF(*name, name_len);
    name[name_len] = '\0';
 
@@ -156,16 +156,16 @@ void p_handler_shader(uint8_t* data, size_t length)
    {
       READ_BUFF(vertex_len, sizeof(vertex_len));
       READ_BUFF(uncomp_data_len, sizeof(uncomp_data_len));
-      vertex_data = malloc(vertex_len);
+      vertex_data = DEEPCARS_MALLOC(vertex_len);
       READ_BUFF(*vertex_data, vertex_len);
 
       if(compress)
       {
-         uint8_t* decompressed = malloc(uncomp_data_len);
+         uint8_t* decompressed = DEEPCARS_MALLOC(uncomp_data_len);
          memset(decompressed, 0, uncomp_data_len);
          p_decompress(vertex_len, uncomp_data_len, vertex_data, decompressed);
 
-         free(vertex_data);
+         DEEPCARS_FREE(vertex_data);
          vertex_data = decompressed;
          vertex_len = uncomp_data_len;
       }
@@ -175,16 +175,16 @@ void p_handler_shader(uint8_t* data, size_t length)
    {
       READ_BUFF(fragment_len, sizeof(fragment_len));
       READ_BUFF(uncomp_data_len, sizeof(uncomp_data_len));
-      fragment_data = malloc(fragment_len);
+      fragment_data = DEEPCARS_MALLOC(fragment_len);
       READ_BUFF(*fragment_data, fragment_len);
 
       if(compress)
       {
-         uint8_t* decompressed = malloc(uncomp_data_len);
+         uint8_t* decompressed = DEEPCARS_MALLOC(uncomp_data_len);
          memset(decompressed, 0, uncomp_data_len);
          p_decompress(fragment_len, uncomp_data_len, fragment_data, decompressed);
 
-         free(fragment_data);
+         DEEPCARS_FREE(fragment_data);
          fragment_data = decompressed;
          fragment_len = uncomp_data_len;
       }
@@ -194,16 +194,16 @@ void p_handler_shader(uint8_t* data, size_t length)
    {
       READ_BUFF(geometry_len, sizeof(geometry_len));
       READ_BUFF(uncomp_data_len, sizeof(uncomp_data_len));
-      geometry_data = malloc(geometry_len);
+      geometry_data = DEEPCARS_MALLOC(geometry_len);
       READ_BUFF(*geometry_data, geometry_len);
 
       if(compress)
       {
-         uint8_t* decompressed = malloc(uncomp_data_len);
+         uint8_t* decompressed = DEEPCARS_MALLOC(uncomp_data_len);
          memset(decompressed, 0, uncomp_data_len);
          p_decompress(geometry_len, uncomp_data_len, geometry_data, decompressed);
 
-         free(geometry_data);
+         DEEPCARS_FREE(geometry_data);
          geometry_data = decompressed;
          geometry_len = uncomp_data_len;
       }
@@ -217,10 +217,10 @@ void p_handler_shader(uint8_t* data, size_t length)
 
    s_push(sh, id);
 
-   if(vertex_data) free(vertex_data);
-   if(fragment_data) free(fragment_data);
-   if(geometry_data) free(geometry_data);
-   free(name);
+   if(vertex_data) DEEPCARS_FREE(vertex_data);
+   if(fragment_data) DEEPCARS_FREE(fragment_data);
+   if(geometry_data) DEEPCARS_FREE(geometry_data);
+   DEEPCARS_FREE(name);
 }
 
 // Handles texture chunk and adds parsed textures to txm
@@ -244,7 +244,7 @@ void p_handler_texture(uint8_t* data, size_t length)
    READ_BUFF(maps, sizeof(maps));
    READ_BUFF(name_len, sizeof(name_len));
 
-   char* name = malloc(name_len + 1);
+   char* name = DEEPCARS_MALLOC(name_len + 1);
    READ_BUFF(*name, name_len);
    name[name_len] = '\0';
 
@@ -325,23 +325,23 @@ void p_handler_texture(uint8_t* data, size_t length)
    for(size_t map = 0; map < maps; map++)
    {
       READ_BUFF(data_len, sizeof(data_len));
-      uint8_t* tex_data = malloc(data_len);
+      uint8_t* tex_data = DEEPCARS_MALLOC(data_len);
       READ_BUFF(*tex_data, data_len);
 
       if (compression == 0)
          t_set_data_png(t, filltarget + map, tex_data, data_len);
       else
          t_set_data_dds(t, filltarget + map, tex_data, data_len);
-      free(tex_data);
+      DEEPCARS_FREE(tex_data);
    }
 
    rm_push(TEXTURE, t, id);
 
    char* sig = t_get_pretty_signature(t);
    P_LOG("Loaded %s", sig);
-   free(sig);
+   DEEPCARS_FREE(sig);
 
-   free(name);
+   DEEPCARS_FREE(name);
 }
 
 void p_handler_material(uint8_t* data, size_t length)
@@ -366,7 +366,7 @@ void p_handler_material(uint8_t* data, size_t length)
 
    READ_BUFF(id, sizeof(id));
    READ_BUFF(name_len, sizeof(name_len));
-   char* name = malloc(name_len + 1);
+   char* name = DEEPCARS_MALLOC(name_len + 1);
    READ_BUFF(*name, name_len);
    name[name_len] = '\0';
 
@@ -375,20 +375,20 @@ void p_handler_material(uint8_t* data, size_t length)
    material_t* material = mt_create(name, mode);
    READ_BUFF(*material->ambient, 12);
    READ_BUFF(ambient_len, sizeof(ambient_len));
-   ambient = malloc(ambient_len + 1);
+   ambient = DEEPCARS_MALLOC(ambient_len + 1);
    READ_BUFF(*ambient, ambient_len);
    ambient[ambient_len] = '\0';
 
    READ_BUFF(*material->diffuse, 12);
    READ_BUFF(diffuse_len, sizeof(diffuse_len));
-   diffuse = malloc(diffuse_len + 1);
+   diffuse = DEEPCARS_MALLOC(diffuse_len + 1);
    READ_BUFF(*diffuse, diffuse_len);
    diffuse[diffuse_len] = '\0';
 
    READ_BUFF(material->shininess, sizeof(material->shininess));
    READ_BUFF(*material->specular, 12);
    READ_BUFF(specular_len, sizeof(specular_len));
-   specular = malloc(specular_len + 1);
+   specular = DEEPCARS_MALLOC(specular_len + 1);
    READ_BUFF(*specular, specular_len);
    specular[specular_len] = '\0';
 
@@ -396,12 +396,12 @@ void p_handler_material(uint8_t* data, size_t length)
    READ_BUFF(trans, sizeof(trans));
    vec4_fill(material->transparent, trans, trans, trans, 0);
    READ_BUFF(transparent_len, sizeof(transparent_len));
-   transparent = malloc(transparent_len + 1);
+   transparent = DEEPCARS_MALLOC(transparent_len + 1);
    READ_BUFF(*transparent, transparent_len);
    transparent[transparent_len] = '\0';
 
    READ_BUFF(normal_len, sizeof(normal_len));
-   normal = malloc(normal_len + 1);
+   normal = DEEPCARS_MALLOC(normal_len + 1);
    READ_BUFF(*normal, normal_len);
    normal[normal_len] = '\0';
 
@@ -446,11 +446,11 @@ void p_handler_material(uint8_t* data, size_t length)
 
    P_LOG("Material \"%s\" loaded", name);
 
-   free(ambient);
-   free(diffuse);
-   free(specular);
-   free(transparent);
-   free(normal);
+   DEEPCARS_FREE(ambient);
+   DEEPCARS_FREE(diffuse);
+   DEEPCARS_FREE(specular);
+   DEEPCARS_FREE(transparent);
+   DEEPCARS_FREE(normal);
 }
 
 void p_handler_font(uint8_t* data, size_t length)
@@ -465,18 +465,18 @@ void p_handler_font(uint8_t* data, size_t length)
 
    READ_BUFF(id, sizeof(id));
    READ_BUFF(name_len, sizeof(name_len));
-   char* name = malloc(name_len + 1);
+   char* name = DEEPCARS_MALLOC(name_len + 1);
    READ_BUFF(*name, name_len);
    name[name_len] = '\0';
 
    READ_BUFF(info_len, sizeof(info_len));
-   uint8_t* info = malloc(sizeof(uint8_t) * info_len);
+   uint8_t* info = DEEPCARS_MALLOC(sizeof(uint8_t) * info_len);
    READ_BUFF(*info, info_len);
 
    READ_BUFF(id, sizeof(id));
 
    READ_BUFF(shader_len, sizeof(shader_len));
-   char* shader_name = malloc(shader_len + 1);
+   char* shader_name = DEEPCARS_MALLOC(shader_len + 1);
    READ_BUFF(*shader_name, shader_len);
    shader_name[shader_len] = '\0';
 
@@ -486,8 +486,8 @@ void p_handler_font(uint8_t* data, size_t length)
    font_t* f = f_create(name, rm_getn(TEXTURE, tex_name), s_getn_shader(shader_name), info, info_len);
    rm_push(FONT, f, id);
 
-   free(shader_name);
-   free(info);
+   DEEPCARS_FREE(shader_name);
+   DEEPCARS_FREE(info);
 }
 
 // Array of supported chunks
@@ -539,7 +539,7 @@ void p_load(const char* name)
       READ(ch_type);
       READ(ch_crc);
 
-      uint8_t* buffer = malloc(sizeof(uint8_t) * ch_len);
+      uint8_t* buffer = DEEPCARS_MALLOC(sizeof(uint8_t) * ch_len);
       if(fread(buffer, ch_len, 1, f) != 1)
       {
          P_ERROR("Unable to read data from file",0);
@@ -566,7 +566,7 @@ void p_load(const char* name)
       {
          P_ERROR("Unknown chunk type %i", ch_type);
       }
-      free(buffer);
+      DEEPCARS_FREE(buffer);
    }
    fclose(f);
 }

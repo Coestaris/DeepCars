@@ -31,7 +31,7 @@ uint32_t read32(uint8_t** ptr)
 
 font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info, size_t infolen)
 {
-   font_t* f = malloc(sizeof(font_t));
+   font_t* f = DEEPCARS_MALLOC(sizeof(font_t));
    f->name = name;
    f->texture = texture;
    f->shader = shader;

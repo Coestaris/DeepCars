@@ -5,17 +5,12 @@
 #ifndef DEEPCARS_TEXTURE_H
 #define DEEPCARS_TEXTURE_H
 
-#include <malloc.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <memory.h>
-#include <assert.h>
-#include <stdbool.h>
+#include "../coredefs.h"
 
+#include <stdarg.h>
 #include <GL/gl.h>
 
 #include "../../oil/oil.h"
-#include "../structs.h"
 
 // Storing all data required for drawing the texture
 typedef struct _texture

@@ -13,7 +13,7 @@
 
 material_t* mt_create(char* name, uint8_t mode)
 {
-   material_t* material = malloc(sizeof(material_t));
+   material_t* material = DEEPCARS_MALLOC(sizeof(material_t));
    material->name = name;
    material->mode = mode;
 
@@ -40,9 +40,9 @@ void mt_free(material_t* material)
    vec4_free(material->diffuse);
    vec4_free(material->specular);
    vec4_free(material->transparent);
-   MT_LOG("Material \"%s\" freed", material->name);
-   free(material->name);
-   free(material);
+   MT_LOG("Material \"%s\" DEEPCARS_FREEd", material->name);
+   DEEPCARS_FREE(material->name);
+   DEEPCARS_FREE(material);
 }
 
 struct _cache_node{
@@ -50,13 +50,13 @@ struct _cache_node{
    texture_t* texture;
 };
 
-list_t* cache;
+list_t* material_cache;
 
 texture_t* mt_get_from_cache(vec4 color)
 {
-   for(size_t i = 0; i < cache->count; i++)
+   for(size_t i = 0; i < material_cache->count; i++)
    {
-      struct _cache_node* node = cache->collection[i];
+      struct _cache_node* node = material_cache->collection[i];
       if(fabsf(node->color[0] - color[0]) < .5e-3 &&
          fabsf(node->color[1] - color[1]) < .5e-3 &&
          fabsf(node->color[2] - color[2]) < .5e-3)
@@ -69,12 +69,12 @@ texture_t* mt_get_from_cache(vec4 color)
 
 void mt_cache(texture_t* tex, vec4 color)
 {
-   struct _cache_node* node = malloc(sizeof(struct _cache_node));
+   struct _cache_node* node = DEEPCARS_MALLOC(sizeof(struct _cache_node));
    node->color[0] = color[0];
    node->color[1] = color[1];
    node->color[2] = color[2];
    node->texture = tex;
-   list_push(cache, node);
+   list_push(material_cache, node);
 }
 
 texture_t* mt_to_texture(char* mat_name, const char* field, vec4 color)
@@ -82,7 +82,7 @@ texture_t* mt_to_texture(char* mat_name, const char* field, vec4 color)
    texture_t* cached = mt_get_from_cache(color);
    if(cached) return cached;
 
-   char* name = malloc(50);
+   char* name = DEEPCARS_MALLOC(50);
    snprintf(name, 50, "__generated_mt_%s_%s_%.1f_%.1f_%.1f",
             mat_name, field, color[0], color[1], color[2]);
    texture_t* t = t_create(name);
@@ -148,11 +148,11 @@ void mt_build(material_t* material)
 
 void mt_init(void)
 {
-   cache = list_create();
+   material_cache = list_create();
 }
 
-void mt_fin(void)
+void mt_release(void)
 {
-   list_free_elements(cache);
-   list_free(cache);
+   list_free_elements(material_cache);
+   list_free(material_cache);
 }

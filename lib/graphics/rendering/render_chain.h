@@ -5,10 +5,10 @@
 #ifndef DEEPCARS_RENDER_CHAIN_H
 #define DEEPCARS_RENDER_CHAIN_H
 
-#include <stdbool.h>
+#include "../../coredefs.h"
 
 #include "render_stage.h"
-#include "../../structs.h"
+#include "../../coredefs.h"
 #include "../../object.h"
 #include "../../resources/shader.h"
 #include "../../resources/shm.h"

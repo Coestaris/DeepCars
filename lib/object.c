@@ -21,8 +21,8 @@ void o_free(object_t* object)
    if (object->destroy_func)
       object->destroy_func(object);
 
-   free(object->draw_info);
-   free(object);
+   DEEPCARS_FREE(object->draw_info);
+   DEEPCARS_FREE(object);
 }
 
 //
@@ -30,10 +30,10 @@ void o_free(object_t* object)
 //
 object_t* o_clone(object_t* object)
 {
-   object_t* new_object = malloc(sizeof(object_t));
+   object_t* new_object = DEEPCARS_MALLOC(sizeof(object_t));
    memcpy(new_object, object, sizeof(object_t));
 
-   new_object->draw_info = malloc(sizeof(draw_info_t));
+   new_object->draw_info = DEEPCARS_MALLOC(sizeof(draw_info_t));
    memcpy(new_object->draw_info, object->draw_info, sizeof(draw_info_t));
 
    return new_object;
@@ -44,7 +44,7 @@ object_t* o_clone(object_t* object)
 //
 object_t* o_create()
 {
-   object_t* object = malloc(sizeof(object_t));
+   object_t* object = DEEPCARS_MALLOC(sizeof(object_t));
    object->position = vec3f(0, 0, 0);
    object->rotation = vec3f(0, 0, 0);
    object->scale = vec3f(1, 1, 1);
@@ -57,7 +57,7 @@ object_t* o_create()
 
    //o_dm_colored(object, COLOR_WHITE);
 
-   object->draw_info = malloc(sizeof(draw_info_t));
+   object->draw_info = DEEPCARS_MALLOC(sizeof(draw_info_t));
    object->draw_info->model = NULL;
    object->draw_info->draw_normals = false;
    object->draw_info->shadows = true;
@@ -66,59 +66,3 @@ object_t* o_create()
    object->draw_info->drawable = false;
    return object;
 }
-
-/*
-//
-// o_dm_colored()
-//
-void o_dm_colored(object_t* object, vec4 color)
-{
-   if(object->draw_info) free(object->draw_info);
-
-   object->draw_mode = DM_COLORED;
-   object->draw_info = malloc(sizeof(draw_info_colored_t));
-   draw_info_colored_t* info = (draw_info_colored_t*)object->draw_info;
-   info->color = color;
-}
-
-//
-// o_dm_colored()
-//
-void o_dm_colored_shaded(object_t* object, vec4 color, float ambient)
-{
-   if(object->draw_info) free(object->draw_info);
-
-   object->draw_mode = DM_COLORED_SHADED;
-   object->draw_info = malloc(sizeof(draw_info_colored_shaded_t));
-   draw_info_colored_shaded_t* info = (draw_info_colored_shaded_t*)object->draw_info;
-   info->color = color;
-   info->ambient = ambient;
-}
-
-//
-// o_dm_textured()
-//
-void o_dm_textured(object_t* object, texture_t* texture)
-{
-   if(object->draw_info) free(object->draw_info);
-
-   object->draw_mode = DM_TEXTURED;
-   object->draw_info = malloc(sizeof(draw_info_textured_t));
-   draw_info_textured_t* info = (draw_info_textured_t*)object->draw_info;
-   info->texture = texture;
-}
-
-//
-// o_dm_textured_shaded()
-//
-void o_dm_textured_shaded(object_t* object, texture_t* diffuse, texture_t* specular, texture_t* emit)
-{
-   if(object->draw_info) free(object->draw_info);
-
-   object->draw_mode = DM_TEXTURED_SHADED;
-   object->draw_info = malloc(sizeof(draw_info_textured_shaded_t));
-   draw_info_textured_shaded_t* info = (draw_info_textured_shaded_t*)object->draw_info;
-   info->diffuse = diffuse;
-   info->specular = specular;
-   info->emit = emit;
-}*/

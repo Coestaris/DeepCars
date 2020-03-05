@@ -5,6 +5,8 @@
 #ifndef DEEPCARS_LIGHT_H
 #define DEEPCARS_LIGHT_H
 
+#include "../coredefs.h"
+
 #include "gmath.h"
 #include "camera.h"
 

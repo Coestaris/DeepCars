@@ -88,16 +88,16 @@ void app_fin()
    APP_LOG("Closing....",0);
 
    u_clear_objects(false);
-   u_free();
+   u_release();
 
-   mt_fin();
-   scm_free();
-   gr_free();
+   mt_release();
+   scm_release();
+   gr_release();
 
    free_stages();
 
-   rm_free(true, true, true, true);
-   s_free(true);
+   rm_release(true, true, true, true);
+   s_release(true);
 
    w_destroy(win);
 }

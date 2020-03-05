@@ -5,6 +5,8 @@
 #ifndef DEEPCARS_FONT_H
 #define DEEPCARS_FONT_H
 
+#include "../coredefs.h"
+
 #include "shader.h"
 #include "../graphics/win.h"
 

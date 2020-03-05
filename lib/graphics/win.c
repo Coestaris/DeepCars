@@ -6,7 +6,7 @@
 #pragma implementation "win.h"
 #endif
 #include "win.h"
-#include "../structs.h"
+#include "../coredefs.h"
 
 #define W_LOG(format, ...) DC_LOG("win.c", format, __VA_ARGS__)
 #define W_ERROR(format, ...) DC_ERROR("win.c", format, __VA_ARGS__)
@@ -78,7 +78,7 @@ void w_set_glx_context_version(int major, int minor, int flags)
 win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t win_y,
                      const char* win_caption, bool verbose, bool use_double_buffer)
 {
-   win_info_t* info = malloc(sizeof(win_info_t));
+   win_info_t* info = DEEPCARS_MALLOC(sizeof(win_info_t));
    info->w = win_w;
    info->h = win_h;
    info->caption = win_caption;
@@ -323,7 +323,7 @@ void w_destroy(win_info_t* w)
    XFreeColormap(w->display, w->color_map);
    XCloseDisplay(w->display);
 
-   free(w);
+   DEEPCARS_FREE(w);
 }
 
 //

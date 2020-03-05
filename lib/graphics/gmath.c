@@ -16,7 +16,7 @@
 //
 vec4 cvec4(float_t x, float_t y, float_t z, float_t l)
 {
-   vec4 a = malloc(sizeof(float_t) * 4);
+   vec4 a = DEEPCARS_MALLOC(sizeof(float_t) * 4);
    vec4_fill(a, x, y, z, l);
    return a;
 }
@@ -37,7 +37,7 @@ inline void vec4_fill(vec4 a, float_t x, float_t y, float_t z, float_t l)
 //
 mat4 cmat4()
 {
-   mat4 m = malloc(sizeof(float_t) * 4 * 4);
+   mat4 m = DEEPCARS_MALLOC(sizeof(float_t) * 4 * 4);
    memset(m, 0, sizeof(float_t) * 4 * 4);
    return m;
 }
@@ -47,7 +47,7 @@ mat4 cmat4()
 //
 inline void vec4_free(vec4 vec)
 {
-   free(vec);
+   DEEPCARS_FREE(vec);
 }
 
 //
@@ -55,7 +55,7 @@ inline void vec4_free(vec4 vec)
 //
 inline void mat4_free(mat4 mat)
 {
-   free(mat);
+   DEEPCARS_FREE(mat);
 }
 
 inline void mat4_cpy(mat4 dest, mat4 src)

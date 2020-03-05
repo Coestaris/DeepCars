@@ -12,7 +12,7 @@
 
 evaluator_t* ev_create(size_t population_size, genome_t* orig, evaluate_func_t evaluate_func)
 {
-   evaluator_t* evaluator = malloc(sizeof(evaluator_t));
+   evaluator_t* evaluator = DEEPCARS_MALLOC(sizeof(evaluator_t));
    evaluator->evaluate_func = evaluate_func;
    evaluator->genomes = list_create();
    evaluator->population_size = population_size;
@@ -21,10 +21,10 @@ evaluator_t* ev_create(size_t population_size, genome_t* orig, evaluate_func_t e
       for(size_t i = 0; i < population_size; i++)
          list_push(evaluator->genomes, gn_clone(orig));
    }
-   evaluator->species = malloc(sizeof(struct _species*) * population_size);
+   evaluator->species = DEEPCARS_MALLOC(sizeof(struct _species*) * population_size);
    for(size_t i = 0; i < population_size; i++)
    {
-      evaluator->species[i] = malloc(sizeof(species_t));
+      evaluator->species[i] = DEEPCARS_MALLOC(sizeof(species_t));
       evaluator->species[i]->mascot = NULL;
       evaluator->species[i]->members = list_create();
       evaluator->species[i]->adjusted_score = 0;
@@ -45,11 +45,11 @@ void ev_free(evaluator_t* evaluator)
    {
       species_t* species = evaluator->species[i];
       list_free(species->members);
-      free(species);
+      DEEPCARS_FREE(species);
    }
    list_free(evaluator->new_genomes);
-   free(evaluator->species);
-   free(evaluator);
+   DEEPCARS_FREE(evaluator->species);
+   DEEPCARS_FREE(evaluator);
 }
 
 const float c1 = 1;
@@ -214,7 +214,7 @@ void ev_evaluate(evaluator_t* evaluator)
       list_push(evaluator->new_genomes, child);
    }
 
-   // now we can free all old genomes
+   // now we can DEEPCARS_FREE all old genomes
    for(size_t i = 0; i < evaluator->genomes->count; i++)
       gn_free(evaluator->genomes->collection[i]);
    evaluator->genomes->count = 0;

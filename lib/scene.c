@@ -15,7 +15,7 @@
 //
 scene_t* sc_create(uint32_t id)
 {
-   scene_t* scene = malloc(sizeof(scene_t));
+   scene_t* scene = DEEPCARS_MALLOC(sizeof(scene_t));
    scene->id = id;
    scene->shadow_light = NULL;
    scene->backcolor = NULL;
@@ -42,5 +42,5 @@ void sc_free(scene_t* scene)
 
    list_free(scene->lights);
    list_free(scene->startup_objects);
-   free(scene);
+   DEEPCARS_FREE(scene);
 }

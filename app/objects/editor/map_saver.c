@@ -83,7 +83,7 @@ void map_load(list_t* walls, list_t* objects, char* file, vec2* prev_point, bool
 
    for(size_t i = 0; i < c; i++)
    {
-      wall_t* wall = malloc(sizeof(wall_t));
+      wall_t* wall = DEEPCARS_MALLOC(sizeof(wall_t));
       if(fread(wall, sizeof(wall_t), 1, f) != 1)
          APP_ERROR("Unable to read wall information (5) from file",0);
 
@@ -95,7 +95,7 @@ void map_load(list_t* walls, list_t* objects, char* file, vec2* prev_point, bool
 
    for(size_t i = 0; i < c; i++)
    {
-      map_object_t* object = malloc(sizeof(map_object_t));
+      map_object_t* object = DEEPCARS_MALLOC(sizeof(map_object_t));
       if(fread(object, sizeof(map_object_t), 1, f) != 1)
          APP_ERROR("Unable to read object information (7) from file",0);
 

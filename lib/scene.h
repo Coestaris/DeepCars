@@ -5,9 +5,8 @@
 #ifndef DEEPCARS_SCENE_H
 #define DEEPCARS_SCENE_H
 
-#include <stdint.h>
+#include "coredefs.h"
 
-#include "structs.h"
 #include "graphics/camera.h"
 #include "graphics/rendering/graphics.h"
 #include "graphics/light.h"

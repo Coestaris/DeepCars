@@ -12,7 +12,7 @@ texture_t* generate_noise(size_t n)
 {
    size_t size = n * n;
 
-   float* floats = malloc(sizeof(float) * size * 3);
+   float* floats = DEEPCARS_MALLOC(sizeof(float) * size * 3);
 
    for (size_t i = 0; i < size - 1; i++)
    {
@@ -39,7 +39,7 @@ texture_t* generate_noise(size_t n)
    t->type = GL_TEXTURE_2D;
    rm_push(TEXTURE, t, -1);
 
-   free(floats);
+   DEEPCARS_FREE(floats);
 
    return t;
 }
@@ -51,7 +51,7 @@ float lerp(float a, float b, float f)
 
 vec4* generate_kernel(size_t n)
 {
-   vec4* vectors = malloc(sizeof(vec4) * n);
+   vec4* vectors = DEEPCARS_MALLOC(sizeof(vec4) * n);
    for (size_t i = 0; i < n; i++)
    {
       vec4 sample = cvec4(

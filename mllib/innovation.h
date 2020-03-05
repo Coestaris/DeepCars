@@ -6,7 +6,7 @@
 #define DEEPCARS_MLLIB_INNOVATION_H
 
 #include <stddef.h>
-#include "../lib/structs.h"
+#include "../lib/coredefs.h"
 
 typedef size_t innovation_t;
 

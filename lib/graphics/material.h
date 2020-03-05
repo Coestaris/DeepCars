@@ -5,6 +5,8 @@
 #ifndef DEEPCARS_MATERIAL_H
 #define DEEPCARS_MATERIAL_H
 
+#include "../coredefs.h"
+
 #include "gmath.h"
 #include "../resources/texture.h"
 
@@ -46,7 +48,7 @@ typedef struct _material
 } material_t;
 
 void mt_init(void);
-void mt_fin(void);
+void mt_release(void);
 
 material_t* mt_create(char* name, uint8_t mode);
 void mt_free(material_t* material);

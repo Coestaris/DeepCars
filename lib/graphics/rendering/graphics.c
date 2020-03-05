@@ -114,7 +114,7 @@ inline void gr_render_vao(GLuint vao)
    //GL_PCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
 
-void gr_free(void)
+void gr_release(void)
 {
    vec4_free(COLOR_WHITE);
    vec4_free(COLOR_SILVER);
@@ -150,7 +150,7 @@ void gr_draw_model(model_t* model)
    GL_PCALL(glBindVertexArray(0))
 }
 
-inline mat4 gr_transform(vec3f_t pos, vec3f_t scale, vec3f_t rot)
+inline mat4 gr_transform(vec3 pos, vec3 scale, vec3 rot)
 {
    mat4_identity(model_mat);
    mat4_translate(model_mat, (float) pos.x, (float) pos.y, (float) pos.z);
@@ -420,7 +420,7 @@ void gr_draw_line(vec2 p1, vec2 p2, float width, vec4 color,
 
 sprite_renderer_t* gr_create_sprite_renderer(shader_t* shader)
 {
-   sprite_renderer_t* sprite_renderer = malloc(sizeof(sprite_renderer_t));
+   sprite_renderer_t* sprite_renderer = DEEPCARS_MALLOC(sizeof(sprite_renderer_t));
    sprite_renderer->shader = shader;
    sprite_renderer->bind_func = NULL;
 
@@ -453,7 +453,7 @@ sprite_renderer_t* gr_create_sprite_renderer(shader_t* shader)
 
 primitive_renderer_t* gr_create_primitive_renderer(shader_t* shader)
 {
-   primitive_renderer_t* primitive_renderer = malloc(sizeof(primitive_renderer_t));
+   primitive_renderer_t* primitive_renderer = DEEPCARS_MALLOC(sizeof(primitive_renderer_t));
    primitive_renderer->shader = shader;
    primitive_renderer->bind_line_func = NULL;
 

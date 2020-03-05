@@ -41,7 +41,7 @@ void s_push(shader_t* shader, int id)
       S_ERROR("Shader with same id already exists",0);
    }
 
-   shm_node_t* node = malloc(sizeof(shm_node_t));
+   shm_node_t* node = DEEPCARS_MALLOC(sizeof(shm_node_t));
    node->shader = shader;
    node->id = id;
 
@@ -83,11 +83,11 @@ shader_t* s_get_shader(int id)
 }
 
 //
-// s_free
+// s_release
 //
-void s_free(bool free_shaders)
+void s_release(bool DEEPCARS_FREE_shaders)
 {
-   if(free_shaders)
+   if(DEEPCARS_FREE_shaders)
    {
       for (size_t i = 0; i < shader_nodes->count; i++)
          sh_free(((shm_node_t*) shader_nodes->collection[i])->shader);

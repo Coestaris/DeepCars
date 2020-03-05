@@ -7,15 +7,13 @@
 
 #define GL_GLEXT_PROTOTYPES
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "../coredefs.h"
+
 #include <unistd.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <GL/gl.h>
 #include <GL/glx.h>
-#include <stdbool.h>
 
 #include "gmath.h"
 #include "camera.h"

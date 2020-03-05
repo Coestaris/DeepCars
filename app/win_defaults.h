@@ -5,6 +5,7 @@
 #ifndef DEEPCARS_WIN_DEFAULTS_H
 #define DEEPCARS_WIN_DEFAULTS_H
 
+#include "../lib/coredefs.h"
 #include "../lib/graphics/win.h"
 
 #define APP_LOG(format, ...) DC_LOG("app", format, __VA_ARGS__)

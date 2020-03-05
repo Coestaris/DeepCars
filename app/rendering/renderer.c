@@ -140,15 +140,12 @@ inline void switch_ssao(void)
 {
    render_stage_t* ssao_blur_stage = default_rc->stages->collection[STAGE_SSAO_BLUR];
    if(ssao_state)
-   {
       ssao_texture = ssao_dummy_texture;
-   }
    else
-   {
       ssao_texture = ssao_blur_stage->color0_tex;
-   }
 
    ssao_state = !ssao_state;
+   APP_LOG("SSAO: %s", ssao_state ? "ON" : "OFF");
 }
 
 inline void switch_stages(void)
@@ -514,7 +511,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer->bind_func = bind_g_buffer;
    g_buffer->unbind_func = unbind_g_buffer;
    g_buffer->setup_obj_func = setup_object_g_buffer;
-   geometry_shader_data_t* g_buffer_data = (g_buffer->data = malloc(sizeof(geometry_shader_data_t)));
+   geometry_shader_data_t* g_buffer_data = (g_buffer->data = DEEPCARS_MALLOC(sizeof(geometry_shader_data_t)));
    g_buffer_data->camera = camera;
    g_buffer_data->buffmat = cmat4();
 
@@ -562,7 +559,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    mat4_cpy(skybox->proj, proj);
    mat4_identity(skybox->view);
    skybox->vao = rc_get_cube_vao();
-   geometry_shader_data_t* skybox_data = (skybox->data = malloc(sizeof(geometry_shader_data_t)));
+   geometry_shader_data_t* skybox_data = (skybox->data = DEEPCARS_MALLOC(sizeof(geometry_shader_data_t)));
    skybox_data->buffmat = cmat4();
    skybox_data->camera = camera;
 
@@ -592,7 +589,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shading->unbind_func = unbind_shading;
    shading->vao = rc_get_quad_vao();
    mat4_cpy(shading->proj, proj);
-   geometry_shader_data_t* shading_data = (shading->data = malloc(sizeof(geometry_shader_data_t)));
+   geometry_shader_data_t* shading_data = (shading->data = DEEPCARS_MALLOC(sizeof(geometry_shader_data_t)));
    shading_data->camera = camera;
    shading_data->buffmat = cmat4();
 
@@ -649,8 +646,8 @@ void free_geometry_shader_data(render_chain_t* render_chain, size_t index)
 
 void free_stages(void)
 {
-   free(default_primitive_renderer);
-   free(default_sprite_renderer);
+   DEEPCARS_FREE(default_primitive_renderer);
+   DEEPCARS_FREE(default_sprite_renderer);
 
    free_geometry_shader_data(default_rc, STAGE_G_BUFFER);
    rs_free(default_rc->stages->collection[STAGE_G_BUFFER]);
@@ -678,5 +675,5 @@ void free_stages(void)
 
    for(size_t i = 0; i < KERNEL_SIZE; i++)
       vec4_free(ssao_kernel[i]);
-   free(ssao_kernel);
+   DEEPCARS_FREE(ssao_kernel);
 }

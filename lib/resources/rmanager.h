@@ -5,8 +5,7 @@
 #ifndef DEEPCARS_RMANAGER_H
 #define DEEPCARS_RMANAGER_H
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "../coredefs.h"
 
 typedef enum _resource_type {
    TEXTURE,
@@ -28,6 +27,6 @@ void* rm_getn_try(resource_type_t type, const char* name);
 
 void rm_push(resource_type_t type, void* data, int32_t id);
 
-void rm_free(bool free_tex, bool free_model, bool free_mat, bool free_font);
+void rm_release(bool DEEPCARS_FREE_tex, bool DEEPCARS_FREE_model, bool DEEPCARS_FREE_mat, bool DEEPCARS_FREE_font);
 
 #endif //DEEPCARS_RMANAGER_H

@@ -9,12 +9,12 @@
 
 #include <GL/gl.h>
 
+#include "render_stage.h"
 #include "../gmath.h"
 #include "../../resources/model.h"
 #include "../../resources/shader.h"
 #include "../../resources/shm.h"
 #include "../../object.h"
-#include "render_stage.h"
 #include "../../resources/font.h"
 
 #define MAX_DEPTH 5
@@ -44,9 +44,9 @@ primitive_renderer_t* gr_create_primitive_renderer(shader_t* shader);
 void gr_fill(vec4 color);
 
 void gr_init(void);
-void gr_free(void);
+void gr_release(void);
 
-mat4 gr_transform(vec3f_t pos, vec3f_t scale, vec3f_t rot);
+mat4 gr_transform(vec3 pos, vec3 scale, vec3 rot);
 
 void gr_draw_string(font_t* f, vec2 position, vec2 scale, char* string, void* data);
 void gr_draw_sprite(texture_t* texture, vec2 position, vec2 scale, vec2 center, float angle,

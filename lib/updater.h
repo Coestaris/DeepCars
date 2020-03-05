@@ -5,10 +5,10 @@
 #ifndef DEEPCARS_UPDATER_H
 #define DEEPCARS_UPDATER_H
 
-#include <stddef.h>
+#include "coredefs.h"
+
 #include <sys/time.h>
 #include <zconf.h>
-#include <stdio.h>
 #include <X11/Xlib.h>
 
 #include "graphics/win.h"
@@ -47,7 +47,7 @@ void u_start_loop(win_info_t* info);
 void u_clear_objects(bool free);
 
 // Finalize all used resources
-void u_free();
+void u_release();
 
 // Add specified object to global objects list
 void u_push_object(object_t* object);

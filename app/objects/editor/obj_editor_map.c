@@ -143,7 +143,7 @@ void calculate_start_points(vec2 pos, float angle, vec2* p1, vec2* p2)
 void draw_line_arrow(vec2 p1, vec2 p2, float l, float w, float h, vec4 color)
 {
    //calculate direction
-   vec2 d = vec2_normalize(vec2f(p2.x - p1.x, p2.y - p1.y));
+   vec2 d = vec2_normalize(vec2fp(p1, p2));
 
    //calculate normal
    vec2 n = vec2_normal(d);
@@ -173,10 +173,10 @@ void update_editor_map(object_t* this)
             gr_pq_push_line(1, object->p1, object->p2, 4, COLOR_BLACK, default_primitive_renderer, NULL);
             gr_pq_push_sprite(1, object->type == START ? texture_start : texture_fin,
                   vec2f(object->p1.x, object->p1.y - texture_start->height),
-                  vec2f(1, 1), vec2f(0, 0), 0, default_sprite_renderer, &trans);
+                  vec2u, vec2e, 0, default_sprite_renderer, &trans);
             gr_pq_push_sprite(1, object->type == START ? texture_start : texture_fin,
                   vec2f(object->p2.x, object->p2.y - texture_start->height),
-                  vec2f(1, 1), vec2f(0, 0), 0, default_sprite_renderer, &trans);
+                  vec2u, vec2e, 0, default_sprite_renderer, &trans);
             if(object->type == START)
                draw_line_arrow(object->p1, object->p2, 40, 4, 10, COLOR_GREEN);
             break;
@@ -219,9 +219,9 @@ void update_editor_map(object_t* this)
       gr_pq_push_line(1, p1, p2, 4, COLOR_BLACK, default_primitive_renderer, NULL);
 
       gr_pq_push_sprite(1, toolbar_state == START ? texture_start : texture_fin, vec2f(p1.x, p1.y - texture_start->height),
-            vec2f(1, 1), vec2f(0, 0), 0, default_sprite_renderer, &trans);
+            vec2u, vec2e, 0, default_sprite_renderer, &trans);
       gr_pq_push_sprite(1, toolbar_state == START ? texture_start : texture_fin, vec2f(p2.x, p2.y - texture_start->height),
-            vec2f(1, 1), vec2f(0, 0), 0, default_sprite_renderer, &trans);
+            vec2u, vec2e, 0, default_sprite_renderer, &trans);
       if(toolbar_state == START)
          draw_line_arrow(p1, p2, 40, 4, 10, COLOR_GREEN);
    }
@@ -234,7 +234,7 @@ void mouse_editor_map(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
    {
       if(first_point_set)
       {
-         struct _wall* wall = malloc(sizeof(struct _wall));
+         struct _wall* wall = DEEPCARS_MALLOC(sizeof(struct _wall));
          wall->p1 = prev_point;
          wall->p2 = pos;
          list_push(walls, wall);
@@ -244,7 +244,7 @@ void mouse_editor_map(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
    }
    else if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && (toolbar_state == START || toolbar_state == FIN))
    {
-      struct _map_object* object = malloc(sizeof(struct _map_object));
+      struct _map_object* object = DEEPCARS_MALLOC(sizeof(struct _map_object));
       object->rotation = rotation;
       object->type = toolbar_state;
       object->pos = pos;

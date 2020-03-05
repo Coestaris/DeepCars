@@ -47,7 +47,7 @@ void rs_set_depth_options(attachment_options_t* ao)
 
 render_stage_t* rs_create(const char* name, render_mode_t render_mode, shader_t* shader)
 {
-   render_stage_t* rs = malloc(sizeof(render_stage_t));
+   render_stage_t* rs = DEEPCARS_MALLOC(sizeof(render_stage_t));
    rs->shader = shader;
    rs->render_mode = render_mode;
    rs->name = name;
@@ -100,8 +100,8 @@ void rs_free(render_stage_t* rs)
    mat4_free(rs->proj);
    mat4_free(rs->view);
 
-   if(rs->data) free(rs->data);
-   free(rs);
+   if(rs->data) DEEPCARS_FREE(rs->data);
+   DEEPCARS_FREE(rs);
 }
 
 texture_t* rs_setup_tex(GLenum attachment, attachment_options_t options, GLuint fbo, const char* target)
@@ -132,7 +132,7 @@ texture_t* rs_setup_tex(GLenum attachment, attachment_options_t options, GLuint 
    GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, options.tex_target, id, 0));
    GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 
-   char* name = malloc(30);
+   char* name = DEEPCARS_MALLOC(30);
    snprintf(name, 30, "__generated_fb%i_%s", fbo, target);
    texture_t* t = t_create(name);
    t->type = GL_TEXTURE_2D;

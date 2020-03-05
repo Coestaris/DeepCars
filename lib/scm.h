@@ -5,6 +5,8 @@
 #ifndef DEEPCARS_SCM_H
 #define DEEPCARS_SCM_H
 
+#include "coredefs.h"
+
 #include "scene.h"
 #include "updater.h"
 
@@ -21,7 +23,7 @@ void scm_push_scene(scene_t* scene);
 void scm_load_scene(uint32_t id, bool free);
 
 // Free all used by scene manager resources
-void scm_free(void);
+void scm_release(void);
 
 // Get loaded scene
 scene_t* scm_get_current(void);

@@ -137,15 +137,15 @@ void create_grid(size_t size)
 void draw(texture_t* texture, vec2 position)
 {
    static float a = 0;
-   gr_pq_push_sprite(3, texture, position, vec2f(1, 1),
-                     vec2f(0, 0), 0, default_sprite_renderer, &a);
+   gr_pq_push_sprite(3, texture, position, vec2u,
+                     vec2e, 0, default_sprite_renderer, &a);
 }
 
 void draw_depth(size_t depth, texture_t* texture, vec2 position)
 {
    static float a = 0;
-   gr_pq_push_sprite(depth, texture, position, vec2f(1, 1),
-                     vec2f(0, 0), 0, default_sprite_renderer, &a);
+   gr_pq_push_sprite(depth, texture, position, vec2u,
+                     vec2e, 0, default_sprite_renderer, &a);
 }
 
 void draw_centered(texture_t* texture, vec2 position)
@@ -153,8 +153,8 @@ void draw_centered(texture_t* texture, vec2 position)
    static float a = 0;
    gr_pq_push_sprite(3, texture,
          vec2f(position.x - (texture->width - toolbar_size) / 2.0, position.y - (texture->height - toolbar_size) / 2.0),
-         vec2f(1, 1),
-         vec2f(0, 0), 0, default_sprite_renderer, &a);
+         vec2u,
+         vec2e, 0, default_sprite_renderer, &a);
 }
 
 
@@ -172,8 +172,8 @@ void update_editor(object_t* this)
    {
       editor_p += 0.03f;
       gr_pq_push_sprite(4, editor_black_texture,
-                        vec2f(0, 0),
-                        vec2f(default_win->w,default_win->h), vec2f(0, 0), 0, default_sprite_renderer, &editor_p);
+                        vec2e,
+                        vec2f(default_win->w,default_win->h), vec2e, 0, default_sprite_renderer, &editor_p);
    }
 
    vec2 pos = u_get_mouse_pos();
@@ -426,7 +426,7 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
          if(fn)
          {
             map_save(walls, map_objects, fn, prev_point, first_point_set);
-            free(fn);
+            DEEPCARS_FREE(fn);
          }
       }
       else if(CHECK_SIZE(tab_file_save_pos, tab_file_selected))
@@ -435,7 +435,7 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
          if(fn)
          {
             map_load(walls, map_objects, fn, &prev_point, &first_point_set);
-            free(fn);
+            DEEPCARS_FREE(fn);
          }
       }
    }

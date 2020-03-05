@@ -15,7 +15,7 @@
 //
 camera_t* c_create(vec4 position, vec4 up)
 {
-   camera_t* camera = malloc(sizeof(camera_t));
+   camera_t* camera = DEEPCARS_MALLOC(sizeof(camera_t));
    camera->position = position;
    camera->up = up;
    camera->direction = cvec4(0, 0, 0, 0);
@@ -32,9 +32,9 @@ camera_t* c_create(vec4 position, vec4 up)
 }
 
 //
-// c_free()
+// c_DEEPCARS_FREE()
 //
-void c_free(camera_t* camera)
+void c_DEEPCARS_FREE(camera_t* camera)
 {
    if (camera->position)
       vec4_free(camera->position);
@@ -49,7 +49,7 @@ void c_free(camera_t* camera)
    mat4_free(camera->_component_1);
    mat4_free(camera->_component_2);
 
-   free(camera);
+   DEEPCARS_FREE(camera);
 }
 
 //

@@ -31,7 +31,7 @@ bool cmp_vectors(vec4 p1, vec4 p2, float dist)
    return vec4_dist(p1, p2) < dist;
 }
 
-size_t find_vector(model_t* m, size_t* counter, bool normal, vec4 to_find)
+size_t find_vector(model_t* m, size_t* counter, bool normal, vec4 to_find, float min_dist)
 {
    vec4* array = normal ? m->normals : m->tex_coords;
    size_t len = normal ? m->model_len->normals_count : m->model_len->tex_coords_count;
@@ -39,7 +39,7 @@ size_t find_vector(model_t* m, size_t* counter, bool normal, vec4 to_find)
    int64_t index = -1;
    for(size_t i = 0; i < len; i++)
    {
-      if(cmp_vectors(array[i], to_find, MIN_DIST / 2))
+      if(cmp_vectors(array[i], to_find, min_dist))
       {
          //vec4_free(to_find);
          index = i + 1;
@@ -66,7 +66,7 @@ model_face_t* alloc_face(
       size_t p1id, size_t p2id, size_t p3id, size_t p4id,
       vec4 normal)
 {
-   model_face_t* f = malloc(sizeof(model_face_t));
+   model_face_t* f = DEEPCARS_MALLOC(sizeof(model_face_t));
    f->count = 4;
 
    f->vert_id[0] = p1id;
@@ -74,12 +74,12 @@ model_face_t* alloc_face(
    f->vert_id[2] = p3id;
    f->vert_id[3] = p4id;
 
-   size_t normal_index = find_vector(m, normal_counter, true, normal);
+   size_t normal_index = find_vector(m, normal_counter, true, normal, MIN_DIST_FIND_NORMAL);
 
-   size_t t1_index = find_vector(m, tex_counter, false, t1);
-   size_t t2_index = find_vector(m, tex_counter, false, t2);
-   size_t t3_index = find_vector(m, tex_counter, false, t3);
-   size_t t4_index = find_vector(m, tex_counter, false, t4);
+   size_t t1_index = find_vector(m, tex_counter, false, t1, MIN_DIST_FIND_TEXCOORD);
+   size_t t2_index = find_vector(m, tex_counter, false, t2, MIN_DIST_FIND_TEXCOORD);
+   size_t t3_index = find_vector(m, tex_counter, false, t3, MIN_DIST_FIND_TEXCOORD);
+   size_t t4_index = find_vector(m, tex_counter, false, t4, MIN_DIST_FIND_TEXCOORD);
 
    f->normal_id[0] = normal_index;
    f->normal_id[1] = normal_index;
@@ -97,7 +97,7 @@ model_face_t* alloc_face(
 struct _normal create_normal(vec2 p1, vec2 p2)
 {
    struct _normal n;
-   n.d = vec2f(p2.x - p1.x, p2.y - p1.y);
+   n.d = vec2fp(p1, p2);
    n.n = vec2_normal(n.d);
    n.p1 = p1;
    n.p2 = p2;
@@ -119,12 +119,12 @@ bool check_intersection(double ray_x1, double ray_y1, double ray_x2, double ray_
 
    if ((fabs(r_dx)) < GET_INTERSECTION_COMP) // Vertical vector
    {
-      double min_sx = min(seg1.x, seg2.x);
-      double min_sy = min(seg1.y, seg2.y);
-      double min_ry = min(ray_y1, ray_y2);
-      double max_sx = max(seg1.x, seg2.x);
-      double max_sy = max(seg1.y, seg2.y);
-      double max_ry = max(ray_y1, ray_y2);
+      double min_sx = fmin(seg1.x, seg2.x);
+      double min_sy = fmin(seg1.y, seg2.y);
+      double min_ry = fmin(ray_y1, ray_y2);
+      double max_sx = fmax(seg1.x, seg2.x);
+      double max_sy = fmax(seg1.y, seg2.y);
+      double max_ry = fmax(ray_y1, ray_y2);
 
       if (fabs(s_dx) < GET_INTERSECTION_COMP) return false; // Parallel
       else if(fabs(s_dy) < GET_INTERSECTION_COMP)
@@ -139,12 +139,12 @@ bool check_intersection(double ray_x1, double ray_y1, double ray_x2, double ray_
 
    if ((fabs(r_dy)) < GET_INTERSECTION_COMP) // Horizontal vector
    {
-      double min_sx = min(seg1.x, seg2.x);
-      double min_sy = min(seg1.y, seg2.y);
-      double min_rx = min(ray_x1, ray_x2);
-      double max_sx = max(seg1.x, seg2.x);
-      double max_sy = max(seg1.y, seg2.y);
-      double max_rx = max(ray_x1, ray_x2);
+      double min_sx = fmin(seg1.x, seg2.x);
+      double min_sy = fmin(seg1.y, seg2.y);
+      double min_rx = fmin(ray_x1, ray_x2);
+      double max_sx = fmax(seg1.x, seg2.x);
+      double max_sy = fmax(seg1.y, seg2.y);
+      double max_rx = fmax(ray_x1, ray_x2);
 
       if (fabs(s_dy) < GET_INTERSECTION_COMP) return false; // Parallel
       else if(fabs(s_dx) < GET_INTERSECTION_COMP)
@@ -192,7 +192,7 @@ void push_height_rec(
       model_t* m, size_t* i, size_t* normal_counter, size_t* tex_counter,
       vec2 p1, vec2 p2, vec2 p3, vec2 p4,
       float height,
-      bool default_tex, float tex_x_reduce, float tex_y_reduce,
+      bool default_tex, float reduce_v, vec2 reduce_d,
       bool last, bool first)
 {
    size_t p1id, p2id, p3id, p4id, p1hid, p2hid, p3hid, p4hid;
@@ -207,12 +207,11 @@ void push_height_rec(
 
    if(default_tex)
    {
-      tex_x_reduce = 0;
-      tex_y_reduce = 0;
    }
    else
    {
-      printf("x %f y %f\n", tex_x_reduce, tex_y_reduce);
+      //if(tex_x_reduce == 0) tex_x_reduce = 1;
+      printf("V: %f, D(%f, %f)\n", reduce_v, reduce_d.x, reduce_d.y);
    }
 
    vec4 dt1 = cvec4(0, 1, 0, 0);
@@ -220,10 +219,10 @@ void push_height_rec(
    vec4 dt3 = cvec4(1, 0, 0, 0);
    vec4 dt4 = cvec4(0, 0, 0, 0);
 
-   vec4 t1 = cvec4(0, 1 - tex_y_reduce, 0, 0);
-   vec4 t2 = cvec4(1 - tex_x_reduce, 1 - tex_y_reduce, 0, 0);
-   vec4 t3 = cvec4(1 - tex_x_reduce, 0, 0, 0);
-   vec4 t4 = cvec4(0, 0, 0, 0);
+   vec4 t1 = default_tex ? dt1 : cvec4(0, 0.3, 0, 0);
+   vec4 t2 = default_tex ? dt2 : cvec4(1, 0.3, 0, 0);
+   vec4 t3 = default_tex ? dt3 : cvec4(1, 0, 0, 0);
+   vec4 t4 = default_tex ? dt4 : cvec4(0, 0, 0, 0);
    //vec4 t2 = cvec4(1 - tex_reduce, 0, 0, 0);
 
    /*model_face_t* face5 = alloc_face(m, normal_counter, tex_counter, t1, t2, t3, t4,
@@ -291,7 +290,7 @@ void push_hexahedron(
       vec2 int_p4 = vec2_lerp(p2, p4, v2);
 
       push_height_rec(m, i, normal_counter, tex_counter, int_p1, int_p2, int_p3, int_p4, height,
-            true, 0, 0, i == 0, false);
+            true, 0, vec2e, i == 0, false);
    }
 
    float last_v = n * step;
@@ -299,11 +298,11 @@ void push_hexahedron(
    vec2 int_p2 = vec2_lerp(p2, p4, last_v);
 
    // Proceed last one
-   vec2 d = vec2_normalize(vec2f(p3.x - p1.x, p3.y - p1.y));
+   vec2 d = vec2_normalize(vec2fp(p1, p3));
    float l = rest_len / (WALL_WIDTH * 2);
 
    push_height_rec(m, i, normal_counter, tex_counter, int_p1, int_p2, p1, p2, height, false,
-         fabs(l * d.x), fabs(l * d.y), false, true);
+         l, d, false, true);
 }
 
 void push_prism(
@@ -312,7 +311,7 @@ void push_prism(
       float height)
 {
    push_height_rec(m, i, normal_counter, tex_counter, p1, p2, p3, p4, height,
-         true, 0, 0, true, true);
+         true, 0, vec2e, true, true);
 }
 
 model_t* build_map_model(list_t* walls)
@@ -346,9 +345,9 @@ model_t* build_map_model(list_t* walls)
       vec2 p1 = wall->p1;
       vec2 p2 = wall->p2;
       // Direction of current wall
-      vec2 d = vec2_normalize(vec2f(p2.x - p1.x, p2.y - p1.y));
+      vec2 d = vec2_normalize(vec2fp(p1, p2));
       // Normal to current wall
-      vec2 n = vec2_normalize(vec2f(d.y, -d.x));
+      vec2 n = vec2_normal(d);
 
       // Calculate first two points of wall
       vec2 mp1 = vec2f(p1.x - n.x * WALL_WIDTH + prev_offset.x, p1.y - n.y * WALL_WIDTH + prev_offset.y);
@@ -383,7 +382,7 @@ model_t* build_map_model(list_t* walls)
       }
 
       prev_d = d;
-      vec2 offset = vec2f(0, 0);
+      vec2 offset = vec2e;
       if(i != walls->count - 1)
       {
          wall_t* next_wall = walls->collection[i + 1];
@@ -391,7 +390,7 @@ model_t* build_map_model(list_t* walls)
          vec2 np2 = next_wall->p2;
 
          // Calculate direction of next wall
-         vec2 nd = vec2_normalize(vec2f(np2.x - np1.x, np2.y - np1.y));
+         vec2 nd = vec2_normalize(vec2fp(np1, np2));
 
          // Cosine of angle between current and next wall (a)
          double cos_nd_d = vec2_dot(d, nd);
