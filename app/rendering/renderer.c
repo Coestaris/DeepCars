@@ -192,11 +192,11 @@ inline void switch_stages(void)
 // G BUFFER ROUTINES
 void bind_g_buffer(render_stage_t* stage)
 {
-   GL_PCALL(glClearColor(0,0,0,0));
+   GL_PCALL(glClearColor(0, 0, 0, 0));
    GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
 
    if(wireframe)
-      GL_PCALL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+   GL_PCALL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
 
    geometry_shader_data_t* data = (geometry_shader_data_t*)stage->data;
    c_to_mat(view, data->camera);
@@ -206,7 +206,7 @@ void bind_g_buffer(render_stage_t* stage)
 void unbind_g_buffer(render_stage_t* stage)
 {
    if(wireframe)
-      GL_PCALL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+   GL_PCALL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
 }
 
 void setup_object_g_buffer(render_stage_t* stage, object_t* object, mat4 model_mat)

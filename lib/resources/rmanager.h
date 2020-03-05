@@ -27,6 +27,6 @@ void* rm_getn_try(resource_type_t type, const char* name);
 
 void rm_push(resource_type_t type, void* data, int32_t id);
 
-void rm_release(bool DEEPCARS_FREE_tex, bool DEEPCARS_FREE_model, bool DEEPCARS_FREE_mat, bool DEEPCARS_FREE_font);
+void rm_release(bool free_tex, bool free_models, bool free_mats, bool free_fonts);
 
 #endif //DEEPCARS_RMANAGER_H

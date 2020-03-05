@@ -56,7 +56,7 @@ void sh_compile_s(shader_t* sh,
    char info_log[1024];
    if (vertex_source)
    {
-      GL_CALL(glShaderSource(vertex_shader, 1, (const GLchar**)&vertex_source, &vertex_len))
+      GL_CALL(glShaderSource(vertex_shader, 1, (const GLchar**) &vertex_source, &vertex_len))
       GL_CALL(glCompileShader(vertex_shader));
       GL_CALL(glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &test_val));
       GL_CALL(glGetShaderInfoLog(vertex_shader, sizeof(info_log), NULL, info_log));
@@ -71,7 +71,7 @@ void sh_compile_s(shader_t* sh,
 
    if (geometry_source)
    {
-      GL_CALL(glShaderSource(geometry_shader, 1, (const GLchar**)&geometry_source, &geometry_len))
+      GL_CALL(glShaderSource(geometry_shader, 1, (const GLchar**) &geometry_source, &geometry_len))
       GL_CALL(glCompileShader(geometry_shader));
       GL_CALL(glGetShaderiv(geometry_shader, GL_COMPILE_STATUS, &test_val));
       GL_CALL(glGetShaderInfoLog(geometry_shader, sizeof(info_log), NULL, info_log));
@@ -86,7 +86,7 @@ void sh_compile_s(shader_t* sh,
 
    if(fragment_source)
    {
-      GL_CALL(glShaderSource(fragment_shader, 1, (const GLchar**)&fragment_source, &fragment_len))
+      GL_CALL(glShaderSource(fragment_shader, 1, (const GLchar**) &fragment_source, &fragment_len))
       GL_CALL(glCompileShader(fragment_shader));
       GL_CALL(glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &test_val))
       GL_CALL(glGetShaderInfoLog(fragment_shader, sizeof(info_log), NULL, info_log));
@@ -105,11 +105,11 @@ void sh_compile_s(shader_t* sh,
    }
 
    if(fragment_source)
-      GL_CALL(glAttachShader(sh->prog_id, vertex_shader));
+   GL_CALL(glAttachShader(sh->prog_id, vertex_shader));
    if(geometry_source)
-      GL_CALL(glAttachShader(sh->prog_id, geometry_shader));
+   GL_CALL(glAttachShader(sh->prog_id, geometry_shader));
    if(fragment_source)
-      GL_CALL(glAttachShader(sh->prog_id, fragment_shader));
+   GL_CALL(glAttachShader(sh->prog_id, fragment_shader));
 
    GL_CALL(glLinkProgram(sh->prog_id));
 
@@ -124,11 +124,11 @@ void sh_compile_s(shader_t* sh,
       SH_ERROR("Unable to link program...",0);
 
    if(vertex_source)
-      GL_CALL(glDeleteShader(vertex_shader));
+   GL_CALL(glDeleteShader(vertex_shader));
    if(geometry_source)
-      GL_CALL(glDeleteShader(geometry_shader));
+   GL_CALL(glDeleteShader(geometry_shader));
    if(fragment_source)
-      GL_CALL(glDeleteShader(fragment_shader));
+   GL_CALL(glDeleteShader(fragment_shader));
 
    char buff[100];
    if(vertex_source)
@@ -245,8 +245,10 @@ void sh_free(shader_t* sh)
 //
 inline void sh_use(shader_t* sh)
 {
-   if (!sh) GL_PCALL(glUseProgram(0))
-   else GL_PCALL(glUseProgram(sh->prog_id));
+   if (!sh)
+   GL_PCALL(glUseProgram(0))
+   else
+   GL_PCALL(glUseProgram(sh->prog_id));
 }
 
 inline void sh_set_int(GLint location, int value)

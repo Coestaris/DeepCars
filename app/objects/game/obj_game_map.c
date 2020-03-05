@@ -82,9 +82,9 @@ void game_map_update(object_t* this)
 
       GL_CALL(glBindVertexArray(normal_vao));
       GL_CALL(glEnableVertexAttribArray(0));
-      GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0));
+      GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*) 0));
       GL_CALL(glEnableVertexAttribArray(1));
-      GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat))));
+      GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat))));
 
       GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
       GL_CALL(glBindVertexArray(0));

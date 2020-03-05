@@ -5,15 +5,24 @@
 #ifdef __GNUC__
 #pragma implementation "structs.h"
 #endif
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCInconsistentNamingInspection"
+
 #include "coredefs.h"
 
 #include <GL/gl.h>
-#include <stdlib.h>
 #include <stdarg.h>
-#include <memory.h>
+
+#define CD_LOG(format, ...) DC_LOG("coredefs.c", format, __VA_ARGS__)
+#define CD_ERROR(format, ...) DC_ERROR("coredefs.c", format, __VA_ARGS__)
 
 #if VERBOSE == true
-void _log(const char* prefix, const char* format, ...)
+
+//
+// __message
+//
+void __message(const char* prefix, const char* format, ...)
 {
    va_list argp;
    va_start(argp, format);
@@ -25,7 +34,10 @@ void _log(const char* prefix, const char* format, ...)
    va_end(argp);
 }
 
-void _error(const char* prefix, const char* file, size_t line, const char* format, ...)
+//
+// __error
+//
+void __error(const char* prefix, const char* file, size_t line, const char* format, ...)
 {
    va_list argp;
    va_start(argp, format);
@@ -39,14 +51,20 @@ void _error(const char* prefix, const char* file, size_t line, const char* forma
    fflush(stdin);
 
    va_end(argp);
+
    abort();
 }
+
 #endif
 
 #if DEBUG_LEVEL != 0
-void gl_check(const char* line, int line_index, const char* file)
+
+//
+// __gl_check
+//
+void __gl_check(const char* line, int line_index, const char* file)
 {
-   GLenum error;
+   static GLenum error;
    if((error = glGetError()) != GL_NO_ERROR)
    {
       const char* error_name = NULL;
@@ -77,11 +95,40 @@ void gl_check(const char* line, int line_index, const char* file)
       printf("[GL ERROR]: Error type: %i (%s) occurred while processing \"%s\"\n[GL ERROR]: At %s at line %i",
               error, error_name, line, file, line_index);
 
-      fflush(stdout); // stdout не успевает высерать все сообщение.
+      // stdout не успевает высерать все сообщение.
+      fflush(stdout);
       fflush(stdin);
 
       abort();
-      //exit(EXIT_FAILURE);
    }
 }
+
 #endif
+
+//
+// __check_malloc
+//
+inline void* __check_malloc(size_t size, size_t line_index, const char* file)
+{
+   void* ptr = DEEPCARS_MALLOC_FUNCTION(size);
+   if(!ptr)
+      CD_ERROR("Unable to allocate %li bytes. Allocation in %s at %li line",
+            size, file, line_index);
+
+   return ptr;
+}
+
+//
+// __check_realloc
+//
+inline void* __check_realloc(void* ptr, size_t size, size_t line_index, const char* file)
+{
+   void* new_ptr = DEEPCARS_REALLOC_FUNCTION(ptr, size);
+   if(!new_ptr)
+      CD_ERROR("Unable to reallocate %p to %li bytes. Allocation in %s at %li line", ptr,
+            size, file, line_index);
+
+   return new_ptr;
+}
+
+#pragma clang diagnostic pop

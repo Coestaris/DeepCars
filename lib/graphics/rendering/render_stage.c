@@ -95,7 +95,8 @@ render_stage_t* rs_create(const char* name, render_mode_t render_mode, shader_t*
 
 void rs_free(render_stage_t* rs)
 {
-   if(rs->fbo) GL_CALL(glDeleteFramebuffers(1, &rs->fbo));
+   if(rs->fbo)
+   GL_CALL(glDeleteFramebuffers(1, &rs->fbo));
 
    mat4_free(rs->proj);
    mat4_free(rs->view);
@@ -112,7 +113,7 @@ texture_t* rs_setup_tex(GLenum attachment, attachment_options_t options, GLuint 
    if(options.tex_target == GL_TEXTURE_2D_MULTISAMPLE)
    {
       GL_CALL(glTexImage2DMultisample(options.tex_target, 4, options.tex_int_format,
-         options.tex_width, options.tex_height, GL_TRUE));
+                                      options.tex_width, options.tex_height, GL_TRUE));
    }
    else
    {
@@ -164,7 +165,7 @@ void rs_check_sizes(render_stage_t* rs, attachment_options_t options)
 void rs_build_tex(render_stage_t* rs)
 {
    if(!rs->fbo)
-      GL_CALL(glGenFramebuffers(1, &rs->fbo));
+   GL_CALL(glGenFramebuffers(1, &rs->fbo));
 
    size_t count = 0;
    GLenum attachments[10];
@@ -226,7 +227,7 @@ void rs_build_tex(render_stage_t* rs)
 
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, rs->fbo));
    if(count > 2)
-      GL_PCALL(glDrawBuffers(count - 1, attachments));
+   GL_PCALL(glDrawBuffers(count - 1, attachments));
 
    GLenum error;
    if ((error = glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE)

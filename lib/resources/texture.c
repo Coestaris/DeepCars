@@ -38,7 +38,7 @@ void t_free(texture_t* tex)
 {
    T_LOG("Texture \"%s\" unloaded", tex->name);
    if(tex->texID)
-      GL_CALL(glDeleteTextures(1, &tex->texID));
+   GL_CALL(glDeleteTextures(1, &tex->texID));
 
    DEEPCARS_FREE(tex->name);
    DEEPCARS_FREE(tex->data);

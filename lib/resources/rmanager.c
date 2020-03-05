@@ -195,18 +195,18 @@ void rm_push(resource_type_t type, void* data, int32_t id)
 //
 // rm_release()
 //
-void rm_release(bool DEEPCARS_FREE_tex, bool DEEPCARS_FREE_model, bool DEEPCARS_FREE_mat, bool DEEPCARS_FREE_font)
+void rm_release(bool free_tex, bool free_models, bool free_mats, bool free_fonts)
 {
-   if(DEEPCARS_FREE_tex) for(size_t i = 0; i < textures->count; i++)
+   if(free_tex) for(size_t i = 0; i < textures->count; i++)
          t_free(((struct _texture_node*) textures->collection[i])->texture);
 
-   if(DEEPCARS_FREE_model) for(size_t i = 0; i < models->count; i++)
+   if(free_models) for(size_t i = 0; i < models->count; i++)
          m_free(((struct _model_node*) models->collection[i])->model);
 
-   if(DEEPCARS_FREE_mat) for(size_t i = 0; i < materials->count; i++)
+   if(free_mats) for(size_t i = 0; i < materials->count; i++)
          mt_free(((struct _material_node*) materials->collection[i])->material);
 
-   if(DEEPCARS_FREE_font) for(size_t i = 0; i < fonts->count; i++)
+   if(free_fonts) for(size_t i = 0; i < fonts->count; i++)
          f_free(((struct _font_node*) fonts->collection[i])->font);
 
    list_free_elements(textures);

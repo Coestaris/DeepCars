@@ -443,10 +443,10 @@ void m_free(model_t* model)
    DEEPCARS_FREE(model->model_len);
 
    if (model->VBO != 0)
-      GL_CALL(glDeleteBuffers(1, &(model->VBO)))
+   GL_CALL(glDeleteBuffers(1, &(model->VBO)))
 
    if (model->VAO != 0)
-      GL_CALL(glDeleteBuffers(1, &(model->VAO)))
+   GL_CALL(glDeleteBuffers(1, &(model->VAO)))
 
    M_LOG("Freed model \"%s\"", model->name);
 
@@ -620,48 +620,48 @@ void m_build(model_t* model)
    {
       // vertices (3 floats)
       GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                            (void*) 0))
+                                    (void*) 0))
       GL_CALL(glEnableVertexAttribArray(0))
 
       // normals (3 floats)
       GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                            (void*)(3 * sizeof(float))))
+                                    (void*) (3 * sizeof(float))))
       GL_CALL(glEnableVertexAttribArray(1))
 
       // texture coordinates (2 floats)
       GL_CALL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                            (void*) (6 * sizeof(float))))
+                                    (void*) (6 * sizeof(float))))
       GL_CALL(glEnableVertexAttribArray(2))
    }
    else if (!use_normals && use_tex_coords)
    {
       // vertices (3 floats)
       GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                            (void*) 0))
+                                    (void*) 0))
       GL_CALL(glEnableVertexAttribArray(0))
 
       // texture coordinates (2 floats)
       GL_CALL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                            (void*) (3 * sizeof(float))))
+                                    (void*) (3 * sizeof(float))))
       GL_CALL(glEnableVertexAttribArray(2))
    }
    else if (use_normals && !use_tex_coords)
    {
       // vertices (3 floats)
       GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                            (void*) 0))
+                                    (void*) 0))
       GL_CALL(glEnableVertexAttribArray(0))
 
       // normals (3 floats)
       GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                            (void*) (3 * sizeof(float))))
+                                    (void*) (3 * sizeof(float))))
       GL_CALL(glEnableVertexAttribArray(1))
    }
    else //no normals and coords
    {
       // vertices (3 floats)
       GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-                            (void*) 0))
+                                    (void*) 0))
       GL_CALL(glEnableVertexAttribArray(0))
    }
 

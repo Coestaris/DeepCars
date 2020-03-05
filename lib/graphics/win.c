@@ -78,6 +78,12 @@ void w_set_glx_context_version(int major, int minor, int flags)
 win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t win_y,
                      const char* win_caption, bool verbose, bool use_double_buffer)
 {
+   W_LOG("[INIT]: ==============================",0);
+   W_LOG("[INIT]: %s (version %s) by %s", DEEPCARS, DEEPCARS_VERSION, DEEPCARS_DEVS);
+   W_LOG("[INIT]: Verbose: %s", VERBOSE ? "true" : "false");
+   W_LOG("[INIT]: Debug level: %i", DEBUG_LEVEL);
+   W_LOG("[INIT]: ==============================",0);
+
    win_info_t* info = DEEPCARS_MALLOC(sizeof(win_info_t));
    info->w = win_w;
    info->h = win_h;

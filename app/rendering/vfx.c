@@ -56,13 +56,13 @@ blurred_region_t* create_br(win_info_t* info, vec2 pos, vec2 size, vec2 back_tex
    GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));
 
    GL_CALL(glEnableVertexAttribArray(0));
-   GL_CALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0));
+   GL_CALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) 0));
 
    GL_CALL(glEnableVertexAttribArray(1));
-   GL_CALL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(2 * sizeof(float))));
+   GL_CALL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (2 * sizeof(float))));
 
    GL_CALL(glEnableVertexAttribArray(2));
-   GL_CALL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(4 * sizeof(float))));
+   GL_CALL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (4 * sizeof(float))));
 
    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 

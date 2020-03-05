@@ -40,7 +40,7 @@ void mt_free(material_t* material)
    vec4_free(material->diffuse);
    vec4_free(material->specular);
    vec4_free(material->transparent);
-   MT_LOG("Material \"%s\" DEEPCARS_FREEd", material->name);
+   MT_LOG("Material \"%s\" freed", material->name);
    DEEPCARS_FREE(material->name);
    DEEPCARS_FREE(material);
 }
