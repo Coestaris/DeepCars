@@ -1,13 +1,7 @@
-
 \.idea/
 *.pyc
 __pycache__/
 cmake-build-debug/
-
 *.bin
-
-lib/shaders/shaders/
-
 _cache\.json
-
 _cache/

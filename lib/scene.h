@@ -15,17 +15,22 @@
 // Structure for ease movement between scenes (changing one set of objects, lights to a second)
 typedef struct _scene
 {
+   // Unique ID of current scene
    uint32_t id;
-   // Light set of this scene
+
+   // List of all lights presents in this scene
    list_t* lights;
 
-   // Set of objects that loads to an updater when scene is will be loading
+   // Set of objects that will be loaded to the updater when scene is loaded
    list_t* startup_objects;
 
+   // Skybox texture, if set to NULL ignored
    texture_t* skybox;
 
+   // Shadow casting directional light, if set to NULL ignored
    shadow_light_t* shadow_light;
 
+   // Background color, if set to NULL ignored
    vec4 backcolor;
 
 } scene_t;

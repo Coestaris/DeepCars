@@ -7,6 +7,9 @@
 #endif
 #include "texture.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #define T_LOG(format, ...) DC_LOG("texture.c", format, __VA_ARGS__)
 #define T_ERROR(format, ...) DC_ERROR("texture.c", format, __VA_ARGS__)
 
@@ -65,12 +68,12 @@ void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t he
    texture->height = height;
 }
 
-char* t_get_pretty_signature(texture_t* t)
+char* t_get_pretty_signature(texture_t* t, const char* str_descr)
 {
    char* buffer = DEEPCARS_MALLOC(sizeof(char) * 100);
 
    snprintf(buffer, 100, "%s %s \"%s\" [%ix%i] (%li mipmap%s%s)",
-         t->mipmaps <= 1 ? "" : "DDS",
+         str_descr,
          t->type == GL_TEXTURE_2D ? "texture" : "cubemap",
          t->name, t->width, t->height,
          t->mipmaps,
@@ -81,14 +84,35 @@ char* t_get_pretty_signature(texture_t* t)
 
 }
 
-void t_set_data_png(texture_t* texture, GLenum fill_target, uint8_t* source, size_t length)
+void t_set_data_png(char const** str_descr, texture_t* texture, GLenum fill_target, uint8_t* source, size_t length)
 {
-   //todo:
+   int32_t width, height, channels;
+   uint8_t *img = stbi_load_from_memory(source, length, &width, &height, &channels, STBI_rgb_alpha);
+   if(img == NULL)
+   {
+      T_ERROR("Error in loading PNG the image\n",0);
+   }
+
+   assert(width == texture->width);
+   assert(height == texture->height);
+
+   GL_PCALL(glBindTexture(texture->type, texture->texID));
+   GL_PCALL(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
+   if(channels == 3)
+      {GL_PCALL(glTexImage2D(fill_target, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, img));}
+   else if(channels == 4)
+      {GL_PCALL(glTexImage2D(fill_target, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img))};
+
+   GL_CALL(glTexParameteri(texture->type, GL_TEXTURE_MAX_LEVEL, 0));
+   GL_PCALL(glBindTexture(texture->type, 0));
+
+   *str_descr = "PNG";
+   DEEPCARS_FREE(img);
 }
 
-void t_set_data_dds(texture_t* texture, GLenum fill_target, uint8_t* source, size_t length)
+void t_set_data_dds(char const** str_descr, texture_t* texture, GLenum fill_target, uint8_t* source, size_t length)
 {
-   const char* str_format = NULL;
+   *str_descr = NULL;
 
    uint32_t width = 0;
    uint32_t height = 0;
@@ -118,19 +142,19 @@ void t_set_data_dds(texture_t* texture, GLenum fill_target, uint8_t* source, siz
          case '1': // DXT1
             format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
             block_size = 8;
-            str_format = "DXT1";
+            *str_descr = "DXT1";
             break;
 
          case '3': // DXT3
             format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
             block_size = 16;
-            str_format = "DXT3";
+            *str_descr = "DXT3";
             break;
 
          case '5': // DXT5
             format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
             block_size = 16;
-            str_format = "DXT5";
+            *str_descr = "DXT5";
             break;
 
          case '0':
@@ -139,13 +163,13 @@ void t_set_data_dds(texture_t* texture, GLenum fill_target, uint8_t* source, siz
             // as it adds sizeof(struct DDS_HEADER_DXT10) between pixels
             // so, buffer = DEEPCARS_MALLOC((file_size - 128) - sizeof(struct DDS_HEADER_DXT10));
          default:
-            str_format = "unknown";
+            *str_descr = "unknown";
             goto exit;
       }
    }
    else
    {
-      str_format = "unknown";
+      *str_descr = "unknown";
       goto exit;
    }
 

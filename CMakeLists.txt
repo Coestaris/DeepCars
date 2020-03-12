@@ -3,7 +3,7 @@ project(DeepCars C)
 
 set(CMAKE_C_STANDARD 99)
 
-set(CMAKE_C_FLAGS "-pipe -O3 -Wall -Wextra -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-parameter")
+set(CMAKE_C_FLAGS "-pipe -O0 -Wall -Wextra -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-parameter")
 
 FILE(GLOB oilSources oil/*.c)
 FILE(GLOB oilHeaders oil/*.h)

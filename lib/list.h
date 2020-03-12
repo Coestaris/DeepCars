@@ -5,7 +5,9 @@
 #ifndef DEEPCARS_LIST_H
 #define DEEPCARS_LIST_H
 
+// Startup size of the bootstrap
 #define LIST_BOOTSTRAP_SIZE 50
+#define LIST_SIZE_INCREASE 1.5f
 
 #include <stddef.h>
 
@@ -23,9 +25,6 @@ typedef struct _list
 
 } list_t;
 
-//
-// List methods
-//
 // Push new element to a list
 void list_push(list_t* list, void* object);
 

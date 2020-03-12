@@ -10,14 +10,12 @@
 #define O_LOG(format, ...) DC_LOG("object.c", format, __VA_ARGS__)
 #define O_ERROR(format, ...) DC_ERROR("object.c", format, __VA_ARGS__)
 
-// for color
-#include "graphics/rendering/graphics.h"
-
 //
 // o_free
 //
 void o_free(object_t* object)
 {
+   assert(object);
    if (object->destroy_func)
       object->destroy_func(object);
 
@@ -30,6 +28,7 @@ void o_free(object_t* object)
 //
 object_t* o_clone(object_t* object)
 {
+   assert(object);
    object_t* new_object = DEEPCARS_MALLOC(sizeof(object_t));
    memcpy(new_object, object, sizeof(object_t));
 
@@ -67,9 +66,15 @@ object_t* o_create()
    return object;
 }
 
+//
+// o_enable_draw_normals()
+//
 void o_enable_draw_normals(object_t* object, vec4 color1, vec4 color2, float len)
 {
    assert(object);
+   assert(color1);
+   assert(color2);
+
    if(!object->draw_info->normal_vao)
    {
       assert(object->draw_info->model);

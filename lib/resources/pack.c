@@ -318,6 +318,7 @@ static void p_handler_texture(uint8_t* data, size_t length)
    GLenum filltarget = maps == 1 ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 
    t_set_params(t, target, width, heigth);
+   const char* str_descr = NULL;
 
    for(size_t map = 0; map < maps; map++)
    {
@@ -326,15 +327,15 @@ static void p_handler_texture(uint8_t* data, size_t length)
       READ_BUFF(*tex_data, data_len);
 
       if (compression == 0)
-         t_set_data_png(t, filltarget + map, tex_data, data_len);
+         t_set_data_png(&str_descr, t, filltarget + map, tex_data, data_len);
       else
-         t_set_data_dds(t, filltarget + map, tex_data, data_len);
+         t_set_data_dds(&str_descr, t, filltarget + map, tex_data, data_len);
       DEEPCARS_FREE(tex_data);
    }
 
    rm_push(TEXTURE, t, id);
 
-   char* sig = t_get_pretty_signature(t);
+   char* sig = t_get_pretty_signature(t, str_descr);
    P_LOG("Loaded %s", sig);
    DEEPCARS_FREE(sig);
 

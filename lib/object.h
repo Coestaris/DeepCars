@@ -18,28 +18,34 @@ typedef void (* key_event_func_t)(struct _object* this, uint32_t key, uint32_t s
 typedef void (* mouse_event_func_t)(struct _object* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse);
 typedef void (* mousemove_event_func_t)(struct _object* this, uint32_t x, uint32_t y);
 
+// Structs that describes drawing options of object
 typedef struct _draw_info
 {
+   // Describes whether the object will be drawn
    bool drawable;
 
    // Model to be rendered
    model_t* model;
 
-   // Cast shadows?
+   // Describes whether the object will be cast shadows
    bool shadows;
 
+   // Material of the model
    material_t* material;
 
+   // Describes whether the normals will be drawn
    bool draw_normals;
+
+   // Normal buffer properties
    GLuint normal_vao;
    size_t normal_buffer_len;
 
 } draw_info_t;
 
-// Struct that describes drawable object
+// Struct that describes objects
 typedef struct _object
 {
-   // Transformation of object
+   // Transformations of object
    vec3 position;
    vec3 rotation;
    vec3 scale;
@@ -68,6 +74,7 @@ object_t* o_create();
 // Frees object and all its used resources
 void o_free(object_t* object);
 
+// Calculates VAO buffers of model normals with specified lengths
 void o_enable_draw_normals(object_t* object, vec4 color1, vec4 color2, float len);
 
 #endif //DEEPCARS_OBJECT_H

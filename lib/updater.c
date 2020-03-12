@@ -76,6 +76,7 @@ void u_close(void)
 // Looping through all objects and draws it
 static void u_draw_func(void)
 {
+   // Fill scene with background color
    if(current_scene->backcolor)
    {
       GL_PCALL(glClearColor(
@@ -88,6 +89,7 @@ static void u_draw_func(void)
    render_chain_t* chain = rc_get_current();
    list_t* stages = chain->stages;
 
+   // Iterate thought render stages
    for(size_t i = 0; i < stages->count; i++)
    {
       render_stage_t* stage = (render_stage_t*)stages->collection[i];
@@ -104,7 +106,7 @@ static void u_draw_func(void)
 
       if(stage->render_mode == RM_GEOMETRY)
       {
-         //render objects
+         // Render all objects
          for(size_t j = 0; j < objects->count; j++)
          {
             object_t* obj = objects->collection[j];
@@ -118,7 +120,7 @@ static void u_draw_func(void)
       }
       else if(stage->render_mode == RM_BYPASS || stage->render_mode == RM_FRAMEBUFFER)
       {
-         //render from buffer to a buffer
+         // Render from buffer to a buffer
          gr_render_vao(stage->vao);
       }
       else if(stage->render_mode == RM_CUSTOM || stage->render_mode == RM_CUSTOM_FRAMEBUFFER)
@@ -293,7 +295,7 @@ static void u_measure_time(void)
    counter++;
    frames++;
 
-   // wait
+   // Wait the difference between two frames
    if (diff < FPS_DELAY)
    {
       usleep((uint32_t) (FPS_DELAY - diff) * 1000);

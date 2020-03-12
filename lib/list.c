@@ -11,45 +11,52 @@
 #include <string.h>
 
 //
-// list_push
+// list_push()
 //
 inline void list_push(list_t* list, void* object)
 {
+   assert(list);
+   assert(object);
+
    // current collection if full increase its size in 1.5 times
    if (list->count > list->max_size - 1)
    {
       if (list->max_size == LIST_BOOTSTRAP_SIZE) {
-         size_t newLen = (int) ((float) list->max_size * 1.5f);
+         size_t new_len = (int) ((float) list->max_size * LIST_SIZE_INCREASE);
 
-         void** new_collection = DEEPCARS_MALLOC(sizeof(void*) * newLen);
+         void** new_collection = DEEPCARS_MALLOC(sizeof(void*) * new_len);
          memcpy(new_collection, list->bootstrap, list->count * sizeof(void*));
          list->collection = new_collection;
-         list->max_size = newLen;
+         list->max_size = new_len;
 
       } else {
-         size_t newLen = (int) ((float) list->max_size * 1.5f);
-         list->collection = realloc(list->collection, sizeof(void*) * newLen);
-         list->max_size = newLen;
+         size_t new_len = (int) ((float) list->max_size * LIST_SIZE_INCREASE);
+         list->collection = realloc(list->collection, sizeof(void*) * new_len);
+         list->max_size = new_len;
       }
    }
    list->collection[list->count++] = object;
 }
 
 //
-// list_free_elements
+// list_free_elements()
 //
 void list_free_elements(list_t* list)
 {
+   assert(list);
+
    for (size_t i = 0; i < list->count; i++)
       DEEPCARS_FREE(list->collection[i]);
    list->count = 0;
 }
 
 //
-// list_free
+// list_free()
 //
 void list_free(list_t* list)
 {
+   assert(list);
+
    if (list->collection != list->bootstrap) {
       DEEPCARS_FREE(list->collection);
    }
@@ -57,10 +64,13 @@ void list_free(list_t* list)
 }
 
 //
-// list_remove
+// list_remove()
 //
 void list_remove(list_t* list, void* object)
 {
+   assert(list);
+   assert(object);
+
    //todo
 }
 

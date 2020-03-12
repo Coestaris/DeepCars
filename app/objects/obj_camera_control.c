@@ -15,7 +15,7 @@ float camera_pitch      = 0;
 float camera_yaw        = M_PI / 2;
 float lastdx            = 0;
 float lastdy            = 0;
-vec4 player_start;
+vec4  player_start;
 
 void camera_update_func(object_t* this)
 {

@@ -47,10 +47,10 @@ void t_bind(texture_t* tex, GLenum active);
 
 void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t height);
 
-void t_set_data_png(texture_t* texture, GLenum fill_target, uint8_t* source, size_t length);
+void t_set_data_dds(char const** str_descr, texture_t* texture, GLenum fill_target, uint8_t* source, size_t length);
 
-void t_set_data_dds(texture_t* texture, GLenum fill_target, uint8_t* source, size_t length);
+void t_set_data_png(char const** str_descr, texture_t* texture, GLenum fill_target, uint8_t* source, size_t length);
 
-char* t_get_pretty_signature(texture_t* t);
+char* t_get_pretty_signature(texture_t* t, const char* str_descr);
 
 #endif //DEEPCARS_TEXTURE_H
