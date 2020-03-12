@@ -23,7 +23,7 @@ bool first_point_set = false;
 
 void draw_line(vec2 p1, vec2 p2)
 {
-   gr_pq_push_line(2, p1, p2, 4, COLOR_WHITE, default_primitive_renderer, NULL);
+   gr_pq_push_line(2, p1, p2, 2, COLOR_WHITE, default_primitive_renderer, NULL);
 }
 
 vec2 floor_point(vec2 pos)
@@ -154,9 +154,9 @@ void draw_line_arrow(vec2 p1, vec2 p2, float l, float w, float h, vec4 color)
    vec2 a = vec2f(dest.x - n.x * h + d.x * w, dest.y - n.y * h + d.y * w);
    vec2 b = vec2f(dest.x - n.x * h - d.x * w, dest.y - n.y * h - d.y * w);
 
-   gr_pq_push_line(1, src, dest, 4, color, default_primitive_renderer, NULL);
-   gr_pq_push_line(1, dest, a, 4, color, default_primitive_renderer, NULL);
-   gr_pq_push_line(1, dest, b, 4, color, default_primitive_renderer, NULL);
+   gr_pq_push_line(1, src, dest, 2, color, default_primitive_renderer, NULL);
+   gr_pq_push_line(1, dest, a, 2, color, default_primitive_renderer, NULL);
+   gr_pq_push_line(1, dest, b, 2, color, default_primitive_renderer, NULL);
 }
 
 void update_editor_map(object_t* this)
@@ -170,7 +170,7 @@ void update_editor_map(object_t* this)
       {
          case START:
          case FIN:
-            gr_pq_push_line(1, object->p1, object->p2, 4, COLOR_BLACK, default_primitive_renderer, NULL);
+            gr_pq_push_line(1, object->p1, object->p2, 2, COLOR_BLACK, default_primitive_renderer, NULL);
             gr_pq_push_sprite(1, object->type == START ? texture_start : texture_fin,
                   vec2f(object->p1.x, object->p1.y - texture_start->height),
                   vec2u, vec2e, 0, default_sprite_renderer, &trans);
@@ -214,9 +214,8 @@ void update_editor_map(object_t* this)
             pos.x - 50 * cosf(angle+ M_PI),
             pos.y - 50 * sinf(angle+ M_PI));
 
-      gr_pq_push_line(1, pp1, pp2, 4, COLOR_RED, default_primitive_renderer, NULL);
-
-      gr_pq_push_line(1, p1, p2, 4, COLOR_BLACK, default_primitive_renderer, NULL);
+      gr_pq_push_line(1, pp1, pp2, 2, COLOR_RED, default_primitive_renderer, NULL);
+      gr_pq_push_line(1, p1, p2, 2, COLOR_BLACK, default_primitive_renderer, NULL);
 
       gr_pq_push_sprite(1, toolbar_state == START ? texture_start : texture_fin, vec2f(p1.x, p1.y - texture_start->height),
             vec2u, vec2e, 0, default_sprite_renderer, &trans);

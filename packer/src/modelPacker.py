@@ -2,6 +2,8 @@
 from src import common as cm
 from glob import glob
 from zlib import compress
+from zipfile import ZipFile
+from shutil import rmtree
 
 # 4 bytes: model id 
 # 2 bytes: model name length 
@@ -50,8 +52,16 @@ class model_packer:
                 continue
 
             data = ""
-            with open(self.path + model["fn"]) as file:
+            path = self.path + model["fn"]
+            zip_path = "tmp/" + model["fn"].split('.')[0] + ".obj"
+
+            with ZipFile(path, 'r') as zip_ref:
+                zip_ref.extractall("tmp")
+
+            with open(zip_path) as file:
                 data = file.read()
+            
+            rmtree("tmp")
 
             print("[{}/{}]: Packing model \"{}\" ({} bytes)".format(i + 1, len(self.models), model["name"], len(data)))
 

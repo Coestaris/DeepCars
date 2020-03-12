@@ -390,7 +390,7 @@ void gr_draw_line(vec2 p1, vec2 p2, float width, vec4 color,
    p2.x = p2.x - (float)default_win->w / 2.0f;
    p2.y = (float)default_win->h / 2.0f - p2.y;
 
-   sh_use(primitive_renderer->shader);
+   sh_use(primitive_renderer->line_shader);
 
    primitive_renderer->bind_line_func(primitive_renderer, width, color, data);
 

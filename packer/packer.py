@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from glob import glob
-from os import rmdir, unlink, path
+from os import rmdir, unlink, path, walk
 from sys import argv
 import src.common as cm
 import src.modelPacker as mp
@@ -18,6 +18,11 @@ from shutil import copyfile
 #   1 byte : chunk type
 #   4 bytes: chunk crc
 #   n bytes: chunk data
+
+def get_time(dir, file):
+    dir_time = max(map(lambda x: path.getmtime(x[0]), walk(dir)))
+    file_time = path.getmtime(file) 
+    return max(dir_time, file_time)
 
 if __name__ == "__main__":
     if "clear" in argv:
@@ -55,14 +60,14 @@ if __name__ == "__main__":
     
     id = "__pack"
     if id in cm.cache:
-        time = path.getmtime(index_path) 
+        time = get_time(in_dir, index_path)
         last_time = cm.cache[id]
 
         if last_time >= time:
             #write from cache
             print("\"{0}\" already cached. Writing from cache".format(out_file))
             copyfile(cm.CACHE_DIR + id, out_file)
-            #exit(0)
+            exit(0)
  
     cm.set_dir(in_dir)
 
@@ -91,7 +96,7 @@ if __name__ == "__main__":
 
     copyfile(out_file, cm.CACHE_DIR + id)
 
-    time = path.getmtime(index_path) 
+    time = get_time(in_dir, index_path)
     cm.cache.update( {id : time} )
 
     cm.write_cache()

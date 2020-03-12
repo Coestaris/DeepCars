@@ -31,6 +31,8 @@ typedef struct _sprite_renderer
 typedef struct _primitive_renderer
 {
    shader_t* shader;
+   shader_t* line_shader;
+
    GLuint vao;
    GLuint vbo;
 

@@ -424,7 +424,8 @@ void bind_sprite_renderer(sprite_renderer_t* this, mat4 transform, void* data)
 
 void bind_line_renderer(struct _primitive_renderer* this, float width, vec4 color, void* data)
 {
-   sh_set_vec3(UNIFORM_PRIMITIVE.color, color);
+   sh_set_vec3(UNIFORM_LINE_PRIMITIVE.color, color);
+   sh_set_float(UNIFORM_LINE_PRIMITIVE.thickness, width);
 }
 
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
@@ -451,11 +452,13 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    br_shader = setup_br(primitive_proj, 27, 7);
    shader_t* sprite_shader = setup_sprite(primitive_proj);
    shader_t* primitive_shader = setup_primitive(primitive_proj);
+   shader_t* line_primitive_shader = setup_line_primitive(primitive_proj, vec2f(win->w, win->h));
 
    default_sprite_renderer = gr_create_sprite_renderer(sprite_shader);
    default_sprite_renderer->bind_func = bind_sprite_renderer;
 
    default_primitive_renderer = gr_create_primitive_renderer(primitive_shader);
+   default_primitive_renderer->line_shader = line_primitive_shader;
    default_primitive_renderer->bind_line_func = bind_line_renderer;
 
    render_stage_t* g_buffer = rs_create("gbuffer", RM_GEOMETRY, g_buffer_shader);

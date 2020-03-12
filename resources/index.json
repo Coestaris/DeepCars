@@ -13,7 +13,13 @@
         { "vertex" : "2d_shaders/font.vsh",           "fragment" : "2d_shaders/font.fsh",           "name": "font"      },
         { "vertex" : "2d_shaders/blurred_region.vsh", "fragment" : "2d_shaders/blurred_region.fsh", "name": "blurred_region" },
         { "vertex" : "2d_shaders/sprite.vsh",         "fragment" : "2d_shaders/sprite.fsh",         "name": "sprite" },
-        { "vertex" : "2d_shaders/primitive.vsh",      "fragment" : "2d_shaders/primitive.fsh",      "name": "primitive" }
+        { "vertex" : "2d_shaders/primitive.vsh",      "fragment" : "2d_shaders/primitive.fsh",      "name": "primitive" },
+        {
+            "geometry" : "2d_shaders/line.gsh",
+            "vertex" : "2d_shaders/primitive.vsh",
+            "fragment" : "2d_shaders/primitive.fsh",
+            "name": "line"
+        }
     ],
 
     "textures" : 
@@ -38,13 +44,13 @@
         { "fn" : "editor/toolbar_frame.png",               "name" : "editor_toolbar_frame", "compression" : "png" },
         { "fn" : "editor/toolbar_frame_back.png",          "name" : "editor_toolbar_frame_back", "compression" : "png" },
         { "fn" : "editor/toolbar_frame_back_selected.png", "name" : "editor_toolbar_frame_back_selected", "compression" : "png" },
-        { "fn" : "editor/toolbar_frame_clicked.png",       "name" : "editor_toolbar_frame_clicked", "compression" : "png" },
+        { "fn" : "editor/toolbar_frame_clicked.png",       "name" : "editor_toolbar_frame_clicked", "compression" : "dxt5" },
 
         { "fn" : "editor/toolbar_eraser.png",              "name" : "editor_toolbar_eraser", "compression" : "png" },
-        { "fn" : "editor/toolbar_grid_8.png",              "name" : "editor_toolbar_grid_8", "compression" : "png" },
-        { "fn" : "editor/toolbar_grid_16.png",             "name" : "editor_toolbar_grid_16", "compression" : "png" },
-        { "fn" : "editor/toolbar_grid_32.png",             "name" : "editor_toolbar_grid_32", "compression" : "png" },
-        { "fn" : "editor/toolbar_grid_128.png",            "name" : "editor_toolbar_grid_128", "compression" : "png" },
+        { "fn" : "editor/toolbar_grid_8.png",              "name" : "editor_toolbar_grid_8", "compression" : "dxt5" },
+        { "fn" : "editor/toolbar_grid_16.png",             "name" : "editor_toolbar_grid_16", "compression" : "dxt5" },
+        { "fn" : "editor/toolbar_grid_32.png",             "name" : "editor_toolbar_grid_32", "compression" : "dxt5" },
+        { "fn" : "editor/toolbar_grid_128.png",            "name" : "editor_toolbar_grid_128", "compression" : "dxt5" },
         { "fn" : "editor/toolbar_grid_no.png",             "name" : "editor_toolbar_grid_no", "compression" : "png" },
         { "fn" : "editor/toolbar_wall.png",                "name" : "editor_toolbar_wall", "compression" : "png" },
         { "fn" : "editor/toolbar_start.png",               "name" : "editor_toolbar_start", "compression" : "png" },

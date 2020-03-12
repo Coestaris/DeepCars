@@ -14,6 +14,7 @@ extern enum _toolbar_state {
    START,
    FIN,
    WALL,
+
 } toolbar_state;
 
 extern uint8_t grid_state;
