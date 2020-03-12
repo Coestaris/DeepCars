@@ -81,11 +81,11 @@
 
     "models": 
     [
-        { "fn" : "column.obj",  "name" : "column" },
-        { "fn" : "car.obj",  "name" : "car" },
-        { "fn" : "sphere.obj",  "name" : "sphere", "normalize_x" : false, "normalize_y" : false, "normalize_z" : false },
-        { "fn" : "ring.obj",  "name" : "ring" },
-        { "fn" : "lenin.obj",  "name" : "lenin" }
+        { "fn" : "column.zobj",  "name" : "column" },
+        { "fn" : "car.zobj",  "name" : "car" },
+        { "fn" : "sphere.zobj",  "name" : "sphere", "normalize_x" : false, "normalize_y" : false, "normalize_z" : false },
+        { "fn" : "ring.zobj",  "name" : "ring" },
+        { "fn" : "lenin.zobj",  "name" : "lenin" }
     ],
 
     "materials":
