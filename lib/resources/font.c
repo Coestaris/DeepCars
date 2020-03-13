@@ -66,7 +66,7 @@ font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info
    if(block_id != 2)
       F_ERROR("Expected block with id 2 (common)",0);
    size_t common_size = read32(&info);
-   f->line_height = read16(&info) / FONT_SCALE;
+   read16(&info); // ignore height
    f->base = read16(&info) / FONT_SCALE;
    //skip scales
    info += 4;

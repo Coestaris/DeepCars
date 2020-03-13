@@ -14,25 +14,32 @@
 #include "../../resources/shm.h"
 #include "../win.h"
 
+// Represent list of rendering stages
 typedef struct _render_chain
 {
    list_t* stages;
+
+   // Chain user data
    void* data;
 
 } render_chain_t;
 
-void rc_create_perspective(win_info_t* win, mat4 mat, float fov, float near, float far);
-void rc_create_ortho(win_info_t* win, mat4 mat, float near, float far);
-GLint rc_get_quad_vao(void);
-GLint rc_get_cube_vao(void);
-
-void rc_link(render_chain_t* rc);
-void rc_build(render_chain_t* rc);
-
+// render_chain_t constructor
 render_chain_t* rc_create();
+
+// Frees render_chain_t but doesn't free its stages
 void rc_free(render_chain_t* rc, bool free_stages);
 
+// Link stages between each other (like linked list)
+void rc_link(render_chain_t* rc);
+
+// Calls rs_build_tex depends on its mode
+void rc_build(render_chain_t* rc);
+
+// Updates current rendering chain and linking it
 void rc_set_current(render_chain_t* rc);
+
+// Returns current rendering chain
 render_chain_t* rc_get_current(void);
 
 #endif //DEEPCARS_RENDER_CHAIN_H

@@ -6,42 +6,46 @@
 #pragma implementation "menu_drawert.h"
 #endif
 #include "obj_menu_drawer.h"
+
 #include "../../rendering/vfx.h"
 #include "../../win_defaults.h"
 #include "../../../lib/resources/rmanager.h"
 #include "../../rendering/renderer.h"
 #include "obj_menu_camera_mover.h"
 
-bool free_regions;
-bool about;
-blurred_region_t* btn_run_br;
-blurred_region_t* btn_about_br;
-blurred_region_t* btn_exit_br;
+static bool free_regions = false;
+static bool about        = false;
 
-blurred_region_t* btn_back_br;
-blurred_region_t* about_page;
+static blurred_region_t* btn_run_br   = NULL;
+static blurred_region_t* btn_about_br = NULL;
+static blurred_region_t* btn_exit_br  = NULL;
 
-texture_t* logo_texture;
-texture_t* about_logo_texture;
-texture_t* black_texture;
+static blurred_region_t* btn_back_br = NULL;
+static blurred_region_t* about_page  = NULL;
 
-vec4 selected_color;
-vec4 default_color;
-bool changing_trans;
-bool exiting;
-bool going_editor;
-float p = 1;
-float t = 1;
+static texture_t* logo_texture       = NULL;
+static texture_t* about_logo_texture = NULL;
+static texture_t* black_texture      = NULL;
+
+static vec4  selected_color = NULL;
+static vec4  default_color  = NULL;
+
+static bool  changing_trans = false;
+static bool  exiting        = false;
+static bool  going_editor   = false;
+static float p = 1;
+static float t = 1;
+
 static float sprite_transparency;
 
-bool in_rec(blurred_region_t* br, vec2 pos)
+static bool in_rec(blurred_region_t* br, vec2 pos)
 {
    return
       pos.x > br->x && pos.x < br->x + br->w &&
       pos.y > br->y && pos.y < br->y + br->h;
 }
 
-void update_menu_drawer(object_t* this)
+static void update_menu_drawer(object_t* this)
 {
    vec2 mouse = u_get_mouse_pos();
 
@@ -136,7 +140,7 @@ void update_menu_drawer(object_t* this)
    }
 }
 
-void mouse_menu_drawer(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
+static void mouse_menu_drawer(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
 {
    if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && !exiting && !going_editor)
    {
@@ -179,7 +183,7 @@ void mouse_menu_drawer(object_t* this, uint32_t x, uint32_t y, uint32_t state, u
    }
 }
 
-void free_menu_drawer(object_t* drawer)
+static void free_menu_drawer(object_t* drawer)
 {
    if(!free_regions)
    {

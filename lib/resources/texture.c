@@ -57,7 +57,7 @@ void t_free(texture_t* tex)
 //
 void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t height)
 {
-   assert(tex);
+   assert(texture);
    assert(target);
    assert(width && height);
 

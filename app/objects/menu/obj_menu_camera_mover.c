@@ -9,18 +9,18 @@
 #include "../../win_defaults.h"
 #include "../../rendering/renderer.h"
 
-float new_camera_y;
-float new_camera_radius;
+static float new_camera_y      = 0;
+static float new_camera_radius = 0;
 
-float camera_y;
-float camera_radius;
-bool updating_camera;
+static float camera_y        = 0;
+static float camera_radius   = 0;
+static bool  updating_camera = false;
 
-float x_to_y;
-float x_to_r;
-float old_y;
-float old_r;
-float x;
+static float x_to_y = 0;
+static float x_to_r = 0;
+static float old_y  = 0;
+static float old_r  = 0;
+static float x      = 0;
 
 void update_camera(float new_y, float new_r)
 {
@@ -37,24 +37,12 @@ void update_camera(float new_y, float new_r)
    x_to_r = (new_camera_radius - camera_radius) / 100;
 }
 
-// code from wikipedia??
-float clamp(float x, float lowerlimit, float upperlimit) {
-   if (x < lowerlimit)
-      x = lowerlimit;
-   if (x > upperlimit)
-      x = upperlimit;
-   return x;
-}
-
-float smootherstep(float edge0, float edge1, float x) {
-   //   // Scale, and clamp x to 0..1 range
-   //   x = clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
-   //   // Evaluate polynomial
+float smootherstep(float edge0, float edge1, float x)
+{
    return x * x * x * (x * (x * 6 - 15) + 10);
 }
 
-
-void update_menu_camera_mover(object_t* this)
+static void update_menu_camera_mover(object_t* this)
 {
    if(updating_camera)
    {

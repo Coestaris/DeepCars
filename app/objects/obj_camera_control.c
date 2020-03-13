@@ -5,19 +5,23 @@
 #include "obj_camera_control.h"
 #include "../rendering/renderer.h"
 
-float dx;
-float dy;
-float press_mouse_x;
-float press_mouse_y;
-vec4  camera_dir_cpy;
-vec4  camera_cross_cpy;
-float camera_pitch      = 0;
-float camera_yaw        = M_PI / 2;
-float lastdx            = 0;
-float lastdy            = 0;
-vec4  player_start;
+static float dx            = 0;
+static float dy            = 0;
+static float press_mouse_x = 0;
+static float press_mouse_y = 0;
 
-void camera_update_func(object_t* this)
+static vec4  camera_dir_cpy   = NULL;
+static vec4  camera_cross_cpy = NULL;
+
+static float camera_pitch = 0;
+static float camera_yaw   = M_PI / 2;
+
+static float lastdx = 0;
+static float lastdy = 0;
+
+static vec4  player_start = NULL;
+
+static void camera_update_func(object_t* this)
 {
    uint64_t frame = u_get_frames();
 
@@ -80,7 +84,7 @@ void camera_update_func(object_t* this)
    }
 }
 
-void camera_mouse_event_func(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
+static void camera_mouse_event_func(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
 {
    if (state == MOUSE_RELEASE)
    {
@@ -94,7 +98,7 @@ void camera_mouse_event_func(object_t* this, uint32_t x, uint32_t y, uint32_t st
    }
 }
 
-void camera_mouse_move_event_func(object_t* this, uint32_t x, uint32_t y)
+static void camera_mouse_move_event_func(object_t* this, uint32_t x, uint32_t y)
 {
    if (u_get_mouse_state(MOUSE_LEFT) == MOUSE_PRESSED)
    {
@@ -103,7 +107,7 @@ void camera_mouse_move_event_func(object_t* this, uint32_t x, uint32_t y)
    }
 }
 
-void camera_destroy_func(object_t* this)
+static void camera_destroy_func(object_t* this)
 {
    if (camera_dir_cpy)
    {

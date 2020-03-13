@@ -6,11 +6,13 @@
 #pragma implementation "render_stage.h"
 #endif
 #include "render_stage.h"
+
 #include "../../resources/rmanager.h"
 
 #define RS_LOG(format, ...) DC_LOG("render_stage.c", format, __VA_ARGS__)
 #define RS_ERROR(format, ...) DC_ERROR("render_stage.c", format, __VA_ARGS__)
 
+// Sets default options for color attachments
 static void rs_set_color_options(attachment_options_t* ao)
 {
    ao->tex_width = 1024;
@@ -28,6 +30,7 @@ static void rs_set_color_options(attachment_options_t* ao)
    ao->tex_target = GL_TEXTURE_2D;
 }
 
+// Sets default options for Depth buffers
 static void rs_set_depth_options(attachment_options_t* ao)
 {
    ao->tex_width = 1024;
@@ -45,8 +48,73 @@ static void rs_set_depth_options(attachment_options_t* ao)
    ao->tex_target = GL_TEXTURE_2D;
 }
 
+// Crates texture according to its parameters and binds it to the FBO
+static texture_t* rs_setup_tex(GLenum attachment, attachment_options_t options, GLuint fbo, const char* target)
+{
+   GLuint id;
+   GL_CALL(glGenTextures(1, &id));
+   GL_CALL(glBindTexture(options.tex_target, id));
+   if(options.tex_target == GL_TEXTURE_2D_MULTISAMPLE)
+   {
+      GL_CALL(glTexImage2DMultisample(options.tex_target, 4, options.tex_int_format,
+                                      options.tex_width, options.tex_height, GL_TRUE));
+   }
+   else
+   {
+      GL_CALL(glTexImage2D(options.tex_target, 0, options.tex_int_format,
+                           options.tex_width, options.tex_height, 0, options.tex_format, GL_FLOAT, NULL));
+
+      GL_CALL(glTexParameteri(options.tex_target, GL_TEXTURE_MIN_FILTER, options.tex_min_filter));
+      GL_CALL(glTexParameteri(options.tex_target, GL_TEXTURE_MAG_FILTER, options.tex_mag_filter));
+      GL_CALL(glTexParameteri(options.tex_target, GL_TEXTURE_WRAP_S, options.tex_wrapping_s));
+      GL_CALL(glTexParameteri(options.tex_target, GL_TEXTURE_WRAP_T, options.tex_wrapping_t));
+      GL_CALL(glTexParameterfv(options.tex_target, GL_TEXTURE_BORDER_COLOR, options.tex_border_color));
+   }
+
+   GL_CALL(glBindTexture(options.tex_target, 0));
+
+   GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, fbo));
+   GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, options.tex_target, id, 0));
+   GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+
+   char* name = DEEPCARS_MALLOC(30);
+   snprintf(name, 30, "__generated_fb%i_%s", fbo, target);
+   texture_t* t = t_create(name);
+   t->type = GL_TEXTURE_2D;
+   t->height = options.tex_height;
+   t->width = options.tex_width;
+   t->texID = id;
+   rm_push(TEXTURE, t, -1);
+
+   return t;
+}
+
+// Check if attachment's size equals to a stage size
+static void rs_check_sizes(render_stage_t* rs, attachment_options_t options)
+{
+   if(!rs->width)
+   {
+      rs->width = options.tex_width;
+      rs->height = options.tex_height;
+   }
+   else
+   {
+      if(rs->width  != (GLuint)options.tex_width ||
+         rs->height != (GLuint)options.tex_height)
+      {
+         RS_ERROR("Sizes of attachments should be equal, I guess....",0);
+      }
+   }
+}
+
+//
+// rs_create()
+//
 render_stage_t* rs_create(const char* name, render_mode_t render_mode, shader_t* shader)
 {
+   assert(name);
+   assert(shader);
+
    render_stage_t* rs = DEEPCARS_MALLOC(sizeof(render_stage_t));
    rs->shader = shader;
    rs->render_mode = render_mode;
@@ -93,8 +161,13 @@ render_stage_t* rs_create(const char* name, render_mode_t render_mode, shader_t*
    return rs;
 }
 
+//
+// rs_free()
+//
 void rs_free(render_stage_t* rs)
 {
+   assert(rs);
+
    if(rs->fbo)
    GL_CALL(glDeleteFramebuffers(1, &rs->fbo));
 
@@ -105,65 +178,14 @@ void rs_free(render_stage_t* rs)
    DEEPCARS_FREE(rs);
 }
 
-static texture_t* rs_setup_tex(GLenum attachment, attachment_options_t options, GLuint fbo, const char* target)
-{
-   GLuint id;
-   GL_CALL(glGenTextures(1, &id));
-   GL_CALL(glBindTexture(options.tex_target, id));
-   if(options.tex_target == GL_TEXTURE_2D_MULTISAMPLE)
-   {
-      GL_CALL(glTexImage2DMultisample(options.tex_target, 4, options.tex_int_format,
-                                      options.tex_width, options.tex_height, GL_TRUE));
-   }
-   else
-   {
-      GL_CALL(glTexImage2D(options.tex_target, 0, options.tex_int_format,
-                           options.tex_width, options.tex_height, 0, options.tex_format, GL_FLOAT, NULL));
 
-      GL_CALL(glTexParameteri(options.tex_target, GL_TEXTURE_MIN_FILTER, options.tex_min_filter));
-      GL_CALL(glTexParameteri(options.tex_target, GL_TEXTURE_MAG_FILTER, options.tex_mag_filter));
-      GL_CALL(glTexParameteri(options.tex_target, GL_TEXTURE_WRAP_S, options.tex_wrapping_s));
-      GL_CALL(glTexParameteri(options.tex_target, GL_TEXTURE_WRAP_T, options.tex_wrapping_t));
-      GL_CALL(glTexParameterfv(options.tex_target, GL_TEXTURE_BORDER_COLOR, options.tex_border_color));
-   }
-
-   GL_CALL(glBindTexture(options.tex_target, 0));
-
-   GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, fbo));
-   GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, options.tex_target, id, 0));
-   GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-
-   char* name = DEEPCARS_MALLOC(30);
-   snprintf(name, 30, "__generated_fb%i_%s", fbo, target);
-   texture_t* t = t_create(name);
-   t->type = GL_TEXTURE_2D;
-   t->height = options.tex_height;
-   t->width = options.tex_width;
-   t->texID = id;
-   rm_push(TEXTURE, t, -1);
-
-   return t;
-}
-
-static void rs_check_sizes(render_stage_t* rs, attachment_options_t options)
-{
-   if(!rs->width)
-   {
-      rs->width = options.tex_width;
-      rs->height = options.tex_height;
-   }
-   else
-   {
-      if(rs->width  != (GLuint)options.tex_width ||
-         rs->height != (GLuint)options.tex_height)
-      {
-         RS_ERROR("Sizes of attachments should be equal, I guess....",0);
-      }
-   }
-}
-
+//
+// rs_build_tex()
+//
 void rs_build_tex(render_stage_t* rs)
 {
+   assert(rs);
+
    if(!rs->fbo)
    GL_CALL(glGenFramebuffers(1, &rs->fbo));
 

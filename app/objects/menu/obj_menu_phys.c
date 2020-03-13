@@ -7,27 +7,31 @@
 #endif
 #include "obj_menu_phys.h"
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCInconsistentNamingInspection"
+
 #include <chipmunk/chipmunk.h>
 
-bool freed_phys;
-cpBody* spheres[SPHERES_COUNT];
-cpShape* sphere_shapes[SPHERES_COUNT];
+static bool freed_phys;
+static cpBody* spheres[SPHERES_COUNT];
+static cpShape* sphere_shapes[SPHERES_COUNT];
+
+static cpBody* car1 = NULL;
+static cpBody* car2 = NULL;
+
+static cpShape* car1_shape = NULL;
+static cpShape* car2_shape = NULL;
+static cpShape* bound1_shape = NULL;
+static cpShape* bound2_shape = NULL;
+
+static cpSpace * space = NULL;
+static const cpFloat time_step = 1.0 / FPS_TO_LOCK;
+
 object_t* render_spheres[SPHERES_COUNT];
-object_t* render_car1;
-object_t* render_car2;
+object_t* render_car1 = NULL;
+object_t* render_car2 = NULL;
 
-cpBody* car1;
-cpBody* car2;
-
-cpShape* car1_shape;
-cpShape* car2_shape;
-cpShape* bound1_shape;
-cpShape* bound2_shape;
-
-cpSpace * space;
-cpFloat time_step = 1.0 / FPS_TO_LOCK;
-
-void move(cpBody* car, cpVect dest)
+static void move_car(cpBody* car, cpVect dest)
 {
    cpVect pos = cpBodyGetPosition(car);
 
@@ -49,7 +53,7 @@ void move(cpBody* car, cpVect dest)
    }
 }
 
-void update_menu_phys(object_t* this)
+static void update_menu_phys(object_t* this)
 {
    if(u_get_frames() == 1)
    {
@@ -76,13 +80,13 @@ void update_menu_phys(object_t* this)
    render_car2->position = vec3f(pos2.x, 0, pos2.y);
    render_car2->rotation = vec3f(0, cpBodyGetAngle(car2), 0);
 
-   move(car1, cpv(drand48() * 70, drand48() * 70));
-   move(car2, pos1);
+   move_car(car1, cpv(drand48() * 70, drand48() * 70));
+   move_car(car2, pos1);
 
    cpSpaceStep(space, time_step);
 }
 
-cpBody* createCar(cpVect pos, cpShape** shape)
+static cpBody* createCar(cpVect pos, cpShape** shape)
 {
    cpFloat mass = 5;
    cpFloat moment = cpMomentForBox(mass, CAR_SIZE, CAR_SIZE / 2.0f);
@@ -95,7 +99,7 @@ cpBody* createCar(cpVect pos, cpShape** shape)
    return car;
 }
 
-void DEEPCARS_FREE_menu_phys(object_t* object)
+static void free_menu_phys(object_t* object)
 {
    if(!freed_phys)
    {
@@ -177,7 +181,9 @@ object_t* create_menu_phys(void)
 
    object_t* this = o_create();
    this->update_func = update_menu_phys;
-   this->destroy_func = DEEPCARS_FREE_menu_phys;
+   this->destroy_func = free_menu_phys;
 
    return this;
 }
+
+#pragma clang diagnostic pop

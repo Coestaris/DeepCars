@@ -7,6 +7,11 @@
 #endif
 #include "vfx.h"
 
+static float normpdf(float x, float sigma)
+{
+   return 0.39894f * expf(-0.5f * x * x / (sigma * sigma)) / sigma;
+}
+
 blurred_region_t* create_br(win_info_t* info, vec2 pos, vec2 size, vec2 back_tex_size)
 {
    blurred_region_t* br = DEEPCARS_MALLOC(sizeof(blurred_region_t));
@@ -77,11 +82,6 @@ void free_br(blurred_region_t* br)
    //if(br->gray_color)
       //vec4_free(br->gray_color);
    DEEPCARS_FREE(br);
-}
-
-float normpdf(float x, float sigma)
-{
-   return 0.39894*exp(-0.5*x*x/(sigma*sigma))/sigma;
 }
 
 float* create_gaussian_kernel(float sigma, float* z, size_t* k_size, size_t len)

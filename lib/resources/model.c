@@ -463,36 +463,42 @@ void m_free(model_t* model)
 
 inline void m_push_vertex(model_t* model, vec4 vec)
 {
+   assert(model);
    assert(vec);
    M_PUSH_MODEL_PROP(model, vertices, vec4, vec);
 }
 
 inline void m_push_normal(model_t* model, vec4 vec)
 {
+   assert(model);
    assert(vec);
    M_PUSH_MODEL_PROP(model, normals, vec4, vec);
 }
 
 inline void m_push_tex_coord(model_t* model, vec4 vec)
 {
+   assert(model);
    assert(vec);
    M_PUSH_MODEL_PROP(model, tex_coords, vec4, vec);
 }
 
 inline void m_push_face(model_t* model, model_face_t* face)
 {
+   assert(model);
    assert(face);
    M_PUSH_MODEL_PROP(model, faces, model_face_t*, face);
 }
 
 inline void m_push_group_name(model_t* model, char* group_name)
 {
+   assert(model);
    assert(group_name);
    M_PUSH_MODEL_PROP(model, group_names, char*, group_name);
 }
 
 inline void m_push_mtllib(model_t* model, char* mtllib)
 {
+   assert(model);
    assert(mtllib);
    M_PUSH_MODEL_PROP(model, mtl_libs, char*, mtllib);
 }

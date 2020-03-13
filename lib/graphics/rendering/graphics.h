@@ -40,6 +40,27 @@ typedef struct _primitive_renderer
 
 } primitive_renderer_t;
 
+extern vec4 COLOR_WHITE;
+extern vec4 COLOR_SILVER;
+extern vec4 COLOR_GRAY;
+extern vec4 COLOR_BLACK;
+extern vec4 COLOR_RED;
+extern vec4 COLOR_MAROON;
+extern vec4 COLOR_YELLOW;
+extern vec4 COLOR_OLIVE;
+extern vec4 COLOR_LIME;
+extern vec4 COLOR_GREEN;
+extern vec4 COLOR_AQUA;
+extern vec4 COLOR_TEAL;
+extern vec4 COLOR_BLUE;
+extern vec4 COLOR_NAVY;
+extern vec4 COLOR_FUCHSIA;
+extern vec4 COLOR_PURPLE;
+
+extern mat4 proj_mat;
+extern mat4 view_mat;
+extern mat4 model_mat;
+
 sprite_renderer_t* gr_create_sprite_renderer(shader_t* shader);
 primitive_renderer_t* gr_create_primitive_renderer(shader_t* shader);
 
@@ -69,25 +90,11 @@ void gr_pq_push_line(uint8_t depth, vec2 p1, vec2 p2, float width, vec4 color,
 
 void gr_pq_flush(void);
 
-extern vec4 COLOR_WHITE;
-extern vec4 COLOR_SILVER;
-extern vec4 COLOR_GRAY;
-extern vec4 COLOR_BLACK;
-extern vec4 COLOR_RED;
-extern vec4 COLOR_MAROON;
-extern vec4 COLOR_YELLOW;
-extern vec4 COLOR_OLIVE;
-extern vec4 COLOR_LIME;
-extern vec4 COLOR_GREEN;
-extern vec4 COLOR_AQUA;
-extern vec4 COLOR_TEAL;
-extern vec4 COLOR_BLUE;
-extern vec4 COLOR_NAVY;
-extern vec4 COLOR_FUCHSIA;
-extern vec4 COLOR_PURPLE;
 
-extern mat4 proj_mat;
-extern mat4 view_mat;
-extern mat4 model_mat;
+void rc_create_perspective(win_info_t* win, mat4 mat, float fov, float near, float far);
+void rc_create_ortho(win_info_t* win, mat4 mat, float near, float far);
+
+GLint rc_get_quad_vao(void);
+GLint rc_get_cube_vao(void);
 
 #endif //DEEPCARS_GRAPHICS_H

@@ -14,9 +14,9 @@
 static font_data_t* font_data;
 static font_data_t* sec_font_data;
 
-char buff[10][70];
-float last_fps;
-bool draw_text;
+static char buff[10][70];
+static float last_fps;
+static bool draw_text;
 
 void switch_text_drawer(void)
 {
@@ -34,7 +34,7 @@ void update_drawer(object_t* this)
       if (fps != last_fps)
       {
          snprintf(buff[0], sizeof(buff[0]), "%s. FPS: %.3f (%i objects)\n",
-                  get_ssao_stage_string(), (float) fps, (int) objects->count);
+                  get_stage_string(), (float) fps, (int) objects->count);
 
          for (size_t i = 0; i < chain->stages->count; i++)
          {

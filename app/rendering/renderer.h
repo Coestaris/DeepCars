@@ -30,7 +30,7 @@ extern render_chain_t* default_rc;
 extern render_chain_t* editor_rc;
 extern list_t* blurred_regions;
 
-char* get_ssao_stage_string();
+char* get_stage_string();
 
 void switch_stages(void);
 void switch_ssao(void);

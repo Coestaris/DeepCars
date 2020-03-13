@@ -16,7 +16,7 @@ static font_t* default_font;
 static font_t* monospace_font;
 mat4 primitive_proj;
 
-void bind_default_font(font_t* font, void* data)
+static void bind_default_font(font_t* font, void* data)
 {
    struct _font_data fd = *(struct _font_data*)data;
    //sh_set_vec4(UNIFORM_FONT.color, fd.color);

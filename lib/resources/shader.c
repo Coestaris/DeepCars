@@ -19,9 +19,6 @@ void sh_compile_s(shader_t* sh,
                   uint8_t* fragment_source, GLint fragment_len)
 {
    assert(sh);
-   assert(vertex_source);
-   assert(geometry_source);
-   assert(fragment_source);
 
    GLuint vertex_shader   = 0;
    GLuint fragment_shader = 0;

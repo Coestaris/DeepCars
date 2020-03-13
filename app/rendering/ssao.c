@@ -6,7 +6,13 @@
 #pragma implementation "ssao.h"
 #endif
 #include "ssao.h"
+
 #include "../../lib/resources/rmanager.h"
+
+static float lerp(float a, float b, float f)
+{
+   return a + f * (b - a);
+}
 
 texture_t* generate_noise(size_t n)
 {
@@ -42,11 +48,6 @@ texture_t* generate_noise(size_t n)
    DEEPCARS_FREE(floats);
 
    return t;
-}
-
-float lerp(float a, float b, float f)
-{
-   return a + f * (b - a);
 }
 
 vec4* generate_kernel(size_t n)

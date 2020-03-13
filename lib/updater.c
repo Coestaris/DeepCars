@@ -15,10 +15,8 @@
 #define U_LOG(format, ...) DC_LOG("updater.c", format, __VA_ARGS__)
 #define U_ERROR(format, ...) DC_ERROR("updater.c", format, __VA_ARGS__)
 
-// Initial count of objects
-#define OBJECT_COUNT_START 50
 // Maximum available count of key states
-#define MAX_KEYS 256
+#define MAX_KEYS_STATES 256
 // Maximum available count of mouse states
 #define MAX_MOUSE_STATES 10
 
@@ -39,7 +37,7 @@ static uint64_t    frames;
 //
 // Event processing variables
 //
-static uint32_t    keys_state[MAX_KEYS];
+static uint32_t    keys_state[MAX_KEYS_STATES];
 static uint32_t    mouse_state[MAX_MOUSE_STATES];
 static uint32_t    mouse_x;
 static uint32_t    mouse_y;
@@ -66,14 +64,6 @@ static double_t u_get_millis(void)
    gettimeofday(&tv, NULL);
 
    return (tv.tv_sec) * 1000.0 + (tv.tv_usec) / 1000.0;
-}
-
-//
-// u_close()
-//
-void u_close(void)
-{
-   closed = true;
 }
 
 // Main draw function.
@@ -147,30 +137,48 @@ static void u_draw_func(void)
    w_swap_buffers(default_win);
 }
 
-//
-// u_get_mouse_pos()
-//
-vec2 u_get_mouse_pos()
+// Measures the time between frames and
+// waits for the required amount of time
+static void u_measure_time(void)
 {
-   return vec2f(mouse_x, mouse_y);
-}
+   // Measure time of draw cycle
+   double_t tick_start = u_get_millis();
 
-//
-// u_get_key_state()
-//
-uint32_t u_get_key_state(uint32_t key)
-{
-   assert(key < MAX_KEYS);
-   return keys_state[key];
-}
+   // Call main draw routine
+   u_draw_func();
 
-//
-// u_get_mouse_state()
-//
-uint32_t u_get_mouse_state(uint32_t mouse)
-{
-   assert(key < MAX_MOUSE_STATES);
-   return mouse_state[mouse];
+   double_t diff = u_get_millis() - tick_start;
+   counter++;
+   frames++;
+
+   // Wait the difference between two frames
+   if (diff < FPS_DELAY)
+   {
+      usleep((uint32_t) (FPS_DELAY - diff) * 1000);
+   }
+
+   elapsed += u_get_millis() - tick_start;
+   // calculate FPS
+   if (elapsed > FPS_AV_COUNTER)
+   {
+      fps = 1000.0 * counter / elapsed;
+      counter = 0;
+      elapsed = 0;
+
+      U_LOG("FPS: %lf. Objects: %li", fps, objects->count);
+
+#ifdef OUTPUT_RENDER_TIME
+      if(render_time_counter++ % OUTPUT_RENDER_TIME == 0)
+      {
+         render_chain_t* chain = rc_get_current();
+         for(size_t i = 0; i < chain->stages->count; i++)
+         {
+            render_stage_t* stage = chain->stages->collection[i];
+            U_LOG("%s: %lf ms", stage->name, (double_t)stage->render_time);
+         }
+      }
+#endif
+   }
 }
 
 // Main event handler function.
@@ -248,6 +256,40 @@ static void u_event_handler(XEvent event)
 }
 
 //
+// u_close()
+//
+void u_close(void)
+{
+   closed = true;
+}
+
+//
+// u_get_mouse_pos()
+//
+vec2 u_get_mouse_pos()
+{
+   return vec2f(mouse_x, mouse_y);
+}
+
+//
+// u_get_key_state()
+//
+uint32_t u_get_key_state(uint32_t key)
+{
+   assert(key < MAX_KEYS_STATES);
+   return keys_state[key];
+}
+
+//
+// u_get_mouse_state()
+//
+uint32_t u_get_mouse_state(uint32_t mouse)
+{
+   assert(mouse < MAX_MOUSE_STATES);
+   return mouse_state[mouse];
+}
+
+//
 // u_clear_objects
 //
 void u_clear_objects(bool free)
@@ -290,50 +332,6 @@ void u_push_object(object_t* object)
 uint64_t u_get_frames()
 {
    return frames;
-}
-
-// Measures the time between frames and
-// waits for the required amount of time
-static void u_measure_time(void)
-{
-   // Measure time of draw cycle
-   double_t tick_start = u_get_millis();
-
-   // Call main draw routine
-   u_draw_func();
-
-   double_t diff = u_get_millis() - tick_start;
-   counter++;
-   frames++;
-
-   // Wait the difference between two frames
-   if (diff < FPS_DELAY)
-   {
-      usleep((uint32_t) (FPS_DELAY - diff) * 1000);
-   }
-
-   elapsed += u_get_millis() - tick_start;
-   // calculate FPS
-   if (elapsed > FPS_AV_COUNTER)
-   {
-      fps = 1000.0 * counter / elapsed;
-      counter = 0;
-      elapsed = 0;
-
-      U_LOG("FPS: %lf. Objects: %li", fps, objects->count);
-
-#ifdef OUTPUT_RENDER_TIME
-      if(render_time_counter++ % OUTPUT_RENDER_TIME == 0)
-      {
-         render_chain_t* chain = rc_get_current();
-         for(size_t i = 0; i < chain->stages->count; i++)
-         {
-            render_stage_t* stage = chain->stages->collection[i];
-            U_LOG("%s: %lf ms", stage->name, (double_t)stage->render_time);
-         }
-      }
-#endif
-   }
 }
 
 list_t* u_get_objects(void)
