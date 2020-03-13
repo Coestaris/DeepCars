@@ -21,15 +21,17 @@ inline void list_push(list_t* list, void* object)
    // current collection if full increase its size in 1.5 times
    if (list->count > list->max_size - 1)
    {
-      if (list->max_size == LIST_BOOTSTRAP_SIZE) {
+      if (list->max_size == LIST_BOOTSTRAP_SIZE) 
+      {
          size_t new_len = (int) ((float) list->max_size * LIST_SIZE_INCREASE);
 
          void** new_collection = DEEPCARS_MALLOC(sizeof(void*) * new_len);
          memcpy(new_collection, list->bootstrap, list->count * sizeof(void*));
          list->collection = new_collection;
          list->max_size = new_len;
-
-      } else {
+      }
+      else 
+      {
          size_t new_len = (int) ((float) list->max_size * LIST_SIZE_INCREASE);
          list->collection = realloc(list->collection, sizeof(void*) * new_len);
          list->max_size = new_len;
