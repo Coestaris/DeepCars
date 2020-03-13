@@ -17,7 +17,11 @@ cmake CMakeLists.txt
 make 
 sudo make install
 ```
-
+And also you need to install [STB](https://github.com/nothings/stb):
+```
+git clone https://github.com/nothings/stb.git
+sudo cp stb/stb_image.h /usr/local/include/
+```
 To build project:
 ```bash
 cmake CMakeLists.txt 
@@ -39,10 +43,11 @@ The resource file must be in the same folder as the application executable
 [MIT License](https://github.com/Coestaris/DeepCars/blob/master/LICENSE)
 
 The project also bundles third party software under its own licenses:
- - mesa-utils - [MIT license](https://www.mesa3d.org/license.html)
- - libX11 - [X11 license](http://www.xfree86.org/3.3.6/COPYRIGHT2.html)
- - OIL - [MIT license](https://github.com/Coestaris/oil/blob/master/LICENSE)
- - fontbm - [MIT license](https://github.com/vladimirgamalyan/fontbm/blob/master/LICENSE)
- - Chipmunk2D - [MIT license](https://github.com/slembcke/Chipmunk2D/blob/master/LICENSE.txt)
+ - mesa-utils - [MIT License](https://www.mesa3d.org/license.html)
+ - libX11 - [X11 License](http://www.xfree86.org/3.3.6/COPYRIGHT2.html)
+ - OIL - [MIT License](https://github.com/Coestaris/oil/blob/master/LICENSE)
+ - fontbm - [MIT License](https://github.com/vladimirgamalyan/fontbm/blob/master/LICENSE)
+ - Chipmunk2D - [MIT License](https://github.com/slembcke/Chipmunk2D/blob/master/LICENSE.txt)
  - freetype - [Free Type License (FTL)](https://git.savannah.gnu.org/cgit/freetype/freetype2.git/tree/docs/FTL.TXT)
  - osdialog - [CC0 License](https://github.com/AndrewBelt/osdialog/blob/master/LICENSE.txt)
+ - stb - [MIT License](https://github.com/nothings/stb/blob/master/LICENSE)
