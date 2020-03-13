@@ -6,104 +6,118 @@
 #pragma implementation "obj_editor_drawer.h"
 #endif
 #include "obj_editor_drawer.h"
+
+#include "obj_editor_map.h"
+#include "../../win_defaults.h"
 #include "../../../lib/resources/rmanager.h"
 #include "../../rendering/renderer.h"
 #include "map_saver.h"
-#include "../../rendering/text_rendering.h"
 #include "../../../osdialog/osdialog.h"
-#include "obj_editor_map.h"
-#include "../../win_defaults.h"
 
-#define toolbar_size 33
-#define grid_size 256
+#define TOOLBAR_SIZE 33
+#define GRID_TEXTURE_SIZE 256
 
-texture_t* run_button_texture[2];
-texture_t* toolbar_eraser_texture;
-texture_t* toolbar_grid_texture[5];
-texture_t* toolbar_obstacle_texture;
-texture_t* toolbar_slip_texture;
-texture_t* toolbar_start_texture;
-texture_t* toolbar_fin_texture;
-texture_t* toolbar_wall_texture;
+#define CHECK(position)                                       \
+   pos.x > position.x && pos.x < position.x + TOOLBAR_SIZE && \
+   pos.y > position.y && pos.y < position.y + TOOLBAR_SIZE    \
 
-texture_t* toolbar_selected;
-texture_t* toolbar_frame;
-texture_t* toolbar_back;
-texture_t* toolbar_back_selected;
-texture_t* toolbar_clicked;
+#define CHECK_SIZE(position, tex)                            \
+   pos.x > position.x && pos.x < position.x + tex->width &&  \
+   pos.y > position.y && pos.y < position.y + tex->height    \
 
-texture_t* tabbutton_arrow;
-texture_t* tabbutton_ffnn;
-texture_t* tabbutton_ga;
-texture_t* tabbutton_map;
-texture_t* tabbutton_file;
+static texture_t* run_button_texture[2]    = {NULL, NULL};
+static texture_t* toolbar_eraser_texture   = NULL;
+static texture_t* toolbar_grid_texture[5]  = {NULL, NULL, NULL, NULL, NULL};
+static texture_t* toolbar_obstacle_texture = NULL;
+static texture_t* toolbar_slip_texture     = NULL;
+static texture_t* toolbar_start_texture    = NULL;
+static texture_t* toolbar_fin_texture      = NULL;
+static texture_t* toolbar_wall_texture     = NULL;
 
-vec2 tabbutton_ffnn_pos;
-vec2 tabbutton_ga_pos;
-vec2 tabbutton_map_pos;
-vec2 tabbutton_file_pos;
-vec2 tabbutton_selected_pos;
+static texture_t* toolbar_selected      = NULL;
+static texture_t* toolbar_frame         = NULL;
+static texture_t* toolbar_back          = NULL;
+static texture_t* toolbar_back_selected = NULL;
+static texture_t* toolbar_clicked       = NULL;
 
-texture_t* grid;
-texture_t* editor_black_texture;
+static texture_t* tabbutton_arrow       = NULL;
+static texture_t* tabbutton_ffnn        = NULL;
+static texture_t* tabbutton_ga          = NULL;
+static texture_t* tabbutton_map         = NULL;
+static texture_t* tabbutton_file        = NULL;
 
-vec2 run_button_pos;
-vec2 toolbar_eraser_pos;
-vec2 toolbar_grid_pos;
-vec2 toolbar_obstacle_pos;
-vec2 toolbar_slip_pos;
-vec2 toolbar_start_pos;
-vec2 toolbar_fin_pos;
-vec2 toolbar_wall_pos;
+static vec2 tabbutton_ffnn_pos     = vec2e;
+static vec2 tabbutton_ga_pos       = vec2e;
+static vec2 tabbutton_map_pos      = vec2e;
+static vec2 tabbutton_file_pos     = vec2e;
+static vec2 tabbutton_selected_pos = vec2e;
 
-vec2 tab_file_save_pos;
-vec2 tab_file_load_pos;
-texture_t* tab_file_selected;
-texture_t* tab_file_clicked;
+static texture_t* grid_texture         = NULL;
+static texture_t* editor_black_texture = NULL;
 
-bool toolbar_eraser_clicked;
-bool toolbar_grid_clicked;
-bool toolbar_obstacle_clicked;
-bool toolbar_slip_clicked;
-bool toolbar_start_clicked;
-bool toolbar_fin_clicked;
-bool toolbar_wall_clicked;
+static vec2 run_button_pos        = vec2e;
+static vec2 toolbar_eraser_pos    = vec2e;
+static vec2 toolbar_grid_pos      = vec2e;
+static vec2 toolbar_obstacle_pos  = vec2e;
+static vec2 toolbar_slip_pos      = vec2e;
+static vec2 toolbar_start_pos     = vec2e;
+static vec2 toolbar_fin_pos       = vec2e;
+static vec2 toolbar_wall_pos      = vec2e;
 
-texture_t* tab_texture;
-texture_t* tab_file_texture;
-texture_t* tab_ffnn_texture;
-texture_t* tab_ga_texture;
-texture_t* tab_map_texture;
-vec2 tab_pos;
-float editor_p = 0;
-osdialog_filters* filters = NULL;
+static vec2       tab_file_save_pos = vec2e;
+static vec2       tab_file_load_pos = vec2e;
+static texture_t* tab_file_selected = NULL;
+static texture_t* tab_file_clicked  = NULL;
 
-enum _toolbar_state toolbar_state;
-vec2 selected_toolbar_state_pos;
-uint8_t grid_state;
-int8_t tab_state;
-uint8_t current_grid_size;
+static bool     toolbar_eraser_clicked   = false;
+static bool     toolbar_grid_clicked     = false;
+static bool     toolbar_obstacle_clicked = false;
+static bool     toolbar_slip_clicked     = false;
+static bool     toolbar_start_clicked    = false;
+static bool     toolbar_fin_clicked      = false;
+static bool     toolbar_wall_clicked     = false;
+
+static texture_t* tab_texture        = NULL;
+static texture_t* tab_file_texture   = NULL;
+static texture_t* tab_ffnn_texture   = NULL;
+static texture_t* tab_ga_texture     = NULL;
+static texture_t* tab_map_texture    = NULL;
+static vec2       tab_pos            = vec2e;
+static float      editor_p           = 0;
+static osdialog_filters* filters     = NULL;
+
+static vec2 selected_toolbar_state_pos = vec2e;
+
+enum _toolbar_state toolbar_state     = WALL;
+enum _tab_state     tab_state         = TAB_CLOSED;
+uint8_t             grid_state        = EDITOR_GRID_START_STATE;
+uint8_t             current_grid_size = EDITOR_GRID_START;
+
 void (*field_click_func)(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse);
 
-void create_grid(size_t size)
+static void create_grid(size_t size)
 {
    char buff[256];
    snprintf(buff, sizeof(buff), "__%li_grid", size);
 
-   grid = rm_getn_try(TEXTURE, buff);
-   if(!grid)
+   grid_texture = rm_getn_try(TEXTURE, buff);
+   if(!grid_texture)
    {
       pngImage* image = oilCreateImg();
-      image->width = grid_size;
-      image->height = grid_size;
-      image->colorMatrix = oilColorMatrixAlloc(true, grid_size, grid_size);
+      image->width = GRID_TEXTURE_SIZE;
+      image->height = GRID_TEXTURE_SIZE;
+      image->colorMatrix = oilColorMatrixAlloc(true, GRID_TEXTURE_SIZE, GRID_TEXTURE_SIZE);
 
-      oilColor gridColor = {90, 90, 90, 220};
-      oilColor gridColor1 = {120, 120, 120, 200};
-      for(size_t x = 0; x < grid_size / size; x++)
-         oilGrDrawLine(image->colorMatrix, x * size, 0, x * size, grid_size - 1, x % 2 ? gridColor : gridColor1);
-      for(size_t y = 0; y < grid_size / size; y++)
-         oilGrDrawLine(image->colorMatrix, 0, y * size, grid_size - 1, y * size, y % 2 ? gridColor : gridColor1);
+      oilColor grid_color = EDITOR_GRID_COLOR;
+      oilColor grid_color_accent = EDITOR_GRID_COLOR_ACCENT;
+
+      for(size_t x = 0; x < GRID_TEXTURE_SIZE / size; x++)
+         oilGrDrawLine(image->colorMatrix, x * size, 0, x * size, GRID_TEXTURE_SIZE - 1,
+               x % 2 ? grid_color : grid_color_accent);
+
+      for(size_t y = 0; y < GRID_TEXTURE_SIZE / size; y++)
+         oilGrDrawLine(image->colorMatrix, 0, y * size, GRID_TEXTURE_SIZE - 1, y * size,
+               y % 2 ? grid_color : grid_color_accent);
 
       imageData* data = oilGetPNGImageData(image, GL_RGBA, GL_UNSIGNED_BYTE);
       if(!data)
@@ -121,57 +135,49 @@ void create_grid(size_t size)
 
       texture_t* texture = t_create(strdup(buff));
       texture->texID = id;
-      texture->width = grid_size;
-      texture->height = grid_size;
+      texture->width = GRID_TEXTURE_SIZE;
+      texture->height = GRID_TEXTURE_SIZE;
       texture->type = GL_TEXTURE_2D;
 
       rm_push(TEXTURE, texture, -1);
 
-      grid = texture;
+      grid_texture = texture;
 
       oilFreeImageData(data);
       oilPNGFreeImage(image);
    }
 }
 
-void draw(texture_t* texture, vec2 position)
+static void draw(texture_t* texture, vec2 position)
 {
    static float a = 0;
-   gr_pq_push_sprite(3, texture, position, vec2u,
+   gr_pq_push_sprite(EDITOR_MAIN_DEPTH, texture, position, vec2u,
                      vec2e, 0, default_sprite_renderer, &a);
 }
 
-void draw_depth(size_t depth, texture_t* texture, vec2 position)
+static void draw_depth(size_t depth, texture_t* texture, vec2 position)
 {
    static float a = 0;
    gr_pq_push_sprite(depth, texture, position, vec2u,
                      vec2e, 0, default_sprite_renderer, &a);
 }
 
-void draw_centered(texture_t* texture, vec2 position)
+static void draw_centered(texture_t* texture, vec2 position)
 {
    static float a = 0;
-   gr_pq_push_sprite(3, texture,
-         vec2f(position.x - (texture->width - toolbar_size) / 2.0, position.y - (texture->height - toolbar_size) / 2.0),
+   gr_pq_push_sprite(EDITOR_MAIN_DEPTH, texture,
+         vec2f(position.x - (texture->width - TOOLBAR_SIZE) / 2.0,
+               position.y - (texture->height - TOOLBAR_SIZE) / 2.0),
          vec2u,
          vec2e, 0, default_sprite_renderer, &a);
 }
 
-
-#define CHECK(position)                                       \
-   pos.x > position.x && pos.x < position.x + toolbar_size && \
-   pos.y > position.y && pos.y < position.y + toolbar_size    \
-
-#define CHECK_SIZE(position, tex)                            \
-   pos.x > position.x && pos.x < position.x + tex->width &&  \
-   pos.y > position.y && pos.y < position.y + tex->height    \
-
-void update_editor(object_t* this)
+static void update_editor(object_t* this)
 {
    if(editor_p <= 1)
    {
       editor_p += 0.03f;
-      gr_pq_push_sprite(4, editor_black_texture,
+      gr_pq_push_sprite(EDITOR_MENU_DEPTH, editor_black_texture,
                         vec2e,
                         vec2f(default_win->w,default_win->h), vec2e, 0, default_sprite_renderer, &editor_p);
    }
@@ -186,7 +192,7 @@ void update_editor(object_t* this)
    {
       draw(toolbar_back_selected, toolbar_eraser_pos);
       if(toolbar_eraser_clicked)
-         draw_depth(4, toolbar_clicked, toolbar_eraser_pos);
+         draw_depth(EDITOR_MENU_DEPTH, toolbar_clicked, toolbar_eraser_pos);
    }
    else draw(toolbar_back, toolbar_eraser_pos);
 
@@ -194,7 +200,7 @@ void update_editor(object_t* this)
    {
       draw(toolbar_back_selected, toolbar_grid_pos);
       if(toolbar_grid_clicked)
-         draw_depth(4, toolbar_clicked, toolbar_grid_pos);
+         draw_depth(EDITOR_MENU_DEPTH, toolbar_clicked, toolbar_grid_pos);
    }
    else draw(toolbar_back, toolbar_grid_pos);
 
@@ -202,7 +208,7 @@ void update_editor(object_t* this)
    {
       draw(toolbar_back_selected, toolbar_wall_pos);
       if(toolbar_wall_clicked)
-         draw_depth(4, toolbar_clicked, toolbar_wall_pos);
+         draw_depth(EDITOR_MENU_DEPTH, toolbar_clicked, toolbar_wall_pos);
    }
    else draw(toolbar_back, toolbar_wall_pos);
 
@@ -210,7 +216,7 @@ void update_editor(object_t* this)
    {
       draw(toolbar_back_selected, toolbar_start_pos);
       if(toolbar_start_clicked)
-         draw_depth(4, toolbar_clicked, toolbar_start_pos);
+         draw_depth(EDITOR_MENU_DEPTH, toolbar_clicked, toolbar_start_pos);
    }
    else draw(toolbar_back, toolbar_start_pos);
 
@@ -218,7 +224,7 @@ void update_editor(object_t* this)
    {
       draw(toolbar_back_selected, toolbar_fin_pos);
       if(toolbar_fin_clicked)
-         draw_depth(4, toolbar_clicked, toolbar_fin_pos);
+         draw_depth(EDITOR_MENU_DEPTH, toolbar_clicked, toolbar_fin_pos);
    }
    else draw(toolbar_back, toolbar_fin_pos);
 
@@ -226,7 +232,7 @@ void update_editor(object_t* this)
    {
       draw(toolbar_back_selected, toolbar_obstacle_pos);
       if(toolbar_obstacle_clicked)
-         draw_depth(4, toolbar_clicked, toolbar_obstacle_pos);
+         draw_depth(EDITOR_MENU_DEPTH, toolbar_clicked, toolbar_obstacle_pos);
    }
    else draw(toolbar_back, toolbar_obstacle_pos);
 
@@ -234,7 +240,7 @@ void update_editor(object_t* this)
    {
       draw(toolbar_back_selected, toolbar_slip_pos);
       if(toolbar_slip_clicked)
-         draw_depth(4, toolbar_clicked, toolbar_slip_pos);
+         draw_depth(EDITOR_MENU_DEPTH, toolbar_clicked, toolbar_slip_pos);
    }
    else draw(toolbar_back, toolbar_slip_pos);
 
@@ -263,43 +269,45 @@ void update_editor(object_t* this)
    draw(tabbutton_ga, tabbutton_ga_pos);
    draw(tabbutton_map, tabbutton_map_pos);
    draw(tabbutton_file, tabbutton_file_pos);
-   if(tab_state != -1)
+   if(tab_state != TAB_CLOSED)
    {
       draw(tabbutton_arrow, tabbutton_selected_pos);
       draw(tab_texture, tab_pos);
       switch(tab_state)
       {
-         case 0: if(tab_ffnn_texture) draw(tab_ffnn_texture, tab_pos); break;
-         case 1: if(tab_ga_texture) draw(tab_ga_texture, tab_pos); break;
-         case 2: if(tab_map_texture) draw(tab_map_texture, tab_pos); break;
-         case 3: if(tab_file_texture) draw(tab_file_texture, tab_pos); break;
+         case TAB_FFNN: if(tab_ffnn_texture) draw(tab_ffnn_texture, tab_pos); break;
+         case TAB_GA: if(tab_ga_texture) draw(tab_ga_texture, tab_pos); break;
+         case TAB_MAP: if(tab_map_texture) draw(tab_map_texture, tab_pos); break;
+         case TAB_FILE: if(tab_file_texture) draw(tab_file_texture, tab_pos); break;
+         default:
+            break;
       }
    }
    draw(toolbar_selected, selected_toolbar_state_pos);
 
-   if(CHECK_SIZE(tab_file_load_pos, tab_file_selected) && tab_state == 3)
+   if(CHECK_SIZE(tab_file_load_pos, tab_file_selected) && tab_state == TAB_FILE)
    {
       draw(ms == MOUSE_PRESSED ? tab_file_clicked : tab_file_selected, tab_file_load_pos);
    }
-   if(CHECK_SIZE(tab_file_save_pos, tab_file_selected) && tab_state == 3)
+   if(CHECK_SIZE(tab_file_save_pos, tab_file_selected) && tab_state == TAB_FILE)
    {
       draw(ms == MOUSE_PRESSED ? tab_file_clicked : tab_file_selected, tab_file_save_pos);
    }
 
-   if(grid)
+   if(grid_texture)
    {
-      for(size_t x = 0; x < default_win->w / grid_size + 1U; x++)
-      for(size_t y = 0; y < default_win->h / grid_size + 1U; y++)
+      for(size_t x = 0; x < default_win->w / GRID_TEXTURE_SIZE + 1; x++)
+      for(size_t y = 0; y < default_win->h / GRID_TEXTURE_SIZE + 1; y++)
       {
-         float screen_x = x * (float)grid_size;
-         float screen_y = y * (float)grid_size;
+         float screen_x = x * (float)GRID_TEXTURE_SIZE;
+         float screen_y = y * (float)GRID_TEXTURE_SIZE;
 
-         draw_depth(1, grid, vec2f(screen_x, screen_y));
+         draw_depth(EDITOR_GRID_DEPTH, grid_texture, vec2f(screen_x, screen_y));
       }
    }
 }
 
-void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
+static void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
 {
    vec2 pos = u_get_mouse_pos();
 
@@ -317,20 +325,22 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
       toolbar_grid_clicked = state == MOUSE_PRESSED && mouse == MOUSE_LEFT;
       if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT)
       {
-         grid_state = (grid_state + 1) % 5;
+         grid_state = (grid_state + 1) % (EDITOR_GRID_STATES - 1);
          switch(grid_state)
          {
-            case 0: current_grid_size = 8; break;
-            case 1: current_grid_size = 16; break;
-            case 2: current_grid_size = 32; break;
-            case 3: current_grid_size = 128; break;
-            case 4: current_grid_size = 0; break;
+            case 0: current_grid_size = EDITOR_GRID_SIZE_1; break;
+            case 1: current_grid_size = EDITOR_GRID_SIZE_2; break;
+            case 2: current_grid_size = EDITOR_GRID_SIZE_3; break;
+            case 3: current_grid_size = EDITOR_GRID_SIZE_4; break;
+            default:
+            case 4:
+               current_grid_size = EDITOR_GRID_SIZE_0; break;
          }
 
          if(current_grid_size)
             create_grid(current_grid_size);
          else
-            grid = NULL;
+            grid_texture = NULL;
       }
    }
    else if(CHECK(toolbar_obstacle_pos))
@@ -380,49 +390,45 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
    }
    else if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && CHECK_SIZE(tabbutton_ffnn_pos, tabbutton_ffnn))
    {
-      if(tab_state == 0)
-         tab_state = -1;
+      if(tab_state == TAB_FFNN) tab_state = TAB_CLOSED;
       else
       {
          tabbutton_selected_pos = tabbutton_ffnn_pos;
-         tab_state = 0;
+         tab_state = TAB_FFNN;
       }
    }
    else if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && CHECK_SIZE(tabbutton_ga_pos, tabbutton_ga))
    {
-      if(tab_state == 1)
-         tab_state = -1;
+      if(tab_state == TAB_GA) tab_state = TAB_CLOSED;
       else
       {
          tabbutton_selected_pos = tabbutton_ga_pos;
-         tab_state = 1;
+         tab_state = TAB_GA;
       }
    }
    else if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && CHECK_SIZE(tabbutton_map_pos, tabbutton_map))
    {
-      if(tab_state == 2)
-         tab_state = -1;
+      if(tab_state == TAB_MAP) tab_state = TAB_CLOSED;
       else
       {
          tabbutton_selected_pos = tabbutton_map_pos;
-         tab_state = 2;
+         tab_state = TAB_MAP;
       }
    }
    else if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && CHECK_SIZE(tabbutton_file_pos, tabbutton_file))
    {
-      if(tab_state == 3)
-         tab_state = -1;
+      if(tab_state == TAB_FILE) tab_state = TAB_CLOSED;
       else
       {
          tabbutton_selected_pos = tabbutton_file_pos;
-         tab_state = 3;
+         tab_state = TAB_FILE;
       }
    }
-   else if(tab_state != -1 && state == MOUSE_RELEASE && mouse == MOUSE_LEFT && CHECK_SIZE(tab_pos, tab_texture))
+   else if(tab_state != TAB_CLOSED && state == MOUSE_RELEASE && mouse == MOUSE_LEFT && CHECK_SIZE(tab_pos, tab_texture))
    {
       if(CHECK_SIZE(tab_file_load_pos, tab_file_selected))
       {
-         char* fn = osdialog_file(OSDIALOG_SAVE, MAP_SAVE_DIR, "map.map", filters);
+         char* fn = osdialog_file(OSDIALOG_SAVE, MAP_SAVE_DIR, EDITOR_DEFALUT_MAP_FN, filters);
          if(fn)
          {
             map_save(walls, map_objects, fn, prev_point, first_point_set);
@@ -431,7 +437,7 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
       }
       else if(CHECK_SIZE(tab_file_save_pos, tab_file_selected))
       {
-         char* fn = osdialog_file(OSDIALOG_OPEN, MAP_SAVE_DIR, "map.map", filters);
+         char* fn = osdialog_file(OSDIALOG_OPEN, MAP_SAVE_DIR, EDITOR_DEFALUT_MAP_FN, filters);
          if(fn)
          {
             map_load(walls, map_objects, fn, &prev_point, &first_point_set);
@@ -456,52 +462,53 @@ void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32
 object_t* create_editor_drawer(void)
 {
    if(!filters)
-      filters = osdialog_filters_parse("Map files:map");
+      filters = osdialog_filters_parse(EDITOR_FILE_FILTER);
 
-   tab_texture = rm_getn(TEXTURE, "editor_tab");
+   tab_texture      = rm_getn(TEXTURE, "editor_tab");
    tab_file_texture = rm_getn(TEXTURE, "editor_tab_file");
-   tab_ffnn_texture = NULL;//rm_getn(TEXTURE, "editor_tab_ffnn");
-   tab_ga_texture =   NULL;//rm_getn(TEXTURE, "editor_tab_ga");
-   tab_map_texture =  NULL;//rm_getn(TEXTURE, "editor_tab_map");
+   tab_ffnn_texture = NULL; // rm_getn(TEXTURE, "editor_tab_ffnn");
+   tab_ga_texture   = NULL; // rm_getn(TEXTURE, "editor_tab_ga");
+   tab_map_texture  = NULL; // rm_getn(TEXTURE, "editor_tab_map");
 
-   tab_file_save_pos = vec2f(895, 400);
-   tab_file_load_pos = vec2f(1027, 400);
+   tab_file_save_pos = vec2f(EDITOR_MENU_TAB_FILE_SAVE_POS);
+   tab_file_load_pos = vec2f(EDITOR_MENU_TAB_FILE_LOAD_POS);
    tab_file_selected = rm_getn(TEXTURE, "editor_tab_file_selected");
-   tab_file_clicked = rm_getn(TEXTURE, "editor_tab_file_clicked");
+   tab_file_clicked  = rm_getn(TEXTURE, "editor_tab_file_clicked");
 
    editor_black_texture = rm_getn(TEXTURE, "__generated_mt_grass_trans_0.0_0.0_0.0");
 
-   tab_pos = vec2f(871, 7);
-   run_button_pos = vec2f(895, 698);
-   toolbar_eraser_pos = vec2f(16 ,704);
-   toolbar_grid_pos = vec2f(16 ,752);
-   toolbar_wall_pos = vec2f(80 ,752);
-   toolbar_start_pos = vec2f(120 ,752);
-   toolbar_fin_pos = vec2f(160 ,752);
-   toolbar_obstacle_pos = vec2f(200 ,752);
-   toolbar_slip_pos = vec2f(240 ,752);
-   create_grid(32);
-   grid_state = 2;
-   current_grid_size = 32;
+   tab_pos              = vec2f(EDITOR_MENU_TAB_POS);
+   run_button_pos       = vec2f(EDITOR_MENU_RUNBTN_POS);
+   toolbar_eraser_pos   = vec2f(EDITOR_MENU_ERASER_POS);
+   toolbar_grid_pos     = vec2f(EDITOR_MENU_GRID_POS);
+   toolbar_wall_pos     = vec2f(EDITOR_MENU_WALL_POS);
+   toolbar_start_pos    = vec2f(EDITOR_MENU_START_POS);
+   toolbar_fin_pos      = vec2f(EDITOR_MENU_FIN_POS);
+   toolbar_obstacle_pos = vec2f(EDITOR_MENU_OBSTACLE_POS);
+   toolbar_slip_pos     = vec2f(EDITOR_MENU_SLIP_POS);
 
-   tabbutton_arrow = rm_getn(TEXTURE, "editor_tabbutton_arrow");
-   tabbutton_ffnn = rm_getn(TEXTURE, "editor_tabbutton_ffnn");
-   tabbutton_ga = rm_getn(TEXTURE, "editor_tabbutton_ga");
-   tabbutton_map = rm_getn(TEXTURE, "editor_tabbutton_map");
-   tabbutton_file = rm_getn(TEXTURE, "editor_tabbutton_file");
+   create_grid(EDITOR_GRID_START);
+   grid_state        = EDITOR_GRID_START_STATE;
+   current_grid_size = EDITOR_GRID_START;
 
-   tabbutton_ffnn_pos = vec2f(1168, 16);
-   tabbutton_ga_pos = vec2f(1168, 128);
-   tabbutton_map_pos = vec2f(1168, 240);
-   tabbutton_file_pos = vec2f(1168, 352);
-   tab_state = -1;
+   tabbutton_arrow   = rm_getn(TEXTURE, "editor_tabbutton_arrow");
+   tabbutton_ffnn    = rm_getn(TEXTURE, "editor_tabbutton_ffnn");
+   tabbutton_ga      = rm_getn(TEXTURE, "editor_tabbutton_ga");
+   tabbutton_map     = rm_getn(TEXTURE, "editor_tabbutton_map");
+   tabbutton_file    = rm_getn(TEXTURE, "editor_tabbutton_file");
 
-   toolbar_selected = rm_getn(TEXTURE, "editor_toolbar_selected");
-   toolbar_frame = rm_getn(TEXTURE, "editor_toolbar_frame");
-   toolbar_back = rm_getn(TEXTURE, "editor_toolbar_frame_back");
-   toolbar_back = rm_getn(TEXTURE, "editor_toolbar_frame_back");
+   tabbutton_ffnn_pos = vec2f(EDITOR_MENU_TABBUTTON_FFNN_POS);
+   tabbutton_ga_pos   = vec2f(EDITOR_MENU_TABBUTTON_GA_POS);
+   tabbutton_map_pos  = vec2f(EDITOR_MENU_TABBUTTON_MAP_POS);
+   tabbutton_file_pos = vec2f(EDITOR_MENU_TABBUTTON_FILE_POS);
+   tab_state = TAB_CLOSED;
+
+   toolbar_selected      = rm_getn(TEXTURE, "editor_toolbar_selected");
+   toolbar_frame         = rm_getn(TEXTURE, "editor_toolbar_frame");
+   toolbar_back          = rm_getn(TEXTURE, "editor_toolbar_frame_back");
+   toolbar_back          = rm_getn(TEXTURE, "editor_toolbar_frame_back");
    toolbar_back_selected = rm_getn(TEXTURE, "editor_toolbar_frame_back_selected");
-   toolbar_clicked = rm_getn(TEXTURE, "editor_toolbar_frame_clicked");
+   toolbar_clicked       = rm_getn(TEXTURE, "editor_toolbar_frame_clicked");
 
    run_button_texture[0] = rm_getn(TEXTURE, "editor_run");
    run_button_texture[1] = rm_getn(TEXTURE, "editor_run_selected");
@@ -512,12 +519,12 @@ object_t* create_editor_drawer(void)
    toolbar_grid_texture[3] = rm_getn(TEXTURE, "editor_toolbar_grid_128");
    toolbar_grid_texture[4] = rm_getn(TEXTURE, "editor_toolbar_grid_no");
 
-   toolbar_eraser_texture = rm_getn(TEXTURE, "editor_toolbar_eraser");
-   toolbar_wall_texture = rm_getn(TEXTURE, "editor_toolbar_wall");
-   toolbar_start_texture = rm_getn(TEXTURE, "editor_toolbar_start");
-   toolbar_fin_texture = rm_getn(TEXTURE, "editor_toolbar_finish");
+   toolbar_eraser_texture   = rm_getn(TEXTURE, "editor_toolbar_eraser");
+   toolbar_wall_texture     = rm_getn(TEXTURE, "editor_toolbar_wall");
+   toolbar_start_texture    = rm_getn(TEXTURE, "editor_toolbar_start");
+   toolbar_fin_texture      = rm_getn(TEXTURE, "editor_toolbar_finish");
    toolbar_obstacle_texture = rm_getn(TEXTURE, "editor_toolbar_obstacle");
-   toolbar_slip_texture = rm_getn(TEXTURE, "editor_toolbar_slip");
+   toolbar_slip_texture     = rm_getn(TEXTURE, "editor_toolbar_slip");
 
    toolbar_state = WALL;
    selected_toolbar_state_pos = toolbar_wall_pos;

@@ -6,6 +6,7 @@
 #define DEEPCARS_OBJ_EDITOR_MAP_H
 
 #include "../../../lib/object_include.h"
+
 #define GET_INTERSECTION_COMP 1e-5
 
 extern list_t* walls;

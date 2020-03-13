@@ -6,39 +6,45 @@
 #pragma implementation "obj_editor_map.h"
 #endif
 #include "obj_editor_map.h"
+
 #include "map_saver.h"
 #include "obj_editor_drawer.h"
 #include "../../rendering/renderer.h"
 #include "../../../lib/resources/rmanager.h"
+#include "../../win_defaults.h"
 
-texture_t* texture_start;
-texture_t* texture_fin;
+static texture_t*  texture_start   = NULL;
+static texture_t*  texture_fin     = NULL;
+static float       rotation        = 0;
 
-list_t* walls = NULL;
-list_t* map_objects = NULL;
-float rotation;
+list_t*     walls           = NULL;
+list_t*     map_objects     = NULL;
+vec2        prev_point      = vec2e;
+bool        first_point_set = false;
 
-vec2 prev_point;
-bool first_point_set = false;
-
-void draw_line(vec2 p1, vec2 p2)
+static void draw_line(vec2 p1, vec2 p2)
 {
-   gr_pq_push_line(2, p1, p2, 2, COLOR_WHITE, default_primitive_renderer, NULL);
+   gr_pq_push_line(MAP_MAIN_DEPTH, p1, p2, MAP_MAIN_LINE_WIDTH, MAP_MAIN_LINE_COLOR,
+         default_primitive_renderer, NULL);
 }
 
-vec2 floor_point(vec2 pos)
+static vec2 floor_point(vec2 pos)
 {
-   pos.x = current_grid_size != 0 ? roundf((float)pos.x / (float) current_grid_size) * (float) current_grid_size : pos.x;
-   pos.y = current_grid_size != 0 ? roundf((float)pos.y / (float) current_grid_size) * (float) current_grid_size : pos.y;
+   pos.x = current_grid_size != 0 ?
+         roundf((float)pos.x / (float) current_grid_size) * (float) current_grid_size : pos.x;
+
+   pos.y = current_grid_size != 0 ?
+         roundf((float)pos.y / (float) current_grid_size) * (float) current_grid_size : pos.y;
+
    return pos;
 }
 
-void wheel_mouse_editor_map(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
+static void wheel_mouse_editor_map(object_t* this, uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
 {
    if(state == MOUSE_RELEASE && mouse == MOUSE_WHEELDOWN)
-      rotation -= M_PI / (current_grid_size == 0 ? 72 : 36);
+      rotation -= (float)M_PI / (float)(current_grid_size == 0 ? MAP_ROTATION_STEP_SMALL : MAP_ROTATION_STEP);
    else if(state == MOUSE_RELEASE && mouse == MOUSE_WHEELUP)
-      rotation += M_PI / (current_grid_size == 0 ? 72 : 36);
+      rotation += (float)M_PI / (float)(current_grid_size == 0 ? MAP_ROTATION_STEP_SMALL : MAP_ROTATION_STEP);
 }
 
 bool get_intersection(double ray_x1, double ray_y1, double ray_x2, double ray_y2, vec2 seg1, vec2  seg2,
@@ -76,9 +82,9 @@ bool get_intersection(double ray_x1, double ray_y1, double ray_x2, double ray_y2
    return true;
 }
 
-void calculate_start_points(vec2 pos, float angle, vec2* p1, vec2* p2)
+static void calculate_start_points(vec2 pos, float angle, vec2* p1, vec2* p2)
 {
-   const double max_dist = sqrtf(2) * (float)default_win->w;
+   const double max_dist = MAP_FLAGS_MAX_DIST;
 
    *p1 = vec2f(
          pos.x - max_dist * cosf(angle),
@@ -87,14 +93,19 @@ void calculate_start_points(vec2 pos, float angle, vec2* p1, vec2* p2)
          pos.x - max_dist * cosf(angle + M_PI),
          pos.y - max_dist * sinf(angle + M_PI));
 
-   double min_p1 = max_dist;
-   double min_p2 = max_dist;
-   bool found_p1 = false, found_p2 = false;
+   double min_p1    = max_dist;
+   double min_p2    = max_dist;
+   bool   found_p1  = false;
+   bool   found_p2  = false;
 
-   double min_p1_x, min_p1_y;
-   double min_p2_x, min_p2_y;
-   double dest_x, dest_y;
-   double dest_dist;
+   double min_p1_x  = 0;
+   double min_p1_y  = 0;
+   double min_p2_x  = 0;
+   double min_p2_y  = 0;
+
+   double dest_x    = 0;
+   double dest_y    = 0;
+   double dest_dist = 0;
 
    for(size_t i = 0; i < walls->count; i++)
    {
@@ -125,8 +136,8 @@ void calculate_start_points(vec2 pos, float angle, vec2* p1, vec2* p2)
    else
    {
       *p1 = vec2f(
-            pos.x - 50 * cosf(angle),
-            pos.y - 50 * sinf(angle));
+            pos.x - MAP_FLAGS_MIN_DIST * cosf(angle),
+            pos.y - MAP_FLAGS_MIN_DIST * sinf(angle));
    }
    if(found_p2)
    {
@@ -135,12 +146,12 @@ void calculate_start_points(vec2 pos, float angle, vec2* p1, vec2* p2)
    else
    {
       *p2 = vec2f(
-            pos.x - 50 * cosf(angle + M_PI),
-            pos.y - 50 * sinf(angle + M_PI));
+            pos.x - MAP_FLAGS_MIN_DIST * cosf(angle + M_PI),
+            pos.y - MAP_FLAGS_MIN_DIST * sinf(angle + M_PI));
    }
 }
 
-void draw_line_arrow(vec2 p1, vec2 p2, float l, float w, float h, vec4 color)
+static void draw_line_arrow(vec2 p1, vec2 p2, float l, float w, float h, vec4 color)
 {
    //calculate direction
    vec2 d = vec2_normalize(vec2fp(p1, p2));
@@ -154,12 +165,12 @@ void draw_line_arrow(vec2 p1, vec2 p2, float l, float w, float h, vec4 color)
    vec2 a = vec2f(dest.x - n.x * h + d.x * w, dest.y - n.y * h + d.y * w);
    vec2 b = vec2f(dest.x - n.x * h - d.x * w, dest.y - n.y * h - d.y * w);
 
-   gr_pq_push_line(1, src, dest, 2, color, default_primitive_renderer, NULL);
-   gr_pq_push_line(1, dest, a, 2, color, default_primitive_renderer, NULL);
-   gr_pq_push_line(1, dest, b, 2, color, default_primitive_renderer, NULL);
+   gr_pq_push_line(MAP_FLAGS_DEPTH, src, dest, MAP_FLAGS_LINE_WIDTH, color, default_primitive_renderer, NULL);
+   gr_pq_push_line(MAP_FLAGS_DEPTH, dest, a, MAP_FLAGS_LINE_WIDTH, color, default_primitive_renderer, NULL);
+   gr_pq_push_line(MAP_FLAGS_DEPTH, dest, b, MAP_FLAGS_LINE_WIDTH, color, default_primitive_renderer, NULL);
 }
 
-void update_editor_map(object_t* this)
+static void update_editor_map(object_t* this)
 {
    static float trans = 0;
    for(size_t i = 0; i < map_objects->count; i++)
@@ -170,15 +181,20 @@ void update_editor_map(object_t* this)
       {
          case START:
          case FIN:
-            gr_pq_push_line(1, object->p1, object->p2, 2, COLOR_BLACK, default_primitive_renderer, NULL);
-            gr_pq_push_sprite(1, object->type == START ? texture_start : texture_fin,
+            gr_pq_push_line(MAP_FLAGS_DEPTH, object->p1, object->p2, MAP_FLAGS_LINE_WIDTH, MAP_FLAGS_LINE_COLOR,
+                  default_primitive_renderer, NULL);
+
+            gr_pq_push_sprite(MAP_FLAGS_DEPTH, object->type == START ? texture_start : texture_fin,
                   vec2f(object->p1.x, object->p1.y - texture_start->height),
                   vec2u, vec2e, 0, default_sprite_renderer, &trans);
-            gr_pq_push_sprite(1, object->type == START ? texture_start : texture_fin,
+
+            gr_pq_push_sprite(MAP_FLAGS_DEPTH, object->type == START ? texture_start : texture_fin,
                   vec2f(object->p2.x, object->p2.y - texture_start->height),
                   vec2u, vec2e, 0, default_sprite_renderer, &trans);
+
             if(object->type == START)
-               draw_line_arrow(object->p1, object->p2, 40, 4, 10, COLOR_GREEN);
+               draw_line_arrow(object->p1, object->p2, MAP_FLAGS_ARROW_L, MAP_FLAGS_ARROW_W, MAP_FLAGS_ARROW_H,
+                     MAP_FLAGS_ARROW_COLOR);
             break;
          case ERASER:
          case OBSTACLE:
@@ -203,30 +219,39 @@ void update_editor_map(object_t* this)
    if(toolbar_state == START || toolbar_state == FIN)
    {
       vec2 pos = floor_point(u_get_mouse_pos());
-      float angle = current_grid_size == 0 ? rotation : (float)(roundf(rotation / (M_PI / 36)) * M_PI / 36);
+      float angle = current_grid_size == 0 ? rotation :
+            (float)(roundf(rotation / (float)(M_PI / MAP_ROTATION_STEP)) * M_PI / MAP_ROTATION_STEP);
+
       vec2 p1, p2;
       calculate_start_points(pos, angle, &p1, &p2);
 
       vec2 pp1 = vec2f(
-            pos.x - 50 * cosf(angle),
-            pos.y - 50 * sinf(angle));
+            pos.x - MAP_FLAGS_MIN_DIST * cosf(angle),
+            pos.y - MAP_FLAGS_MIN_DIST * sinf(angle));
       vec2 pp2 = vec2f(
-            pos.x - 50 * cosf(angle+ M_PI),
-            pos.y - 50 * sinf(angle+ M_PI));
+            pos.x - MAP_FLAGS_MIN_DIST * cosf(angle+ M_PI),
+            pos.y - MAP_FLAGS_MIN_DIST * sinf(angle+ M_PI));
+/*
+      gr_pq_push_line(MAP_FLAGS_DEPTH, pp1, pp2, MAP_FLAGS_LINE_WIDTH, COLOR_RED,
+            default_primitive_renderer, NULL);
+      */
+      gr_pq_push_line(MAP_FLAGS_DEPTH, p1, p2, MAP_FLAGS_LINE_WIDTH, MAP_FLAGS_LINE_COLOR,
+            default_primitive_renderer, NULL);
 
-      gr_pq_push_line(1, pp1, pp2, 2, COLOR_RED, default_primitive_renderer, NULL);
-      gr_pq_push_line(1, p1, p2, 2, COLOR_BLACK, default_primitive_renderer, NULL);
+      gr_pq_push_sprite(MAP_FLAGS_DEPTH, toolbar_state == START ? texture_start : texture_fin,
+            vec2f(p1.x, p1.y - texture_start->height),
+            vec2u, vec2e, 0, default_sprite_renderer, &trans);
 
-      gr_pq_push_sprite(1, toolbar_state == START ? texture_start : texture_fin, vec2f(p1.x, p1.y - texture_start->height),
+      gr_pq_push_sprite(MAP_FLAGS_DEPTH, toolbar_state == START ? texture_start : texture_fin,
+            vec2f(p2.x, p2.y - texture_start->height),
             vec2u, vec2e, 0, default_sprite_renderer, &trans);
-      gr_pq_push_sprite(1, toolbar_state == START ? texture_start : texture_fin, vec2f(p2.x, p2.y - texture_start->height),
-            vec2u, vec2e, 0, default_sprite_renderer, &trans);
+
       if(toolbar_state == START)
-         draw_line_arrow(p1, p2, 40, 4, 10, COLOR_GREEN);
+         draw_line_arrow(p1, p2, MAP_FLAGS_ARROW_L, MAP_FLAGS_ARROW_W, MAP_FLAGS_ARROW_H, MAP_FLAGS_ARROW_COLOR);
    }
 }
 
-void mouse_editor_map(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
+static void mouse_editor_map(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
 {
    vec2 pos = floor_point(vec2f(x, y));
    if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && toolbar_state == WALL)
@@ -249,7 +274,9 @@ void mouse_editor_map(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
       object->pos = pos;
 
       vec2 pos = floor_point(u_get_mouse_pos());
-      float angle = current_grid_size == 0 ? rotation : (float)(roundf(rotation / (M_PI / 36)) * M_PI / 36);
+      float angle = current_grid_size == 0 ? rotation :
+            (float)(roundf(rotation / (float)(M_PI / MAP_ROTATION_STEP_SMALL)) * M_PI / MAP_ROTATION_STEP_SMALL);
+
       vec2 p1, p2;
       calculate_start_points(pos, angle, &p1, &p2);
 
@@ -259,7 +286,6 @@ void mouse_editor_map(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
       list_push(map_objects, object);
    }
 }
-
 
 object_t* create_editor_map(void)
 {
@@ -276,7 +302,9 @@ object_t* create_editor_map(void)
    this->mouse_event_func = wheel_mouse_editor_map;
    field_click_func = mouse_editor_map;
 
-   map_load(walls, map_objects, MAP_SAVE_DIR "/1.map", &prev_point, &first_point_set);
+#ifdef MAP_DEFAULT_MAP
+   map_load(walls, map_objects, MAP_SAVE_DIR MAP_DEFAULT_MAP, &prev_point, &first_point_set);
+#endif
 
    return this;
 }

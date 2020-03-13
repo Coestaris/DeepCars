@@ -106,8 +106,8 @@ void t_set_data_png(char const** str_descr, texture_t* texture, GLenum fill_targ
    GL_CALL(glTexParameteri(texture->type, GL_TEXTURE_MAX_LEVEL, 0));
    GL_PCALL(glBindTexture(texture->type, 0));
 
-   *str_descr = "PNG";
    DEEPCARS_FREE(img);
+   *str_descr = "PNG";
 }
 
 void t_set_data_dds(char const** str_descr, texture_t* texture, GLenum fill_target, uint8_t* source, size_t length)

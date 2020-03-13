@@ -5,15 +5,20 @@
 #ifdef __GNUC__
 #pragma implementation "map_builder.h"
 #endif
+#include "map_builder.h"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCInconsistentNamingInspection"
 
-#include "map_builder.h"
 #include "../editor/map_saver.h"
 #include "../../../lib/resources/model_push.h"
 #include "../../win_defaults.h"
 #include "../editor/obj_editor_map.h"
+
+#define MIN_DIST 0.01
+#define MIN_DIST_FIND_NORMAL 1e-4
+#define MIN_DIST_FIND_TEXCOORD 1e-6
+#define MAX_CHECK_DISTANCE 10000
 
 struct _normal
 {
@@ -162,7 +167,7 @@ static bool check_intersection(double ray_x1, double ray_y1, double ray_x2, doub
 
 static bool intersects(struct _normal n, struct _normal n1, struct _normal n2, struct _normal n3)
 {
-   vec2 dest = vec2f(n.p.x + n.n.x * 10000, n.p.y + n.n.y * 10000);
+   vec2 dest = vec2f(n.p.x + n.n.x * MAX_CHECK_DISTANCE, n.p.y + n.n.y * MAX_CHECK_DISTANCE);
 
    if(check_intersection(n.p.x, n.p.y, dest.x, dest.y, n1.p1, n1.p2))
       return true;
@@ -355,9 +360,9 @@ model_t* build_map_model(list_t* walls)
          t4 = mp1;
          t3 = mp2;
 
-         vec2 m_point = {0, 0},
-               d1_point = {0, 0},
-               d2_point = {0, 0};
+         vec2 m_point = vec2e;
+         vec2 d1_point = vec2e;
+         vec2 d2_point = vec2e;
 
          // Find matching points
          if     (cmp_points(t1, t3, MIN_DIST)) { m_point = t1; d1_point = t2; d2_point = t4; }
@@ -409,9 +414,9 @@ model_t* build_map_model(list_t* walls)
          t4 = first_p1;
          t3 = first_p2;
 
-         vec2 m_point = vec2e,
-              d1_point = vec2e,
-              d2_point = vec2e;
+         vec2 m_point = vec2e;
+         vec2 d1_point = vec2e;
+         vec2 d2_point = vec2e;
 
          //find matching points
          if     (cmp_points(t1, t3, MIN_DIST)) { m_point = t1; d1_point = t2; d2_point = t4; }

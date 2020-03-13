@@ -5,9 +5,8 @@
 #ifdef __GNUC__
 #pragma implementation "map_saver.h"
 #endif
-
-#include <dirent.h>
 #include "map_saver.h"
+
 #include "../../win_defaults.h"
 
 void map_save(list_t* walls, list_t* objects, char* file, vec2 prev_point, bool first_point_set)

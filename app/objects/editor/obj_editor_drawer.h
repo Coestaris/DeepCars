@@ -17,8 +17,16 @@ extern enum _toolbar_state {
 
 } toolbar_state;
 
+extern enum _tab_state {
+   TAB_FFNN,
+   TAB_GA,
+   TAB_MAP,
+   TAB_FILE,
+   TAB_CLOSED
+
+} tab_state;
+
 extern uint8_t grid_state;
-extern int8_t tab_state;
 extern uint8_t current_grid_size;
 extern void (*field_click_func)(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse);
 
