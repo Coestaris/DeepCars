@@ -10,16 +10,19 @@
 #define F_LOG(format, ...) DC_LOG("font.c", format, __VA_ARGS__)
 #define F_ERROR(format, ...) DC_ERROR("font.c", format, __VA_ARGS__)
 
+// Read 1 byte from ptr and increments pointer
 static uint8_t read8(uint8_t** ptr)
 {
    return *((*ptr)++);
 }
 
+// Reads 2 bytes from ptr and converts it to a uint16 and increments pointer 2 times
 static uint16_t read16(uint8_t** ptr)
 {
    return read8(ptr) | read8(ptr) << 8U;
 }
 
+// Reads 4 bytes from ptr and converts it to a uint32 and increments pointer 4 times
 static uint32_t read32(uint8_t** ptr)
 {
    return
@@ -29,8 +32,17 @@ static uint32_t read32(uint8_t** ptr)
       read8(ptr) << 24U;
 }
 
+//
+// f_create()
+//
 font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info, size_t infolen)
 {
+   assert(name);
+   assert(texture);
+   assert(shader);
+   assert(info);
+   assert(infolen);
+
    font_t* f = DEEPCARS_MALLOC(sizeof(font_t));
    f->name = name;
    f->texture = texture;
@@ -160,8 +172,13 @@ font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info
    return f;
 }
 
+//
+// f_free()
+//
 void f_free(font_t* font)
 {
+   assert(font);
+
    F_LOG("Font \"%s\" freed", font->name);
    DEEPCARS_FREE(font->name);
    DEEPCARS_FREE(font);

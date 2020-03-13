@@ -16,26 +16,31 @@
 #define RM_LOG(format, ...) DC_LOG("rmanager.c", format, __VA_ARGS__)
 #define RM_ERROR(format, ...) DC_ERROR("rmanager.c", format, __VA_ARGS__)
 
+// Stores texture data: tex pointer and its id
 struct _texture_node {
    uint32_t id;
    texture_t* texture;
 };
 
+// Stores model data: model pointer and its id
 struct _model_node {
    uint32_t id;
    model_t* model;
 };
 
+// Stores material data: mat pointer and its id
 struct _material_node {
    uint32_t id;
    material_t* material;
 };
 
+// Stores font data: font pointer and its id
 struct _font_node {
    uint32_t id;
    font_t* font;
 };
 
+// Lists storing resources
 static list_t*    textures;
 static list_t*    models;
 static list_t*    materials;
@@ -92,6 +97,8 @@ void* rm_get_try(resource_type_t type, uint32_t id)
 //
 void* rm_getn_try(resource_type_t type, const char* name)
 {
+   assert(name);
+
    switch(type)
    {
       case TEXTURE:
@@ -122,7 +129,9 @@ void* rm_getn_try(resource_type_t type, const char* name)
    return NULL;
 }
 
-
+//
+// rm_get()
+//
 void* rm_get(resource_type_t type, uint32_t id)
 {
    void* ptr = rm_get_try(type, id);
@@ -133,8 +142,13 @@ void* rm_get(resource_type_t type, uint32_t id)
    return ptr;
 }
 
+//
+// rm_getn()
+//
 void* rm_getn(resource_type_t type, const char* name)
 {
+   assert(name);
+
    void* ptr = rm_getn_try(type, name);
    if(!ptr)
       RM_ERROR("Unable to find %s with name \"%s\"",
@@ -148,6 +162,8 @@ void* rm_getn(resource_type_t type, const char* name)
 //
 void rm_push(resource_type_t type, void* data, int32_t id)
 {
+   assert(data);
+
    switch(type)
    {
       case TEXTURE:

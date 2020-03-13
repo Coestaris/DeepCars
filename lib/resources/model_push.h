@@ -7,6 +7,8 @@
 
 #include "model.h"
 
+// Push some data to a model. It's index will be automatically incremented.
+// If it doesn't fit in existing array it will be resized to fit new element
 void m_push_vertex(model_t* model, vec4 vec);
 void m_push_normal(model_t* model, vec4 vec);
 void m_push_tex_coord(model_t* model, vec4 vec);

@@ -111,6 +111,9 @@ inline void mat4_print(mat4 mat)
    printf("]\n");
 }
 
+//
+// vec4_dist()
+//
 inline float vec4_dist(vec4 a, vec4 b)
 {
    return sqrtf(

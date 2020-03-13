@@ -45,12 +45,18 @@ void t_free(texture_t* tex);
 // Binds specified texture
 void t_bind(texture_t* tex, GLenum active);
 
+// Allocates OpenGL texture and sets all its parameters
 void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t height);
 
+// Fills specified texture with DDS data taken from source buffer.
+// Stores short format description into the str_descr pointer
 void t_set_data_dds(char const** str_descr, texture_t* texture, GLenum fill_target, uint8_t* source, size_t length);
 
+// Fills specified texture with PNG data taken from source buffer.
+// Stores short format description into the str_descr pointer
 void t_set_data_png(char const** str_descr, texture_t* texture, GLenum fill_target, uint8_t* source, size_t length);
 
+// Allocates new string that stores pretty formated description of specified texture
 char* t_get_pretty_signature(texture_t* t, const char* str_descr);
 
 #endif //DEEPCARS_TEXTURE_H

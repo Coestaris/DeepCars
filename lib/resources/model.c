@@ -359,6 +359,9 @@ model_t* m_create()
 //
 model_t* m_load_s(char* name, char* source)
 {
+   assert(name);
+   assert(source);
+
    if (!buff_vec)
       buff_vec = cvec4(0, 0, 0, 0);
 
@@ -385,6 +388,7 @@ model_t* m_load_s(char* name, char* source)
 //
 model_t* m_load(const char* filename)
 {
+   assert(filename);
 
    FILE* f = fopen(filename, "r");
    if (!f)
@@ -416,6 +420,8 @@ model_t* m_load(const char* filename)
 //
 void m_free(model_t* model)
 {
+   assert(model);
+
    for (size_t i = 0; i < model->model_len->vertices_count; i++)
       vec4_free(model->vertices[i]);
    DEEPCARS_FREE(model->vertices);
@@ -496,6 +502,8 @@ inline void m_push_mtllib(model_t* model, char* mtllib)
 //
 void m_info(model_t* model)
 {
+   assert(model);
+
    M_LOG("Vertices (%li):", model->model_len->vertices_count);
    for (size_t i = 0; i < model->model_len->vertices_count; i++)
       M_LOG("%li: %f %f %f [%f]",
@@ -561,6 +569,8 @@ static void m_store_vertex(
 //
 void m_build(model_t* model)
 {
+   assert(model);
+
    bool use_tex_coords = model->model_len->tex_coords_count != 0 && model->faces[0]->tex_id[0] != -1;
    bool use_normals = model->model_len->normals_count != 0 && model->faces[0]->normal_id[0] != -1;
    //bool supposed_normals = use_normals && model->model_len->vertices_count == model->model_len->normals_count;
@@ -750,6 +760,8 @@ model_t* m_create_plane(uint32_t vpoly, uint32_t hpoly, bool global_uv)
 //
 void m_normalize(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_pos, bool norm_scale)
 {
+   assert(model);
+
    float maxX = FLT_MIN, maxY = FLT_MIN, maxZ = FLT_MIN;
    float minX = FLT_MAX, minY = FLT_MAX, minZ = FLT_MAX;
 
@@ -801,6 +813,12 @@ void m_normalize(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_p
 
 void m_calculate_normals_vao(model_t* model, vec4 color1, vec4 color2, float normal_len, GLuint* vao, size_t* len)
 {
+   assert(model);
+   assert(color1);
+   assert(color2);
+   assert(vao);
+   assert(len);
+
    size_t s = model->model_len->faces_count * 12;
    float* buffer = DEEPCARS_MALLOC(sizeof(float) * s);
    size_t buffer_counter = 0;

@@ -17,6 +17,10 @@
 
 // Initial count of objects
 #define OBJECT_COUNT_START 50
+// Maximum available count of key states
+#define MAX_KEYS 256
+// Maximum available count of mouse states
+#define MAX_MOUSE_STATES 10
 
 //
 // FPS Lock variables
@@ -35,8 +39,8 @@ static uint64_t    frames;
 //
 // Event processing variables
 //
-static uint32_t    keys_state[256];
-static uint32_t    mouse_state[10];
+static uint32_t    keys_state[MAX_KEYS];
+static uint32_t    mouse_state[MAX_MOUSE_STATES];
 static uint32_t    mouse_x;
 static uint32_t    mouse_y;
 
@@ -154,16 +158,18 @@ vec2 u_get_mouse_pos()
 //
 // u_get_key_state()
 //
-int u_get_key_state(int key)
+uint32_t u_get_key_state(uint32_t key)
 {
+   assert(key < MAX_KEYS);
    return keys_state[key];
 }
 
 //
 // u_get_mouse_state()
 //
-int u_get_mouse_state(int mouse)
+uint32_t u_get_mouse_state(uint32_t mouse)
 {
+   assert(key < MAX_MOUSE_STATES);
    return mouse_state[mouse];
 }
 
@@ -265,6 +271,8 @@ void u_clear_objects(bool free)
 //
 void u_push_object(object_t* object)
 {
+   assert(object);
+
    list_push(objects, object);
    if (object->mouse_event_func)
       list_push(mouse_listeners, object);
@@ -288,8 +296,11 @@ uint64_t u_get_frames()
 // waits for the required amount of time
 static void u_measure_time(void)
 {
+   // Measure time of draw cycle
    double_t tick_start = u_get_millis();
-   u_draw_func(); //draw routine
+
+   // Call main draw routine
+   u_draw_func();
 
    double_t diff = u_get_millis() - tick_start;
    counter++;
@@ -347,6 +358,7 @@ void u_init(void)
 //
 void u_start_loop(win_info_t* info)
 {
+   assert(info);
 
    XEvent event;
    XSelectInput(info->display, info->win,
@@ -381,6 +393,9 @@ void u_start_loop(win_info_t* info)
 
 }
 
+//
+// u_get_fps()
+//
 double_t u_get_fps()
 {
    return fps;

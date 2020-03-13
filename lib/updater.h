@@ -62,10 +62,10 @@ vec2 u_get_mouse_pos(void);
 double_t u_get_fps(void);
 
 // Get state of specified keyboard key
-int u_get_key_state(int key);
+uint32_t u_get_key_state(uint32_t key);
 
 // Get state of mouse button
-int u_get_mouse_state(int mouse);
+uint32_t u_get_mouse_state(uint32_t mouse);
 
 // Get list of all objects
 list_t* u_get_objects(void);

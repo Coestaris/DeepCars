@@ -10,7 +10,7 @@
 #define S_LOG(format, ...) DC_LOG("shm.c", format, __VA_ARGS__)
 #define S_ERROR(format, ...) DC_ERROR("shm.c", format, __VA_ARGS__)
 
-// Soring shader and its id
+// Storing shader and its id
 typedef struct _shm_node
 {
    shader_t* shader;
@@ -28,6 +28,7 @@ bool s_has_shader(int id)
 {
    for (size_t i = 0; i < shader_nodes->count; i++)
       if (((shm_node_t*)shader_nodes->collection[i])->id == id) return true;
+
    return false;
 }
 
@@ -36,7 +37,8 @@ bool s_has_shader(int id)
 //
 void s_push(shader_t* shader, int id)
 {
-   assert(shader != NULL);
+   assert(shader);
+
    if(s_has_shader(id))
    {
       S_ERROR("Shader with same id already exists",0);
@@ -62,6 +64,8 @@ void s_init()
 //
 shader_t* s_getn_shader(const char* name)
 {
+   assert(name);
+
    for (size_t i = 0; i < shader_nodes->count; i++)
       if (!strcmp(((shm_node_t*)shader_nodes->collection[i])->shader->name, name))
          return ((shm_node_t*)shader_nodes->collection[i])->shader;

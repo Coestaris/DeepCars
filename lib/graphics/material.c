@@ -6,6 +6,7 @@
 #pragma implementation "material.h"
 #endif
 #include "material.h"
+
 #include "../resources/rmanager.h"
 
 #define MT_LOG(format, ...) DC_LOG("material.c", format, __VA_ARGS__)
@@ -17,42 +18,11 @@ struct _cache_node
    texture_t* texture;
 };
 
+// Stores all cached textures
 static list_t* material_cache;
 
-material_t* mt_create(char* name, uint8_t mode)
-{
-   material_t* material = DEEPCARS_MALLOC(sizeof(material_t));
-   material->name = name;
-   material->mode = mode;
 
-   material->ambient = cvec4(0.2, 0.2, 0.2, 0);
-   material->map_ambient = NULL;
-
-   material->diffuse = cvec4(0.8, 0.8, 0.8, 0);
-   material->map_diffuse = NULL;
-
-   material->specular = cvec4(1, 1, 1, 0);
-   material->map_specular = NULL;
-   material->shininess = 32;
-
-   material->transparent = cvec4(0, 0, 0, 0);
-   material->map_transparent = NULL;
-
-   material->map_normal = NULL;
-   return material;
-}
-
-void mt_free(material_t* material)
-{
-   vec4_free(material->ambient);
-   vec4_free(material->diffuse);
-   vec4_free(material->specular);
-   vec4_free(material->transparent);
-   MT_LOG("Material \"%s\" freed", material->name);
-   DEEPCARS_FREE(material->name);
-   DEEPCARS_FREE(material);
-}
-
+// Tries to find texture in the cache by comparing linear distances of color components
 static texture_t* mt_get_from_cache(vec4 color)
 {
    for(size_t i = 0; i < material_cache->count; i++)
@@ -68,6 +38,7 @@ static texture_t* mt_get_from_cache(vec4 color)
    return NULL;
 }
 
+// Store texture in cache
 static void mt_cache(texture_t* tex, vec4 color)
 {
    struct _cache_node* node = DEEPCARS_MALLOC(sizeof(struct _cache_node));
@@ -78,6 +49,8 @@ static void mt_cache(texture_t* tex, vec4 color)
    list_push(material_cache, node);
 }
 
+// Creates OpenGL texture from specified color and cached it.
+// If almost same color already cached texture from cache is used
 static texture_t* mt_to_texture(char* mat_name, const char* field, vec4 color)
 {
    texture_t* cached = mt_get_from_cache(color);
@@ -117,11 +90,57 @@ static texture_t* mt_to_texture(char* mat_name, const char* field, vec4 color)
    return t;
 }
 
+//
+// mt_create()
+//
+material_t* mt_create(char* name, uint8_t mode)
+{
+   material_t* material = DEEPCARS_MALLOC(sizeof(material_t));
+   material->name = name;
+   material->mode = mode;
+
+   material->ambient = cvec4(0.2, 0.2, 0.2, 0);
+   material->map_ambient = NULL;
+
+   material->diffuse = cvec4(0.8, 0.8, 0.8, 0);
+   material->map_diffuse = NULL;
+
+   material->specular = cvec4(1, 1, 1, 0);
+   material->map_specular = NULL;
+   material->shininess = 32;
+
+   material->transparent = cvec4(0, 0, 0, 0);
+   material->map_transparent = NULL;
+
+   material->map_normal = NULL;
+   return material;
+}
+
+//
+// mt_free()
+//
+void mt_free(material_t* material)
+{
+   vec4_free(material->ambient);
+   vec4_free(material->diffuse);
+   vec4_free(material->specular);
+   vec4_free(material->transparent);
+   MT_LOG("Material \"%s\" freed", material->name);
+   DEEPCARS_FREE(material->name);
+   DEEPCARS_FREE(material);
+}
+
+//
+// mt_create_colored_tex()
+//
 texture_t* mt_create_colored_tex(vec4 color)
 {
    return mt_to_texture("colored_tex", "_", color);
 }
 
+//
+// mt_build()
+//
 void mt_build(material_t* material)
 {
    if(material->mode != MT_DEFAULT_NO_AMBIENT &&
@@ -147,11 +166,17 @@ void mt_build(material_t* material)
       material->map_transparent = mt_to_texture(material->name, "trans", material->transparent);
 }
 
+//
+// mt_init()
+//
 void mt_init(void)
 {
    material_cache = list_create();
 }
 
+//
+// mt_release()
+//
 void mt_release(void)
 {
    list_free_elements(material_cache);

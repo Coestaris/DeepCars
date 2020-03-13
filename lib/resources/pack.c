@@ -64,7 +64,7 @@ static void p_decompress(size_t in_len, size_t out_len, uint8_t* buff_in, uint8_
    inflateEnd(&infstream);
 }
 
-// Handles model chunk and adds parsed models to mm
+// Handles model chunk and adds parsed models to resource manager
 static void p_handler_model(uint8_t* data, size_t length)
 {
    size_t      count = 0;
@@ -220,7 +220,7 @@ static void p_handler_shader(uint8_t* data, size_t length)
    DEEPCARS_FREE(name);
 }
 
-// Handles texture chunk and adds parsed textures to txm
+// Handles texture chunk and adds parsed textures to a resource manager
 static void p_handler_texture(uint8_t* data, size_t length)
 {
    size_t      count = 0;
@@ -342,6 +342,7 @@ static void p_handler_texture(uint8_t* data, size_t length)
    DEEPCARS_FREE(name);
 }
 
+// Handles material chunk and adds parsed materials to a resource manager
 static void p_handler_material(uint8_t* data, size_t length)
 {
    size_t      count = 0;
@@ -451,6 +452,7 @@ static void p_handler_material(uint8_t* data, size_t length)
    DEEPCARS_FREE(normal);
 }
 
+// Handles font chunk and adds parsed fonts to a resource manager
 static void p_handler_font(uint8_t* data, size_t length)
 {
    size_t      count = 0;
@@ -510,6 +512,8 @@ static char magic_bytes[] = { 'D', 'P', 'A', 'C', 'K' };
 //
 void p_load(const char* name)
 {
+   assert(name);
+
    P_LOG("Loading resource pack \"%s\"", name)
    FILE* f = fopen(name, "rb");
    if(!f)

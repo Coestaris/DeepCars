@@ -16,6 +16,7 @@
 void o_free(object_t* object)
 {
    assert(object);
+
    if (object->destroy_func)
       object->destroy_func(object);
 
@@ -29,6 +30,7 @@ void o_free(object_t* object)
 object_t* o_clone(object_t* object)
 {
    assert(object);
+
    object_t* new_object = DEEPCARS_MALLOC(sizeof(object_t));
    memcpy(new_object, object, sizeof(object_t));
 

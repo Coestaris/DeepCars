@@ -30,6 +30,8 @@ scene_t* sc_create(uint32_t id)
 //
 void sc_free(scene_t* scene)
 {
+   assert(scene);
+
    if(scene->shadow_light) l_sh_free(scene->shadow_light);
    for (size_t i = 0; i < scene->lights->count; i++)
       l_free((light_t*) scene->lights->collection[i]);

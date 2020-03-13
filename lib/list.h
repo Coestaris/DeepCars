@@ -5,11 +5,11 @@
 #ifndef DEEPCARS_LIST_H
 #define DEEPCARS_LIST_H
 
+#include <stddef.h>
+
 // Startup size of the bootstrap
 #define LIST_BOOTSTRAP_SIZE 50
 #define LIST_SIZE_INCREASE 1.5f
-
-#include <stddef.h>
 
 // Generic list to store pointers
 typedef struct _list

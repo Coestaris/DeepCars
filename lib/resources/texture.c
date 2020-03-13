@@ -18,6 +18,8 @@
 //
 texture_t* t_create(char* name)
 {
+   assert(name);
+
    texture_t* t = DEEPCARS_MALLOC(sizeof(texture_t));
    t->name = name;
    t->data = DEEPCARS_MALLOC(sizeof(texData));
@@ -39,6 +41,8 @@ texture_t* t_create(char* name)
 //
 void t_free(texture_t* tex)
 {
+   assert(tex);
+
    T_LOG("Texture \"%s\" unloaded", tex->name);
    if(tex->texID)
    GL_CALL(glDeleteTextures(1, &tex->texID));
@@ -48,8 +52,15 @@ void t_free(texture_t* tex)
    DEEPCARS_FREE(tex);
 }
 
+//
+// t_set_params()
+//
 void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t height)
 {
+   assert(tex);
+   assert(target);
+   assert(width && height);
+
    GL_CALL(glGenTextures(1, &texture->texID));
    if(!texture->texID) T_ERROR("Unable to create OpenGL texture",0);
 
@@ -68,8 +79,14 @@ void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t he
    texture->height = height;
 }
 
+//
+// t_get_pretty_signature()
+//
 char* t_get_pretty_signature(texture_t* t, const char* str_descr)
 {
+   assert(t);
+   assert(str_descr);
+
    char* buffer = DEEPCARS_MALLOC(sizeof(char) * 100);
 
    snprintf(buffer, 100, "%s %s \"%s\" [%ix%i] (%li mipmap%s%s)",
@@ -84,8 +101,16 @@ char* t_get_pretty_signature(texture_t* t, const char* str_descr)
 
 }
 
+//
+// t_set_data_png()
+//
 void t_set_data_png(char const** str_descr, texture_t* texture, GLenum fill_target, uint8_t* source, size_t length)
 {
+   assert(str_descr);
+   assert(texture);
+   assert(source);
+   assert(length);
+
    int32_t width, height, channels;
    uint8_t *img = stbi_load_from_memory(source, length, &width, &height, &channels, STBI_rgb_alpha);
    if(img == NULL)
@@ -110,8 +135,16 @@ void t_set_data_png(char const** str_descr, texture_t* texture, GLenum fill_targ
    *str_descr = "PNG";
 }
 
+//
+// t_set_data_dds()
+//
 void t_set_data_dds(char const** str_descr, texture_t* texture, GLenum fill_target, uint8_t* source, size_t length)
 {
+   assert(str_descr);
+   assert(texture);
+   assert(source);
+   assert(length);
+
    *str_descr = NULL;
 
    uint32_t width = 0;
