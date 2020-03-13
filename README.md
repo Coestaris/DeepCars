@@ -18,16 +18,17 @@ make
 sudo make install
 ```
 And also you need to install [STB](https://github.com/nothings/stb):
-```
+```bash
 git clone https://github.com/nothings/stb.git
 sudo cp stb/stb_image.h /usr/local/include/
 ```
-To build project:
+#### Build project
+To build project simply use:
 ```bash
 cmake CMakeLists.txt 
 make all
 ```
-
+#### Application resources
 You need to pack resources before running the application:
 ```bash
 sudo apt install python3 # If needed
