@@ -276,7 +276,7 @@ vec2 u_get_mouse_pos()
 //
 uint32_t u_get_key_state(uint32_t key)
 {
-   assert(key < MAX_KEYS_STATES);
+   PASSERT(key < MAX_KEYS_STATES);
    return keys_state[key];
 }
 
@@ -285,7 +285,7 @@ uint32_t u_get_key_state(uint32_t key)
 //
 uint32_t u_get_mouse_state(uint32_t mouse)
 {
-   assert(mouse < MAX_MOUSE_STATES);
+   PASSERT(mouse < MAX_MOUSE_STATES);
    return mouse_state[mouse];
 }
 
@@ -313,7 +313,7 @@ void u_clear_objects(bool free)
 //
 void u_push_object(object_t* object)
 {
-   assert(object);
+   ASSERT(object);
 
    list_push(objects, object);
    if (object->mouse_event_func)
@@ -356,7 +356,7 @@ void u_init(void)
 //
 void u_start_loop(win_info_t* info)
 {
-   assert(info);
+   ASSERT(info);
 
    XEvent event;
    XSelectInput(info->display, info->win,

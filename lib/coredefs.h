@@ -53,6 +53,9 @@
 
 #if DEBUG_LEVEL >= 2
 
+   #define ASSERT(expr) assert(expr)
+   #define PASSERT(expr) assert(expr)
+
    // Check glGetError() after running specified expression.
    // Should be used for non performance critical functions
    #define GL_CALL(expr) { expr; __gl_check(#expr, __LINE__, __FILE__); }
@@ -62,13 +65,21 @@
    #define GL_PCALL(expr) { expr; __gl_check(#expr, __LINE__, __FILE__); }
 
 #elif DEBUG_LEVEL == 1
+
+   #define ASSERT(expr) assert(expr)
+   #define PASSERT(expr) {};
+
    // If DEBUG_LEVEL == 1 ignore OpenGL checks for performance critical functions
    #define GL_CALL(expr) { expr; __gl_check(#expr, __LINE__, __FILE__); }
    #define GL_PCALL(expr) {expr;}
 #else
+
+   #define ASSERT(expr) {}
+   #define PASSERT(expr) {}
+
    // If DEBUG_LEVEL == 0 ignore all OpenGL checks
-   #define GL_CALL(expr) expr
-   #define GL_PCALL(expr) expr
+   #define GL_CALL(expr) {expr;}
+   #define GL_PCALL(expr) {expr;}
 
 #endif
 

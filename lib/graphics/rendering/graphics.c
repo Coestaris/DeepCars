@@ -151,10 +151,9 @@ void gr_release(void)
 
 static void gr_draw_model(model_t* model)
 {
-   GL_PCALL(glBindVertexArray(model->VAO))
-   GL_PCALL(glDrawArrays(GL_TRIANGLES, 0, model->triangles_count * 3))
-   //GL_PCALL(glBindBuffer(GL_ARRAY_BUFFER, 0))
-   GL_PCALL(glBindVertexArray(0))
+   GL_PCALL(glBindVertexArray(model->VAO));
+   GL_PCALL(glDrawArrays(GL_TRIANGLES, 0, model->triangles_count * 3));
+   GL_PCALL(glBindVertexArray(0));
 }
 
 inline mat4 gr_transform(vec3 pos, vec3 scale, vec3 rot)
@@ -191,7 +190,7 @@ inline void gr_render_object(object_t* obj)
 
 inline void gr_bind(render_stage_t* stage)
 {
-   GL_PCALL(glViewport(0, 0, stage->width, stage->height))
+   GL_PCALL(glViewport(0, 0, stage->width, stage->height));
    if(stage->render_mode != RM_BYPASS && stage->render_mode != RM_CUSTOM)
    {
       GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, stage->fbo));
@@ -230,7 +229,8 @@ void gr_draw_string(font_t* f, vec2 position, vec2 scale, char* string, void* da
          continue;
       }
 
-      assert(ci->id != -1);
+      if(ci->id == -1)
+         GR_ERROR("Trying to draw uninitialized symbol",0);
 
       float x1 = (float)position.x + (float)scale.x * (ci->xoffset);
       float y1 = (float)position.y + (float)scale.y * (ci->yoffset);
@@ -260,8 +260,13 @@ inline void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2 position,
                        vec2 scale, vec2 center, float angle,
                        sprite_renderer_t* sprite_renderer, void* data)
 {
-   assert(depth < MAX_DEPTH);
-   assert(queue_length[depth] < MAX_QUEUE_COUNT);
+   PASSERT(texture);
+   PASSERT(sprite_renderer);
+
+   if(depth >= MAX_DEPTH)
+      GR_ERROR("Passed wrong depth. Max depth: %i, passed depth: %i", MAX_DEPTH, depth);
+   if(queue_length[depth] >= MAX_QUEUE_COUNT)
+      GR_ERROR("Too many items in queue. Max length: %i at depth: %i", MAX_QUEUE_COUNT, depth);
 
    size_t index = queue_length[depth];
    struct _queue_item* qi = &queue[depth][index];
@@ -280,8 +285,13 @@ inline void gr_pq_push_sprite(uint8_t depth, texture_t* texture, vec2 position,
 inline void gr_pq_push_string(uint8_t depth, font_t* f, vec2 position,
                        vec2 scale, char* string, void* data)
 {
-   assert(depth < MAX_DEPTH);
-   assert(queue_length[depth] < MAX_QUEUE_COUNT);
+   PASSERT(f);
+   PASSERT(string);
+
+   if(depth >= MAX_DEPTH)
+      GR_ERROR("Passed wrong depth. Max depth: %i, passed depth: %i", MAX_DEPTH, depth);
+   if(queue_length[depth] >= MAX_QUEUE_COUNT)
+      GR_ERROR("Too many items in queue. Max length: %i at depth: %i", MAX_QUEUE_COUNT, depth);
 
    size_t index = queue_length[depth];
    struct _queue_item* qi = &queue[depth][index];
@@ -298,8 +308,13 @@ inline void gr_pq_push_string(uint8_t depth, font_t* f, vec2 position,
 inline void gr_pq_push_line(uint8_t depth, vec2 p1, vec2 p2, float width, vec4 color,
                      primitive_renderer_t* primitive_renderer, void* data)
 {
-   assert(depth < MAX_DEPTH);
-   assert(queue_length[depth] < MAX_QUEUE_COUNT);
+   PASSERT(primitive_renderer);
+   PASSERT(color);
+
+   if(depth >= MAX_DEPTH)
+      GR_ERROR("Passed wrong depth. Max depth: %i, passed depth: %i", MAX_DEPTH, depth);
+   if(queue_length[depth] >= MAX_QUEUE_COUNT)
+      GR_ERROR("Too many items in queue. Max length: %i at depth: %i", MAX_QUEUE_COUNT, depth);
 
    size_t index = queue_length[depth];
    struct _queue_item* qi = &queue[depth][index];

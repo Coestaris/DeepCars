@@ -27,7 +27,7 @@ light_t* l_create()
 //
 void l_free(light_t* light)
 {
-   assert(light);
+   ASSERT(light);
 
    vec4_free(light->color);
    vec4_free(light->position);
@@ -39,8 +39,8 @@ void l_free(light_t* light)
 //
 shadow_light_t* l_sh_create(vec4 position, vec4 up)
 {
-   assert(position);
-   assert(up);
+   ASSERT(position);
+   ASSERT(up);
 
    shadow_light_t* lt = DEEPCARS_MALLOC(sizeof(shadow_light_t));
    lt->light_proj = cmat4();
@@ -57,7 +57,7 @@ shadow_light_t* l_sh_create(vec4 position, vec4 up)
 //
 void l_sh_free(shadow_light_t* light)
 {
-   assert(light);
+   ASSERT(light);
 
    if(light->light_view) mat4_free(light->light_view);
    if(light->light_proj) mat4_free(light->light_proj);
@@ -73,7 +73,7 @@ void l_sh_free(shadow_light_t* light)
 //
 void l_calc_radius(light_t* light)
 {
-   assert(light);
+   ASSERT(light);
 
    float max_brightness = fmaxf(fmaxf(light->color[0], light->color[1]), light->color[2]);
    light->radius = (-light->linear

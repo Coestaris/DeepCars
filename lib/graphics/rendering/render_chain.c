@@ -17,7 +17,7 @@ static render_chain_t* current_chain;
 //
 void rc_free(render_chain_t* rc, bool free_stages)
 {
-   assert(rc);
+   ASSERT(rc);
 
    if(free_stages)
    {
@@ -45,7 +45,7 @@ render_chain_t* rc_create()
 //
 void rc_set_current(render_chain_t* rc)
 {
-   assert(rc);
+   ASSERT(rc);
 
    rc_link(rc);
    current_chain = rc;
@@ -64,7 +64,7 @@ render_chain_t* rc_get_current(void)
 //
 void rc_link(render_chain_t* rc)
 {
-   assert(rc);
+   ASSERT(rc);
 
    for(size_t i = 0; i < rc->stages->count; i++)
    {
@@ -81,7 +81,7 @@ void rc_link(render_chain_t* rc)
 //
 void rc_build(render_chain_t* rc)
 {
-   assert(rc);
+   ASSERT(rc);
 
    for(size_t i = 0; i < rc->stages->count; i++)
    {

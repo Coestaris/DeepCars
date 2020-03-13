@@ -18,7 +18,7 @@
 //
 texture_t* t_create(char* name)
 {
-   assert(name);
+   ASSERT(name);
 
    texture_t* t = DEEPCARS_MALLOC(sizeof(texture_t));
    t->name = name;
@@ -41,7 +41,7 @@ texture_t* t_create(char* name)
 //
 void t_free(texture_t* tex)
 {
-   assert(tex);
+   ASSERT(tex);
 
    T_LOG("Texture \"%s\" unloaded", tex->name);
    if(tex->texID)
@@ -57,9 +57,9 @@ void t_free(texture_t* tex)
 //
 void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t height)
 {
-   assert(texture);
-   assert(target);
-   assert(width && height);
+   ASSERT(texture);
+   ASSERT(target);
+   ASSERT(width && height);
 
    GL_CALL(glGenTextures(1, &texture->texID));
    if(!texture->texID) T_ERROR("Unable to create OpenGL texture",0);
@@ -84,8 +84,8 @@ void t_set_params(texture_t* texture, GLenum target, uint32_t width, uint32_t he
 //
 char* t_get_pretty_signature(texture_t* t, const char* str_descr)
 {
-   assert(t);
-   assert(str_descr);
+   ASSERT(t);
+   ASSERT(str_descr);
 
    char* buffer = DEEPCARS_MALLOC(sizeof(char) * 100);
 
@@ -106,10 +106,10 @@ char* t_get_pretty_signature(texture_t* t, const char* str_descr)
 //
 void t_set_data_png(char const** str_descr, texture_t* texture, GLenum fill_target, uint8_t* source, size_t length)
 {
-   assert(str_descr);
-   assert(texture);
-   assert(source);
-   assert(length);
+   ASSERT(str_descr);
+   ASSERT(texture);
+   ASSERT(source);
+   ASSERT(length);
 
    int32_t width, height, channels;
    uint8_t *img = stbi_load_from_memory(source, length, &width, &height, &channels, STBI_rgb_alpha);
@@ -118,15 +118,15 @@ void t_set_data_png(char const** str_descr, texture_t* texture, GLenum fill_targ
       T_ERROR("Error in loading PNG the image\n",0);
    }
 
-   assert(width == texture->width);
-   assert(height == texture->height);
+   ASSERT(width == texture->width);
+   ASSERT(height == texture->height);
 
    GL_PCALL(glBindTexture(texture->type, texture->texID));
    GL_PCALL(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
    if(channels == 3)
       {GL_PCALL(glTexImage2D(fill_target, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, img));}
    else if(channels == 4)
-      {GL_PCALL(glTexImage2D(fill_target, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img))};
+      {GL_PCALL(glTexImage2D(fill_target, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img));};
 
    GL_CALL(glTexParameteri(texture->type, GL_TEXTURE_MAX_LEVEL, 0));
    GL_PCALL(glBindTexture(texture->type, 0));
@@ -140,10 +140,10 @@ void t_set_data_png(char const** str_descr, texture_t* texture, GLenum fill_targ
 //
 void t_set_data_dds(char const** str_descr, texture_t* texture, GLenum fill_target, uint8_t* source, size_t length)
 {
-   assert(str_descr);
-   assert(texture);
-   assert(source);
-   assert(length);
+   ASSERT(str_descr);
+   ASSERT(texture);
+   ASSERT(source);
+   ASSERT(length);
 
    *str_descr = NULL;
 
@@ -244,6 +244,8 @@ void t_set_data_dds(char const** str_descr, texture_t* texture, GLenum fill_targ
 //
 inline void t_bind(texture_t* tex, GLenum active)
 {
+   PASSERT(tex);
+
    GL_PCALL(glActiveTexture(GL_TEXTURE0 + active));
    if(!tex)
    {

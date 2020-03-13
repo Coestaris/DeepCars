@@ -37,11 +37,11 @@ static uint32_t read32(uint8_t** ptr)
 //
 font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info, size_t infolen)
 {
-   assert(name);
-   assert(texture);
-   assert(shader);
-   assert(info);
-   assert(infolen);
+   ASSERT(name);
+   ASSERT(texture);
+   ASSERT(shader);
+   ASSERT(info);
+   ASSERT(infolen);
 
    font_t* f = DEEPCARS_MALLOC(sizeof(font_t));
    f->name = name;
@@ -177,7 +177,7 @@ font_t* f_create(char* name, texture_t* texture, shader_t* shader, uint8_t* info
 //
 void f_free(font_t* font)
 {
-   assert(font);
+   ASSERT(font);
 
    F_LOG("Font \"%s\" freed", font->name);
    DEEPCARS_FREE(font->name);

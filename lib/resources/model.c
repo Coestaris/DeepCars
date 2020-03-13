@@ -120,7 +120,7 @@ static bool m_read_next_word(const char* string, size_t* start_index, size_t end
    while (!m_is_separator(string[*start_index])) (*start_index)++;
 
    size_t len = *start_index - start;
-   assert(len < MAX_WORD_LEN);
+   ASSERT(len < MAX_WORD_LEN);
 
    memset(word, 0, len + 1);
    memcpy(word, string + start, len);
@@ -222,7 +222,7 @@ static void m_proceed_line(model_t* model, const char* string, size_t start_inde
          }
          if (descriptor->type == OD_FACE)
          {
-            assert(word_count < MAX_FACE_LEN);
+            ASSERT(word_count < MAX_FACE_LEN);
 
             int32_t i1 = -1, i2 = -1, i3 = -1;
             m_parse_face(&i1, &i2, &i3);
@@ -359,8 +359,8 @@ model_t* m_create()
 //
 model_t* m_load_s(char* name, char* source)
 {
-   assert(name);
-   assert(source);
+   ASSERT(name);
+   ASSERT(source);
 
    if (!buff_vec)
       buff_vec = cvec4(0, 0, 0, 0);
@@ -388,7 +388,7 @@ model_t* m_load_s(char* name, char* source)
 //
 model_t* m_load(const char* filename)
 {
-   assert(filename);
+   ASSERT(filename);
 
    FILE* f = fopen(filename, "r");
    if (!f)
@@ -420,7 +420,7 @@ model_t* m_load(const char* filename)
 //
 void m_free(model_t* model)
 {
-   assert(model);
+   ASSERT(model);
 
    for (size_t i = 0; i < model->model_len->vertices_count; i++)
       vec4_free(model->vertices[i]);
@@ -450,10 +450,10 @@ void m_free(model_t* model)
    DEEPCARS_FREE(model->model_len);
 
    if (model->VBO != 0)
-   GL_CALL(glDeleteBuffers(1, &(model->VBO)))
+      GL_CALL(glDeleteBuffers(1, &(model->VBO)));
 
    if (model->VAO != 0)
-   GL_CALL(glDeleteBuffers(1, &(model->VAO)))
+      GL_CALL(glDeleteBuffers(1, &(model->VAO)));
 
    M_LOG("Freed model \"%s\"", model->name);
 
@@ -463,43 +463,43 @@ void m_free(model_t* model)
 
 inline void m_push_vertex(model_t* model, vec4 vec)
 {
-   assert(model);
-   assert(vec);
+   ASSERT(model);
+   ASSERT(vec);
    M_PUSH_MODEL_PROP(model, vertices, vec4, vec);
 }
 
 inline void m_push_normal(model_t* model, vec4 vec)
 {
-   assert(model);
-   assert(vec);
+   ASSERT(model);
+   ASSERT(vec);
    M_PUSH_MODEL_PROP(model, normals, vec4, vec);
 }
 
 inline void m_push_tex_coord(model_t* model, vec4 vec)
 {
-   assert(model);
-   assert(vec);
+   ASSERT(model);
+   ASSERT(vec);
    M_PUSH_MODEL_PROP(model, tex_coords, vec4, vec);
 }
 
 inline void m_push_face(model_t* model, model_face_t* face)
 {
-   assert(model);
-   assert(face);
+   ASSERT(model);
+   ASSERT(face);
    M_PUSH_MODEL_PROP(model, faces, model_face_t*, face);
 }
 
 inline void m_push_group_name(model_t* model, char* group_name)
 {
-   assert(model);
-   assert(group_name);
+   ASSERT(model);
+   ASSERT(group_name);
    M_PUSH_MODEL_PROP(model, group_names, char*, group_name);
 }
 
 inline void m_push_mtllib(model_t* model, char* mtllib)
 {
-   assert(model);
-   assert(mtllib);
+   ASSERT(model);
+   ASSERT(mtllib);
    M_PUSH_MODEL_PROP(model, mtl_libs, char*, mtllib);
 }
 
@@ -508,7 +508,7 @@ inline void m_push_mtllib(model_t* model, char* mtllib)
 //
 void m_info(model_t* model)
 {
-   assert(model);
+   ASSERT(model);
 
    M_LOG("Vertices (%li):", model->model_len->vertices_count);
    for (size_t i = 0; i < model->model_len->vertices_count; i++)
@@ -575,7 +575,7 @@ static void m_store_vertex(
 //
 void m_build(model_t* model)
 {
-   assert(model);
+   ASSERT(model);
 
    bool use_tex_coords = model->model_len->tex_coords_count != 0 && model->faces[0]->tex_id[0] != -1;
    bool use_normals = model->model_len->normals_count != 0 && model->faces[0]->normal_id[0] != -1;
@@ -614,18 +614,18 @@ void m_build(model_t* model)
          m_store_vertex(model, f, tria + 2, buffer, &buffer_index, use_tex_coords, use_normals, false);
       }
    }
-   assert(buffer_index == size);
+   ASSERT(buffer_index == size);
 
-   GL_CALL(glGenBuffers(1, &model->VBO))
+   GL_CALL(glGenBuffers(1, &model->VBO));
    //GL_CALL(glGenBuffers(1, &model->EBO))
-   GL_CALL(glGenVertexArrays(1, &model->VAO))
+   GL_CALL(glGenVertexArrays(1, &model->VAO));
 
    // 1. bind Vertex Array Object
-   GL_CALL(glBindVertexArray(model->VAO))
+   GL_CALL(glBindVertexArray(model->VAO));
 
    // 2. copy our vertices array in a vertex buffer for OpenGL to use
-   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, model->VBO))
-   GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * buffer_index, buffer, GL_STATIC_DRAW))
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, model->VBO));
+   GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * buffer_index, buffer, GL_STATIC_DRAW));
 
    // 3. copy our index array in a element buffer for OpenGL to use
    //GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->EBO))
@@ -636,53 +636,53 @@ void m_build(model_t* model)
    {
       // vertices (3 floats)
       GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                                    (void*) 0))
-      GL_CALL(glEnableVertexAttribArray(0))
+                                    (void*) 0));
+      GL_CALL(glEnableVertexAttribArray(0));
 
       // normals (3 floats)
       GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                                    (void*) (3 * sizeof(float))))
-      GL_CALL(glEnableVertexAttribArray(1))
+                                    (void*) (3 * sizeof(float))));
+      GL_CALL(glEnableVertexAttribArray(1));
 
       // texture coordinates (2 floats)
       GL_CALL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                                    (void*) (6 * sizeof(float))))
-      GL_CALL(glEnableVertexAttribArray(2))
+                                    (void*) (6 * sizeof(float))));
+      GL_CALL(glEnableVertexAttribArray(2));
    }
    else if (!use_normals && use_tex_coords)
    {
       // vertices (3 floats)
       GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                                    (void*) 0))
-      GL_CALL(glEnableVertexAttribArray(0))
+                                    (void*) 0));
+      GL_CALL(glEnableVertexAttribArray(0));
 
       // texture coordinates (2 floats)
       GL_CALL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                                    (void*) (3 * sizeof(float))))
-      GL_CALL(glEnableVertexAttribArray(2))
+                                    (void*) (3 * sizeof(float))));
+      GL_CALL(glEnableVertexAttribArray(2));
    }
    else if (use_normals && !use_tex_coords)
    {
       // vertices (3 floats)
       GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                                    (void*) 0))
-      GL_CALL(glEnableVertexAttribArray(0))
+                                    (void*) 0));
+      GL_CALL(glEnableVertexAttribArray(0));
 
       // normals (3 floats)
       GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                                    (void*) (3 * sizeof(float))))
-      GL_CALL(glEnableVertexAttribArray(1))
+                                    (void*) (3 * sizeof(float))));
+      GL_CALL(glEnableVertexAttribArray(1));
    }
    else //no normals and coords
    {
       // vertices (3 floats)
       GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-                                    (void*) 0))
-      GL_CALL(glEnableVertexAttribArray(0))
+                                    (void*) 0));
+      GL_CALL(glEnableVertexAttribArray(0));
    }
 
-   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0))
-   GL_CALL(glBindVertexArray(0))
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+   GL_CALL(glBindVertexArray(0));
 
    DEEPCARS_FREE(buffer);
 }
@@ -766,7 +766,7 @@ model_t* m_create_plane(uint32_t vpoly, uint32_t hpoly, bool global_uv)
 //
 void m_normalize(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_pos, bool norm_scale)
 {
-   assert(model);
+   ASSERT(model);
 
    float maxX = FLT_MIN, maxY = FLT_MIN, maxZ = FLT_MIN;
    float minX = FLT_MAX, minY = FLT_MAX, minZ = FLT_MAX;
@@ -819,11 +819,11 @@ void m_normalize(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_p
 
 void m_calculate_normals_vao(model_t* model, vec4 color1, vec4 color2, float normal_len, GLuint* vao, size_t* len)
 {
-   assert(model);
-   assert(color1);
-   assert(color2);
-   assert(vao);
-   assert(len);
+   ASSERT(model);
+   ASSERT(color1);
+   ASSERT(color2);
+   ASSERT(vao);
+   ASSERT(len);
 
    size_t s = model->model_len->faces_count * 12;
    float* buffer = DEEPCARS_MALLOC(sizeof(float) * s);
@@ -832,7 +832,7 @@ void m_calculate_normals_vao(model_t* model, vec4 color1, vec4 color2, float nor
    for(size_t i = 0; i < model->model_len->faces_count; i++)
    {
       model_face_t* face = model->faces[i];
-      assert(face->count != MAX_FACE_LEN);
+      ASSERT(face->count != MAX_FACE_LEN);
 
       vec4 normal = model->normals[face->normal_id[0] - 1];
 

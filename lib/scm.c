@@ -37,7 +37,7 @@ void scm_init()
 //
 void scm_push_scene(scene_t* scene)
 {
-   assert(scene);
+   ASSERT(scene);
 
    list_push(scenes, scene);
 }

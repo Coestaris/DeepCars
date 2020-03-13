@@ -37,7 +37,7 @@ bool s_has_shader(int id)
 //
 void s_push(shader_t* shader, int id)
 {
-   assert(shader);
+   ASSERT(shader);
 
    if(s_has_shader(id))
    {
@@ -64,7 +64,7 @@ void s_init()
 //
 shader_t* s_getn_shader(const char* name)
 {
-   assert(name);
+   ASSERT(name);
 
    for (size_t i = 0; i < shader_nodes->count; i++)
       if (!strcmp(((shm_node_t*)shader_nodes->collection[i])->shader->name, name))

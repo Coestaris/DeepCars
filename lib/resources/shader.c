@@ -18,7 +18,7 @@ void sh_compile_s(shader_t* sh,
                   uint8_t* geometry_source, GLint geometry_len,
                   uint8_t* fragment_source, GLint fragment_len)
 {
-   assert(sh);
+   ASSERT(sh);
 
    GLuint vertex_shader   = 0;
    GLuint fragment_shader = 0;
@@ -58,7 +58,7 @@ void sh_compile_s(shader_t* sh,
    char info_log[1024];
    if (vertex_source)
    {
-      GL_CALL(glShaderSource(vertex_shader, 1, (const GLchar**) &vertex_source, &vertex_len))
+      GL_CALL(glShaderSource(vertex_shader, 1, (const GLchar**) &vertex_source, &vertex_len));
       GL_CALL(glCompileShader(vertex_shader));
       GL_CALL(glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &test_val));
       GL_CALL(glGetShaderInfoLog(vertex_shader, sizeof(info_log), NULL, info_log));
@@ -73,7 +73,7 @@ void sh_compile_s(shader_t* sh,
 
    if (geometry_source)
    {
-      GL_CALL(glShaderSource(geometry_shader, 1, (const GLchar**) &geometry_source, &geometry_len))
+      GL_CALL(glShaderSource(geometry_shader, 1, (const GLchar**) &geometry_source, &geometry_len));
       GL_CALL(glCompileShader(geometry_shader));
       GL_CALL(glGetShaderiv(geometry_shader, GL_COMPILE_STATUS, &test_val));
       GL_CALL(glGetShaderInfoLog(geometry_shader, sizeof(info_log), NULL, info_log));
@@ -88,9 +88,9 @@ void sh_compile_s(shader_t* sh,
 
    if(fragment_source)
    {
-      GL_CALL(glShaderSource(fragment_shader, 1, (const GLchar**) &fragment_source, &fragment_len))
+      GL_CALL(glShaderSource(fragment_shader, 1, (const GLchar**) &fragment_source, &fragment_len));
       GL_CALL(glCompileShader(fragment_shader));
-      GL_CALL(glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &test_val))
+      GL_CALL(glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &test_val));
       GL_CALL(glGetShaderInfoLog(fragment_shader, sizeof(info_log), NULL, info_log));
 
       if(strlen(info_log))
@@ -146,10 +146,10 @@ void sh_compile_s(shader_t* sh,
 
 void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* fragment_path)
 {
-   assert(sh);
-   assert(vertex_path);
-   assert(geometry_path);
-   assert(fragment_path);
+   ASSERT(sh);
+   ASSERT(vertex_path);
+   ASSERT(geometry_path);
+   ASSERT(fragment_path);
 
    uint8_t* vertex_source   = NULL;
    uint8_t* geometry_source = NULL;
@@ -228,7 +228,7 @@ void sh_compile(shader_t* sh, char* vertex_path, char* geometry_path, char* frag
 //
 shader_t* sh_create(char* name)
 {
-   assert(name);
+   ASSERT(name);
 
    shader_t* sh = DEEPCARS_MALLOC(sizeof(shader_t));
    sh->prog_id = 0;
@@ -242,10 +242,10 @@ shader_t* sh_create(char* name)
 //
 void sh_free(shader_t* sh)
 {
-   assert(sh);
+   ASSERT(sh);
 
    SH_LOG("Freed shader \"%s\"", sh->name);
-   GL_CALL(glDeleteProgram(sh->prog_id))
+   GL_CALL(glDeleteProgram(sh->prog_id));
 
    DEEPCARS_FREE(sh->name);
    DEEPCARS_FREE(sh);
@@ -257,7 +257,7 @@ void sh_free(shader_t* sh)
 inline void sh_use(shader_t* sh)
 {
    if (!sh)
-      GL_PCALL(glUseProgram(0))
+      {GL_PCALL(glUseProgram(0));}
    else
       GL_PCALL(glUseProgram(sh->prog_id));
 }
@@ -309,44 +309,44 @@ inline void sh_set_vec4(GLint location, vec4 v)
 
 inline void sh_nset_int(shader_t* sh, const char* name, int value)
 {
-   assert(sh);
+   PASSERT(sh);
 
    GLint location = glGetUniformLocation(sh->prog_id, name);
 #if DEBUG_LEVEL == 3
-   assert(location != -1);
+   ASSERT(location != -1);
 #endif
    sh_set_int(location, value);
 }
 
 inline void sh_nset_float(shader_t* sh, const char* name, float value)
 {
-   assert(sh);
+   PASSERT(sh);
 
    GLint location = glGetUniformLocation(sh->prog_id, name);
 #if DEBUG_LEVEL == 3
-   assert(location != -1);
+   ASSERT(location != -1);
 #endif
    sh_set_float(location, value);
 }
 
 inline void sh_nset_mat4(shader_t* sh, const char* name, mat4 value)
 {
-   assert(sh);
+   PASSERT(sh);
 
    GLint location = glGetUniformLocation(sh->prog_id, name);
 #if DEBUG_LEVEL == 3
-   assert(location != -1);
+   ASSERT(location != -1);
 #endif
    sh_set_mat4(location, value);
 }
 
 inline void sh_nset_vec2v(shader_t* sh, const char* name, float a, float b)
 {
-   assert(sh);
+   PASSERT(sh);
 
    GLint location = glGetUniformLocation(sh->prog_id, name);
 #if DEBUG_LEVEL == 3
-   assert(location != -1);
+   ASSERT(location != -1);
 #endif
    sh_set_vec2v(location, a, b);
 }
@@ -358,36 +358,36 @@ inline void sh_nset_vec2(shader_t* sh, const char* name, vec4 v)
 
 inline void sh_nset_vec3v(shader_t* sh, const char* name, float a, float b, float c)
 {
-   assert(sh);
+   PASSERT(sh);
 
    GLint location = glGetUniformLocation(sh->prog_id, name);
 #if DEBUG_LEVEL == 3
-   assert(location != -1);
+   ASSERT(location != -1);
 #endif
    sh_set_vec3v(location, a, b, c);
 }
 
 inline void sh_nset_vec3(shader_t* sh, const char* name, vec4 v)
 {
-   assert(sh);
+   PASSERT(sh);
 
    sh_nset_vec3v(sh, name, v[0], v[1], v[2]);
 }
 
 inline void sh_nset_vec4v(shader_t* sh, const char* name, float a, float b, float c, float d)
 {
-   assert(sh);
+   PASSERT(sh);
 
    GLint location = glGetUniformLocation(sh->prog_id, name);
 #if DEBUG_LEVEL == 3
-   assert(location != -1);
+   ASSERT(location != -1);
 #endif
    sh_set_vec4v(location, a, b, c, d);
 }
 
 inline void sh_nset_vec4(shader_t* sh, const char* name, vec4 v)
 {
-   assert(sh);
+   PASSERT(sh);
 
    sh_nset_vec4v(sh, name, v[0], v[1], v[2], v[3]);
 }
@@ -397,7 +397,7 @@ inline void sh_nset_vec4(shader_t* sh, const char* name, vec4 v)
 //
 void sh_info(shader_t* sh)
 {
-   assert(sh);
+   ASSERT(sh);
 
    GLint i;
    GLint count;

@@ -97,7 +97,7 @@ void* rm_get_try(resource_type_t type, uint32_t id)
 //
 void* rm_getn_try(resource_type_t type, const char* name)
 {
-   assert(name);
+   ASSERT(name);
 
    switch(type)
    {
@@ -147,7 +147,7 @@ void* rm_get(resource_type_t type, uint32_t id)
 //
 void* rm_getn(resource_type_t type, const char* name)
 {
-   assert(name);
+   ASSERT(name);
 
    void* ptr = rm_getn_try(type, name);
    if(!ptr)
@@ -162,7 +162,7 @@ void* rm_getn(resource_type_t type, const char* name)
 //
 void rm_push(resource_type_t type, void* data, int32_t id)
 {
-   assert(data);
+   ASSERT(data);
 
    switch(type)
    {

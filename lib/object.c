@@ -15,7 +15,7 @@
 //
 void o_free(object_t* object)
 {
-   assert(object);
+   ASSERT(object);
 
    if (object->destroy_func)
       object->destroy_func(object);
@@ -29,7 +29,7 @@ void o_free(object_t* object)
 //
 object_t* o_clone(object_t* object)
 {
-   assert(object);
+   ASSERT(object);
 
    object_t* new_object = DEEPCARS_MALLOC(sizeof(object_t));
    memcpy(new_object, object, sizeof(object_t));
@@ -73,13 +73,13 @@ object_t* o_create()
 //
 void o_enable_draw_normals(object_t* object, vec4 color1, vec4 color2, float len)
 {
-   assert(object);
-   assert(color1);
-   assert(color2);
+   ASSERT(object);
+   ASSERT(color1);
+   ASSERT(color2);
 
    if(!object->draw_info->normal_vao)
    {
-      assert(object->draw_info->model);
+      ASSERT(object->draw_info->model);
 
       object->draw_info->draw_normals = true;
       m_calculate_normals_vao(object->draw_info->model,

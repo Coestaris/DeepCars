@@ -512,7 +512,7 @@ static char magic_bytes[] = { 'D', 'P', 'A', 'C', 'K' };
 //
 void p_load(const char* name)
 {
-   assert(name);
+   ASSERT(name);
 
    P_LOG("Loading resource pack \"%s\"", name)
    FILE* f = fopen(name, "rb");

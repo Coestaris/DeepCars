@@ -296,8 +296,8 @@ static void update_editor(object_t* this)
 
    if(grid_texture)
    {
-      for(size_t x = 0; x < default_win->w / GRID_TEXTURE_SIZE + 1; x++)
-      for(size_t y = 0; y < default_win->h / GRID_TEXTURE_SIZE + 1; y++)
+      for(size_t x = 0; x < (size_t)(default_win->w / GRID_TEXTURE_SIZE + 1); x++)
+      for(size_t y = 0; y < (size_t)(default_win->h / GRID_TEXTURE_SIZE + 1); y++)
       {
          float screen_x = x * (float)GRID_TEXTURE_SIZE;
          float screen_y = y * (float)GRID_TEXTURE_SIZE;

@@ -15,8 +15,8 @@
 //
 inline void list_push(list_t* list, void* object)
 {
-   assert(list);
-   assert(object);
+   PASSERT(list);
+   PASSERT(object);
 
    // current collection if full increase its size in 1.5 times
    if (list->count > list->max_size - 1)
@@ -43,7 +43,7 @@ inline void list_push(list_t* list, void* object)
 //
 void list_free_elements(list_t* list)
 {
-   assert(list);
+   ASSERT(list);
 
    for (size_t i = 0; i < list->count; i++)
       DEEPCARS_FREE(list->collection[i]);
@@ -55,7 +55,7 @@ void list_free_elements(list_t* list)
 //
 void list_free(list_t* list)
 {
-   assert(list);
+   ASSERT(list);
 
    if (list->collection != list->bootstrap) {
       DEEPCARS_FREE(list->collection);
@@ -68,8 +68,8 @@ void list_free(list_t* list)
 //
 void list_remove(list_t* list, void* object)
 {
-   assert(list);
-   assert(object);
+   ASSERT(list);
+   ASSERT(object);
 
    //todo
 }

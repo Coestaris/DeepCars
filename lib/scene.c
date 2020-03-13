@@ -30,7 +30,7 @@ scene_t* sc_create(uint32_t id)
 //
 void sc_free(scene_t* scene)
 {
-   assert(scene);
+   ASSERT(scene);
 
    if(scene->shadow_light) l_sh_free(scene->shadow_light);
    for (size_t i = 0; i < scene->lights->count; i++)

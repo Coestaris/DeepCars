@@ -78,8 +78,8 @@ void w_set_glx_context_version(int major, int minor, int flags)
 win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t win_y,
                      const char* win_caption, bool verbose, bool use_double_buffer)
 {
-   assert(win_w && win_h);
-   assert(win_caption);
+   ASSERT(win_w && win_h);
+   ASSERT(win_caption);
 
    W_LOG("[INIT]: ==============================",0);
    W_LOG("[INIT]: %s (version %s) by %s", DEEPCARS, DEEPCARS_VERSION, DEEPCARS_DEVS);
@@ -324,7 +324,7 @@ win_info_t* w_create(uint16_t win_w, uint16_t win_h, uint16_t win_x, uint16_t wi
 //
 void w_destroy(win_info_t* w)
 {
-   assert(w);
+   ASSERT(w);
 
    glXMakeCurrent(w->display, 0, 0);
    glXDestroyContext(w->display, w->context);
@@ -342,9 +342,9 @@ void w_destroy(win_info_t* w)
 //
 inline void w_swap_buffers(win_info_t* w)
 {
-   assert(w);
+   PASSERT(w);
 
-   GL_PCALL(glXSwapBuffers(w->display, w->win))
+   GL_PCALL(glXSwapBuffers(w->display, w->win));
    GL_PCALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 

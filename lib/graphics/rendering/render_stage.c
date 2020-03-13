@@ -112,8 +112,9 @@ static void rs_check_sizes(render_stage_t* rs, attachment_options_t options)
 //
 render_stage_t* rs_create(const char* name, render_mode_t render_mode, shader_t* shader)
 {
-   assert(name);
-   assert(shader);
+   ASSERT(name);
+   if(render_mode != RM_CUSTOM)
+      ASSERT(shader);
 
    render_stage_t* rs = DEEPCARS_MALLOC(sizeof(render_stage_t));
    rs->shader = shader;
@@ -166,7 +167,7 @@ render_stage_t* rs_create(const char* name, render_mode_t render_mode, shader_t*
 //
 void rs_free(render_stage_t* rs)
 {
-   assert(rs);
+   ASSERT(rs);
 
    if(rs->fbo)
    GL_CALL(glDeleteFramebuffers(1, &rs->fbo));
@@ -184,7 +185,7 @@ void rs_free(render_stage_t* rs)
 //
 void rs_build_tex(render_stage_t* rs)
 {
-   assert(rs);
+   ASSERT(rs);
 
    if(!rs->fbo)
    GL_CALL(glGenFramebuffers(1, &rs->fbo));
