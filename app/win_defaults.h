@@ -89,7 +89,7 @@
 // Wall defines
 //
 #define WALL_HEIGHT 15
-#define WALL_WIDTH 10
+#define WALL_WIDTH 5
 
 extern win_info_t* win;
 extern camera_t* camera;

@@ -32,7 +32,7 @@ void setup_game_objects(scene_t* scene)
              create_textured_dummy(vec3f(-1000, 0, -1000), 2000,
                                    rm_getn(MATERIAL, "grass"),
                                    plane));
-   list_push(scene->startup_objects, create_camera_control());
+   //list_push(scene->startup_objects, create_camera_control());
    list_push(scene->startup_objects, create_default_bind_handler());
    list_push(scene->startup_objects, create_game_map());
 }
@@ -41,7 +41,7 @@ void setup_menu_objects(scene_t* scene)
 {
    if(!plane)
    {
-      plane = m_create_plane(50, 50, true);
+      plane = m_create_plane(150, 150, true);
       m_normalize(plane, true, true, true, true);
       m_build(plane);
       rm_push(MODEL, plane, -1);
