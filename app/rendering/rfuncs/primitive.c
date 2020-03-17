@@ -14,7 +14,7 @@ void bind_primitive(render_stage_t* stage)
 
 void unbind_primitive(render_stage_t* stage)
 {
-   //glDisable(GL_BLEND);
+   GL_PCALL(glDisable(GL_BLEND));
    GL_PCALL(glEnable(GL_DEPTH_TEST));
 }
 

@@ -11,7 +11,8 @@ static list_t* instance_collections;
 
 static void ic_load(instance_collection_t* ic)
 {
-   const size_t matsize = 16 * sizeof(float);
+   const size_t vecsize = 4 * sizeof(float);
+   const size_t matsize = vecsize * 4;
    mat4 buff = cmat4();
 
    float* buffer = DEEPCARS_MALLOC(ic->amount * matsize);
@@ -33,11 +34,11 @@ static void ic_load(instance_collection_t* ic)
    GL_CALL(glEnableVertexAttribArray(3));
    GL_CALL(glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, matsize, (void*)0));
    GL_CALL(glEnableVertexAttribArray(4));
-   GL_CALL(glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, matsize, (void*)(sizeof(float) * 4)));
+   GL_CALL(glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, matsize, (void*)(vecsize)));
    GL_CALL(glEnableVertexAttribArray(5));
-   GL_CALL(glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, matsize, (void*)(2 * sizeof(float) * 4)));
+   GL_CALL(glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, matsize, (void*)(2 * vecsize)));
    GL_CALL(glEnableVertexAttribArray(6));
-   GL_CALL(glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, matsize, (void*)(3 * sizeof(float) * 4)));
+   GL_CALL(glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, matsize, (void*)(3 * vecsize)));
 
    GL_CALL(glVertexAttribDivisor(3, 1));
    GL_CALL(glVertexAttribDivisor(4, 1));
@@ -45,6 +46,7 @@ static void ic_load(instance_collection_t* ic)
    GL_CALL(glVertexAttribDivisor(6, 1));
 
    GL_CALL(glBindVertexArray(0));
+   GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 
    mat4_free(buff);
    DEEPCARS_FREE(buffer);
