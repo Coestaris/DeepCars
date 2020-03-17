@@ -16,36 +16,29 @@
 #include "../../lib/resources/font.h"
 #include "vfx.h"
 #include "text_rendering.h"
+#include "rfuncs/rfuncs.h"
 
-typedef struct _geometry_shader_data
-{
-   camera_t* camera;
-   mat4 buffmat;
-
-} geometry_shader_data_t;
 
 static char stage_string_buffer[140];
 //ssao
-static texture_t* noise_texture      = NULL;
+
 static vec4*      ssao_kernel        = NULL;
-static texture_t* ssao_texture       = NULL;
 static texture_t* ssao_dummy_texture = NULL;
 
 //stages
-static texture_t* texture_to_draw = NULL;
 static uint32_t   ssao_state      = 0;
 static uint32_t   render_state    = -1;
-static uint32_t   fxaa_state      = 1;
-static uint32_t   wireframe       = 0;
-static uint32_t   fxaa_edges      = 0;
 
-static shader_t* br_shader = NULL;
+texture_t* texture_to_draw = NULL;
+uint32_t   fxaa_state      = 1;
+uint32_t   fxaa_edges      = 0;
+shader_t*  br_shader       = NULL;
+uint32_t   wireframe       = 0;
+texture_t* ssao_texture    = NULL;
+texture_t* noise_texture   = NULL;
 
-
-mat4 view = NULL;
-
-list_t*               blurred_regions = NULL;
-sprite_renderer_t*    default_sprite_renderer = NULL;
+list_t*               blurred_regions            = NULL;
+sprite_renderer_t*    default_sprite_renderer    = NULL;
 primitive_renderer_t* default_primitive_renderer = NULL;
 
 render_chain_t* default_rc = NULL;
@@ -192,244 +185,6 @@ inline void switch_stages(void)
    }
 }
 
-// G BUFFER ROUTINES
-static void bind_g_buffer(render_stage_t* stage)
-{
-   GL_PCALL(glClearColor(0, 0, 0, 0));
-   GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
-
-   if(wireframe)
-   GL_PCALL(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-
-   geometry_shader_data_t* data = (geometry_shader_data_t*)stage->data;
-   c_to_mat(view, data->camera);
-   sh_set_mat4(UNIFORM_GBUFF.view, view);
-}
-
-static void unbind_g_buffer(render_stage_t* stage)
-{
-   if(wireframe)
-   GL_PCALL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
-}
-
-static void setup_object_g_buffer(render_stage_t* stage, object_t* object, mat4 model_mat)
-{
-   t_bind(object->draw_info->material->map_diffuse, UNIFORM_GBUFF.diffuse_tex);
-   t_bind(object->draw_info->material->map_specular, UNIFORM_GBUFF.spec_tex);
-   sh_set_mat4(UNIFORM_GBUFF.model, model_mat);
-}
-
-// NORMAL ROUTINES
-static void bind_normal(render_stage_t* stage)
-{
-   sh_set_mat4(UNIFORM_NORMAL.view, view);
-}
-
-static void unbind_normal(render_stage_t* stage) { }
-
-static void draw_normal(render_stage_t* stage)
-{
-   render_stage_t* g_buffer_stage = default_rc->stages->collection[STAGE_G_BUFFER];
-   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, g_buffer_stage->fbo));
-   list_t* objects = u_get_objects();
-
-   //GL_PCALL(glEnable(GL_DEPTH_TEST));
-   for(size_t i = 0; i < objects->count; i++)
-   {
-      object_t* object = objects->collection[i];
-      if(object->draw_info->draw_normals)
-      {
-         gr_transform(object->position, object->scale, object->rotation);
-         sh_set_mat4(UNIFORM_NORMAL.model, model_mat);
-
-         GL_PCALL(glBindVertexArray(object->draw_info->normal_vao));
-
-         GL_PCALL(glDrawArrays(GL_LINES, 0, object->draw_info->normal_buffer_len));
-
-         GL_PCALL(glBindVertexArray(0));
-      }
-   }
-   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-}
-
-// SSAO ROUTINES
-static void bind_ssao(render_stage_t* stage)
-{
-   //GL_PCALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-
-   render_stage_t* g_buffer_stage = default_rc->stages->collection[STAGE_G_BUFFER];
-
-   t_bind(g_buffer_stage->color0_tex, UNIFORM_SSAO.pos_tex);
-   t_bind(g_buffer_stage->color1_tex, UNIFORM_SSAO.norm_tex);
-   t_bind(noise_texture, UNIFORM_SSAO.noise_tex);
-}
-
-static void unbind_ssao(render_stage_t* stage) { }
-
-// SSAO BLUR ROUTINES
-static void bind_ssao_blur(render_stage_t* stage)
-{
-   t_bind(stage->prev_stage->color0_tex, UNIFORM_SSAO_BLUR.tex);
-}
-
-static void unbind_ssao_blur(render_stage_t* stage) { }
-
-// SKYBOX ROUTINES
-static void bind_skybox(render_stage_t* stage)
-{
-   scene_t* scene = scm_get_current();
-   geometry_shader_data_t* data = (geometry_shader_data_t*)stage->data;
-   mat4_cpy(data->buffmat, view);
-
-   data->buffmat[3] = 0;
-   data->buffmat[7] = 0;
-   data->buffmat[11] = 0;
-   data->buffmat[15] = 0;
-
-   sh_set_mat4(UNIFORM_SKYBOX.view, data->buffmat);
-   t_bind(scene->skybox, UNIFORM_SKYBOX.skybox_tex);
-}
-
-static void unbind_skybox(render_stage_t* stage)
-{
-   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-}
-
-static void draw_skybox(render_stage_t* stage)
-{
-   render_stage_t* g_buffer_stage = default_rc->stages->collection[STAGE_G_BUFFER];
-   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, g_buffer_stage->fbo));
-   {
-      GL_PCALL(glDepthFunc(GL_LEQUAL));
-      GL_PCALL(glBindVertexArray(stage->vao));
-      GL_PCALL(glDrawArrays(GL_TRIANGLES, 0, 36));
-      GL_PCALL(glBindVertexArray(0));
-      GL_PCALL(glDepthFunc(GL_LESS));
-   }
-   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-}
-
-// SHADOWMAP ROUTINES
-static void bind_shadowmap(render_stage_t* stage)
-{
-   scene_t* scene = scm_get_current();
-   shadow_light_t* shadow_light = scene->shadow_light;
-
-   GL_PCALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
-
-   sh_set_mat4(UNIFORM_SHADOWMAP.light_space, shadow_light->light_space);
-
-   GL_PCALL(glCullFace(GL_FRONT));
-
-   //stage->skip = true;
-}
-
-static void unbind_shadowmap(render_stage_t* stage)
-{
-   GL_PCALL(glCullFace(GL_BACK));
-}
-
-static void setup_object_shadowmap(render_stage_t* stage, object_t* object, mat4 model_mat)
-{
-   sh_set_mat4(UNIFORM_SHADOWMAP.model, model_mat);
-}
-
-// SHADING ROUTINES
-static void bind_shading(render_stage_t* stage)
-{
-   render_stage_t* g_buffer_stage = default_rc->stages->collection[STAGE_G_BUFFER];
-   render_stage_t* shadowmap_stage = default_rc->stages->collection[STAGE_SHADOWMAP];
-
-   scene_t* scene = scm_get_current();
-   geometry_shader_data_t* data = stage->data;
-
-   sh_set_vec3(UNIFORM_SHADING.view_pos, data->camera->position);
-   sh_set_mat4(UNIFORM_SHADING.view, view);
-
-   //t_bind(g_buffer_stage->color0_tex, uniform);
-   t_bind(g_buffer_stage->color1_tex, UNIFORM_SHADING.norm_tex);
-   t_bind(g_buffer_stage->color2_tex, UNIFORM_SHADING.albedoSpec_tex);
-   t_bind(ssao_texture, UNIFORM_SHADING.ssao_tex);
-   t_bind(g_buffer_stage->color3_tex, UNIFORM_SHADING.pos_tex);
-   t_bind(shadowmap_stage->depth_tex, UNIFORM_SHADING.shadow_light_shadowmap_tex);
-}
-
-static void unbind_shading(render_stage_t* stage) { }
-
-// FXAA ROUTINES
-static void bind_fxaa(render_stage_t* stage)
-{
-   render_stage_t* shading_stage = default_rc->stages->collection[STAGE_SHADING];
-   t_bind(shading_stage->color0_tex, UNIFORM_FXAA.tex);
-
-   sh_set_int(UNIFORM_FXAA.show_edges, fxaa_edges);
-   sh_set_int(UNIFORM_FXAA.on, fxaa_state);
-}
-
-static void unbind_fxaa(render_stage_t* stage) { }
-
-// GAMMA / BYPASS ROUTINES
-static void bind_bypass(render_stage_t* stage)
-{
-   t_bind(texture_to_draw, UNIFORM_GAMMA.tex);
-}
-
-static void unbind_bypass(render_stage_t* stage) { }
-
-//FONT ROUTINES
-static void bind_primitive(render_stage_t* stage)
-{
-   glEnable(GL_BLEND);
-   glDisable(GL_DEPTH_TEST);
-   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-}
-
-static void unbind_primitive(render_stage_t* stage)
-{
-   glDisable(GL_BLEND);
-   glEnable(GL_DEPTH_TEST);
-}
-
-static void draw_primitives(render_stage_t* stage)
-{
-   render_stage_t* rs = default_rc->stages->collection[STAGE_SHADING];
-
-   sh_use(br_shader);
-
-   for(size_t i = 0; i < blurred_regions->count; i++)
-   {
-      blurred_region_t* br = blurred_regions->collection[i];
-      if(!br->visible)
-         continue;
-
-      GL_PCALL(glBindVertexArray(br->vao));
-      if(br->gray_color)
-         sh_set_vec3(UNIFORM_BR.gray_color, br->gray_color);
-      sh_set_float(UNIFORM_BR.transparency, br->transparency);
-      t_bind(br->back_tex, UNIFORM_BR.back_tex);
-      t_bind(br->tex, UNIFORM_BR.tex);
-
-      GL_PCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
-   }
-   GL_PCALL(glBindVertexArray(0));
-   sh_use(NULL);
-
-   gr_pq_flush();
-}
-
-static void bind_sprite_renderer(sprite_renderer_t* this, mat4 transform, void* data)
-{
-   float trans = *((float*)data);
-   sh_set_mat4(UNIFORM_SPRITE.model, transform);
-   sh_set_float(UNIFORM_SPRITE.transparency, trans);
-}
-
-static void bind_line_renderer(struct _primitive_renderer* this, float width, vec4 color, void* data)
-{
-   sh_set_vec3(UNIFORM_LINE_PRIMITIVE.color, color);
-   sh_set_float(UNIFORM_LINE_PRIMITIVE.thickness, width);
-}
-
 render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 {
    blurred_regions = list_create();
@@ -440,9 +195,10 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    noise_texture = generate_noise(4);
    ssao_kernel = generate_kernel(KERNEL_SIZE);
    ssao_dummy_texture = mt_create_colored_tex(COLOR_WHITE);
-   view = cmat4();
+   render_view = cmat4();
 
    shader_t* g_buffer_shader = setup_g_buffer(proj);
+   shader_t* g_buffer_instanced_shader = setup_g_buffer_instance(proj);
    shader_t* normal_shader = setup_normal(proj);
    shader_t* ssao_shader = setup_ssao(ssao_kernel, proj);
    shader_t* ssao_blur_shader = setup_ssao_blur();
@@ -520,6 +276,13 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    geometry_shader_data_t* g_buffer_data = (g_buffer->data = DEEPCARS_MALLOC(sizeof(geometry_shader_data_t)));
    g_buffer_data->camera = camera;
    g_buffer_data->buffmat = cmat4();
+
+   //render_stage_t* g_buffer_instanced = rs_create("gbuffer_inst", RM_GEOMETRY_NOFRAMEBUFFER, g_buffer_instanced_shader);
+   //g_buffer_instanced->width = (float)info->w;
+   //g_buffer_instanced->height = (float)info->h;
+   //g_buffer_instanced->bind_func = bind_gbuff_inst;
+   //g_buffer_instanced->unbind_func = bind_gbuff_inst;
+   //g_buffer_instanced->setup_instance_func = bind_gbuff_inst;
 
    render_stage_t* normal = rs_create("normal", RM_CUSTOM, normal_shader);
    normal->width = (float)info->w;
@@ -677,7 +440,7 @@ void free_stages(void)
    rc_free(default_rc, false);
    rc_free(editor_rc, false);
 
-   mat4_free(view);
+   mat4_free(render_view);
 
    for(size_t i = 0; i < KERNEL_SIZE; i++)
       vec4_free(ssao_kernel[i]);

@@ -20,6 +20,14 @@ struct {
 } UNIFORM_GBUFF;
 
 struct {
+   GLint model;
+   GLint view;
+
+   GLint diffuse_tex;
+   GLint spec_tex;
+} UNIFORM_GBUFF_INST;
+
+struct {
    GLint color;
    GLint view;
    GLint model;
@@ -126,6 +134,7 @@ struct {
 
 
 shader_t* setup_g_buffer(mat4 proj);
+shader_t* setup_g_buffer_instance(mat4 proj);
 shader_t* setup_normal(mat4 proj);
 shader_t* setup_ssao(vec4* kernel, mat4 proj);
 shader_t* setup_ssao_blur(void);

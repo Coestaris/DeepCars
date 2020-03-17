@@ -54,16 +54,30 @@ void setup_menu_objects(scene_t* scene)
 
    const size_t count = 20;
    const float step = 2.0f * M_PI / count;
+   const float radius = 70;
    for(size_t i = 0; i < count; i++)
    {
       object_t* obj = create_textured_dummy(
-            vec3f(cosf(i * step) * 70.0f, 0, sinf(i * step) * 70.0f),
+            vec3f(cosf(i * step) * radius, 0, sinf(i * step) * radius),
             30,
             rm_getn(MATERIAL, "column"),
             rm_getn(MODEL, "column"));
       obj->rotation.y = i * step + M_PI / 2;
 
       list_push(scene->startup_objects, obj);
+   }
+
+   for(size_t i = 0; i < 350; i++)
+   {
+      float angle = drand48() * M_PI * 2;
+      float r = drand48() * 350 + radius + 5;
+
+      float x = cosf(angle)  * r;
+      float y = sinf(angle)  * r;
+
+      list_push(scene->startup_objects, create_textured_dummy(vec3f(x,0,y), 20,
+         rm_getn(MATERIAL, "tree1"),
+         rm_getn(MODEL, "tree1")));
    }
 
    for(size_t i = 0; i < SPHERES_COUNT; i++)

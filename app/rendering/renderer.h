@@ -21,8 +21,14 @@
 #define STAGE_BYPASS 8
 #define STAGE_PRIMITIVE 9
 
-//#define WIREFRAME
+extern texture_t* texture_to_draw;
+extern uint32_t   fxaa_state;
+extern uint32_t   fxaa_edges;
 
+extern shader_t*  br_shader;
+extern uint32_t   wireframe;
+extern texture_t* noise_texture;
+extern texture_t* ssao_texture;
 extern sprite_renderer_t* default_sprite_renderer;
 extern primitive_renderer_t* default_primitive_renderer;
 

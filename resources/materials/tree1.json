@@ -1,0 +1,8 @@
+{
+    "mode": 2,
+    "map_diffuse" : "tree1",
+
+    "diffuse" : [0.5039, 0.5703, 0.3476],
+    "specular" : [0, 0, 0],
+    "shininess": 256
+} 

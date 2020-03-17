@@ -56,6 +56,7 @@ void app_init_graphics(void)
    s_init();
    rm_init();
    mt_init();
+   ic_init();
 
    p_load(RESOURCE_PACK_FILE);
 
@@ -93,6 +94,7 @@ void app_fin()
    mt_release();
    scm_release();
    gr_release();
+   ic_release(true, true);
 
    free_stages();
 

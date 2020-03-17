@@ -11,6 +11,7 @@
 #include "resources/shader.h"
 #include "scm.h"
 #include "graphics/rendering/render_chain.h"
+#include "graphics/rendering/instance_collection.h"
 
 #define U_LOG(format, ...) DC_LOG("updater.c", format, __VA_ARGS__)
 #define U_ERROR(format, ...) DC_ERROR("updater.c", format, __VA_ARGS__)
@@ -82,6 +83,7 @@ static void u_draw_func(void)
 
    render_chain_t* chain = rc_get_current();
    list_t* stages = chain->stages;
+   list_t* instance_collections = ic_get();
 
    // Iterate thought render stages
    for(size_t i = 0; i < stages->count; i++)
@@ -98,9 +100,16 @@ static void u_draw_func(void)
       double start_time = u_get_millis();
 #endif
 
-      if(stage->render_mode == RM_GEOMETRY)
+      if(stage->render_mode == RM_GEOMETRY || stage->render_mode == RM_GEOMETRY_NOFRAMEBUFFER)
       {
          // Render all objects
+         for(size_t j = 0; j < instance_collections->count; j++)
+         {
+            instance_collection_t* collection = instance_collections->collection[j];
+            stage->setup_instance_func(stage, collection);
+            gr_render_instance(collection);
+         }
+
          for(size_t j = 0; j < objects->count; j++)
          {
             object_t* obj = objects->collection[j];

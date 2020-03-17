@@ -149,7 +149,7 @@ void gr_release(void)
    mat4_free(z_rot_mat);
 }
 
-static void gr_draw_model(model_t* model)
+static inline void gr_draw_model(model_t* model)
 {
    GL_PCALL(glBindVertexArray(model->VAO));
    GL_PCALL(glDrawArrays(GL_TRIANGLES, 0, model->triangles_count * 3));
@@ -183,6 +183,14 @@ inline mat4 gr_transform(vec3 pos, vec3 scale, vec3 rot)
    return model_mat;
 }
 
+void gr_render_instance(instance_collection_t* ic)
+{
+   GL_PCALL(glBindVertexArray(ic->model->VAO));
+   GL_PCALL(glDrawElementsInstanced(GL_TRIANGLES, 0, ic->model->triangles_count * 3, 0, ic->amount));
+   GL_PCALL(glBindVertexArray(0));
+}
+
+
 inline void gr_render_object(object_t* obj)
 {
    gr_draw_model(obj->draw_info->model);
@@ -191,7 +199,9 @@ inline void gr_render_object(object_t* obj)
 inline void gr_bind(render_stage_t* stage)
 {
    GL_PCALL(glViewport(0, 0, stage->width, stage->height));
-   if(stage->render_mode != RM_BYPASS && stage->render_mode != RM_CUSTOM)
+   if(stage->render_mode != RM_BYPASS &&
+      stage->render_mode != RM_CUSTOM &&
+      stage->render_mode != RM_GEOMETRY_NOFRAMEBUFFER)
    {
       GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, stage->fbo));
    }
@@ -199,7 +209,9 @@ inline void gr_bind(render_stage_t* stage)
 
 inline void gr_unbind(render_stage_t* stage)
 {
-   if(stage->render_mode != RM_BYPASS && stage->render_mode != RM_CUSTOM)
+   if(stage->render_mode != RM_BYPASS &&
+      stage->render_mode != RM_CUSTOM &&
+      stage->render_mode != RM_GEOMETRY_NOFRAMEBUFFER)
    {
       GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
    }

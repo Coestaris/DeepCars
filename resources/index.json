@@ -2,6 +2,7 @@
     "shaders" : 
     [
         { "vertex" : "g_buffer.vsh",                  "fragment" : "g_buffer.fsh",                  "name": "g_buffer"  },
+        { "vertex" : "g_buffer_instanced.vsh",        "fragment" : "g_buffer.fsh",                  "name": "g_buffer_instanced"  },
         { "vertex" : "normal.vsh",                    "fragment" : "normal.fsh",                    "name": "normal"    },
         { "vertex" : "2d_shaders/bypass.vsh",         "fragment" : "ssao.fsh",                      "name": "ssao"      },
         { "vertex" : "2d_shaders/bypass.vsh",         "fragment" : "ssao_blur.fsh",                 "name": "ssao_blur" },
@@ -25,6 +26,7 @@
     "textures" : 
     [
         { "fn" : "grass.png",               "name" : "grass"    },
+        { "fn" : "tree1.png",               "name" : "tree1" },
         { "fn" : "grass_specular.png",      "name" : "grass_specular"    },
         { "fn" : "ball.png",                "name" : "ball" },
         { "fn" : "menu/btn_run_editor.png", "name" : "btn_run_editor" },
@@ -91,7 +93,8 @@
         { "fn" : "car.zobj",  "name" : "car" },
         { "fn" : "sphere.zobj",  "name" : "sphere", "normalize_x" : false, "normalize_y" : false, "normalize_z" : false },
         { "fn" : "ring.zobj",  "name" : "ring" },
-        { "fn" : "lenin.zobj",  "name" : "lenin" }
+        { "fn" : "lenin.zobj",  "name" : "lenin" },
+        { "fn" : "tree1.zobj",  "name" : "tree1" }
     ],
 
     "materials":
@@ -100,7 +103,8 @@
         { "fn": "column.json", "name": "column" },
         { "fn": "sphere.json", "name": "menu_spheres" },
         { "fn": "car1.json", "name": "car1" },
-        { "fn": "car2.json", "name": "car2" }
+        { "fn": "car2.json", "name": "car2" },
+        { "fn": "tree1.json", "name": "tree1" }
     ],
 
     "fonts":

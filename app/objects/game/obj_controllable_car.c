@@ -13,8 +13,8 @@ static vec2 car_velocity = vec2e;
 static float rot_velocity = 0;
 static const float car_acc = .05f;
 static const float max_car_velocity = 2.3f;
-static const float rot_acc = .002f;
-static const float max_rot_velocity = .02f;
+static const float rot_acc = .006f;
+static const float max_rot_velocity = .035f;
 static vec4 car_start = NULL;
 
 static void update_controllable_car(object_t* this)
@@ -33,47 +33,19 @@ static void update_controllable_car(object_t* this)
 
    float vel_to_dir1 = vec2_dot(car_velocity, direction) / vec2_len(direction);
    float vel_to_norm1 = vec2_dot(car_velocity, normal) / vec2_len(normal);
-   car_velocity.x = 0.9 * vel_to_norm1 * normal.x + 0.95 * vel_to_dir1 * direction.x;
-   car_velocity.y = 0.9 * vel_to_norm1 * normal.y + 0.95 * vel_to_dir1 * direction.y;
+   car_velocity.x = 0.92 * vel_to_norm1 * normal.x + 0.95 * vel_to_dir1 * direction.x;
+   car_velocity.y = 0.92 * vel_to_norm1 * normal.y + 0.95 * vel_to_dir1 * direction.y;
 
    if(u_get_key_state(116) == KEY_PRESSED) // down
    {
       //vec2 direction = vec2f(cos(this->rotation.y), sin(this->rotation.y));
-      car_velocity.x -= direction.x * car_acc / 2;
-      car_velocity.y -= direction.y * car_acc / 2;
+      car_velocity.x -= direction.x * car_acc / 3;
+      car_velocity.y -= direction.y * car_acc / 3;
    }
-
-   if(u_get_key_state(113) == KEY_PRESSED) // r
-   {
-      if(u_get_key_state(116) == KEY_PRESSED)
-      {
-         if(rot_velocity < max_rot_velocity)
-            rot_velocity += rot_acc;
-      }
-      else
-      {
-         if(rot_velocity > -max_rot_velocity)
-            rot_velocity -= rot_acc;
-      }
-   }
-   else if(u_get_key_state(114) == KEY_PRESSED) // l
-   {
-      if(u_get_key_state(116) == KEY_PRESSED)
-      {
-         if(rot_velocity > -max_rot_velocity)
-            rot_velocity -= rot_acc;
-      }
-      else
-      {
-         if(rot_velocity < max_rot_velocity)
-            rot_velocity += rot_acc;
-      }
-   }
-   else rot_velocity *= 0.9f;
 
    float vel_to_dir = vec2_dot(car_velocity, direction) / vec2_len(direction);
    float vel_to_norm = vec2_dot(car_velocity, normal) / vec2_len(normal);
-   vel_to_norm *= 0.6;
+   vel_to_norm *= 0.7;
 
    vec2 scaled_velocity = vec2f(
          vel_to_dir * direction.x + vel_to_norm * normal.x,
@@ -86,20 +58,55 @@ static void update_controllable_car(object_t* this)
       scaled_velocity.y *= max_car_velocity / vel;
    }
 
+   if(u_get_key_state(113) == KEY_PRESSED) // r
+   {
+      float a = fmin(max_car_velocity / vec2_len(scaled_velocity) / 2, 30);
+
+      if(u_get_key_state(116) == KEY_PRESSED)
+      {
+         if(rot_velocity < max_rot_velocity)
+            rot_velocity += rot_acc / a * 3;
+      }
+      else
+      {
+         if(rot_velocity > -max_rot_velocity)
+            rot_velocity -= rot_acc / a;
+      }
+   }
+   else if(u_get_key_state(114) == KEY_PRESSED) // l
+   {
+      float a = fmin(max_car_velocity / vec2_len(scaled_velocity) / 2, 30);
+
+      if(u_get_key_state(116) == KEY_PRESSED)
+      {
+         if(rot_velocity > -max_rot_velocity)
+            rot_velocity -= rot_acc / a * 3;
+      }
+      else
+      {
+         if(rot_velocity < max_rot_velocity)
+            rot_velocity += rot_acc / a;
+      }
+   }
+   rot_velocity *= 0.9f;
+
    this->position.x += scaled_velocity.x;
    this->position.z += scaled_velocity.y;
 
    this->rotation.y += rot_velocity;
 
-   float new_x = this->position.x - direction.x * 22;
-   float new_z = this->position.z - direction.y * 22;
-   car_camera->position[0] = new_x * 0.5f + car_camera->position[0] * (1 - 0.5f);
-   car_camera->position[1] = 13;
-   car_camera->position[2] = new_z * 0.5f + car_camera->position[2] * (1 - 0.5f);
+   float new_x = this->position.x - direction.x * 20;
+   float new_z = this->position.z - direction.y * 20;
 
-   car_camera->direction[0] = -direction.x * 0.5f + car_camera->direction[0] * (1 - 0.5f);
+   const float camera_k = 0.152f;
+   car_camera->position[0] = new_x * camera_k + car_camera->position[0] * (1 - camera_k);
+   car_camera->position[1] = 13;
+   car_camera->position[2] = new_z * camera_k + car_camera->position[2] * (1 - camera_k);
+
+   const float camera_dir_k = 0.15f;
+   car_camera->direction[0] = -direction.x * camera_dir_k + car_camera->direction[0] * (1 - camera_dir_k);
    car_camera->direction[1] = 0.3f;
-   car_camera->direction[2] = -direction.y * 0.5f + car_camera->direction[2] * (1 - 0.5f);
+   car_camera->direction[2] = -direction.y * camera_dir_k + car_camera->direction[2] * (1 - camera_dir_k);
    vec4_norm(car_camera->direction);
 
    uint64_t frame = u_get_frames();

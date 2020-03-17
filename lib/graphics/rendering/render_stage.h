@@ -11,6 +11,7 @@
 #include "../../coredefs.h"
 #include "../../object.h"
 #include "../../resources/shader.h"
+#include "instance_collection.h"
 
 // Measure time spent by every stage
 #define MEASURE_RENDER_TIME
@@ -27,6 +28,8 @@ typedef enum _render_mode
    RM_CUSTOM_FRAMEBUFFER,
    // Call draw function for every object. Allocating framebuffer
    RM_GEOMETRY,
+   // Call draw function for every object. But we dont allocating framebuffer
+   RM_GEOMETRY_NOFRAMEBUFFER,
    // No draw function specified (only shader rendering). Allocating framebuffer
    RM_FRAMEBUFFER,
    // No draw function specified (only shader rendering). Rendering to a screen.
@@ -103,6 +106,8 @@ typedef struct _render_stage
    void (*unbind_func)(struct _render_stage* this);
    // Called for every object in scene before rendering its VAO (only if render_mode set to GEOMETRY)
    void (*setup_obj_func)(struct _render_stage* this, object_t* render_obj, mat4 model_mat);
+   // Called for every instanced collection (only if render_mode set to GEOMETRY)
+   void (*setup_instance_func)(struct _render_stage* this, instance_collection_t* collection);
    // Called as main draw func if render_mode set to CUSTOM_*
    void (*custom_draw_func)(struct _render_stage* this);
 

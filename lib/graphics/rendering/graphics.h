@@ -76,6 +76,8 @@ void gr_draw_sprite(texture_t* texture, vec2 position, vec2 scale, vec2 center, 
                     sprite_renderer_t* sprite_renderer, void* data);
 void gr_draw_line(vec2 p1, vec2 p2, float width, vec4 color,
                   primitive_renderer_t* primitive_renderer, void* data);
+
+void gr_render_instance(instance_collection_t* ic);
 void gr_render_object(object_t* obj);
 void gr_render_vao(GLuint vao);
 void gr_bind(render_stage_t* stage);
