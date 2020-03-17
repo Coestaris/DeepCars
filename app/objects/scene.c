@@ -67,7 +67,13 @@ void setup_menu_objects(scene_t* scene)
       list_push(scene->startup_objects, obj);
    }
 
-   for(size_t i = 0; i < 350; i++)
+   const size_t tree_count = 400;
+   instance_collection_t* tree_collection = ic_create(
+         rm_getn(MODEL, "tree1"),
+         rm_getn(MATERIAL, "tree1"),
+         tree_count);
+
+   for(size_t i = 0; i < tree_count; i++)
    {
       float angle = drand48() * M_PI * 2;
       float r = drand48() * 350 + radius + 5;
@@ -75,10 +81,15 @@ void setup_menu_objects(scene_t* scene)
       float x = cosf(angle)  * r;
       float y = sinf(angle)  * r;
 
-      list_push(scene->startup_objects, create_textured_dummy(vec3f(x,0,y), 20,
-         rm_getn(MATERIAL, "tree1"),
-         rm_getn(MODEL, "tree1")));
+      mat4 m = cmat4();
+      gr_transform(vec3f(x, 0, y),
+            vec3f(100, 100, 100),
+            vec3f(0, 0, 0));
+      mat4_cpy(m, model_mat);
+
+      ic_set_mat(tree_collection, i, m);
    }
+   ic_push(tree_collection);
 
    for(size_t i = 0; i < SPHERES_COUNT; i++)
    {

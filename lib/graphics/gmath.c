@@ -314,6 +314,32 @@ inline void mat4_mulm(mat4 m, mat4 v)
 }
 
 //
+// mat4_trans()
+//
+inline void mat4_trans(mat4 dest, mat4 source)
+{
+   dest[0] = source[0];
+   dest[4] = source[1];
+   dest[8] = source[2];
+   dest[12] = source[3];
+
+   dest[1] = source[4];
+   dest[5] = source[5];
+   dest[9] = source[6];
+   dest[13] = source[7];
+
+   dest[2] = source[8];
+   dest[6] = source[9];
+   dest[10] = source[10];
+   dest[14] = source[11];
+
+   dest[3] = source[12];
+   dest[7] = source[13];
+   dest[11] = source[14];
+   dest[15] = source[15];
+}
+
+//
 // mat4_translate()
 //
 inline void mat4_translate(mat4 m, float_t x, float_t y, float_t z)

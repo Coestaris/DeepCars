@@ -20,7 +20,6 @@ struct {
 } UNIFORM_GBUFF;
 
 struct {
-   GLint model;
    GLint view;
 
    GLint diffuse_tex;

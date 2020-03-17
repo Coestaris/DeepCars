@@ -28,7 +28,7 @@ struct _model_node {
    model_t* model;
 };
 
-// Stores material data: mat pointer and its id
+// Stores material data: material pointer and its id
 struct _material_node {
    uint32_t id;
    material_t* material;

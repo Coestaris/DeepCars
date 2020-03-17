@@ -25,6 +25,9 @@ typedef struct _geometry_shader_data
 void bind_g_buffer(render_stage_t* stage);
 void unbind_g_buffer(render_stage_t* stage);
 void setup_object_g_buffer(render_stage_t* stage, object_t* object, mat4 model_mat);
+void bind_g_buffer_inst(render_stage_t* stage);
+void unbind_g_buffer_inst(render_stage_t* stage);
+void setup_g_buffer_inst(render_stage_t* stage, instance_collection_t* ic);
 
 void bind_normal(render_stage_t* stage);
 void unbind_normal(render_stage_t* stage);
