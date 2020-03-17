@@ -27,7 +27,7 @@ void sh_compile_s(shader_t* sh,
 
    if (vertex_source)
    {
-      vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+      GL_CALL(vertex_shader = glCreateShader(GL_VERTEX_SHADER));
       if (!vertex_shader)
       {
          SH_ERROR("Unable to create vertex shader",0);
@@ -37,7 +37,7 @@ void sh_compile_s(shader_t* sh,
 
    if (geometry_source)
    {
-      geometry_shader = glCreateShader(GL_GEOMETRY_SHADER);
+      GL_CALL(geometry_shader = glCreateShader(GL_GEOMETRY_SHADER));
       if (!geometry_shader)
       {
          SH_ERROR("Unable to create geometry shader",0);
@@ -47,7 +47,7 @@ void sh_compile_s(shader_t* sh,
 
    if (fragment_source)
    {
-      fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+      GL_CALL(fragment_shader = glCreateShader(GL_FRAGMENT_SHADER));
       if (!fragment_shader)
       {
          SH_ERROR("Unable to create fragment shader",0);
@@ -100,7 +100,8 @@ void sh_compile_s(shader_t* sh,
       if (test_val == GL_FALSE)
          SH_ERROR("Unable to compile fragment shader...",0);
    }
-   sh->prog_id = glCreateProgram();
+
+   GL_CALL(sh->prog_id = glCreateProgram());
    if(!sh->prog_id)
    {
       SH_ERROR("Unable to create program",0);

@@ -273,16 +273,19 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    g_buffer->bind_func = bind_g_buffer;
    g_buffer->unbind_func = unbind_g_buffer;
    g_buffer->setup_obj_func = setup_object_g_buffer;
+   g_buffer->geometry_filter = GF_OBJECTS;
+
    geometry_shader_data_t* g_buffer_data = (g_buffer->data = DEEPCARS_MALLOC(sizeof(geometry_shader_data_t)));
    g_buffer_data->camera = camera;
    g_buffer_data->buffmat = cmat4();
 
-   //render_stage_t* g_buffer_instanced = rs_create("gbuffer_inst", RM_GEOMETRY_NOFRAMEBUFFER, g_buffer_instanced_shader);
-   //g_buffer_instanced->width = (float)info->w;
-   //g_buffer_instanced->height = (float)info->h;
-   //g_buffer_instanced->bind_func = bind_gbuff_inst;
-   //g_buffer_instanced->unbind_func = bind_gbuff_inst;
-   //g_buffer_instanced->setup_instance_func = bind_gbuff_inst;
+   render_stage_t* g_buffer_instanced = rs_create("gbuffer_inst", RM_GEOMETRY_NOFRAMEBUFFER, g_buffer_instanced_shader);
+   g_buffer_instanced->width = (float)info->w;
+   g_buffer_instanced->height = (float)info->h;
+   g_buffer_instanced->bind_func = bind_g_buffer_inst;
+   g_buffer_instanced->unbind_func = unbind_g_buffer_inst;
+   g_buffer_instanced->setup_instance_func = setup_g_buffer_inst;
+   g_buffer_instanced->geometry_filter = GF_INSTANCED;
 
    render_stage_t* normal = rs_create("normal", RM_CUSTOM, normal_shader);
    normal->width = (float)info->w;
@@ -346,6 +349,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shadowmap->bind_func = bind_shadowmap;
    shadowmap->setup_obj_func = setup_object_shadowmap;
    shadowmap->unbind_func = unbind_shadowmap;
+   shadowmap->geometry_filter = GF_OBJECTS;
 
 
    render_stage_t* shading = rs_create("shading", RM_FRAMEBUFFER, shading_shader);
@@ -388,6 +392,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 
    default_rc = rc_create();
    list_push(default_rc->stages, g_buffer);
+   list_push(default_rc->stages, g_buffer_instanced);
    list_push(default_rc->stages, normal);
    list_push(default_rc->stages, ssao);
    list_push(default_rc->stages, ssao_blur);
@@ -403,6 +408,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
 
    rc_build(default_rc);
    rc_build(editor_rc);
+
    GL_PCALL(glEnable(GL_DEPTH_TEST));
    return default_rc;
 }
@@ -420,6 +426,7 @@ void free_stages(void)
 
    free_geometry_shader_data(default_rc, STAGE_G_BUFFER);
    rs_free(default_rc->stages->collection[STAGE_G_BUFFER]);
+   rs_free(default_rc->stages->collection[STAGE_G_BUFFER_INST]);
    rs_free(default_rc->stages->collection[STAGE_NORMAL]);
 
    rs_free(default_rc->stages->collection[STAGE_SSAO]);
