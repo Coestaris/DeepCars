@@ -9,19 +9,33 @@
 
 static list_t* instance_collections;
 
-static void ic_load(instance_collection_t* ic)
+instance_collection_t* ic_create(model_t* model, material_t* mat, size_t amount)
+{
+   instance_collection_t* ic = DEEPCARS_MALLOC(sizeof(instance_collection_t));
+   ic->model = model;
+   ic->amount = amount;
+   ic->mat = mat;
+   ic->model_matrices = DEEPCARS_MALLOC(sizeof(mat4) * amount);
+   return ic;
+}
+
+void ic_free(instance_collection_t* ic, bool free_matrices)
+{
+   if(free_matrices)
+      for(size_t i = 0; i < ic->amount; i++)
+         mat4_free(ic->model_matrices[i]);
+
+   DEEPCARS_FREE(ic->model_matrices);
+   DEEPCARS_FREE(ic);
+}
+
+void ic_load(instance_collection_t* ic)
 {
    const size_t matsize = 16 * sizeof(float);
-   mat4 buff = cmat4();
 
    float* buffer = DEEPCARS_MALLOC(ic->amount * matsize);
    for(size_t i = 0; i < ic->amount; i++)
-   {
-      mat4_print(ic->model_matrices[i]);
-      mat4_trans(buff, ic->model_matrices[i]);
-      mat4_print(buff);
-      memcpy(buffer + i * 16, buff, matsize);
-   }
+      memcpy(buffer + i * 16, ic->model_matrices[i], matsize);
 
    GLuint vbo;
    GL_CALL(glGenBuffers(1, &vbo));
@@ -46,28 +60,7 @@ static void ic_load(instance_collection_t* ic)
 
    GL_CALL(glBindVertexArray(0));
 
-   mat4_free(buff);
    DEEPCARS_FREE(buffer);
-}
-
-instance_collection_t* ic_create(model_t* model, material_t* mat, size_t amount)
-{
-   instance_collection_t* ic = DEEPCARS_MALLOC(sizeof(instance_collection_t));
-   ic->model = model;
-   ic->amount = amount;
-   ic->material = mat;
-   ic->model_matrices = DEEPCARS_MALLOC(sizeof(mat4) * amount);
-   return ic;
-}
-
-void ic_free(instance_collection_t* ic, bool free_matrices)
-{
-   if(free_matrices)
-      for(size_t i = 0; i < ic->amount; i++)
-         mat4_free(ic->model_matrices[i]);
-
-   DEEPCARS_FREE(ic->model_matrices);
-   DEEPCARS_FREE(ic);
 }
 
 void ic_set_mat(instance_collection_t* ic, size_t index, mat4 mat)
@@ -82,7 +75,6 @@ list_t* ic_get()
 
 void ic_push(instance_collection_t* ic)
 {
-   ic_load(ic);
    list_push(instance_collections, ic);
 }
 

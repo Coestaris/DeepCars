@@ -102,28 +102,22 @@ static void u_draw_func(void)
 
       if(stage->render_mode == RM_GEOMETRY || stage->render_mode == RM_GEOMETRY_NOFRAMEBUFFER)
       {
-         if(stage->geometry_filter & GF_INSTANCED)
+         // Render all objects
+         for(size_t j = 0; j < instance_collections->count; j++)
          {
-            // Render all objects
-            for (size_t j = 0; j < instance_collections->count; j++)
-            {
-               instance_collection_t* collection = instance_collections->collection[j];
-               stage->setup_instance_func(stage, collection);
-               gr_render_instance(collection);
-            }
+            instance_collection_t* collection = instance_collections->collection[j];
+            stage->setup_instance_func(stage, collection);
+            gr_render_instance(collection);
          }
 
-         if(stage->geometry_filter & GF_OBJECTS)
+         for(size_t j = 0; j < objects->count; j++)
          {
-            for(size_t j = 0; j < objects->count; j++)
+            object_t* obj = objects->collection[j];
+            if(obj->draw_info->drawable)
             {
-               object_t* obj = objects->collection[j];
-               if(obj->draw_info->drawable)
-               {
-                  gr_transform(obj->position, obj->scale, obj->rotation);
-                  stage->setup_obj_func(stage, obj, model_mat);
-                  gr_render_object(obj);
-               }
+               gr_transform(obj->position, obj->scale, obj->rotation);
+               stage->setup_obj_func(stage, obj, model_mat);
+               gr_render_object(obj);
             }
          }
       }

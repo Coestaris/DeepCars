@@ -32,22 +32,3 @@ void setup_object_g_buffer(render_stage_t* stage, object_t* object, mat4 model_m
    t_bind(object->draw_info->material->map_specular, UNIFORM_GBUFF.spec_tex);
    sh_set_mat4(UNIFORM_GBUFF.model, model_mat);
 }
-
-void bind_g_buffer_inst(render_stage_t* stage)
-{
-   sh_set_mat4(UNIFORM_GBUFF_INST.view, render_view);
-
-   render_stage_t* g_buffer_stage = default_rc->stages->collection[STAGE_G_BUFFER];
-   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, g_buffer_stage->fbo));
-}
-
-void unbind_g_buffer_inst(render_stage_t* stage)
-{
-   GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-}
-
-void setup_g_buffer_inst(render_stage_t* stage, instance_collection_t* ic)
-{
-   t_bind(ic->material->map_diffuse, UNIFORM_GBUFF_INST.diffuse_tex);
-   t_bind(ic->material->map_specular, UNIFORM_GBUFF_INST.spec_tex);
-}

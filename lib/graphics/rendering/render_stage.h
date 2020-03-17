@@ -38,7 +38,7 @@ typedef enum _render_mode
 } render_mode_t;
 
 // Specifies levels of framebuffer in stage
-typedef enum _tex_format
+typedef enum tex_format
 {
   TF_STENCIL   = 1,
   TF_DEPTH     = 2,
@@ -50,12 +50,6 @@ typedef enum _tex_format
   TF_COLOR5    = 128,
 
 } tex_format_t;
-
-typedef enum _geometry_filter
-{
-   GF_OBJECTS = 1,
-   GF_INSTANCED = 2
-} geometry_filter_t;
 
 // Parameters of every attachment in framebuffer
 typedef struct _attachment_options
@@ -105,8 +99,6 @@ typedef struct _render_stage
 
    // Skip that stage while rendering
    bool skip;
-
-   geometry_filter_t geometry_filter;
 
    // Always called before drawing
    void (*bind_func)(struct _render_stage* this);

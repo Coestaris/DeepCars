@@ -83,8 +83,7 @@ void mat4_ortho(mat4 m, float_t n, float_t f, float_t r, float_t t);
 void mat4_perspective(mat4 m, float_t n, float_t f, float_t r, float_t t);
 // Fills matrix as perspective projection using Angle of view and Window size ratio
 void mat4_perspective_fov(mat4 m, float_t angle_of_view, float_t ratio, float_t n, float_t f);
-// Transpose matrix
-void mat4_trans(mat4 dest, mat4 source);
+
 //
 // Vector operations
 //

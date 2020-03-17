@@ -9,7 +9,7 @@
 
 typedef struct _instance_collection
 {
-   material_t* material;
+   material_t* mat;
    model_t* model;
    mat4* model_matrices;
    size_t amount;
@@ -19,6 +19,7 @@ typedef struct _instance_collection
 instance_collection_t* ic_create(model_t* model, material_t* material, size_t amount);
 void ic_free(instance_collection_t* ic, bool free_matrices);
 void ic_set_mat(instance_collection_t* ic, size_t index, mat4 mat);
+void ic_load(instance_collection_t* ic);
 
 list_t* ic_get();
 

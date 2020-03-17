@@ -11,16 +11,15 @@
 #include "../../lib/object_include.h"
 
 #define STAGE_G_BUFFER 0
-#define STAGE_G_BUFFER_INST 1
-#define STAGE_NORMAL 2
-#define STAGE_SSAO 3
-#define STAGE_SSAO_BLUR 4
-#define STAGE_SKYBOX 5
-#define STAGE_SHADOWMAP 6
-#define STAGE_SHADING 7
-#define STAGE_FXAA 8
-#define STAGE_BYPASS 9
-#define STAGE_PRIMITIVE 10
+#define STAGE_NORMAL 1
+#define STAGE_SSAO 2
+#define STAGE_SSAO_BLUR 3
+#define STAGE_SKYBOX 4
+#define STAGE_SHADOWMAP 5
+#define STAGE_SHADING 6
+#define STAGE_FXAA 7
+#define STAGE_BYPASS 8
+#define STAGE_PRIMITIVE 9
 
 extern texture_t* texture_to_draw;
 extern uint32_t   fxaa_state;

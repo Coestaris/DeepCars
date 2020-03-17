@@ -7,15 +7,15 @@
 
 void bind_primitive(render_stage_t* stage)
 {
-   GL_PCALL(glEnable(GL_BLEND));
-   //GL_PCALL(glDisable(GL_DEPTH_TEST));
-   GL_PCALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+   glEnable(GL_BLEND);
+   glDisable(GL_DEPTH_TEST);
+   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void unbind_primitive(render_stage_t* stage)
 {
-   //glDisable(GL_BLEND);
-   GL_PCALL(glEnable(GL_DEPTH_TEST));
+   glDisable(GL_BLEND);
+   glEnable(GL_DEPTH_TEST);
 }
 
 void draw_primitives(render_stage_t* stage)
