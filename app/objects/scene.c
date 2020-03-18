@@ -48,6 +48,8 @@ static void push_collection(model_t* model, material_t* material, float size, si
       float x = cosf(angle)  * r;
       float y = sinf(angle)  * r;
 
+      size += size * (drand48() * 0.1 - 0.05);
+
       mat4 m = cmat4();
       gr_transform(vec3f(x, 0, y),
                    vec3f(size, size, size),
@@ -93,7 +95,7 @@ void setup_menu_objects(scene_t* scene)
    push_collection(rm_getn(MODEL, "grass2"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
    push_collection(rm_getn(MODEL, "grass3"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
    push_collection(rm_getn(MODEL, "tree1"), rm_getn(MATERIAL, "tree1"), 25, 200);
-   push_collection(rm_getn(MODEL, "tree2"), rm_getn(MATERIAL, "tree1"), 30, 100);
+   push_collection(rm_getn(MODEL, "tree2"), rm_getn(MATERIAL, "tree1"), 25, 100);
 
    push_collection(rm_getn(MODEL, "stone1"), rm_getn(MATERIAL, "column"), 5, 10);
    push_collection(rm_getn(MODEL, "stone2"), rm_getn(MATERIAL, "column"), 5, 10);
@@ -140,7 +142,7 @@ void setup_menu_objects(scene_t* scene)
 
 void setup_menu_shadow_light(scene_t* scene)
 {
-   const float near_plane = 0.01f;
+   const float near_plane = 0.0001f;
    const float far_plane = 200.0f;
    const float r = 1024 / 4.0f;
    const float t = 1024 / 4.0f;
