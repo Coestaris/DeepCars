@@ -339,8 +339,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    render_stage_t* shadowmap = rs_create("shadow_map", RM_GEOMETRY, shadowmap_shader);
    shadowmap->attachments = TF_DEPTH;
    //depth
-   shadowmap->depth_format.tex_width = 1024;
-   shadowmap->depth_format.tex_height = 1024;
+   shadowmap->depth_format.tex_width = 2024;
+   shadowmap->depth_format.tex_height = 2024;
    shadowmap->depth_format.tex_wrapping_t = GL_CLAMP_TO_BORDER;
    shadowmap->depth_format.tex_wrapping_s = GL_CLAMP_TO_BORDER;
    shadowmap->depth_format.tex_border_color[0] = 1;
@@ -353,8 +353,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shadowmap->geometry_filter = GF_OBJECTS;
 
    render_stage_t* shadowmap_instanced = rs_create("shadow_inst_map", RM_GEOMETRY_NOFRAMEBUFFER, shadowmap_instanced_shader);
-   shadowmap_instanced->width = 1024;
-   shadowmap_instanced->height = 1024;
+   shadowmap_instanced->width = 2024;
+   shadowmap_instanced->height = 2024;
    shadowmap_instanced->bind_func = bind_shadowmap_instanced;
    shadowmap_instanced->unbind_func = unbind_shadowmap_instanced;
    shadowmap_instanced->setup_instance_func = setup_shadowmap_instanced;
@@ -374,22 +374,25 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shading_data->camera = camera;
    shading_data->buffmat = cmat4();
 
-   render_stage_t* fxaa = rs_create("fxaa", RM_FRAMEBUFFER, fxaa_shader);
-   fxaa->attachments = TF_COLOR0;
-   fxaa->color0_format.tex_width = info->w;
-   fxaa->color0_format.tex_height = info->h;
-   fxaa->color0_format.tex_format = GL_RGB;
-   fxaa->color0_format.tex_int_format = GL_RGB;
-   fxaa->bind_func = bind_fxaa;
-   fxaa->unbind_func = unbind_fxaa;
-   fxaa->vao = rc_get_quad_vao();
-
-   render_stage_t* bypass = rs_create("bypass", RM_BYPASS, gamma_shader);
-   bypass->width = info->w;
-   bypass->height = info->h;
+   render_stage_t* bypass = rs_create("bypass", RM_FRAMEBUFFER, gamma_shader);
+   bypass->attachments = TF_COLOR0;
+   bypass->color0_format.tex_width = info->w;
+   bypass->color0_format.tex_height = info->h;
+   bypass->color0_format.tex_format = GL_RGB;
+   bypass->color0_format.tex_int_format = GL_RGB;
    bypass->bind_func = bind_bypass;
    bypass->unbind_func = unbind_bypass;
    bypass->vao = rc_get_quad_vao();
+
+   render_stage_t* fxaa = rs_create("fxaa", RM_BYPASS, fxaa_shader);
+/*   fxaa->attachments = TF_COLOR0;
+   fxaa->color0_format.tex_format = GL_RGB;
+   fxaa->color0_format.tex_int_format = GL_RGB;*/
+   fxaa->width = info->w;
+   fxaa->height = info->h;
+   fxaa->bind_func = bind_fxaa;
+   fxaa->unbind_func = unbind_fxaa;
+   fxaa->vao = rc_get_quad_vao();
 
    render_stage_t* primitive = rs_create("primitive", RM_CUSTOM, NULL);
    primitive->width = info->w;
@@ -408,8 +411,8 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    list_push(default_rc->stages, shadowmap);
    list_push(default_rc->stages, shadowmap_instanced);
    list_push(default_rc->stages, shading);
-   list_push(default_rc->stages, fxaa);
    list_push(default_rc->stages, bypass);
+   list_push(default_rc->stages, fxaa);
    list_push(default_rc->stages, primitive);
 
    editor_rc = rc_create();

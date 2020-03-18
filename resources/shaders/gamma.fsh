@@ -15,7 +15,7 @@ uniform sampler2D tex;
 void main()
 {
     vec3 tex_color = texture(tex, TexCoord).rgb;
-    float depth = clamp(-texture(depth_tex, TexCoord).z / 140 - 0.3, 0, 1);
+    float depth = clamp(-texture(depth_tex, TexCoord).z / 250 - 0.3, 0, 1);
 
     vec2 texelSize = 1.0 / vec2(textureSize(tex, 0));
     vec3 result = vec3(0);
@@ -26,10 +26,11 @@ void main()
         vec2 offset = vec2(float(i), float(j)) * texelSize;
         result +=
             kernel[radius + j] *
-            kernel[radius + i] * (texture(tex, TexCoord + offset).rgb + vec3(depth / 5));
+            kernel[radius + i] * (texture(tex, TexCoord + offset).rgb + vec3(depth / 2));
     }
 
     result /= (z * z);
 
-    FragColor = mix(tex_color, result, depth).rgb;
+    vec3 mixed = mix(tex_color, result, depth).rgb;
+    FragColor = mixed;
 }

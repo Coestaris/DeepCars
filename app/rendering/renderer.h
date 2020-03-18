@@ -19,8 +19,8 @@
 #define STAGE_SHADOWMAP 6
 #define STAGE_SHADOWMAP_INST 7
 #define STAGE_SHADING 8
-#define STAGE_FXAA 9
-#define STAGE_BYPASS 10
+#define STAGE_BYPASS 9
+#define STAGE_FXAA 10
 #define STAGE_PRIMITIVE 11
 
 extern texture_t* texture_to_draw;

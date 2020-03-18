@@ -34,19 +34,16 @@ object_t* render_car2 = NULL;
 static void move_car(cpBody* car, cpVect dest)
 {
    cpVect pos = cpBodyGetPosition(car);
-
-   cpVect diff = cpv(pos.x - dest.x, pos.y - dest.y);
-   cpvnormalize(diff);
-   cpvmult(diff, -1.5);
+   //cpVect diff = cpv(pos.x - dest.x, pos.y - dest.y);
+   //cpFloat turn = cpvtoangle(cpvunrotate(cpBodyGetRotation(car), mouseDelta));
 
    cpVect mouseDelta = cpvsub(dest, cpBodyGetPosition(car));
-   cpFloat turn = cpvtoangle(cpvunrotate(cpBodyGetRotation(car), mouseDelta));
 
    if(cpvnear(dest, cpBodyGetPosition(car), 0.0)){
       //cpBodySetVelocity(car1, cpvzero); // stop
    } else {
       cpFloat direction = (cpvdot(mouseDelta, cpBodyGetRotation(car)) > 0.0 ? 1.0 : -1.0);
-      cpVect v = cpvrotate(cpBodyGetRotation(car), cpv(30.0f*direction, 0.0f));
+      cpVect v = cpvrotate(cpBodyGetRotation(car), cpv(40.0f * direction, 0.0f));
       v = cpvmult(v, drand48() * 20 + 20);
 
       cpBodyApplyForceAtWorldPoint(car, v,  pos);
