@@ -30,7 +30,7 @@ shader_t* setup_g_buffer(mat4 proj)
    UNIFORM_GBUFF.view = get_loc(sh, "view");
 
    sh_use(sh);
-   sh_nset_int(sh, "texture_diffuse", UNIFORM_GBUFF.diffuse_tex = 0);
+   //sh_nset_int(sh, "texture_diffuse", UNIFORM_GBUFF.diffuse_tex = 0);
    sh_nset_int(sh, "texture_specular", UNIFORM_GBUFF.spec_tex = 1);
    sh_nset_mat4(sh, "projection", proj);
    sh_use(NULL);
@@ -45,7 +45,7 @@ shader_t* setup_g_buffer_instance(mat4 proj)
    UNIFORM_GBUFF_INST.view = get_loc(sh, "view");
 
    sh_use(sh);
-   sh_nset_int(sh, "texture_diffuse", UNIFORM_GBUFF_INST.diffuse_tex = 0);
+   //sh_nset_int(sh, "texture_diffuse", UNIFORM_GBUFF_INST.diffuse_tex = 0);
    sh_nset_int(sh, "texture_specular", UNIFORM_GBUFF_INST.spec_tex = 1);
    sh_nset_mat4(sh, "projection", proj);
    sh_use(NULL);

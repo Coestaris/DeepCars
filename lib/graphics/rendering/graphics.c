@@ -186,7 +186,7 @@ inline mat4 gr_transform(vec3 pos, vec3 scale, vec3 rot)
 void gr_render_instance(instance_collection_t* ic)
 {
    GL_PCALL(glBindVertexArray(ic->model->VAO));
-   GL_PCALL(glDrawElementsInstanced(GL_TRIANGLES, ic->model->triangles_count * 3, GL_UNSIGNED_INT, 0, ic->amount));
+   GL_PCALL(glDrawArraysInstanced(GL_TRIANGLES, 0, ic->model->triangles_count * 3, ic->amount));
    GL_PCALL(glBindVertexArray(0));
 }
 

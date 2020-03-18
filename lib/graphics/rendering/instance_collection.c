@@ -18,9 +18,8 @@ static void ic_load(instance_collection_t* ic)
    float* buffer = DEEPCARS_MALLOC(ic->amount * matsize);
    for(size_t i = 0; i < ic->amount; i++)
    {
-      mat4_print(ic->model_matrices[i]);
       mat4_trans(buff, ic->model_matrices[i]);
-      mat4_print(buff);
+      //mat4_cpy(buff, ic->model_matrices[i]);
       memcpy(buffer + i * 16, buff, matsize);
    }
 
@@ -45,8 +44,8 @@ static void ic_load(instance_collection_t* ic)
    GL_CALL(glVertexAttribDivisor(5, 1));
    GL_CALL(glVertexAttribDivisor(6, 1));
 
-   GL_CALL(glBindVertexArray(0));
    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+   GL_CALL(glBindVertexArray(0));
 
    mat4_free(buff);
    DEEPCARS_FREE(buffer);

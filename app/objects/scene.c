@@ -37,6 +37,28 @@ void setup_game_objects(scene_t* scene)
    list_push(scene->startup_objects, create_game_map());
 }
 
+static void push_collection(model_t* model, material_t* material, float size, size_t count)
+{
+   instance_collection_t* collection = ic_create(model, material, count);
+   for(size_t i = 0; i < count; i++)
+   {
+      float angle = drand48() * M_PI * 2;
+      float r = drand48() * 350 + 70 + 10;
+
+      float x = cosf(angle)  * r;
+      float y = sinf(angle)  * r;
+
+      mat4 m = cmat4();
+      gr_transform(vec3f(x, 0, y),
+                   vec3f(size, size, size),
+                   vec3f(0, drand48() * M_PI * 2, 0));
+      mat4_cpy(m, model_mat);
+      ic_set_mat(collection, i, m);
+   }
+
+   ic_push(collection);
+}
+
 void setup_menu_objects(scene_t* scene)
 {
    if(!plane)
@@ -67,29 +89,17 @@ void setup_menu_objects(scene_t* scene)
       list_push(scene->startup_objects, obj);
    }
 
-   const size_t tree_count = 400;
-   instance_collection_t* tree_collection = ic_create(
-         rm_getn(MODEL, "tree1"),
-         rm_getn(MATERIAL, "tree1"),
-         tree_count);
+   push_collection(rm_getn(MODEL, "grass1"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
+   push_collection(rm_getn(MODEL, "grass2"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
+   push_collection(rm_getn(MODEL, "grass3"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
+   push_collection(rm_getn(MODEL, "tree1"), rm_getn(MATERIAL, "tree1"), 25, 200);
+   push_collection(rm_getn(MODEL, "tree2"), rm_getn(MATERIAL, "tree1"), 30, 100);
 
-   for(size_t i = 0; i < tree_count; i++)
-   {
-      float angle = drand48() * M_PI * 2;
-      float r = drand48() * 350 + radius + 5;
-
-      float x = cosf(angle)  * r;
-      float y = sinf(angle)  * r;
-
-      mat4 m = cmat4();
-      gr_transform(vec3f(x, 0, y),
-            vec3f(100, 100, 100),
-            vec3f(0, 0, 0));
-      mat4_cpy(m, model_mat);
-
-      ic_set_mat(tree_collection, i, m);
-   }
-   ic_push(tree_collection);
+   push_collection(rm_getn(MODEL, "stone1"), rm_getn(MATERIAL, "column"), 5, 10);
+   push_collection(rm_getn(MODEL, "stone2"), rm_getn(MATERIAL, "column"), 5, 10);
+   push_collection(rm_getn(MODEL, "stone3"), rm_getn(MATERIAL, "column"), 5, 10);
+   push_collection(rm_getn(MODEL, "stone4"), rm_getn(MATERIAL, "column"), 5, 10);
+   push_collection(rm_getn(MODEL, "stone5"), rm_getn(MATERIAL, "column"), 5, 10);
 
    for(size_t i = 0; i < SPHERES_COUNT; i++)
    {
