@@ -16,6 +16,7 @@
 #include "editor/obj_editor_map.h"
 #include "obj_camera_control.h"
 #include "game/obj_game_map.h"
+#include "../../lib/rand.h"
 
 model_t* plane;
 
@@ -29,13 +30,29 @@ void setup_editor_objects(scene_t* scene)
 void setup_game_objects(scene_t* scene)
 {
    list_push(scene->startup_objects,
-             create_textured_dummy(vec3f(-1000, 0, -1000), 2000,
+             create_textured_dummy(vec3f(0, 0, 0), 4000,
                                    rm_getn(MATERIAL, "grass"),
                                    plane));
    //list_push(scene->startup_objects, create_camera_control());
    list_push(scene->startup_objects, create_default_bind_handler());
    list_push(scene->startup_objects, create_game_map());
 }
+static float surface_func_(float x, float y, bool check)
+{
+   float h = rand_perlin2d(x, y, 25, 1) / 1200;
+   if(check)
+   {
+      float r = vec2_len(vec2f(x, y));
+      return h / fmax(70 - r * 2000, 1);
+   }
+   else return h;
+}
+
+static float surface_func(float x, float y)
+{
+   surface_func_(x, y, true);
+}
+
 
 static void push_collection(model_t* model, material_t* material, float size, size_t count)
 {
@@ -51,7 +68,7 @@ static void push_collection(model_t* model, material_t* material, float size, si
       size += size * (drand48() * 0.1 - 0.05);
 
       mat4 m = cmat4();
-      gr_transform(vec3f(x, 0, y),
+      gr_transform(vec3f(x, surface_func(x / 4000, y / 4000) * 4000 - 0.5, y),
                    vec3f(size, size, size),
                    vec3f(0, drand48() * M_PI * 2, 0));
       mat4_cpy(m, model_mat);
@@ -65,14 +82,14 @@ void setup_menu_objects(scene_t* scene)
 {
    if(!plane)
    {
-      plane = m_create_plane(150, 150, true);
-      m_normalize(plane, true, true, true, true);
+      plane = m_create_surface(300, 300, true, surface_func);
+      m_normalize(plane, false, true, false, false);
       m_build(plane);
       rm_push(MODEL, plane, -1);
    }
 
    list_push(scene->startup_objects,
-             create_textured_dummy(vec3f(-1000, 0, -1000), 2000,
+             create_textured_dummy(vec3f(0, 0, 0), 4000,
                                    rm_getn(MATERIAL, "grass"),
                                    plane));
 
@@ -94,8 +111,8 @@ void setup_menu_objects(scene_t* scene)
    push_collection(rm_getn(MODEL, "grass1"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
    push_collection(rm_getn(MODEL, "grass2"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
    push_collection(rm_getn(MODEL, "grass3"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
-   push_collection(rm_getn(MODEL, "tree1"), rm_getn(MATERIAL, "tree1"), 25, 200);
-   push_collection(rm_getn(MODEL, "tree2"), rm_getn(MATERIAL, "tree1"), 25, 100);
+   push_collection(rm_getn(MODEL, "tree1"), rm_getn(MATERIAL, "tree1"), 25, 300);
+   push_collection(rm_getn(MODEL, "tree2"), rm_getn(MATERIAL, "tree1"), 25, 200);
 
    push_collection(rm_getn(MODEL, "stone1"), rm_getn(MATERIAL, "column"), 5, 10);
    push_collection(rm_getn(MODEL, "stone2"), rm_getn(MATERIAL, "column"), 5, 10);

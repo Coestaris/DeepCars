@@ -39,7 +39,7 @@
    // 2 - glPCall and previous
    // 1 - glCall, check malloc/realloc results
    // 0 - no debug checks provided
-   #define DEBUG_LEVEL 3
+   #define DEBUG_LEVEL 2
 #endif
 
 

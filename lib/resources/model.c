@@ -687,7 +687,7 @@ void m_build(model_t* model)
    DEEPCARS_FREE(buffer);
 }
 
-model_t* m_create_plane(uint32_t vpoly, uint32_t hpoly, bool global_uv)
+model_t* m_create_surface(uint32_t vpoly, uint32_t hpoly, bool global_uv, float (*height_func)(float x, float y))
 {
    model_t* model = m_create();
    size_t faces = vpoly * hpoly;
@@ -702,18 +702,29 @@ model_t* m_create_plane(uint32_t vpoly, uint32_t hpoly, bool global_uv)
    }
    m_push_normal(model, cvec4(0, 1, 0, 0));
 
+   const float a = 5;
+
    for(size_t x = 0; x < vpoly; x++)
    for(size_t y = 0; y < hpoly; y++)
    {
-      float y1 = 1.0f / hpoly * y;
-      float y2 = 1.0f / hpoly * (y + 1);
-      float x1 = 1.0f / vpoly * x;
-      float x2 = 1.0f / vpoly * (x + 1);
+      float y1 = 1.0f / hpoly * y - 0.5f;
+      float y2 = 1.0f / hpoly * (y + 1) - 0.5f;
+      float x1 = 1.0f / vpoly * x - 0.5f;
+      float x2 = 1.0f / vpoly * (x + 1) - 0.5f;
 
-      m_push_vertex(model, cvec4(x1, 0, y2, 0));
-      m_push_vertex(model, cvec4(x2, 0, y2, 0));
-      m_push_vertex(model, cvec4(x2, 0, y1, 0));
-      m_push_vertex(model, cvec4(x1, 0, y1, 0));
+      float z1 = 0, z2 = 0, z3 = 0, z4 = 0;
+      if(height_func)
+      {
+         z1 = height_func(x1, y2);
+         z2 = height_func(x2, y2);
+         z3 = height_func(x2, y1);
+         z4 = height_func(x1, y1);
+      }
+
+      m_push_vertex(model, cvec4(x1, z1, y2, 0));
+      m_push_vertex(model, cvec4(x2, z2, y2, 0));
+      m_push_vertex(model, cvec4(x2, z3, y1, 0));
+      m_push_vertex(model, cvec4(x1, z4, y1, 0));
 
       if(!global_uv)
       {

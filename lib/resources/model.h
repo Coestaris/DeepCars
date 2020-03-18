@@ -121,7 +121,7 @@ void m_info(model_t* model);
 void m_build(model_t* model);
 
 // Creates model of 4-vertex plane
-model_t* m_create_plane(uint32_t vpoly, uint32_t hpoly, bool global_uv);
+model_t* m_create_surface(uint32_t vpoly, uint32_t hpoly, bool global_uv, float (*height_func)(float x, float y));
 
 // Moves the model to zero along the specified axes.
 // If norm_scale is set, scales the vertices of the model to the range of [1,0]

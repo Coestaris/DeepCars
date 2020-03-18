@@ -77,14 +77,14 @@
     [
         { 
             "fns" : [
-                "skybox/side.png",  "skybox/side.png",  "skybox/top.png",
+                "skybox/side.png",  "skybox/side.png",  "skybox/bottom.png",
                 "skybox/bottom.png", "skybox/side.png", "skybox/side.png"
             ],
             "name"       : "skybox",
             "wrapping"   : "clamp_to_edge",
-            "min_filter" : "linear",
-            "mag_filter" : "linear",
-            "index"      : 10
+            "min_filter" : "nearest",
+            "mag_filter" : "nearest",
+            "compression" : "png"
         }
     ],
 

@@ -89,6 +89,7 @@ struct {
 
 struct {
    GLint tex;
+   GLint depth_tex;
 
 } UNIFORM_GAMMA;
 

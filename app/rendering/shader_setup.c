@@ -180,6 +180,22 @@ shader_t* setup_gamma(void)
 
    sh_use(sh);
    sh_nset_int(sh, "tex", UNIFORM_GAMMA.tex = 0);
+   sh_nset_int(sh, "depth_tex", UNIFORM_GAMMA.depth_tex = 1);
+
+   size_t k_size;
+   float z;
+   float* kernel = create_gaussian_kernel(20, &z, &k_size, 5);
+   sh_nset_float(sh, "z", z);
+
+   sh_use(sh);
+   for(size_t i = 0; i < 25; i++)
+   {
+      char buff[35];
+      snprintf(buff, sizeof(buff), "kernel[%li]", i);
+      sh_nset_float(sh, buff, kernel[i]);
+   }
+   DEEPCARS_FREE(kernel);
+
    sh_use(NULL);
 
    return sh;

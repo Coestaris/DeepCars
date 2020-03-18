@@ -19,7 +19,10 @@ void unbind_fxaa(render_stage_t* stage) { }
 // GAMMA / BYPASS ROUTINES
 void bind_bypass(render_stage_t* stage)
 {
+   render_stage_t* gbuffer = default_rc->stages->collection[STAGE_G_BUFFER];
+
    t_bind(texture_to_draw, UNIFORM_GAMMA.tex);
+   t_bind(gbuffer->color0_tex, UNIFORM_GAMMA.depth_tex);
 }
 
 void unbind_bypass(render_stage_t* stage) { }

@@ -123,9 +123,9 @@ void t_set_data_png(char const** str_descr, texture_t* texture, GLenum fill_targ
 
    GL_PCALL(glBindTexture(texture->type, texture->texID));
    GL_PCALL(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
-   if(channels == 3)
-      {GL_PCALL(glTexImage2D(fill_target, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, img));}
-   else if(channels == 4)
+   //if(channels == 3)
+   //   {GL_PCALL(glTexImage2D(fill_target, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, img));}
+   //else if(channels == 4)
       {GL_PCALL(glTexImage2D(fill_target, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img));};
 
    GL_CALL(glTexParameteri(texture->type, GL_TEXTURE_MAX_LEVEL, 0));
