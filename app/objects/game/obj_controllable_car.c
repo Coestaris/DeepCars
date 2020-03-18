@@ -110,7 +110,7 @@ static void update_controllable_car(object_t* this)
    vec4_norm(car_camera->direction);
 
    uint64_t frame = u_get_frames();
-   if(frame % 15 == 0)
+   if(frame % 2 == 0)
    {
       scene_t* scene = scm_get_current();
       const float diffX = this->position.x - car_start[0];

@@ -121,11 +121,14 @@ render_stage_t* rs_create(const char* name, render_mode_t render_mode, shader_t*
    rs->render_mode = render_mode;
    rs->name = name;
 
-   rs->bind_func      = NULL;
-   rs->setup_obj_func = NULL;
-   rs->unbind_func    = NULL;
-   rs->data           = NULL;
-   rs->skip           = false;
+   rs->bind_func           = NULL;
+   rs->setup_obj_func      = NULL;
+   rs->setup_instance_func = NULL;
+   rs->unbind_func         = NULL;
+   rs->data                = NULL;
+   rs->skip                = false;
+
+   rs->geometry_filter     = 0;
 
    rs->attachments = 0;
    rs_set_color_options(&rs->color0_format);

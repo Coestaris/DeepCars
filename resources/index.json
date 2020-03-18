@@ -8,6 +8,7 @@
         { "vertex" : "2d_shaders/bypass.vsh",         "fragment" : "ssao_blur.fsh",                 "name": "ssao_blur" },
         { "vertex" : "skybox.vsh",                    "fragment" : "skybox.fsh",                    "name": "skybox"    },
         { "vertex" : "shadowmap.vsh",                 "fragment" : "shadowmap.fsh",                 "name": "shadowmap" },
+        { "vertex" : "shadowmap_instanced.vsh",       "fragment" : "shadowmap.fsh",                 "name": "shadowmap_instanced" },
         { "vertex" : "shading.vsh",                   "fragment" : "shading.fsh",                   "name": "shading"   },
         { "vertex" : "2d_shaders/bypass.vsh",         "fragment" : "fxaa.fsh",                      "name": "fxaa"      },
         { "vertex" : "2d_shaders/bypass.vsh",         "fragment" : "gamma.fsh",                     "name": "gamma"     },

@@ -204,6 +204,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shader_t* ssao_blur_shader = setup_ssao_blur();
    shader_t* skybox_shader = setup_skybox(proj);
    shader_t* shadowmap_shader = setup_shadowmap();
+   shader_t* shadowmap_instanced_shader = setup_shadowmap_instance();
    shader_t* shading_shader = setup_shading();
    shader_t* fxaa_shader = setup_fxaa(0.3f, 8, 128, 8, info);
    shader_t* gamma_shader = setup_gamma();
@@ -351,6 +352,13 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    shadowmap->unbind_func = unbind_shadowmap;
    shadowmap->geometry_filter = GF_OBJECTS;
 
+   render_stage_t* shadowmap_instanced = rs_create("shadow_inst_map", RM_GEOMETRY_NOFRAMEBUFFER, shadowmap_instanced_shader);
+   shadowmap_instanced->width = 1024;
+   shadowmap_instanced->height = 1024;
+   shadowmap_instanced->bind_func = bind_shadowmap_instanced;
+   shadowmap_instanced->unbind_func = unbind_shadowmap_instanced;
+   shadowmap_instanced->setup_instance_func = setup_shadowmap_instanced;
+   shadowmap_instanced->geometry_filter = GF_INSTANCED;
 
    render_stage_t* shading = rs_create("shading", RM_FRAMEBUFFER, shading_shader);
    shading->attachments = TF_COLOR0;
@@ -398,6 +406,7 @@ render_chain_t* get_chain(win_info_t* info, camera_t* camera, mat4 proj)
    list_push(default_rc->stages, ssao_blur);
    list_push(default_rc->stages, skybox);
    list_push(default_rc->stages, shadowmap);
+   list_push(default_rc->stages, shadowmap_instanced);
    list_push(default_rc->stages, shading);
    list_push(default_rc->stages, fxaa);
    list_push(default_rc->stages, bypass);

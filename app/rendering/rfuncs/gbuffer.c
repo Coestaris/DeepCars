@@ -22,8 +22,6 @@ void bind_g_buffer(render_stage_t* stage)
 
 void unbind_g_buffer(render_stage_t* stage)
 {
-   if(wireframe)
-      GL_PCALL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
 }
 
 void setup_object_g_buffer(render_stage_t* stage, object_t* object, mat4 model_mat)
@@ -44,6 +42,9 @@ void bind_g_buffer_inst(render_stage_t* stage)
 void unbind_g_buffer_inst(render_stage_t* stage)
 {
    GL_PCALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+
+   if(wireframe)
+      GL_PCALL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
 }
 
 void setup_g_buffer_inst(render_stage_t* stage, instance_collection_t* ic)

@@ -122,6 +122,15 @@ shader_t* setup_shadowmap(void)
    return sh;
 }
 
+shader_t* setup_shadowmap_instance(void)
+{
+   shader_t* sh = s_getn_shader("shadowmap_instanced");
+
+   UNIFORM_SHADOWMAP_INST.light_space = get_loc(sh, "lightSpaceMatrix");
+
+   return sh;
+}
+
 shader_t* setup_shading(void)
 {
    shader_t* sh = s_getn_shader("shading");

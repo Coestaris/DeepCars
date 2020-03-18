@@ -45,6 +45,9 @@ void draw_skybox(render_stage_t* stage);
 void bind_shadowmap(render_stage_t* stage);
 void unbind_shadowmap(render_stage_t* stage);
 void setup_object_shadowmap(render_stage_t* stage, object_t* object, mat4 model_mat);
+void bind_shadowmap_instanced(render_stage_t* stage);
+void unbind_shadowmap_instanced(render_stage_t* stage);
+void setup_shadowmap_instanced(render_stage_t* stage, instance_collection_t* ic);
 
 void bind_shading(render_stage_t* stage);
 void unbind_shading(render_stage_t* stage);
