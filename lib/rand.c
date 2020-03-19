@@ -10,10 +10,15 @@
 #include <math.h>
 #include <stdlib.h>
 
+#ifdef USE_SIMPLE_RANDOM
+static size_t rand_counter = 0;
+#endif
 
+// Static perlin noise seed
 static const int64_t noise2_seed = 1985;
 
-static const uint8_t noise2_hashtable[] =
+// Predictable pseudo random table
+static const uint8_t noise_hashtable[] =
 {
       208, 34, 231, 213, 32, 248, 233, 56, 161, 78, 24, 140, 71, 48, 140, 254, 245, 255, 247, 247, 40,
       185, 248, 251, 245, 28, 124, 204, 204, 76, 36, 1, 107, 28, 234, 163, 202, 224, 245, 128, 167, 204,
@@ -29,47 +34,61 @@ static const uint8_t noise2_hashtable[] =
       114, 20, 218, 113, 154, 27, 127, 246, 250, 1, 8, 198, 250, 209, 92, 222, 173, 21, 88, 102, 219
 };
 
+// Returns repeatable value from hash table
 static int noise2(int32_t x, int32_t y)
 {
    int32_t yindex = (y + noise2_seed) % 256;
    if (yindex < 0) yindex += 256;
 
-   int32_t xindex = (noise2_hashtable[yindex] + x) % 256;
+   int32_t xindex = (noise_hashtable[yindex] + x) % 256;
    if (xindex < 0) xindex += 256;
 
-   return noise2_hashtable[xindex];
+   return noise_hashtable[xindex];
 }
 
+// Linear interpolation
 static float lin_inter(float x, float y, float s)
 {
-   return x + s * (y-x);
+   return x + s * (y - x);
 }
 
+// Quadratic interpolation
 static float smooth_inter(float x, float y, float s)
 {
    return lin_inter(x, y, s * s * (3 - 2 * s));
 }
 
+// Returns perlin noise in given coordinates
 static float noise2d(float x, float y)
 {
-   const int32_t x_int = floor(x);
-   const int32_t y_int = floor(y);
-   const float x_frac = x - x_int;
-   const float y_frac = y - y_int;
-   const int32_t s = noise2(x_int, y_int);
-   const int32_t t = noise2(x_int + 1, y_int);
-   const int32_t u = noise2( x_int, y_int + 1);
-   const int32_t v = noise2(x_int + 1, y_int + 1);
-   const float low = smooth_inter(s, t, x_frac);
-   const float high = smooth_inter(u, v, x_frac);
+   int32_t x_int = (int32_t)floorf(x);
+   int32_t y_int = (int32_t)floorf(y);
+   float x_frac = x - x_int;
+   float y_frac = y - y_int;
+
+   float low  = smooth_inter(
+         (float)noise2(x_int, y_int),
+         (float)noise2(x_int + 1, y_int), x_frac);
+
+   float high = smooth_inter(
+         (float)noise2( x_int, y_int + 1),
+         (float)noise2(x_int + 1, y_int + 1),
+         x_frac);
+
    return smooth_inter(low, high, y_frac);
 }
 
+//
+// rand_element()
+//
 inline void* rand_element(list_t* list)
 {
    return list->collection[rand_rangei(0, list->count)];
 }
 
+//
+// rand_rangei()
+//
 inline int32_t rand_rangei(int32_t a, int32_t b)
 {
    if(a > b)
@@ -82,6 +101,9 @@ inline int32_t rand_rangei(int32_t a, int32_t b)
    return rand_i() * (b - a) + a;
 }
 
+//
+//  rand_range()
+//
 inline float rand_range(float a, float b)
 {
    if(a > b)
@@ -94,29 +116,45 @@ inline float rand_range(float a, float b)
    return rand_f() * (b - a) + a;
 }
 
+//
+// rand_f()
+//
 inline float rand_f(void)
 {
    return rand_i() / (float)RAND_MAX;
 }
 
+//
+// rand_b()
+//
 inline bool rand_b(void)
 {
    return rand_i() % 2;
 }
 
+//
+// rand_i()
+//
 inline uint32_t rand_i(void)
 {
+#ifdef USE_SIMPLE_RANDOM
+   return noise_hashtable[rand_counter++ % 256] * (RAND_MAX / 256);
+#else
    return rand();
+#endif
 }
 
-inline float rand_perlin2d(float x, float y, float freq, uint32_t depth)
+//
+// rand_perlin2d()
+//
+inline float rand_perlin2d(float x, float y, float freq, size_t depth)
 {
    float xa = x * freq;
    float ya = y * freq;
    float amp = 1.0f;
    float fin = 0;
    float div = 0.0f;
-   for (int i=0; i < depth; i++)
+   for (size_t i = 0; i < depth; i++)
    {
       div += 256 * amp;
       fin += noise2d(xa, ya) * amp;
