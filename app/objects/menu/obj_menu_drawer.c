@@ -90,9 +90,10 @@ static void update_menu_drawer(object_t* this)
       btn_back_br->gray_color = in_rec(btn_back_br, mouse) ? selected_color : default_color;
    }
 
+   float delta = (float)u_get_delta();
    if(changing_trans)
    {
-      if((p -= 0.025f) < 0)
+      if((p -= 0.025f * delta) < 0)
       {
          sprite_transparency = 1 - t;
          if(about)
@@ -119,7 +120,7 @@ static void update_menu_drawer(object_t* this)
             btn_exit_br->transparency = t;
          }
 
-         if((t += 0.025f) > 1)
+         if((t += 0.025f * delta) > 1)
             changing_trans = false;
       }
       else

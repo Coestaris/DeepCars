@@ -317,7 +317,7 @@ model_t* build_map_model(list_t* walls)
    model_t* model = m_create();
 
    char buff[50];
-   snprintf(buff, sizeof(buff), "__generated_map%i", rand());
+   snprintf(buff, sizeof(buff), "__generated_map%i", rand_i());
    model->name = strdup(buff);
 
    size_t counter          = 1;

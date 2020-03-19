@@ -20,6 +20,7 @@
 
 #include "list.h"
 #include "vectors.h"
+#include "rand.h"
 
 
 // Initial message parameters

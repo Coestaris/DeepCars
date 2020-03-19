@@ -2,6 +2,7 @@
 // Created by maxim on 11/17/19.
 //
 
+#include <time.h>
 #include "loader.h"
 #include "../lib/graphics/rendering/graphics.h"
 #include "../lib/updater.h"
@@ -40,6 +41,8 @@ void app_load_resources(void)
 
 void app_init_graphics(void)
 {
+   srand(time(NULL) * 3);
+
    win = w_create(
            WIN_WIDTH,
            WIN_HEIGHT,

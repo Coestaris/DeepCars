@@ -37,20 +37,13 @@ void setup_game_objects(scene_t* scene)
    list_push(scene->startup_objects, create_default_bind_handler());
    list_push(scene->startup_objects, create_game_map());
 }
-static float surface_func_(float x, float y, bool check)
-{
-   float h = rand_perlin2d(x, y, 25, 1) / 1200;
-   if(check)
-   {
-      float r = vec2_len(vec2f(x, y));
-      return h / fmax(70 - r * 2000, 1);
-   }
-   else return h;
-}
 
 static float surface_func(float x, float y)
 {
-   surface_func_(x, y, true);
+   float h = rand_perlin2d(x, y, 25, 1) / 1200;
+
+   float r = vec2_len(vec2f(x, y));
+   return h / fmax(70 - r * 2000, 1);
 }
 
 
@@ -59,18 +52,19 @@ static void push_collection(model_t* model, material_t* material, float size, si
    instance_collection_t* collection = ic_create(model, material, count);
    for(size_t i = 0; i < count; i++)
    {
-      float angle = drand48() * M_PI * 2;
-      float r = drand48() * 350 + 70 + 10;
+      float angle = rand_range(0, M_PI * 2);
+      float r = rand_range(80, 430);
+
 
       float x = cosf(angle)  * r;
       float y = sinf(angle)  * r;
 
-      size += size * (drand48() * 0.1 - 0.05);
+      size += size * rand_range(-0.05f, 0.05f);
 
       mat4 m = cmat4();
       gr_transform(vec3f(x, surface_func(x / 4000, y / 4000) * 4000 - 0.5, y),
                    vec3f(size, size, size),
-                   vec3f(0, drand48() * M_PI * 2, 0));
+                   vec3f(0, rand_range(0, M_PI * 2), 0));
       mat4_cpy(m, model_mat);
       ic_set_mat(collection, i, m);
    }
@@ -192,14 +186,14 @@ void setup_menu_lights(scene_t* scene)
       float z_pos = cosf(angle * i) * radius;
       vec4_fill(lt->position, x_pos, y_pos, z_pos, 0);
 
-      float r_color = (float)drand48() * 0.5f + 0.5f;
-      float g_color = (float)drand48() * 0.5f + 0.5f;
-      float b_color = (float)drand48() * 0.5f + 0.5f;
+      float r_color = rand_range(0.5f, 1.0f);
+      float g_color = rand_range(0.5f, 1.0f);
+      float b_color = rand_range(0.5f, 1.0f);
       vec4_fill(lt->color, r_color, g_color, b_color, 0);
 
       lt->constant = 1.0f;
-      lt->linear = linear + (float)drand48() * linear_rand;
-      lt->quadratic = quadratic + (float)drand48() * quadratic_rand;
+      lt->linear = linear + rand_range(0, linear_rand);
+      lt->quadratic = quadratic + rand_range(0, quadratic_rand);
 
       l_calc_radius(lt);
       list_push(scene->lights, lt);

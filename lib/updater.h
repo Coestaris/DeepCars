@@ -70,4 +70,6 @@ uint32_t u_get_mouse_state(uint32_t mouse);
 // Get list of all objects
 list_t* u_get_objects(void);
 
+double_t u_get_delta(void);
+
 #endif //DEEPCARS_UPDATER_H

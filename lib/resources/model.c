@@ -766,7 +766,7 @@ model_t* m_create_surface(uint32_t vpoly, uint32_t hpoly, bool global_uv, float 
    model->model_len->faces_count = faces;
 
    char buff[50];
-   snprintf(buff, sizeof(buff), "__generated_plane%i", rand());
+   snprintf(buff, sizeof(buff), "__generated_plane%i", rand_i());
    model->name = strdup(buff);
 
    return model;

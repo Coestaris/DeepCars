@@ -15,6 +15,7 @@ static float new_camera_radius = 0;
 static float camera_y        = 0;
 static float camera_radius   = 0;
 static bool  updating_camera = false;
+static float angle = 0;
 
 static float x_to_y = 0;
 static float x_to_r = 0;
@@ -44,9 +45,11 @@ float smootherstep(float edge0, float edge1, float x)
 
 static void update_menu_camera_mover(object_t* this)
 {
+   float delta = (float)u_get_delta();
+
    if(updating_camera)
    {
-      float f = smootherstep(0, 1, x += 0.007f);
+      float f = smootherstep(0, 1, x += 0.007f * delta);
       camera_y = f * 100 * x_to_y + old_y;
       camera_radius = f * 100 * x_to_r + old_r;
 
@@ -72,10 +75,10 @@ static void update_menu_camera_mover(object_t* this)
       update_shadow_light();
    }
 
-
-   camera->position[0] = camera_radius * sinf(time / 1000.0f);
+   angle += 1 * delta;
+   camera->position[0] = camera_radius * sinf(angle / 1000.0f);
    camera->position[1] = camera_y;
-   camera->position[2] = camera_radius * cosf(time / 1000.0f);
+   camera->position[2] = camera_radius * cosf(angle / 1000.0f);
 
    vec4_cpy(camera->direction, camera->position);
   // vec4_mulf(camera->direction, -1);

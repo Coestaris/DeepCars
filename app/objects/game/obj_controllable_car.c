@@ -19,6 +19,8 @@ static vec4 car_start = NULL;
 
 static void update_controllable_car(object_t* this)
 {
+   float delta = (float)u_get_delta();
+
    vec2 direction = vec2f(cos(this->rotation.y), sin(this->rotation.y));
    vec2 normal = vec2_normal(direction);
 

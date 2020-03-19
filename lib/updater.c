@@ -34,6 +34,8 @@ static double_t    elapsed = 0;
 static double_t    fps = 0;
 // Current frame counter
 static uint64_t    frames;
+// Time spent for current rendering cycle
+static double_t diff = FPS_DELAY;
 
 //
 // Event processing variables
@@ -162,7 +164,7 @@ static void u_measure_time(void)
    // Call main draw routine
    u_draw_func();
 
-   double_t diff = u_get_millis() - tick_start;
+   diff = u_get_millis() - tick_start;
    counter++;
    frames++;
 
@@ -268,6 +270,14 @@ static void u_event_handler(XEvent event)
       case Expose:
          break;
    }
+}
+
+//
+// u_get_delta()
+//
+double_t u_get_delta(void)
+{
+   return diff / (FPS_DELAY);
 }
 
 //
