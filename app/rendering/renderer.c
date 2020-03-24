@@ -27,7 +27,6 @@ static texture_t* ssao_dummy_texture = NULL;
 
 //stages
 static uint32_t   ssao_state      = 0;
-static uint32_t   render_state    = -1;
 
 texture_t* texture_to_draw = NULL;
 uint32_t   fxaa_state      = 1;

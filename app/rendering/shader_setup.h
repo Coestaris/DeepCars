@@ -88,6 +88,7 @@ struct {
 } UNIFORM_SHADING;
 
 struct {
+   GLint postprocess;
    GLint tex;
    GLint depth_tex;
 

@@ -7,6 +7,7 @@ out vec3 FragColor;
 
 in vec2 TexCoord;
 
+uniform bool postprocess;
 uniform float kernel[25];
 uniform float z;
 uniform sampler2D depth_tex;
@@ -14,6 +15,12 @@ uniform sampler2D tex;
 
 void main()
 {
+    if(!postprocess)
+    {
+        FragColor = texture(tex, TexCoord).rgb;
+        return;
+    }
+
     vec3 tex_color = texture(tex, TexCoord).rgb;
     float depth = clamp(-texture(depth_tex, TexCoord).z / 250 - 0.3, 0, 1);
 

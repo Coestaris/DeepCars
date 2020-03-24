@@ -19,6 +19,7 @@ void unbind_fxaa(render_stage_t* stage) { }
 // GAMMA / BYPASS ROUTINES
 void bind_bypass(render_stage_t* stage)
 {
+   if()
    render_stage_t* shading_stage = default_rc->stages->collection[STAGE_SHADING];
    t_bind(shading_stage->color0_tex, UNIFORM_GAMMA.tex);
 

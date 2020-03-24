@@ -26,7 +26,7 @@ static void game_map_update(object_t* this)
 
       object_t* obj = create_textured_dummy(
             vec3f(-150, 0, -100),
-            0.3f, rm_getn(MATERIAL, "menu_spheres"), m);
+            0.3f, rm_getn(MATERIAL, "wall"), m);
 
       o_enable_draw_normals(obj, COLOR_GREEN, COLOR_WHITE, 15);
       u_push_object(obj);

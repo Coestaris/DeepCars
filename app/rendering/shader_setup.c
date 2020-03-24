@@ -180,6 +180,8 @@ shader_t* setup_gamma(void)
 {
    shader_t* sh = s_getn_shader("gamma");
 
+   UNIFORM_GAMMA.postprocess = get_loc(sh, "postprocess");
+
    sh_use(sh);
    sh_nset_int(sh, "tex", UNIFORM_GAMMA.tex = 0);
    sh_nset_int(sh, "depth_tex", UNIFORM_GAMMA.depth_tex = 1);

@@ -102,6 +102,7 @@ void setup_menu_objects(scene_t* scene)
       list_push(scene->startup_objects, obj);
    }
 
+/*
    push_collection(rm_getn(MODEL, "grass1"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
    push_collection(rm_getn(MODEL, "grass2"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
    push_collection(rm_getn(MODEL, "grass3"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
@@ -113,6 +114,7 @@ void setup_menu_objects(scene_t* scene)
    push_collection(rm_getn(MODEL, "stone3"), rm_getn(MATERIAL, "column"), 5, 10);
    push_collection(rm_getn(MODEL, "stone4"), rm_getn(MATERIAL, "column"), 5, 10);
    push_collection(rm_getn(MODEL, "stone5"), rm_getn(MATERIAL, "column"), 5, 10);
+*/
 
    for(size_t i = 0; i < SPHERES_COUNT; i++)
    {

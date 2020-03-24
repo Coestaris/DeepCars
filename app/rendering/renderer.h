@@ -23,6 +23,8 @@
 #define STAGE_FXAA 10
 #define STAGE_PRIMITIVE 11
 
+static uint32_t   render_state    = -1;
+
 extern texture_t* texture_to_draw;
 extern uint32_t   fxaa_state;
 extern uint32_t   fxaa_edges;

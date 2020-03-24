@@ -27,6 +27,7 @@
     "textures" : 
     [
         { "fn" : "grass.png",               "name" : "grass"    },
+        { "fn" : "wall.png",               "name" : "wall"    },
         { "fn" : "tree1.png",               "name" : "tree1" },
         { "fn" : "grass_specular.png",      "name" : "grass_specular"    },
         { "fn" : "ball.png",                "name" : "ball" },
@@ -110,6 +111,7 @@
     "materials":
     [
         { "fn": "grass.json",   "name": "grass" },
+        { "fn": "wall.json",   "name": "wall" },
         { "fn": "grass_dec.json", "name": "grass_dec" },
         { "fn": "column.json", "name": "column" },
         { "fn": "sphere.json", "name": "menu_spheres" },
