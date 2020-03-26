@@ -12,7 +12,12 @@
 
 typedef struct _wall
 {
+   // Has two points, otherwise p1 - previous point
    bool disjoint;
+
+   // Has no points. p1 - prev point, p2 - p1 of first disjoint point
+   bool looped;
+
    vec2 p1;
    vec2 p2;
 

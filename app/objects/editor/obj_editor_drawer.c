@@ -428,7 +428,7 @@ static void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state,
    {
       if(CHECK_SIZE(tab_file_load_pos, tab_file_selected))
       {
-         char* fn = osdialog_file(OSDIALOG_SAVE, MAP_SAVE_DIR, EDITOR_DEFALUT_MAP_FN, filters);
+         char* fn = osdialog_file(OSDIALOG_SAVE, MAP_SAVE_DIR, EDITOR_DEFAULT_MAP_FN, filters);
          if(fn)
          {
             map_save(walls, map_objects, fn, prev_point, first_point_set);
@@ -437,7 +437,7 @@ static void mouse_editor(object_t* this, uint32_t x, uint32_t y, uint32_t state,
       }
       else if(CHECK_SIZE(tab_file_save_pos, tab_file_selected))
       {
-         char* fn = osdialog_file(OSDIALOG_OPEN, MAP_SAVE_DIR, EDITOR_DEFALUT_MAP_FN, filters);
+         char* fn = osdialog_file(OSDIALOG_OPEN, MAP_SAVE_DIR, EDITOR_DEFAULT_MAP_FN, filters);
          if(fn)
          {
             map_load(walls, map_objects, fn, &prev_point, &first_point_set);

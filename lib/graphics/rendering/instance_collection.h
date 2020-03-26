@@ -24,6 +24,6 @@ list_t* ic_get();
 
 void ic_push(instance_collection_t* ic);
 void ic_init(void);
-void ic_release(bool free_collections, bool free_matrices);
+void ic_release(bool fin, bool free_collections, bool free_matrices);
 
 #endif //DEEPCARS_INSTANCE_COLLECTION_H

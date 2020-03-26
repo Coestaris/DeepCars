@@ -63,6 +63,7 @@ static void update_menu_drawer(object_t* this)
          else
          {
             rc_set_current(editor_rc);
+            ic_release(false, true, true);
             scm_load_scene(SCENEID_EDITOR, true);
          }
          return;

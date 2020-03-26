@@ -68,6 +68,10 @@
         { "fn" : "editor/tabbutton_ga.png",                "name" : "editor_tabbutton_ga", "compression" : "png" },
         { "fn" : "editor/tabbutton_map.png",               "name" : "editor_tabbutton_map", "compression" : "png" },
 
+        { "fn" : "editor/marker_default.png",                "name" : "editor_marker_default", "compression" : "png" },
+        { "fn" : "editor/marker_disjoint.png",                "name" : "editor_marker_disjoint", "compression" : "png" },
+        { "fn" : "editor/marker_prev.png",                "name" : "editor_marker_prev", "compression" : "png" },
+
         { "fn" : "editor/tab.png",                "name" : "editor_tab", "compression" : "png" },
         { "fn" : "editor/tab_file.png",           "name" : "editor_tab_file", "compression" : "png" },
         { "fn" : "editor/tab_file_selected.png",  "name" : "editor_tab_file_selected", "compression" : "png" },

@@ -92,14 +92,15 @@ void ic_init(void)
    instance_collections = list_create();
 }
 
-void ic_release(bool free_collections, bool free_matrices)
+void ic_release(bool fin, bool free_collections, bool free_matrices)
 {
    if(free_collections)
       for(size_t i = 0; i < instance_collections->count; i++)
          ic_free(instance_collections->collection[i], free_matrices);
 
-
-   list_free(instance_collections);
+   instance_collections->count = 0;
+   if(fin)
+      list_free(instance_collections);
 }
 
 

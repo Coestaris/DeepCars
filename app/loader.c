@@ -97,7 +97,7 @@ void app_fin()
    mt_release();
    scm_release();
    gr_release();
-   ic_release(true, true);
+   ic_release(true, true, true);
 
    free_stages();
 

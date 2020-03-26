@@ -13,6 +13,10 @@
 #include "../../../lib/resources/rmanager.h"
 #include "../../win_defaults.h"
 
+static texture_t*  texture_marker_prev   = NULL;
+static texture_t*  texture_marker_disjoint   = NULL;
+static texture_t*  texture_marker   = NULL;
+
 static texture_t*  texture_start   = NULL;
 static texture_t*  texture_fin     = NULL;
 static float       rotation        = 0;
@@ -74,7 +78,7 @@ static void calculate_start_points(vec2 pos, float angle, vec2* p1, vec2* p2)
 
    for(size_t i = 0; i < walls->count; i++)
    {
-      struct _wall* wall = walls->collection[i];
+      wall_t* wall = walls->collection[i];
       bool found = get_intersection(pos.x, pos.y, p1->x, p1->y, wall->p1, wall->p2, &dest_x, &dest_y, &dest_dist);
       if(found && min_p1 > dest_dist)
       {
@@ -135,6 +139,13 @@ static void draw_line_arrow(vec2 p1, vec2 p2, float l, float w, float h, vec4 co
    gr_pq_push_line(MAP_FLAGS_DEPTH, dest, b, MAP_FLAGS_LINE_WIDTH, color, default_primitive_renderer, NULL);
 }
 
+static void draw_marker(texture_t* tex, vec2 point)
+{
+   static float trans = 0;
+   gr_pq_push_sprite(MAP_MAIN_DEPTH + 1, tex, vec2f(point.x - tex->width / 2.0, point.y - tex->height / 2.0),
+                     vec2u, vec2e, 0, default_sprite_renderer, &trans);
+}
+
 static void update_editor_map(object_t* this)
 {
    static float trans = 0;
@@ -171,14 +182,29 @@ static void update_editor_map(object_t* this)
 
    for(size_t i = 0; i < walls->count; i++)
    {
-      struct _wall* wall = walls->collection[i];
+      wall_t* wall = walls->collection[i];
+      wall_t* next_wall = i != walls->count - 1 ?  walls->collection[i + 1] : NULL;
+
       draw_line(wall->p1, wall->p2);
+
+      if(!wall->looped && ((next_wall && next_wall->disjoint) || (i == walls->count - 1 && first_point_set)))
+         draw_marker(texture_marker_disjoint, wall->p2);
+
+      if(wall->disjoint && !wall->looped)
+         draw_marker(texture_marker_disjoint, wall->p1);
+      else
+         draw_marker(texture_marker, wall->p1);
    }
 
    if(toolbar_state == WALL && (walls->count != 0 || first_point_set))
    {
-      vec2 pos = floor_point(u_get_mouse_pos());
-      draw_line(prev_point, pos);
+      if(u_get_key_state(50) == KEY_PRESSED || u_get_key_state(62) == KEY_PRESSED)
+      {
+         vec2 pos = floor_point(u_get_mouse_pos());
+         draw_line(prev_point, pos);
+      }
+
+      draw_marker(texture_marker_prev, prev_point);
    }
 
    if(toolbar_state == START || toolbar_state == FIN)
@@ -196,10 +222,7 @@ static void update_editor_map(object_t* this)
       vec2 pp2 = vec2f(
             pos.x - MAP_FLAGS_MIN_DIST * cosf(angle+ M_PI),
             pos.y - MAP_FLAGS_MIN_DIST * sinf(angle+ M_PI));
-/*
-      gr_pq_push_line(MAP_FLAGS_DEPTH, pp1, pp2, MAP_FLAGS_LINE_WIDTH, COLOR_RED,
-            default_primitive_renderer, NULL);
-      */
+
       gr_pq_push_line(MAP_FLAGS_DEPTH, p1, p2, MAP_FLAGS_LINE_WIDTH, MAP_FLAGS_LINE_COLOR,
             default_primitive_renderer, NULL);
 
@@ -216,16 +239,64 @@ static void update_editor_map(object_t* this)
    }
 }
 
+static size_t counter = 0;
+
 static void mouse_editor_map(uint32_t x, uint32_t y, uint32_t state, uint32_t mouse)
 {
    vec2 pos = floor_point(vec2f(x, y));
    if(state == MOUSE_RELEASE && mouse == MOUSE_LEFT && toolbar_state == WALL)
    {
+      if(u_get_key_state(50) != KEY_PRESSED && u_get_key_state(62) != KEY_PRESSED)
+      {
+         first_point_set = false;
+         counter = 0;
+      }
+
       if(first_point_set)
       {
-         struct _wall* wall = DEEPCARS_MALLOC(sizeof(struct _wall));
+         if(vec2_dist(pos, prev_point) < 1)
+            return;
+
+         wall_t* wall = DEEPCARS_MALLOC(sizeof(wall_t));
+         wall->looped = false;
+         wall->disjoint = true;
          wall->p1 = prev_point;
+
+         if(counter > 0)
+            wall->disjoint = false;
+
+         counter++;
+
          wall->p2 = pos;
+
+         wall_t* first_of_loop = NULL;
+
+         if(counter > 1)
+         {
+            size_t index = walls->count - 1;
+            while (index >= 0)
+            {
+               wall_t* w = (wall_t*) walls->collection[index];
+               if (w->disjoint)
+               {
+                  first_of_loop = w;
+                  break;
+               }
+               index--;
+            }
+         }
+
+         if(first_of_loop != NULL)
+         {
+            if(vec2_dist(first_of_loop->p1, wall->p2) < 1e-2)
+            {
+               wall->p2 = first_of_loop->p1;
+
+               wall->looped = true;
+               first_of_loop->looped = true;
+            }
+         }
+
          list_push(walls, wall);
       }
       prev_point = pos;
@@ -258,6 +329,10 @@ object_t* create_editor_map(void)
       walls = list_create();
    if(!map_objects)
       map_objects = list_create();
+
+   texture_marker_prev = rm_getn(TEXTURE, "editor_marker_prev");
+   texture_marker_disjoint = rm_getn(TEXTURE, "editor_marker_disjoint");
+   texture_marker = rm_getn(TEXTURE, "editor_marker_default");
 
    texture_start = rm_getn(TEXTURE, "editor_start_flag");
    texture_fin = rm_getn(TEXTURE, "editor_finish_flag");

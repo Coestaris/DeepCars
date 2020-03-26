@@ -159,20 +159,17 @@ static void push_height_rec(
    normals[0].n.y *= -1;
 
    // Texture mapping not used here
-   if(first)
+   if(first || last)
    {
       model_face_t* face1 = alloc_face(m, normal_counter, tex_counter, dt1, dt2, dt3, dt4,
             p1id, p2id, p2hid, p1hid, cvec4(normals[0].n.x, 0, normals[0].n.y, 0));
 
-      m_push_face(m, face1);
-   }
-
-   if(last)
-   {
       model_face_t* face4 = alloc_face(m, normal_counter, tex_counter, dt1, dt2, dt3, dt4,
             p3id, p4id, p4hid, p3hid, cvec4(normals[1].n.x, 0, normals[1].n.y, 0));
 
       m_push_face(m, face4);
+
+      m_push_face(m, face1);
    }
    model_face_t* face2 = alloc_face(m, normal_counter, tex_counter, tt1, tt2, tt3, dt4,
          p4id, p2id, p2hid, p4hid, cvec4(normals[2].n.x, 0, normals[2].n.y, 0));
@@ -207,7 +204,7 @@ static void push_hexahedron(
       vec2 int_p4 = vec2_lerp(p2, p4, v2);
 
       push_height_rec(m, i, normal_counter, tex_counter, int_p1, int_p2, int_p3, int_p4, height,
-            true, 0, vec2e, i == 0, false);
+            true, 0, vec2e, s == 0, false);
    }
 
    float last_v = n * step;
@@ -294,12 +291,100 @@ static void create_prism(
    else if(cmp_points(p2, p4, MIN_DIST)) { m_point = p2; d1_point = p1; d2_point = p3; }
    else
    {
-      return;
+      APP_ERROR("Unable to find matching points. Looks like you're fucked up....",0); // ??
    }
 
    vec2 d3_point = vec2f(d1_point.x + d.x * p, d1_point.y + d.y * p);
    push_prism(m, i, normal_counter, tex_counter, m_point, d1_point, d2_point, d3_point, WALL_HEIGHT);
 }
+
+static vec2 calculate_offset(double* p, vec2 d, vec2 d_next)
+{
+   // Cosine of angle between current and next wall (a)
+   double cos_nd_d = vec2_dot(vec2_normalize(d), vec2_normalize(d_next));
+
+   // Tan(a/2) of its angle
+   double tan_half_a = sqrt((1 - cos_nd_d) / (cos_nd_d + 1));
+   double l = WALL_WIDTH * tan_half_a;
+   *p = 2 * l;
+
+   return vec2f(d.x * l, d.y * l);
+}
+
+static void connect_walls(model_t* m, size_t* counter, size_t* normal_counter, size_t* tex_counter,
+      wall_t* prev_wall, wall_t* curr_wall, wall_t* next_wall)
+{
+   vec2 d_prev = vec2e;
+   vec2 n_prev = vec2e;
+   vec2 d_next = vec2e;
+   vec2 n_next = vec2e;
+
+   if(prev_wall)
+   {
+      // Direction of previous wall
+      d_prev = vec2_normalize(vec2fp(prev_wall->p1, prev_wall->p2));
+      // Normal to previous wall
+      n_prev = vec2_normal(d_prev);
+   }
+
+   // Direction of current wall
+   vec2 d_curr = vec2_normalize(vec2fp(curr_wall->p1, curr_wall->p2));
+   // Normal to current wall
+   vec2 n_curr = vec2_normal(d_curr);
+
+   if(next_wall)
+   {
+      // Direction of next wall
+      d_next = vec2_normalize(vec2fp(next_wall->p1, next_wall->p2));
+      // Normal to next wall
+      n_next = vec2_normal(d_next);
+   }
+
+   double prev_curr_p = 0, curr_next_p = 0;
+   vec2 prev_curr_offset = prev_wall ? calculate_offset(&prev_curr_p, d_prev, d_curr) : vec2e;
+   vec2 curr_next_offset = next_wall ? calculate_offset(&curr_next_p, d_next, d_curr) : vec2e;
+
+   vec2 p1 = curr_wall->p1;
+   vec2 p2 = curr_wall->p2;
+
+   vec2 mp1 = vec2f(
+         p1.x - n_curr.x * WALL_WIDTH + prev_curr_offset.x,
+         p1.y - n_curr.y * WALL_WIDTH + prev_curr_offset.y);
+
+   vec2 mp2 = vec2f(
+         p1.x + n_curr.x * WALL_WIDTH + prev_curr_offset.x,
+         p1.y + n_curr.y * WALL_WIDTH + prev_curr_offset.y);
+
+   vec2 mp4 = vec2f(
+         p2.x + n_curr.x * WALL_WIDTH - curr_next_offset.x,
+         p2.y + n_curr.y * WALL_WIDTH - curr_next_offset.y);
+
+   vec2 mp3 = vec2f(
+         p2.x - n_curr.x * WALL_WIDTH - curr_next_offset.x,
+         p2.y - n_curr.y * WALL_WIDTH - curr_next_offset.y);
+
+   push_hexahedron(m, counter, normal_counter, tex_counter, mp1, mp2, mp3, mp4, WALL_HEIGHT);
+
+   if(next_wall)
+   {
+      curr_next_offset = calculate_offset(&curr_next_p, d_curr, d_next);
+
+      // Calculate first two points of next wall
+      vec2 np1 = next_wall->p1;
+      vec2 np2 = next_wall->p2;
+
+      vec2 mnp1 = vec2f(
+            np1.x - n_next.x * WALL_WIDTH + curr_next_offset.x,
+            np1.y - n_next.y * WALL_WIDTH + curr_next_offset.y);
+      vec2 mnp2 = vec2f(
+            np1.x + n_next.x * WALL_WIDTH + curr_next_offset.x,
+            np1.y + n_next.y * WALL_WIDTH + curr_next_offset.y);
+
+      create_prism(m, counter, normal_counter, tex_counter,
+                   d_curr, curr_next_p, mp3, mp4, mnp1, mnp2);
+   }
+}
+
 
 model_t* build_map_model(list_t* walls)
 {
@@ -312,87 +397,95 @@ model_t* build_map_model(list_t* walls)
    size_t counter          = 1;
    size_t normal_counter   = 1;
    size_t tex_counter      = 1;
-   vec2   prev_offset      = vec2e;
-   vec2   prev_d           = vec2e;
-   vec2   first_d          = vec2e;
-   double p                = 0;
-   vec2   t1               = vec2e;
-   vec2   t2               = vec2e;
-   vec2   t3               = vec2e;
-   vec2   t4               = vec2e;
-   vec2   first_p1         = vec2e;
-   vec2   first_p2         = vec2e;
 
-   for(size_t i = 0; i < walls->count; i++)
+   for(int64_t i = 0; i < walls->count; i++)
    {
       wall_t* wall = walls->collection[i];
-      vec2  p1 = wall->p1;
-      vec2  p2 = wall->p2;
-      // Direction of current wall
-      vec2 d = vec2_normalize(vec2fp(p1, p2));
-      // Normal to current wall
-      vec2 n = vec2_normal(d);
+      wall_t* prev_wall = i != 0 ? walls->collection[i - 1] : NULL;
+      wall_t* next_wall = i != walls->count - 1 ? walls->collection[i + 1] : NULL;
 
-      // Calculate first two points of wall
-      vec2 mp1 = vec2f(p1.x - n.x * WALL_WIDTH + prev_offset.x, p1.y - n.y * WALL_WIDTH + prev_offset.y);
-      vec2 mp2 = vec2f(p1.x + n.x * WALL_WIDTH + prev_offset.x, p1.y + n.y * WALL_WIDTH + prev_offset.y);
-
-      // If its first point store its values
-      if(!i)
+      if(wall->disjoint && next_wall && next_wall->disjoint)
       {
-         first_p1 = mp1;
-         first_p2 = mp2;
-         first_d = d;
-      }
-      else
-      {
-         t4 = mp1;
-         t3 = mp2;
-
-         create_prism(model, &counter, &normal_counter, &tex_counter,
-                      prev_d, p, t1, t2, t3, t4);
+         connect_walls(
+               model, &counter, &normal_counter, &tex_counter,
+               NULL, wall, NULL);
+         continue;
       }
 
-      prev_d = d;
-      vec2 offset = vec2e;
-      if(i != walls->count - 1)
+      // Regular wall
+      if(!wall->looped)
       {
-         wall_t* next_wall = walls->collection[i + 1];
-         vec2 np1 = next_wall->p1;
-         vec2 np2 = next_wall->p2;
+         if(next_wall && next_wall->disjoint)
+         {
+            connect_walls(
+                  model, &counter, &normal_counter, &tex_counter,
+                  prev_wall, wall, NULL);
 
-         // Calculate direction of next wall
-         vec2 nd = vec2_normalize(vec2fp(np1, np2));
+            continue;
+         }
 
-         // Cosine of angle between current and next wall (a)
-         double cos_nd_d = vec2_dot(d, nd);
+         connect_walls(
+               model, &counter, &normal_counter, &tex_counter,
+               prev_wall, wall, next_wall);
 
-         // Tan(a/2) of its angle
-         double tan_half_a = sqrt((1 - cos_nd_d) / (cos_nd_d + 1));
-         double l = WALL_WIDTH * tan_half_a;
-         p = 2 * l;
-
-         offset = vec2f(d.x * l, d.y * l);
-         prev_offset = vec2f(nd.x * l, nd.y * l);
+         continue;
       }
 
-      vec2 mp4 = vec2f(p2.x + n.x * WALL_WIDTH - offset.x, p2.y + n.y * WALL_WIDTH - offset.y);
-      vec2 mp3 = vec2f(p2.x - n.x * WALL_WIDTH - offset.x, p2.y - n.y * WALL_WIDTH - offset.y);
-
-      t1 = mp4;
-      t2 = mp3;
-
-      push_hexahedron(model, &counter, &normal_counter, &tex_counter, mp1, mp2, mp3, mp4, WALL_HEIGHT);
-
-      // Last wall
-      if(i == walls->count - 1)
+      // Last wall of the loop
+      if(!wall->disjoint && wall->looped)
       {
-         t4 = first_p1;
-         t3 = first_p2;
+         wall_t* first_of_loop = NULL;
+         // Find first element in current loop
+         size_t index = i;
+         while (index >= 0)
+         {
+            wall_t* w = (wall_t*) walls->collection[index];
+            if (w->disjoint)
+            {
+               first_of_loop = w;
+               break;
+            }
+            index--;
+         }
 
-         create_prism(model, &counter, &normal_counter, &tex_counter,
-               first_d, p, t1, t2, t3, t4);
+         if(!first_of_loop)
+            continue;
+
+         connect_walls(
+               model, &counter, &normal_counter, &tex_counter,
+               prev_wall, wall, first_of_loop);
+
+         continue;
       }
+
+      // First wall of the loop
+      if(wall->disjoint && wall->looped)
+      {
+         wall_t* last_of_loop = NULL;
+         // Find first element in current loop
+         size_t index = i;
+         while (index >= 0)
+         {
+            wall_t* w = (wall_t*) walls->collection[index];
+            if (!w->disjoint && w->looped)
+            {
+               last_of_loop = w;
+               break;
+            }
+            index++;
+         }
+
+         if(!last_of_loop)
+            continue;
+
+         connect_walls(
+               model, &counter, &normal_counter, &tex_counter,
+               last_of_loop, wall, next_wall);
+
+         continue;
+      }
+
+      APP_ERROR("Not handled wall case =ccc",0);
    }
 
    return model;
