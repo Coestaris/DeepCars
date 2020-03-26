@@ -157,8 +157,6 @@ static void push_height_rec(
    normals[3].n.y *= -1;
    normals[0].n.x *= -1;
    normals[0].n.y *= -1;
-   //for(size_t j = 0; j < 4; j++)
-   //   reverse(&(normals[j]), j, normals);
 
    // Texture mapping not used here
    if(first)
@@ -230,21 +228,21 @@ static void key_value_sort(size_t len, size_t el_size, void* values, float* keys
    void* tp = DEEPCARS_MALLOC(el_size);
    bool swapped = false;
 
-   for(size_t i = 0; i < len; i++)
+   for(size_t j = 0; j < len; j++)
    {
       swapped = false;
-      for (size_t j = 0; j < len; j++)
+      for (size_t i = 0; i < len - 1; i++)
       {
-         if (keys[i] < keys[j])
+         if (keys[i] > keys[i + 1])
          {
             swapped = true;
             float t = keys[i];
-            keys[i] = keys[j];
-            keys[j] = t;
+            keys[i] = keys[i + 1];
+            keys[i + 1] = t;
 
             memcpy(tp, values + el_size * i, el_size);
-            memcpy(values + el_size * i, values + el_size * j, el_size);
-            memcpy(values + el_size * j, tp, el_size);
+            memcpy(values + el_size * i, values + el_size * (i + 1), el_size);
+            memcpy(values + el_size * (i + 1), tp, el_size);
          }
       }
 
@@ -274,8 +272,33 @@ static void push_prism(
 
    key_value_sort(4, sizeof(vec2), values, keys);
 
-   push_height_rec(m, i, normal_counter, tex_counter, values[0], values[1], values[2], values[3], height,
+   printf("%f %f %f %f\n", keys[0], keys[1], keys[2], keys[3]);
+
+   push_height_rec(m, i, normal_counter, tex_counter, values[0], values[1], values[3], values[2], height,
          true, 0, vec2e, true, true);
+}
+
+static void create_prism(
+   model_t* m, size_t* i, size_t* normal_counter, size_t* tex_counter,
+   vec2 d, float p,
+   vec2 p1, vec2 p2, vec2 p3, vec2 p4)
+{
+   vec2 m_point = vec2e;
+   vec2 d1_point = vec2e;
+   vec2 d2_point = vec2e;
+
+   //find matching points
+   if     (cmp_points(p1, p3, MIN_DIST)) { m_point = p1; d1_point = p2; d2_point = p4; }
+   else if(cmp_points(p1, p4, MIN_DIST)) { m_point = p1; d1_point = p2; d2_point = p3; }
+   else if(cmp_points(p2, p3, MIN_DIST)) { m_point = p2; d1_point = p1; d2_point = p4; }
+   else if(cmp_points(p2, p4, MIN_DIST)) { m_point = p2; d1_point = p1; d2_point = p3; }
+   else
+   {
+      return;
+   }
+
+   vec2 d3_point = vec2f(d1_point.x + d.x * p, d1_point.y + d.y * p);
+   push_prism(m, i, normal_counter, tex_counter, m_point, d1_point, d2_point, d3_point, WALL_HEIGHT);
 }
 
 model_t* build_map_model(list_t* walls)
@@ -326,20 +349,8 @@ model_t* build_map_model(list_t* walls)
          t4 = mp1;
          t3 = mp2;
 
-         vec2 m_point = vec2e;
-         vec2 d1_point = vec2e;
-         vec2 d2_point = vec2e;
-
-         // Find matching points
-         if     (cmp_points(t1, t3, MIN_DIST)) { m_point = t1; d1_point = t2; d2_point = t4; }
-         else if(cmp_points(t1, t4, MIN_DIST)) { m_point = t1; d1_point = t2; d2_point = t3; }
-         else if(cmp_points(t2, t3, MIN_DIST)) { m_point = t2; d1_point = t1; d2_point = t4; }
-         else if(cmp_points(t2, t4, MIN_DIST)) { m_point = t2; d1_point = t1; d2_point = t3; }
-         else APP_ERROR("Unable to find matching points",0);
-
-         // Calculate fourth point of mesh
-         vec2 d3_point = vec2f(d1_point.x + prev_d.x * p, d1_point.y + prev_d.y * p);
-         push_prism(model, &counter, &normal_counter, &tex_counter, d3_point, d2_point, d1_point, m_point, WALL_HEIGHT);
+         create_prism(model, &counter, &normal_counter, &tex_counter,
+                      prev_d, p, t1, t2, t3, t4);
       }
 
       prev_d = d;
@@ -376,26 +387,11 @@ model_t* build_map_model(list_t* walls)
       // Last wall
       if(i == walls->count - 1)
       {
-
          t4 = first_p1;
          t3 = first_p2;
 
-         vec2 m_point = vec2e;
-         vec2 d1_point = vec2e;
-         vec2 d2_point = vec2e;
-
-         //find matching points
-         if     (cmp_points(t1, t3, MIN_DIST)) { m_point = t1; d1_point = t2; d2_point = t4; }
-         else if(cmp_points(t1, t4, MIN_DIST)) { m_point = t1; d1_point = t2; d2_point = t3; }
-         else if(cmp_points(t2, t3, MIN_DIST)) { m_point = t2; d1_point = t1; d2_point = t4; }
-         else if(cmp_points(t2, t4, MIN_DIST)) { m_point = t2; d1_point = t1; d2_point = t3; }
-         else
-         {
-            break;
-         }
-
-         vec2 d3_point = vec2f(d1_point.x + first_d.x * p, d1_point.y + first_d.y * p);
-         push_prism(model, &counter, &normal_counter, &tex_counter, m_point, d1_point, d2_point, d3_point, WALL_HEIGHT);
+         create_prism(model, &counter, &normal_counter, &tex_counter,
+               first_d, p, t1, t2, t3, t4);
       }
    }
 

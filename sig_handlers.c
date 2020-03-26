@@ -40,7 +40,11 @@ void print_backtrace()
 
 void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 {
+   fflush(stderr);
+   fflush(stdout);
+
    const char* code_string = si->si_code == SEGV_MAPERR ? "SEGV_MAPERR" : "SEGV_ACCERR";
+
    fprintf(stderr, "\n========= SIGFAULT =========\nSignal code: %i (%s)\nSignal errno: %i\nSignal address: %p\n" \
          "Lower bound: %p\nUpper bound: %p\n\n",
            si->si_code, code_string, si->si_errno, si->si_addr, si->si_lower, si->si_upper);
@@ -55,6 +59,9 @@ void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 
 void abort_sigaction(int signal, siginfo_t *si, void *arg)
 {
+   fflush(stderr);
+   fflush(stdout);
+
    fprintf(stderr, "\n========= ABORT =========\nSignal errno: %i\nSignal address: %p\n\n",
            si->si_errno, si->si_addr);
 

@@ -192,7 +192,7 @@ shader_t* setup_gamma(void)
    sh_nset_float(sh, "z", z);
 
    sh_use(sh);
-   for(size_t i = 0; i < 25; i++)
+   for(size_t i = 0; i < 5; i++)
    {
       char buff[35];
       snprintf(buff, sizeof(buff), "kernel[%li]", i);

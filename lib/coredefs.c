@@ -42,11 +42,12 @@ void __error(const char* prefix, const char* file, size_t line, const char* form
    va_list argp;
    va_start(argp, format);
 
-   printf("[%s][ERROR]: ", prefix);
-   vprintf(format, argp);
-   putchar('\n');
-   printf("[%s][ERROR]: Error occurred in file \"%s\" at line %li", prefix, file, line);
+   fprintf(stderr, "[%s][ERROR]: ", prefix);
+   vfprintf(stderr, format, argp);
+   putc('\n', stderr);
+   fprintf(stderr, "[%s][ERROR]: Error occurred in file \"%s\" at line %li", prefix, file, line);
 
+   fflush(stderr);
    fflush(stdout);
    fflush(stdin);
 
@@ -92,10 +93,11 @@ void __gl_check(const char* line, int line_index, const char* file)
             error_name = "unknown error";
       }
 
-      printf("[GL ERROR]: Error type: %i (%s) occurred while processing \"%s\"\n[GL ERROR]: At %s at line %i",
+      fprintf(stderr, "[GL ERROR]: Error type: %i (%s) occurred while processing \"%s\"\n[GL ERROR]: At %s at line %i",
               error, error_name, line, file, line_index);
 
       // stdout не успевает высерать все сообщение.
+      fflush(stderr);
       fflush(stdout);
       fflush(stdin);
 
