@@ -3,6 +3,7 @@
 //
 #include "rfuncs.h"
 #include "../renderer.h"
+#include "../shader_setup.h"
 
 // FXAA ROUTINES
 void bind_fxaa(render_stage_t* stage)
@@ -19,12 +20,22 @@ void unbind_fxaa(render_stage_t* stage) { }
 // GAMMA / BYPASS ROUTINES
 void bind_bypass(render_stage_t* stage)
 {
-   if()
    render_stage_t* shading_stage = default_rc->stages->collection[STAGE_SHADING];
-   t_bind(shading_stage->color0_tex, UNIFORM_GAMMA.tex);
+   if(render_state == 0)
+   {
+      t_bind(shading_stage->color0_tex, UNIFORM_GAMMA.tex);
 
-   render_stage_t* gbuffer = default_rc->stages->collection[STAGE_G_BUFFER];
-   t_bind(gbuffer->color0_tex, UNIFORM_GAMMA.depth_tex);
+      render_stage_t* gbuffer = default_rc->stages->collection[STAGE_G_BUFFER];
+      t_bind(gbuffer->color0_tex, UNIFORM_GAMMA.depth_tex);
+
+      sh_set_int(UNIFORM_GAMMA.postprocess, true);
+   }
+   else
+   {
+      t_bind(texture_to_draw, UNIFORM_GAMMA.tex);
+
+      sh_set_int(UNIFORM_GAMMA.postprocess, false);
+   }
 }
 
 void unbind_bypass(render_stage_t* stage) { }

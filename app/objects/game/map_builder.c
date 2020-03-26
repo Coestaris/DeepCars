@@ -110,89 +110,6 @@ static struct _normal create_normal(vec2 p1, vec2 p2)
    return n;
 }
 
-static bool check_intersection(double ray_x1, double ray_y1, double ray_x2, double ray_y2, vec2 seg1, vec2 seg2)
-{
-   double r_px = ray_x1;
-   double r_py = ray_y1;
-   double r_dx = ray_x2 - ray_x1;
-   double r_dy = ray_y2 - ray_y1;
-
-   double s_px = seg1.x;
-   double s_py = seg1.y;
-   double s_dx = seg2.x - seg1.x;
-   double s_dy = seg2.y - seg1.y;
-
-   if ((fabs(r_dx)) < GET_INTERSECTION_COMP) // Vertical vector
-   {
-      double min_sx = fmin(seg1.x, seg2.x);
-      double min_sy = fmin(seg1.y, seg2.y);
-      double min_ry = fmin(ray_y1, ray_y2);
-      double max_sx = fmax(seg1.x, seg2.x);
-      double max_sy = fmax(seg1.y, seg2.y);
-      double max_ry = fmax(ray_y1, ray_y2);
-
-      if (fabs(s_dx) < GET_INTERSECTION_COMP) return false; // Parallel
-      else if(fabs(s_dy) < GET_INTERSECTION_COMP)
-         return max_sx > r_px && r_px > min_sx && max_ry > s_py && s_py > min_ry; // Normal
-      else // Other
-      {
-         vec2 norm = vec2_normalize(vec2f(s_dx, s_dy));
-         double y = (min_sx - norm.x * r_px) / norm.y;
-         return (max_sy > y && y > min_sy && max_ry > y && y > min_ry);
-      }
-   }
-
-   if ((fabs(r_dy)) < GET_INTERSECTION_COMP) // Horizontal vector
-   {
-      double min_sx = fmin(seg1.x, seg2.x);
-      double min_sy = fmin(seg1.y, seg2.y);
-      double min_rx = fmin(ray_x1, ray_x2);
-      double max_sx = fmax(seg1.x, seg2.x);
-      double max_sy = fmax(seg1.y, seg2.y);
-      double max_rx = fmax(ray_x1, ray_x2);
-
-      if (fabs(s_dy) < GET_INTERSECTION_COMP) return false; // Parallel
-      else if(fabs(s_dx) < GET_INTERSECTION_COMP)
-         return max_sy > r_py && r_py > min_sy && max_rx > s_px && s_px > min_rx; // Normal
-      else // Other
-      {
-         vec2 norm = vec2_normalize(vec2f(s_dx, s_dy));
-         double x = (min_sy - norm.y * r_py) / norm.x;
-         return (max_sx > x && x > min_sx && max_rx > x && x > min_rx);
-      }
-   }
-
-   return get_intersection(ray_x1, ray_y1, ray_x2, ray_y2, seg1, seg2, &r_px, &r_py, &r_dx);
-}
-
-static bool intersects(struct _normal n, struct _normal n1, struct _normal n2, struct _normal n3)
-{
-   vec2 dest = vec2f(n.p.x + n.n.x * MAX_CHECK_DISTANCE, n.p.y + n.n.y * MAX_CHECK_DISTANCE);
-
-   if(check_intersection(n.p.x, n.p.y, dest.x, dest.y, n1.p1, n1.p2))
-      return true;
-   if(check_intersection(n.p.x, n.p.y, dest.x, dest.y, n2.p1, n2.p2))
-      return true;
-   if(check_intersection(n.p.x, n.p.y, dest.x, dest.y, n3.p1, n3.p2))
-      return true;
-
-   return false;
-}
-
-static void reverse(struct _normal* n, size_t i, struct _normal normals[4])
-{
-   struct _normal others[3];
-   size_t c = 0;
-   for(size_t j = 0; j < 4; j++)
-      if(j != i) others[c++] = normals[j];
-
-   if(intersects(*n, others[0], others[1], others[2]))
-   {
-      n->n.x *= -1;
-      n->n.y *= -1;
-   }
-}
-
 static void push_height_rec(
       model_t* m, size_t* i, size_t* normal_counter, size_t* tex_counter,
       vec2 p1, vec2 p2, vec2 p3, vec2 p4,
@@ -236,8 +153,12 @@ static void push_height_rec(
       create_normal(p3, p1),
    };
 
-   for(size_t j = 0; j < 4; j++)
-      reverse(&(normals[j]), j, normals);
+   normals[3].n.x *= -1;
+   normals[3].n.y *= -1;
+   normals[0].n.x *= -1;
+   normals[0].n.y *= -1;
+   //for(size_t j = 0; j < 4; j++)
+   //   reverse(&(normals[j]), j, normals);
 
    // Texture mapping not used here
    if(first)
@@ -303,12 +224,57 @@ static void push_hexahedron(
          l, d, false, true);
 }
 
+
+static void key_value_sort(size_t len, size_t el_size, void* values, float* keys)
+{
+   void* tp = DEEPCARS_MALLOC(el_size);
+   bool swapped = false;
+
+   for(size_t i = 0; i < len; i++)
+   {
+      swapped = false;
+      for (size_t j = 0; j < len; j++)
+      {
+         if (keys[i] < keys[j])
+         {
+            swapped = true;
+            float t = keys[i];
+            keys[i] = keys[j];
+            keys[j] = t;
+
+            memcpy(tp, values + el_size * i, el_size);
+            memcpy(values + el_size * i, values + el_size * j, el_size);
+            memcpy(values + el_size * j, tp, el_size);
+         }
+      }
+
+      if(!swapped)
+         break;
+   }
+
+   DEEPCARS_FREE(tp);
+}
+
+
 static void push_prism(
       model_t* m, size_t* i, size_t* normal_counter, size_t* tex_counter,
       vec2 p1, vec2 p2, vec2 p3, vec2 p4,
       float height)
 {
-   push_height_rec(m, i, normal_counter, tex_counter, p1, p2, p3, p4, height,
+   float av_x = (p1.x + p2.x + p3.x + p4.x) / 4.0f;
+   float av_y = (p1.y + p2.y + p3.y + p4.y) / 4.0f;
+
+   float angle1 = atan2f(p1.y - av_y, p1.x - av_x);
+   float angle2 = atan2f(p2.y - av_y, p2.x - av_x);
+   float angle3 = atan2f(p3.y - av_y, p3.x - av_x);
+   float angle4 = atan2f(p4.y - av_y, p4.x - av_x);
+
+   float keys[]  = { angle1, angle2, angle3, angle4 };
+   vec2 values[] = { p1, p2, p3, p4 };
+
+   key_value_sort(4, sizeof(vec2), values, keys);
+
+   push_height_rec(m, i, normal_counter, tex_counter, values[0], values[1], values[2], values[3], height,
          true, 0, vec2e, true, true);
 }
 
@@ -373,7 +339,7 @@ model_t* build_map_model(list_t* walls)
 
          // Calculate fourth point of mesh
          vec2 d3_point = vec2f(d1_point.x + prev_d.x * p, d1_point.y + prev_d.y * p);
-         push_prism(model, &counter, &normal_counter, &tex_counter, m_point, d1_point, d2_point, d3_point, WALL_HEIGHT);
+         push_prism(model, &counter, &normal_counter, &tex_counter, d3_point, d2_point, d1_point, m_point, WALL_HEIGHT);
       }
 
       prev_d = d;

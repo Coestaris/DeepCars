@@ -49,11 +49,11 @@ static void game_map_update(object_t* this)
       if(!found)
          APP_ERROR("Unable to find start object",0);
 
-      object_t* car = create_controllable_car(
+     /* object_t* car = create_controllable_car(
             vec2f(start_pos.x * 0.3f - 150, start_pos.y * 0.3f - 100),
             start_rotation,
             camera);
-      u_push_object(car);
+      u_push_object(car);*/
 
       first_map_load = false;
    }

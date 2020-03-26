@@ -28,6 +28,7 @@ static texture_t* ssao_dummy_texture = NULL;
 //stages
 static uint32_t   ssao_state      = 0;
 
+uint32_t   render_state    = -1;
 texture_t* texture_to_draw = NULL;
 uint32_t   fxaa_state      = 1;
 uint32_t   fxaa_edges      = 0;
@@ -158,7 +159,7 @@ inline void switch_stages(void)
    {
       default:
       case 0:
-         texture_to_draw = fxaa_stage->color0_tex; // result
+         texture_to_draw = shading_stage->color0_tex; // result
          break;
       case 1:
          texture_to_draw = g_buffer_stage->color0_tex; //positions

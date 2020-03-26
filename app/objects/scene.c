@@ -33,7 +33,8 @@ void setup_game_objects(scene_t* scene)
              create_textured_dummy(vec3f(0, 0, 0), 4000,
                                    rm_getn(MATERIAL, "grass"),
                                    plane));
-   //list_push(scene->startup_objects, create_camera_control());
+
+   list_push(scene->startup_objects, create_camera_control());
    list_push(scene->startup_objects, create_default_bind_handler());
    list_push(scene->startup_objects, create_game_map());
 }
@@ -43,7 +44,7 @@ static float surface_func(float x, float y)
    float h = rand_perlin2d(x, y, 25, 1) / 1200;
 
    float r = vec2_len(vec2f(x, y));
-   return h / fmax(70 - r * 2000, 1);
+   return h / fmax(120 - r * 2000, 1);
 }
 
 
