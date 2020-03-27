@@ -75,7 +75,8 @@ object_t* create_controllable_car(vec2 position, float rotation, camera_t* camer
    this->scale = vec3f(5, 5, 5);
    this->update_func = update_controllable_car;
    car_camera = camera;
-   car_start = cvec4(position.x, 0, position.y, 0);
+   //car_start = cvec4(position.x, 0, position.y, 0);
+   car_start = cvec4(0, 0, 0, 0);
 
    car = DEEPCARS_MALLOC(sizeof(car_t));
    car->position = position;

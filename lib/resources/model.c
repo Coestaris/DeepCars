@@ -690,8 +690,12 @@ void m_build(model_t* model)
 model_t* m_create_surface(uint32_t vpoly, uint32_t hpoly, bool global_uv, float (*height_func)(float x, float y))
 {
    model_t* model = m_create();
+   vec4 a = cvec4(0, 0, 0, 0);
+   vec4 b = cvec4(0, 0, 0, 0);
+
    size_t faces = vpoly * hpoly;
    size_t i = 1;
+   size_t normal = 1;
 
    if(global_uv)
    {
@@ -701,8 +705,6 @@ model_t* m_create_surface(uint32_t vpoly, uint32_t hpoly, bool global_uv, float 
       m_push_tex_coord(model, cvec4(0, 0, 0, 0));
    }
    m_push_normal(model, cvec4(0, 1, 0, 0));
-
-   const float a = 5;
 
    for(size_t x = 0; x < vpoly; x++)
    for(size_t y = 0; y < hpoly; y++)
@@ -720,6 +722,14 @@ model_t* m_create_surface(uint32_t vpoly, uint32_t hpoly, bool global_uv, float 
          z3 = height_func(x2, y1);
          z4 = height_func(x1, y1);
       }
+
+      vec4_fill(a, x1 - x1, z1 - z4, y2 - y1, 0);
+      vec4_fill(b, x2 - x1, z3 - z4, y1 - y1, 0);
+
+      vec4_norm(a);
+      vec4_norm(b);
+
+      vec4_cross(a, b);
 
       m_push_vertex(model, cvec4(x1, z1, y2, 0));
       m_push_vertex(model, cvec4(x2, z2, y2, 0));
@@ -741,10 +751,12 @@ model_t* m_create_surface(uint32_t vpoly, uint32_t hpoly, bool global_uv, float 
       f->vert_id[2] = i++;
       f->vert_id[3] = i++;
 
-      f->normal_id[0] = 1;
-      f->normal_id[1] = 1;
-      f->normal_id[2] = 1;
-      f->normal_id[3] = 1;
+      m_push_normal(model, vec4_ccpy(a));
+      f->normal_id[0] = normal;
+      f->normal_id[1] = normal;
+      f->normal_id[2] = normal;
+      f->normal_id[3] = normal;
+      normal++;
 
       if(global_uv)
       {
@@ -768,6 +780,9 @@ model_t* m_create_surface(uint32_t vpoly, uint32_t hpoly, bool global_uv, float 
    char buff[50];
    snprintf(buff, sizeof(buff), "__generated_plane%i", rand_i());
    model->name = strdup(buff);
+
+   vec4_free(a);
+   vec4_free(b);
 
    return model;
 }

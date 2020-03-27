@@ -29,10 +29,13 @@ void setup_editor_objects(scene_t* scene)
 
 void setup_game_objects(scene_t* scene)
 {
+   object_t* plane_obj;
    list_push(scene->startup_objects,
-             create_textured_dummy(vec3f(0, 0, 0), 4000,
+             plane_obj = create_textured_dummy(vec3f(0, 0, 0), 4000,
                                    rm_getn(MATERIAL, "grass"),
                                    plane));
+   //o_enable_draw_normals(plane_obj, COLOR_GREEN, COLOR_WHITE, 0.001);
+
 
    //list_push(scene->startup_objects, create_camera_control());
    list_push(scene->startup_objects, create_default_bind_handler());
@@ -83,10 +86,13 @@ void setup_menu_objects(scene_t* scene)
       rm_push(MODEL, plane, -1);
    }
 
+   object_t* plane_obj;
    list_push(scene->startup_objects,
-             create_textured_dummy(vec3f(0, 0, 0), 4000,
+             plane_obj = create_textured_dummy(vec3f(0, 0, 0), 4000,
                                    rm_getn(MATERIAL, "grass"),
                                    plane));
+
+   //o_enable_draw_normals(plane_obj, COLOR_GREEN, COLOR_WHITE, 0.001);
 
    const size_t count = 20;
    const float step = 2.0f * M_PI / count;
@@ -103,6 +109,7 @@ void setup_menu_objects(scene_t* scene)
       list_push(scene->startup_objects, obj);
    }
 
+#ifdef ENABLE_TREES
    push_collection(rm_getn(MODEL, "grass1"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
    push_collection(rm_getn(MODEL, "grass2"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
    push_collection(rm_getn(MODEL, "grass3"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
@@ -114,6 +121,7 @@ void setup_menu_objects(scene_t* scene)
    push_collection(rm_getn(MODEL, "stone3"), rm_getn(MATERIAL, "column"), 5, 10);
    push_collection(rm_getn(MODEL, "stone4"), rm_getn(MATERIAL, "column"), 5, 10);
    push_collection(rm_getn(MODEL, "stone5"), rm_getn(MATERIAL, "column"), 5, 10);
+#endif
 
    for(size_t i = 0; i < SPHERES_COUNT; i++)
    {

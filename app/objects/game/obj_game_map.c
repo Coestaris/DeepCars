@@ -40,7 +40,7 @@ static void push_collection(model_t* model, material_t* material, float size, si
       //float angle = rand_range(0, M_PI * 2);
       //float r = rand_range(130, 430);
 
-      size += size * rand_range(-0.05f, 0.05f);
+      //size += size * rand_range(-0.005f, 0.005f);
       vec2 pos = get_point(180, 110, 320);
       pos.x += 60;
 
@@ -68,7 +68,7 @@ static void game_map_update(object_t* this)
             vec3f(-150, 0, -100),
             0.3f, rm_getn(MATERIAL, "wall"), m);
 
-      o_enable_draw_normals(obj, COLOR_GREEN, COLOR_WHITE, 15);
+//      o_enable_draw_normals(obj, COLOR_GREEN, COLOR_WHITE, 15);
       u_push_object(obj);
 
       vec2 start_pos = vec2e;
@@ -97,6 +97,7 @@ static void game_map_update(object_t* this)
 
       first_map_load = false;
 
+#ifdef ENABLE_TREES
       push_collection(rm_getn(MODEL, "grass1"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
       push_collection(rm_getn(MODEL, "grass2"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
       push_collection(rm_getn(MODEL, "grass3"), rm_getn(MATERIAL, "grass_dec"), 30, 50);
@@ -108,6 +109,7 @@ static void game_map_update(object_t* this)
       push_collection(rm_getn(MODEL, "stone3"), rm_getn(MATERIAL, "column"), 5, 10);
       push_collection(rm_getn(MODEL, "stone4"), rm_getn(MATERIAL, "column"), 5, 10);
       push_collection(rm_getn(MODEL, "stone5"), rm_getn(MATERIAL, "column"), 5, 10);
+#endif
    }
 }
 
