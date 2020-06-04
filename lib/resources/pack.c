@@ -103,12 +103,23 @@ static void p_handler_model(uint8_t* data, size_t length)
    }
 
    model_t* m = m_load_s(strdup(name), (char*)model_data);
-   m_normalize(m,
-            norm_flags & 0x1u,
-            norm_flags & 0x2u,
-            norm_flags & 0x4u,
-            norm_flags & 0x8u);
-   m_build(m);
+   if(norm_flags & 0x10u)
+   {
+      m_normalize_sym(m,
+         norm_flags & 0x1u,
+         norm_flags & 0x2u,
+         norm_flags & 0x4u,
+         norm_flags & 0x8u);
+   }
+   else
+   {
+      m_normalize(m,
+         norm_flags & 0x1u,
+         norm_flags & 0x2u,
+         norm_flags & 0x4u,
+         norm_flags & 0x8u);
+   }
+      m_build(m);
 
    rm_push(MODEL, m, id);
 

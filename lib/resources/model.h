@@ -123,9 +123,13 @@ void m_build(model_t* model);
 // Creates model of 4-vertex plane
 model_t* m_create_surface(uint32_t vpoly, uint32_t hpoly, bool global_uv, float (*height_func)(float x, float y));
 
-// Moves the model to zero along the specified axes.
+// Moves the model to zero along the specified axes. Converts values to range of [0.0, 1.0]
 // If norm_scale is set, scales the vertices of the model to the range of [1,0]
 void m_normalize(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_pos, bool norm_scale);
+
+// Moves the model to zero along the specified axes. Converts values to range of [-0.5, 0.5]
+// If norm_scale is set, scales the vertices of the model to the range of [1,0]
+void m_normalize_sym(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_pos, bool norm_scale);
 
 // Calculates OpenGL vertex buffer storing normals of the model with
 // specified length as set of lines

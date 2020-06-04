@@ -269,8 +269,6 @@ static void push_prism(
 
    key_value_sort(4, sizeof(vec2), values, keys);
 
-   printf("%f %f %f %f\n", keys[0], keys[1], keys[2], keys[3]);
-
    push_height_rec(m, i, normal_counter, tex_counter, values[0], values[1], values[3], values[2], height,
          true, 0, vec2e, true, true);
 }
@@ -398,11 +396,11 @@ model_t* build_map_model(list_t* walls)
    size_t normal_counter   = 1;
    size_t tex_counter      = 1;
 
-   for(int64_t i = 0; i < walls->count; i++)
+   for(size_t i = 0; i < walls->count; i++)
    {
       wall_t* wall = walls->collection[i];
       wall_t* prev_wall = i != 0 ? walls->collection[i - 1] : NULL;
-      wall_t* next_wall = i != walls->count - 1 ? walls->collection[i + 1] : NULL;
+      wall_t* next_wall = (i != walls->count - 1) ? walls->collection[i + 1] : NULL;
 
       if(wall->disjoint && next_wall && next_wall->disjoint)
       {
@@ -437,7 +435,7 @@ model_t* build_map_model(list_t* walls)
          wall_t* first_of_loop = NULL;
          // Find first element in current loop
          size_t index = i;
-         while (index >= 0)
+         while (index < walls->count)
          {
             wall_t* w = (wall_t*) walls->collection[index];
             if (w->disjoint)
@@ -464,7 +462,7 @@ model_t* build_map_model(list_t* walls)
          wall_t* last_of_loop = NULL;
          // Find first element in current loop
          size_t index = i;
-         while (index >= 0)
+         while (index < walls->count)
          {
             wall_t* w = (wall_t*) walls->collection[index];
             if (!w->disjoint && w->looped)

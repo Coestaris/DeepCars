@@ -787,10 +787,7 @@ model_t* m_create_surface(uint32_t vpoly, uint32_t hpoly, bool global_uv, float 
    return model;
 }
 
-//
-// m_normalize()
-//
-void m_normalize(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_pos, bool norm_scale)
+void m_normalize_int(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_pos, bool norm_scale, bool sym)
 {
    ASSERT(model);
 
@@ -839,8 +836,32 @@ void m_normalize(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_p
          vertex[0] /= scale;
          vertex[1] /= scale;
          vertex[2] /= scale;
+
+         if(sym)
+         {
+            if (norm_x_pos) vertex[0] -= 0.5;
+            if (norm_y_pos) vertex[1] -= 0.5;
+            if (norm_z_pos) vertex[2] -= 0.5;
+         }
       }
    }
+}
+
+
+//
+// m_normalize()
+//
+void m_normalize(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_pos, bool norm_scale)
+{
+   m_normalize_int(model, norm_x_pos, norm_y_pos, norm_z_pos, norm_scale, false);
+}
+
+//
+// m_normalize()
+//
+void m_normalize_sym(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_pos, bool norm_scale)
+{
+   m_normalize_int(model, norm_x_pos, norm_y_pos, norm_z_pos, norm_scale, true);
 }
 
 void m_calculate_normals_vao(model_t* model, vec4 color1, vec4 color2, float normal_len, GLuint* vao, size_t* len)

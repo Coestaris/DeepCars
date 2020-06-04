@@ -8,7 +8,7 @@ from shutil import rmtree
 # 4 bytes: model id 
 # 2 bytes: model name length 
 # n bytes: model name
-# 1 byte : normalize bit field (0x1 - normX, 0x2 - normY, 0x4 - normZ, 0x8 - normScale) 
+# 1 byte : normalize bit field (0x1 - normX, 0x2 - normY, 0x4 - normZ, 0x8 - normScale, 0x10 - norm_sym)
 # 1 byte : arhive type (0 - none, 1 - zlib)
 # 4 bytes: data length
 # 4 bytes: uncompressed data length
@@ -23,6 +23,7 @@ class model_packer:
         self.default_normalize_x = config["model_default_normalize_x"]
         self.default_normalize_y = config["model_default_normalize_y"]
         self.default_normalize_z = config["model_default_normalize_z"]
+        self.default_norm_sym = config["model_default_norm_sym"]
         self.default_normalize_scale = config["model_default_normalize_scale"]
         pass
 
@@ -39,6 +40,7 @@ class model_packer:
                 "normalize_y": (cm.def_bool_comp, False),
                 "normalize_z": (cm.def_bool_comp, False),
                 "normalize_scale": (cm.def_bool_comp, False),
+                "norm_sym": (cm.def_bool_comp, False),
                 "compression": (cm.def_bool_comp, False),
 
                 "index": (cm.def_int_comp, False),
@@ -89,11 +91,16 @@ class model_packer:
             if "normalize_scale" in model:
                 norm_scale = model["normalize_scale"]
 
+            norm_sym = self.default_norm_sym
+            if "norm_sym" in model:
+                norm_sym = model["norm_sym"]
+
             normBitField = 0
             if norm_x:     normBitField |= 0x1
             if norm_y:     normBitField |= 0x2
             if norm_z:     normBitField |= 0x4
             if norm_scale: normBitField |= 0x8
+            if norm_sym:   normBitField |= 0x10
 
 
             chunk = []

@@ -27,10 +27,14 @@
     "textures" : 
     [
         { "fn" : "grass.png",               "name" : "grass"    },
-        { "fn" : "wall.png",               "name" : "wall"    },
+        { "fn" : "wall.png",                "name" : "wall"    },
         { "fn" : "tree1.png",               "name" : "tree1" },
         { "fn" : "grass_specular.png",      "name" : "grass_specular"    },
         { "fn" : "ball.png",                "name" : "ball" },
+
+        { "fn" : "car.png",                 "name" : "car" },
+        { "fn" : "car_red.png",             "name" : "car_red" },
+
         { "fn" : "menu/btn_run_editor.png", "name" : "btn_run_editor" },
         { "fn" : "menu/btn_about.png",      "name" : "btn_about" },
         { "fn" : "menu/btn_exit.png",       "name" : "btn_exit" },
@@ -62,15 +66,15 @@
         { "fn" : "editor/toolbar_obstacle.png",            "name" : "editor_toolbar_obstacle", "compression" : "png" },
         { "fn" : "editor/toolbar_slip.png",                "name" : "editor_toolbar_slip", "compression" : "png" },
 
-        { "fn" : "editor/tabbutton_arrow.png",              "name" : "editor_tabbutton_arrow", "compression" : "png" },
+        { "fn" : "editor/tabbutton_arrow.png",             "name" : "editor_tabbutton_arrow", "compression" : "png" },
         { "fn" : "editor/tabbutton_ffnn.png",              "name" : "editor_tabbutton_ffnn", "compression" : "png" },
         { "fn" : "editor/tabbutton_file.png",              "name" : "editor_tabbutton_file", "compression" : "png" },
         { "fn" : "editor/tabbutton_ga.png",                "name" : "editor_tabbutton_ga", "compression" : "png" },
         { "fn" : "editor/tabbutton_map.png",               "name" : "editor_tabbutton_map", "compression" : "png" },
 
-        { "fn" : "editor/marker_default.png",                "name" : "editor_marker_default", "compression" : "png" },
-        { "fn" : "editor/marker_disjoint.png",                "name" : "editor_marker_disjoint", "compression" : "png" },
-        { "fn" : "editor/marker_prev.png",                "name" : "editor_marker_prev", "compression" : "png" },
+        { "fn" : "editor/marker_default.png",              "name" : "editor_marker_default", "compression" : "png" },
+        { "fn" : "editor/marker_disjoint.png",             "name" : "editor_marker_disjoint", "compression" : "png" },
+        { "fn" : "editor/marker_prev.png",                 "name" : "editor_marker_prev", "compression" : "png" },
 
         { "fn" : "editor/tab.png",                "name" : "editor_tab", "compression" : "png" },
         { "fn" : "editor/tab_file.png",           "name" : "editor_tab_file", "compression" : "png" },
@@ -97,6 +101,7 @@
     [
         { "fn" : "column.zobj",  "name" : "column" },
         { "fn" : "car.zobj",  "name" : "car" },
+        { "fn" : "wheels.zobj",  "name" : "wheels", "normalize_x" : true, "normalize_y" : true, "normalize_z" : true, "norm_sym" : true},
         { "fn" : "sphere.zobj",  "name" : "sphere", "normalize_x" : false, "normalize_y" : false, "normalize_z" : false },
         { "fn" : "ring.zobj",  "name" : "ring" },
         { "fn" : "lenin.zobj",  "name" : "lenin" },
