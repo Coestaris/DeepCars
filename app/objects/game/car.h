@@ -20,6 +20,7 @@ typedef struct {
    float rot_velocity;
 
    vec2 direction;
+   bool reverse;
 
 } car_t;
 

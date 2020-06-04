@@ -10,7 +10,7 @@
 #include "car.h"
 #include "../obj_dummy.h"
 
-#define MAX_WHEEL_ANGLE M_PI / 9
+#define MAX_WHEEL_ANGLE M_PI / 7
 
 static camera_t* car_camera;
 static vec4 car_start = NULL;
@@ -18,6 +18,7 @@ static car_t* car = NULL;
 
 static object_t* my_wheels[4];
 static float wheel_angle = 0;
+static const vec2 angle_offsets[4] = { { 3.6, 2.5 }, { 3.6, -2.2 }, { -3.0, 2.5 }, { -3.0, -2.2 } };
 
 static void update_controllable_car(object_t* this)
 {
@@ -51,25 +52,32 @@ static void update_controllable_car(object_t* this)
    float new_z = this->position.z - car->direction.y * 20;
 
    vec2 angle_comp = { cos(car->rotation), sin(car->rotation) };
-   vec2 angle_offset = { 2.75, 1.5 };
-   my_wheels[0]->position.x = car->position.x + angle_offset.x * angle_comp.x + angle_offset.y * angle_comp.y;
-   my_wheels[0]->position.z = car->position.y + angle_offset.x * angle_comp.y - angle_offset.y * angle_comp.x;
-   my_wheels[0]->rotation.y = wheel_angle + car->rotation - M_PI / 2;
+   for(size_t i = 0; i < 4; i++)
+   {
+      my_wheels[i]->position.x = car->position.x + angle_offsets[i].x * angle_comp.x + angle_offsets[i].y * angle_comp.y;
+      my_wheels[i]->position.z = car->position.y + angle_offsets[i].x * angle_comp.y - angle_offsets[i].y * angle_comp.x;
+      if(i < 2)
+      {
+         // if(car->reverse)
+         //    my_wheels[i]->rotation.y = wheel_angle + car->rotation - M_PI / 2;
+         // else
+            my_wheels[i]->rotation.y = wheel_angle + car->rotation - M_PI / 2;
+      }
+      else my_wheels[i]->rotation.y =  car->rotation - M_PI / 2;
+   }
 
-   my_wheels[1]->position.x = car->position.x + angle_offset.x * angle_comp.x - angle_offset.y * angle_comp.y * 2;
-   my_wheels[1]->position.z = car->position.y + angle_offset.x * angle_comp.y + angle_offset.y * angle_comp.x * 2;
-   my_wheels[1]->rotation.y = wheel_angle + car->rotation - M_PI / 2;
+#ifndef SELF_CAMERA_CONTROL
+   const float camera_k = 0.17f;
+   car_camera->position[0] = new_x * camera_k + car_camera->position[0] * (1 - camera_k);
+   car_camera->position[1] = 13;
+   car_camera->position[2] = new_z * camera_k + car_camera->position[2] * (1 - camera_k);
 
-   // const float camera_k = 0.152f;
-   // car_camera->position[0] = new_x * camera_k + car_camera->position[0] * (1 - camera_k);
-   // car_camera->position[1] = 13;
-   // car_camera->position[2] = new_z * camera_k + car_camera->position[2] * (1 - camera_k);
-
-   // const float camera_dir_k = 0.15f;
-   // car_camera->direction[0] = -car->direction.x * camera_dir_k + car_camera->direction[0] * (1 - camera_dir_k);
-   // car_camera->direction[1] = 0.3f;
-   // car_camera->direction[2] = -car->direction.y * camera_dir_k + car_camera->direction[2] * (1 - camera_dir_k);
-   // vec4_norm(car_camera->direction);
+   const float camera_dir_k = 0.17f;
+   car_camera->direction[0] = -car->direction.x * camera_dir_k + car_camera->direction[0] * (1 - camera_dir_k);
+   car_camera->direction[1] = 0.3f;
+   car_camera->direction[2] = -car->direction.y * camera_dir_k + car_camera->direction[2] * (1 - camera_dir_k);
+   vec4_norm(car_camera->direction);
+#endif
 
    uint64_t frame = u_get_frames();
    if(frame % 2 == 0)
@@ -101,7 +109,7 @@ object_t* create_controllable_car(vec2 position, float rotation, camera_t* camer
    this->draw_info->model = rm_getn(MODEL, "car");
    this->draw_info->material = rm_getn(MATERIAL, "car1");
 
-   this->position.y = 1.5;
+   this->position.y = 1.3;
 
    this->scale = vec3f(10, 10, 10);
    this->update_func = update_controllable_car;
@@ -118,9 +126,10 @@ object_t* create_controllable_car(vec2 position, float rotation, camera_t* camer
    for(size_t i = 0; i < 4; i++)
    {
       my_wheels[i] = create_textured_dummy(
-            vec3f(0, 0, 0), 2,
+            vec3f(0, 0, 0), 1.5,
             rm_getn(MATERIAL, "wall"),
             rm_getn(MODEL, "wheels"));
+      my_wheels[i]->position.y = 1;
       u_push_object(my_wheels[i]);
    }
 

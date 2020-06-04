@@ -79,9 +79,9 @@ static void update_menu_phys(object_t* this)
    cpVect pos2 = cpBodyGetPosition(car2);
 
    render_car1->position = vec3f(pos1.x, 0, pos1.y);
-   render_car1->rotation = vec3f(0, cpBodyGetAngle(car1), 0);
+   render_car1->rotation = vec3f(0, cpBodyGetAngle(car1) + M_PI / 2, 0);
    render_car2->position = vec3f(pos2.x, 0, pos2.y);
-   render_car2->rotation = vec3f(0, cpBodyGetAngle(car2), 0);
+   render_car2->rotation = vec3f(0, cpBodyGetAngle(car2) + M_PI / 2, 0);
 
    move_car(car1, cpv(rand_range(2, 70), rand_range(2, 70)));
    move_car(car2, pos1);

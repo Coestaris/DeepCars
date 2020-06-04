@@ -36,8 +36,9 @@ void setup_game_objects(scene_t* scene)
                                    plane));
    //o_enable_draw_normals(plane_obj, COLOR_GREEN, COLOR_WHITE, 0.001);
 
-
+#ifdef SELF_CAMERA_CONTROL
    list_push(scene->startup_objects, create_camera_control());
+#endif
    list_push(scene->startup_objects, create_default_bind_handler());
    list_push(scene->startup_objects, create_game_map());
 }

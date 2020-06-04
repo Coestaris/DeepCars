@@ -787,6 +787,7 @@ model_t* m_create_surface(uint32_t vpoly, uint32_t hpoly, bool global_uv, float 
    return model;
 }
 
+// Doing all work for m_normalize and m_normalize_sum functions
 void m_normalize_int(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_pos, bool norm_scale, bool sym)
 {
    ASSERT(model);
@@ -857,7 +858,7 @@ void m_normalize(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_p
 }
 
 //
-// m_normalize()
+// m_normalize_sym()
 //
 void m_normalize_sym(model_t* model, bool norm_x_pos, bool norm_y_pos, bool norm_z_pos, bool norm_scale)
 {

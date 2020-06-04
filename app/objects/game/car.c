@@ -50,6 +50,7 @@ void car_update(bool inputs[4], car_t* car, float delta)
       car->velocity.y -= car->direction.y * POSITION_ACCELERATION * REVERSE_VELOCITY_MULTIPLIER;
    }
 
+
    float vel_to_dir  = (float)vec2_dot(car->velocity, car->direction) / (float)vec2_len(car->direction);
    float vel_to_norm = (float)vec2_dot(car->velocity, normal) / (float)vec2_len(normal);
    vel_to_norm *= NORMAL_VELOCITY_DECREASE;
@@ -105,7 +106,7 @@ void car_update(bool inputs[4], car_t* car, float delta)
    car->position.y += scaled_velocity.y;
 
    car->rotation += car->rot_velocity;
-
+   car->reverse = vec2_dot(car->direction, car->velocity) < 0;
 }
 
 
