@@ -1,3 +1,4 @@
+/*
 //
 // Created by maxim on 2/9/20.
 //
@@ -10,3 +11,4 @@
 void nw_forward(genome_t* genome, float* input, float* output);
 
 #endif //DEEPCARS_NETWORK_H
+*/

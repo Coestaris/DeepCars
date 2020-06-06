@@ -1,3 +1,4 @@
+/*
 //
 // Created by maxim on 2/1/20.
 //
@@ -7,10 +8,10 @@
 #endif
 #include "genome.h"
 
-#include "../lib/list.h"
-#include "../oil/bmp.h"
-#include "../oil/graphics.h"
-#include "../lib/graphics/gmath.h"
+#include "../../lib/list.h"
+#include "../../oil/bmp.h"
+#include "../../oil/graphics.h"
+#include "../../lib/graphics/gmath.h"
 #include "connection_genome.h"
 #include "rand_helpers.h"
 
@@ -18,9 +19,11 @@ void gn_push_connection(genome_t* genome, connection_genome_t connection_genome)
 {
    if(genome->connections_count > genome->connections_max_count - 1)
    {
-      /*size_t new_size = (float)genome->connections_max_count * GN_CREATE_INCREASE_CONNECTIONS;
+      */
+/*size_t new_size = (float)genome->connections_max_count * GN_CREATE_INCREASE_CONNECTIONS;
       genome->connections = realloc(genome->connections, sizeof(connection_genome_t) * new_size + 1);
-      genome->connections_max_count = new_size;*/
+      genome->connections_max_count = new_size;*//*
+
       //to much
       puts("Push connection overrun");
       return;
@@ -361,3 +364,4 @@ genome_t* gn_clone(genome_t* genome)
 
    return new;
 }
+*/

@@ -1,3 +1,4 @@
+/*
 //
 // Created by maxim on 2/1/20.
 //
@@ -6,10 +7,10 @@
 #define DEEPCARS_MLLIB_GENOME_H
 
 #include <stdbool.h>
-#include "../lib/coredefs.h"
-#include "../oil/font.h"
+#include "../../lib/coredefs.h"
+#include "../../oil/font.h"
 #include "connection_genome.h"
-#include "../lib/list.h"
+#include "../../lib/list.h"
 
 #define GN_WRITE_WIDTH 512
 #define GN_WRITE_HEIGHT 512
@@ -83,3 +84,4 @@ genome_t* gn_clone(genome_t* genome);
 genome_t* gn_get_free_genome(void);
 
 #endif //DEEPCARS_MLLIB_GENOME_H
+*/

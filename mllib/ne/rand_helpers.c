@@ -1,3 +1,4 @@
+/*
 //
 // Created by maxim on 2/4/20.
 //
@@ -20,4 +21,4 @@ void gn_set_seed(uint32_t seed)
 float gn_rand_float(void)
 {
    return (float)((uint32_t)rand()) / RAND_MAX;
-}
+}*/

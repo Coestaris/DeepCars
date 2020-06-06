@@ -1,3 +1,4 @@
+/*
 //
 // Created by maxim on 2/1/20.
 //
@@ -30,3 +31,4 @@ connection_genome_t cg_clone(connection_genome_t* genome);
 void cg_disable(connection_genome_t* genome);
 
 #endif //DEEPCARS_MLLIB_CONNECTION_GENOME_H
+*/

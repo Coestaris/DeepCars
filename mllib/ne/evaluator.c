@@ -1,3 +1,4 @@
+/*
 //
 // Created by maxim on 2/6/20.
 //
@@ -147,7 +148,9 @@ void ev_evaluate(evaluator_t* evaluator)
       }
    }
 
-   /*// Remove unused species
+   */
+/*//*
+/ Remove unused species
    size_t empty_index = -1;
    bool found_empty;
    do
@@ -168,7 +171,8 @@ void ev_evaluate(evaluator_t* evaluator)
             evaluator->species[i] = evaluator->species[i - 1];
       else break;
    }
-   while(true);*/
+   while(true);*//*
+
 
    // Evaluate genomes and assign score
    for(size_t i = 0; i < evaluator->genomes->count; i++)
@@ -267,3 +271,4 @@ genome_t* ev_fittest_genome(evaluator_t* evaluator)
 
    return fittest;
 }
+*/

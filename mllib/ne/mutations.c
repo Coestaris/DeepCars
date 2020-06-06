@@ -1,3 +1,4 @@
+/*
 //
 // Created by maxim on 2/4/20.
 //
@@ -115,4 +116,4 @@ void gn_mutate_link(genome_t* genome)
 
       break;
    }
-}
+}*/

@@ -86,7 +86,7 @@
 #define EDITOR_MENU_SLIP_POS 240, 752
 #define EDITOR_MENU_DEPTH 4
 
-//#define ENABLE_TREES
+#define ENABLE_TREES
 //#define SELF_CAMERA_CONTROL
 
 //

@@ -1,3 +1,4 @@
+/*
 //
 // Created by maxim on 2/6/20.
 //
@@ -5,7 +6,7 @@
 #ifndef DEEPCARS_EVALUATOR_H
 #define DEEPCARS_EVALUATOR_H
 
-#include "../lib/coredefs.h"
+#include "../../lib/coredefs.h"
 #include "genome.h"
 
 #define EV_MUTATE_MIN_WEIGHT -2
@@ -35,3 +36,4 @@ void ev_free(evaluator_t* evaluator);
 genome_t* ev_fittest_genome(evaluator_t* evaluator);
 
 #endif //DEEPCARS_EVALUATOR_H
+*/

@@ -1,3 +1,4 @@
+/*
 //
 // Created by maxim on 2/9/20.
 //
@@ -49,7 +50,7 @@ genome_t* gn_get_free_genome(void)
          return genome;
       }
    }
-   // no DEEPCARS_FREE genomes found, create new one
+   // no free genomes found, create new one
    genome_t* genome =  gn_alloc_new();
    genome->_free = false;
    list_push(genome_bank, genome);
@@ -64,3 +65,4 @@ void gn_init_bank(void)
 
 
 
+*/

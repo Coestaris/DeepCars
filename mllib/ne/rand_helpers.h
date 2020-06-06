@@ -1,3 +1,4 @@
+/*
 //
 // Created by maxim on 2/4/20.
 //
@@ -14,3 +15,4 @@ void gn_set_seed(uint32_t seed);
 connection_genome_t* gn_rand_connection(genome_t* genome);
 
 #endif //DEEPCARS_MLLIB_RAND_HELPERS_H
+*/

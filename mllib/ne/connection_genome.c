@@ -1,3 +1,4 @@
+/*
 //
 // Created by maxim on 2/1/20.
 //
@@ -35,4 +36,4 @@ connection_genome_t cg_clone(connection_genome_t* genome)
 inline void cg_disable(connection_genome_t* genome)
 {
    genome->disabled = true;
-}
+}*/

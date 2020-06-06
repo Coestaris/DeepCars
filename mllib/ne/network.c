@@ -1,3 +1,4 @@
+/*
 //
 // Created by maxim on 2/9/20.
 //
@@ -107,3 +108,4 @@ void nw_forward(genome_t* genome, float* input, float* output)
       output[i] = out_node->activation;
    }
 }
+*/
