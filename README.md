@@ -38,7 +38,7 @@ You need to pack resources before running the application:
 sudo apt install python3 # If needed
 cd packer
 python3 -m pip install -r requirements.txt # Setup python requirements
-python3 packer.py --out_file=<path to folder>/resources.bin --in_dir=../resources/
+python3 packer.py --out_file=<path to folder with project binary>/resources.bin --in_dir=../resources/
 ```
 The resource file must be in the same folder as the application executable
 
