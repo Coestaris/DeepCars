@@ -1,6 +1,9 @@
 # DeepCars
 
 AI learns to drive a car using the NeuroEvolution algorithm.
+![](https://raw.githubusercontent.com/Coestaris/DeepCars/master/screenshots/header.jpg)
+![](https://raw.githubusercontent.com/Coestaris/DeepCars/master/screenshots/1.gif)
+![](https://raw.githubusercontent.com/Coestaris/DeepCars/master/screenshots/2.gif)
 
 #### Setup
 ```bash
