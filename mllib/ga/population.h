@@ -9,6 +9,9 @@
 
 typedef struct _population {
    genome_t* genomes;
+
+   genome_t* helper;
+
    size_t population_size;
 
    size_t unused_count;
@@ -17,8 +20,9 @@ typedef struct _population {
 
 population_t* pop_create(void (*gen_create_func)(size_t index, genome_t* gen), size_t count);
 void pop_free(population_t* pop);
+void pop_print(population_t* pop);
 
-genome_t* pop_best(population_t* pop);
+genome_t* pop_best(population_t* pop, bool min_are_best, size_t* out_pos);
 
 void pop_ev_fitness(population_t* pop);
 void pop_ev_selection(population_t* pop, bool min_are_best, size_t save_count);

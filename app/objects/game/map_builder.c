@@ -383,7 +383,6 @@ static void connect_walls(model_t* m, size_t* counter, size_t* normal_counter, s
    }
 }
 
-
 model_t* build_map_model(list_t* walls)
 {
    model_t* model = m_create();

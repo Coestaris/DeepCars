@@ -4,7 +4,6 @@
 int main(int argc, char* argv[])
 {
    register_sig_handlers();
-
    app_init_graphics();
    app_load_resources();
 
